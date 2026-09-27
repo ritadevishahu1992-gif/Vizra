@@ -1,0 +1,7 @@
+{
+  "name": "Vizra — AI Creative Studio & Omnia 1.0",
+  "description": "A modern AI creative studio built to make AI-powered creation simpler for creators, animators, motion designers, developers, and beginners.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
