@@ -1,0 +1,349 @@
+{
+  "sources": [
+    {
+      "sourceId": "src_vizra_core_principles",
+      "title": "Vizra Platform Architecture & Core Principles",
+      "sourceType": "documentation",
+      "sourceUrl": "https://vizra.ai/docs/principles",
+      "contentHash": "hash_f985f49f3f9fcd9f",
+      "version": 1,
+      "createdAt": "2026-09-01T00:00:00Z",
+      "updatedAt": "2026-09-01T00:00:00Z",
+      "status": "APPROVED",
+      "trustLevel": "verified_internal",
+      "rawContent": "# Vizra Platform Architecture & Core Principles\nVizra is the dark-matter operating system for human curiosity.\n- Obsidian Aesthetics: Strict black (#000000) canvas with surgical crimson accent (#eb3b2d).\n- Omnia AI: Native multimodal reasoning engine grounded in verified RAG and continuous learning.\n- Tenant Boundaries: Isolation between global, workspace, and isolated project tiers.",
+      "chunkCount": 3,
+      "tokenCount": 160,
+      "tier": "vizra",
+      "accessLevel": "public",
+      "validationScore": 98,
+      "validationNotes": [
+        "Verified internal Vizra platform constitution"
+      ]
+    },
+    {
+      "sourceId": "src_omnia_rag_spec",
+      "title": "OMNIA 1.0 RAG & Verification Architecture Specification",
+      "sourceType": "internal",
+      "contentHash": "hash_a176af56d8654122",
+      "version": 1,
+      "createdAt": "2026-09-15T12:00:00Z",
+      "updatedAt": "2026-09-15T12:00:00Z",
+      "status": "APPROVED",
+      "trustLevel": "official_doc",
+      "rawContent": "# OMNIA 1.0 RAG & Verification Architecture Specification\nLead AI Infrastructure Engineer Specification.\n- Hybrid Retrieval: 60% Dense Cosine Similarity + 40% Sparse BM25 Lexical Matching.\n- Zero Hallucination: Claims without verified citations are rejected or flagged.\n- Grounding Gate: Continuous 6-stage provenance check ensuring URL authentications and excerpt alignment.",
+      "chunkCount": 4,
+      "tokenCount": 220,
+      "tier": "omnia",
+      "accessLevel": "public",
+      "validationScore": 96,
+      "validationNotes": [
+        "Official OMNIA 1.0 architecture standard"
+      ]
+    },
+    {
+      "sourceId": "src_smart_dispenser_specs",
+      "title": "Smart Medicine Dispenser Hardware Specifications",
+      "sourceType": "document",
+      "contentHash": "hash_90e25a8f3c2002bb",
+      "version": 1,
+      "createdAt": "2026-09-20T10:00:00Z",
+      "updatedAt": "2026-09-28T14:22:18.854Z",
+      "status": "CONFLICTED",
+      "trustLevel": "trusted_partner",
+      "rawContent": "# Smart Medicine Dispenser Hardware Specifications\n- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.\n- Carousel: 14 partitioned pods with micro-servo lock.\n- Conflicting report with Clinical Compliance protocol (800ms threshold).",
+      "chunkCount": 1,
+      "tokenCount": 69,
+      "tier": "project",
+      "accessLevel": "private",
+      "projectId": "proj_med_dispenser",
+      "validationScore": 88,
+      "validationNotes": [
+        "Trust level verified: trusted_partner (Score: 88%)"
+      ],
+      "conflictDetails": {
+        "conflictingSourceId": "src_clinical_safety_protocol",
+        "conflictingTopic": "Medicine Dispenser Transit Timing",
+        "reason": "Hardware spec requests 1200ms transit window; Clinical protocol specifies 800ms tamper limit.",
+        "detectedAt": "2026-09-24T10:30:00Z"
+      },
+      "cleanedContent": "# Smart Medicine Dispenser Hardware Specifications\n- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.\n- Carousel: 14 partitioned pods with micro-servo lock.\n- Conflicting report with Clinical Compliance protocol (800ms threshold)."
+    },
+    {
+      "sourceId": "src_user_correction_curiosity_launch",
+      "title": "User Correction: Curiosity Mars Rover Landing Date",
+      "sourceType": "correction",
+      "contentHash": "hash_da5697ba2a626ebc",
+      "version": 1,
+      "createdAt": "2026-09-25T14:20:00Z",
+      "updatedAt": "2026-09-25T14:20:00Z",
+      "status": "APPROVED",
+      "trustLevel": "user_correction",
+      "rawContent": "The Curiosity rover touched down in Gale Crater on Mars on August 6, 2012 UTC (August 5, 2012 PDT). NASA telemetry confirms 05:17 UTC touchdown point.",
+      "chunkCount": 1,
+      "tokenCount": 45,
+      "tier": "global",
+      "accessLevel": "public",
+      "validationScore": 92,
+      "validationNotes": [
+        "Verified against NASA official mission telemetry archives."
+      ]
+    },
+    {
+      "sourceId": "src_corr_1790604403761",
+      "title": "Correction on: \"When did Curiosity land?...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_0c7606e680feb3f2",
+      "version": 1,
+      "createdAt": "2026-09-28T14:06:43.761Z",
+      "updatedAt": "2026-09-28T14:22:18.854Z",
+      "status": "APPROVED",
+      "trustLevel": "user_correction",
+      "rawContent": "Curiosity landed on August 6, 2012 UTC at Gale Crater.",
+      "chunkCount": 1,
+      "tokenCount": 14,
+      "tier": "global",
+      "accessLevel": "public",
+      "validationNotes": [
+        "Trust level verified: user_correction (Score: 75%)"
+      ],
+      "cleanedContent": "Curiosity landed on August 6, 2012 UTC at Gale Crater.",
+      "validationScore": 75
+    }
+  ],
+  "metrics": {
+    "documentsProcessed": 4,
+    "chunksCreated": 27,
+    "embeddingsGenerated": 24,
+    "knowledgeApproved": 5,
+    "knowledgeRejected": 1,
+    "conflictsDetected": 1,
+    "lastSuccessfulTrainingTime": "2026-09-28T14:22:18.854Z",
+    "lastSyncTime": "2026-09-28T14:22:18.854Z",
+    "activeStatus": "Active",
+    "failedJobs": 1
+  },
+  "logs": [
+    {
+      "id": "log_1790605338854_3fyg",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "COMPLETED",
+      "message": "Workflow run finished. Processed: 2, Approved: 1, Rejected: 0, Conflicts: 0, Skipped: 0",
+      "level": "success"
+    },
+    {
+      "id": "log_1790605338854_7cje",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "COMPLETED",
+      "message": "Successfully integrated \"Correction on: \"When did Curiosity land?...\"\" (v1, 1 chunks, status: APPROVED) into Omnia RAG knowledge index.",
+      "level": "success",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1790605338854_hp5s",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "INDEXING",
+      "message": "Generating embeddings for 1 chunks of \"Correction on: \"When did Curiosity land?...\"\"",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1790605338854_gt5g",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "VALIDATING",
+      "message": "Validating factual integrity and safety for \"Correction on: \"When did Curiosity land?...\"\"",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1790605338854_6fjn",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "PROCESSING",
+      "message": "[2/2] Processing \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1790605338854_5auu",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "COMPLETED",
+      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1, 1 chunks, status: CONFLICTED) into Omnia RAG knowledge index.",
+      "level": "success",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790605338854_bpme",
+      "timestamp": "2026-09-28T14:22:18.854Z",
+      "stage": "INDEXING",
+      "message": "Generating embeddings for 1 chunks of \"Smart Medicine Dispenser Hardware Specifications\"",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790605338853_tvbn",
+      "timestamp": "2026-09-28T14:22:18.853Z",
+      "stage": "VALIDATING",
+      "message": "Validating factual integrity and safety for \"Smart Medicine Dispenser Hardware Specifications\"",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790605338852_q68x",
+      "timestamp": "2026-09-28T14:22:18.853Z",
+      "stage": "PROCESSING",
+      "message": "[1/2] Processing \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790605338751_ia0t",
+      "timestamp": "2026-09-28T14:22:18.751Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 2 pending candidate sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1790605338751_a8kr",
+      "timestamp": "2026-09-28T14:22:18.751Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790605338751_zw4ov]",
+      "level": "info"
+    },
+    {
+      "id": "log_1790604403761",
+      "timestamp": "2026-09-28T14:06:43.761Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for review: \"When did Curiosity land?...\"",
+      "sourceId": "src_corr_1790604403761"
+    },
+    {
+      "id": "log_1790604376700_4tg7",
+      "timestamp": "2026-09-28T14:06:16.700Z",
+      "stage": "COMPLETED",
+      "message": "Workflow run finished. Processed: 1, Approved: 0, Rejected: 0, Conflicts: 0, Skipped: 0",
+      "level": "success"
+    },
+    {
+      "id": "log_1790604376700_66sc",
+      "timestamp": "2026-09-28T14:06:16.700Z",
+      "stage": "COMPLETED",
+      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1, 1 chunks, status: CONFLICTED) into Omnia RAG knowledge index.",
+      "level": "success",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790604376700_w0kn",
+      "timestamp": "2026-09-28T14:06:16.700Z",
+      "stage": "INDEXING",
+      "message": "Generating embeddings for 1 chunks of \"Smart Medicine Dispenser Hardware Specifications\"",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790604376699_9vdb",
+      "timestamp": "2026-09-28T14:06:16.699Z",
+      "stage": "VALIDATING",
+      "message": "Validating factual integrity and safety for \"Smart Medicine Dispenser Hardware Specifications\"",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790604376698_jxsw",
+      "timestamp": "2026-09-28T14:06:16.698Z",
+      "stage": "PROCESSING",
+      "message": "[1/1] Processing \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790604376597_f6x0",
+      "timestamp": "2026-09-28T14:06:16.597Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 1 pending candidate sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1790604376597_k784",
+      "timestamp": "2026-09-28T14:06:16.597Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790604376597_idqki]",
+      "level": "info"
+    },
+    {
+      "id": "log_1790604336139_azi4",
+      "timestamp": "2026-09-28T14:05:36.139Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 1 pending candidate sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1790604336139_patg",
+      "timestamp": "2026-09-28T14:05:36.139Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790604336139_ojcfw]",
+      "level": "info"
+    },
+    {
+      "id": "log_cron_1790604324551",
+      "timestamp": "2026-09-28T14:05:24.551Z",
+      "level": "info",
+      "stage": "RUNNING",
+      "message": "Scheduled Omnia Synchronization Cron triggered."
+    },
+    {
+      "id": "log_srv_1",
+      "timestamp": "2026-09-28T14:05:09.276Z",
+      "level": "success",
+      "stage": "COMPLETED",
+      "message": "Omnia Continuous Learning system initialized with 4 verified sources."
+    }
+  ],
+  "feedback": [
+    {
+      "id": "fb_1790604403761_w0zs",
+      "question": "When did Curiosity land?",
+      "answer": "August 2012",
+      "userFeedback": "CORRECTION",
+      "correction": "Curiosity landed on August 6, 2012 UTC at Gale Crater.",
+      "timestamp": "2026-09-28T14:06:43.761Z",
+      "status": "PENDING_REVIEW",
+      "sourceCreatedId": "src_corr_1790604403761"
+    },
+    {
+      "id": "fb_init_1",
+      "question": "What is photosynthesis?",
+      "answer": "Photosynthesis is the process plants use to convert light energy into chemical energy.",
+      "userFeedback": "HELPFUL",
+      "timestamp": "2026-09-28T14:05:09.276Z",
+      "status": "APPROVED"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "conflict_srv_1",
+      "sourceAId": "src_smart_dispenser_specs",
+      "sourceBId": "src_clinical_safety_protocol",
+      "sourceATitle": "Smart Medicine Dispenser Hardware Specs",
+      "sourceBTitle": "Clinical Compliance Safety Directive v2",
+      "topic": "Medicine Dispenser Transit Timing",
+      "statementA": "Optical IR drop sensor timeout is configured at 1200ms to allow gravity transit before triggering retry reversal.",
+      "statementB": "Clinical safety protocol requires pill transit timeout not to exceed 800ms to prevent user tampering while carousel aperture is exposed.",
+      "detectedAt": "2026-09-24T10:30:00Z",
+      "resolutionRule": "MANUAL_REVIEW",
+      "status": "UNRESOLVED"
+    }
+  ]
+}

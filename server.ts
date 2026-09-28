@@ -4,6 +4,10 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  setupOmniaLearningRoutes,
+  getApprovedKnowledgeContext,
+} from './src/services/serverOmniaLearning';
 
 dotenv.config();
 
@@ -15,6 +19,9 @@ async function startServer() {
   const port = parseInt(process.env.PORT || '3000', 10);
 
   app.use(express.json());
+
+  // Mount Vercel Workflows Continuous Learning API routes
+  setupOmniaLearningRoutes(app);
 
   // Server-side Gemini initialization
   let ai: GoogleGenAI | null = null;
@@ -274,9 +281,19 @@ If the provided context does not cover the question, acknowledge that the loaded
         }
       }
 
+      // Grounding with approved Continuous Learning Knowledge
+      const approvedKnowledge = getApprovedKnowledgeContext(prompt);
+      let combinedContext = ragContext && typeof ragContext === 'string' ? ragContext.trim() : '';
+
+      if (approvedKnowledge) {
+        combinedContext = combinedContext
+          ? `${combinedContext}\n\n[OMNIA CONTINUOUS LEARNING — VERIFIED PROVENANCE]\n${approvedKnowledge}`
+          : `[OMNIA CONTINUOUS LEARNING — VERIFIED PROVENANCE]\n${approvedKnowledge}`;
+      }
+
       const finalUserText =
-        ragContext && typeof ragContext === 'string' && ragContext.trim().length > 0
-          ? `${ragContext}\n\nUser Question: ${prompt}`
+        combinedContext.length > 0
+          ? `${combinedContext}\n\nUser Question: ${prompt}`
           : prompt;
 
       contents.push({

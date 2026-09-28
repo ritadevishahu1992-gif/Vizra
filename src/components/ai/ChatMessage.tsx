@@ -354,6 +354,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             {message.status !== 'streaming' && onRegenerate && (
               <MessageActions
                 content={message.content}
+                retrievedSources={message.sources || (message.grounding?.citations as any)}
                 onRegenerate={onRegenerate}
               />
             )}

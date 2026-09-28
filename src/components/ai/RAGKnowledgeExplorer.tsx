@@ -43,7 +43,9 @@ import {
 } from '../../types/omniaGovernance';
 import { ragVectorStore } from '../../services/ragVectorStore';
 import { omniaGovernanceService } from '../../services/omniaGovernanceService';
+import { omniaLearningService } from '../../services/omniaLearningService';
 import { CHUNK_CONFIG } from '../../services/ragIngestionService';
+import { OmniaLearningPanel } from './OmniaLearningPanel';
 
 interface RAGKnowledgeExplorerProps {
   isOpen: boolean;
@@ -52,6 +54,7 @@ interface RAGKnowledgeExplorerProps {
 }
 
 type TabType =
+  | 'learning'
   | 'corpus'
   | 'ingest'
   | 'versioned_db'
@@ -252,6 +255,25 @@ export const RAGKnowledgeExplorer: React.FC<RAGKnowledgeExplorerProps> = ({
 
       setUploadSuccess(true);
       loadData();
+
+      // Requirement 8: Automatic Document Training into Omnia Continuous Learning
+      omniaLearningService
+        .addSource(
+          {
+            title: uploadTitle.trim() || uploadFileName,
+            sourceType: 'document',
+            rawContent: uploadContent,
+            trustLevel:
+              uploadTier === 'vizra' || uploadTier === 'omnia'
+                ? 'verified_internal'
+                : 'trusted_partner',
+            tier: uploadTier,
+            projectId: activeProjectId || 'proj_active',
+          },
+          true
+        )
+        .catch(() => {});
+
       setTimeout(() => {
         setUploadTitle('');
         setUploadFileName('');
@@ -403,6 +425,19 @@ Vizra UI interactions use custom Bezier cubic easing curves:
           {/* Tab Navigation */}
           <div className="px-6 border-b border-neutral-850 flex items-center gap-1 bg-neutral-950/60 shrink-0 overflow-x-auto">
             <button
+              onClick={() => setActiveTab('learning')}
+              className={`px-3.5 py-3 text-xs font-semibold tracking-tight border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                activeTab === 'learning'
+                  ? 'border-[#eb3b2d] text-white'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Cpu size={14} className="text-[#eb3b2d]" />
+              <span>Continuous Learning</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+            </button>
+
+            <button
               onClick={() => setActiveTab('corpus')}
               className={`px-3.5 py-3 text-xs font-semibold tracking-tight border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === 'corpus'
@@ -488,10 +523,13 @@ Vizra UI interactions use custom Bezier cubic easing curves:
           </div>
 
           {/* Main Tab Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto flex flex-col">
+            {/* TAB 0: CONTINUOUS LEARNING SYSTEM */}
+            {activeTab === 'learning' && <OmniaLearningPanel />}
+
             {/* TAB 1: DOCUMENT CORPUS */}
             {activeTab === 'corpus' && (
-              <div className="space-y-4">
+              <div className="p-6 space-y-4">
                 {/* Search & Tier Filter Bar */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <div className="relative flex-1 max-w-md">
