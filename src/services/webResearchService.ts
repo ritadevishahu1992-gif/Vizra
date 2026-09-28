@@ -162,6 +162,10 @@ export function getDomainFavicon(domain: string): string {
 
 /**
  * Determines whether a query requires live Web Research
+ * Section 21: ACCURACY, VERIFICATION & SOURCES
+ * Use external sources ONLY when genuinely necessary.
+ * For simple, stable, conversational, creative, reasoning, or general questions:
+ * do NOT search the web.
  */
 export function shouldPerformWebResearch(
   rawPrompt: string,
@@ -172,6 +176,21 @@ export function shouldPerformWebResearch(
   if (mode === 'research') return true;
 
   const lower = rawPrompt.toLowerCase().trim();
+
+  // Non-web triggers: Creative, brainstorming, rewriting, ideas, captions, names
+  const creativePatterns = [
+    /^(give\s+me\s+an?\s+idea|brainstorm|write\s+a\s+(caption|poem|story|script)|help\s+me\s+brainstorm)/i,
+    /^(rewrite\s+this|what\s+should\s+i\s+name|suggest\s+a\s+name|summarize\s+this)/i,
+    /^(create|build|make|code|design)\s+/i,
+  ];
+  if (creativePatterns.some((p) => p.test(lower))) {
+    return false;
+  }
+
+  // Vizra / Omnia internal platform inquiries: Use internal knowledge base, not web search
+  if (/^(who\s+are\s+you|what\s+is\s+vizra|what\s+is\s+omnia|who\s+created\s+you|who\s+made\s+vizra|who\s+built\s+omnia)/i.test(lower)) {
+    return false;
+  }
 
   // 1. Explicit search requests
   const explicitSearchPatterns = [
@@ -195,6 +214,7 @@ export function shouldPerformWebResearch(
     /\b(current\s+price|stock\s+price|market\s+cap|weather|election|score|match\s+today)\b/i,
     /\bwho\s+is\s+currently\b/i,
     /\bnew\s+release|latest\s+version|changelog\b/i,
+    /\bcurrent\s+(laws|regulations|policy|status)\b/i,
   ];
   if (timeSensitivePatterns.some((p) => p.test(lower))) {
     return true;
@@ -206,17 +226,18 @@ export function shouldPerformWebResearch(
   }
 
   // 4. Insufficient RAG context:
-  // If the query is an informational/knowledge question and RAG has low relevance or zero matches
+  // Only trigger web research if it requires verifiable factual claims that cannot be answered stably
   const isQuestion =
     /^(what|who|when|where|which|how|why|is|are|can)\b/i.test(lower) || lower.endsWith('?');
   if (isQuestion && ragCount === 0 && ragTopScore < 0.35) {
-    // Only search if it's not a timeless basic definition (like photosynthesis or sky color)
+    // Timeless basic definitions and core science/history do NOT need web search
     const isTimelessBasic =
-      /^(why\s+is\s+the\s+sky\s+blue|what\s+is\s+photosynthesis|what\s+is\s+gravity|why\s+does\s+rain\s+happen|what\s+is\s+the\s+capital\s+of)/i.test(
+      /^(why\s+is\s+the\s+sky\s+blue|what\s+is\s+photosynthesis|what\s+is\s+gravity|why\s+does\s+rain\s+happen|what\s+is\s+the\s+capital\s+of|who\s+was\s+albert\s+einstein|how\s+does\s+ai\s+work|what\s+is\s+python|how\s+can\s+i\s+learn\s+coding)/i.test(
         lower
       );
     if (!isTimelessBasic) {
-      return true;
+      // Must be a query specifically asking for current info, product specs, or external verification
+      return /\b(specs|price|released|founder|ceo|headquarters|founded|update|stat|population)\b/i.test(lower);
     }
   }
 

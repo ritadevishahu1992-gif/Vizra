@@ -725,6 +725,13 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       responseText = "Vizra is designed to empower creators, animators, designers, and developers to explore, reason through ideas, and turn concepts into real creative work with seamless intelligent assistance.";
     } else if (/^(is\s*vizra\s*just\s*another\s*chatbot|is\s*vizra\s*a\s*chatbot)[?!.]*$/i.test(lower)) {
       responseText = "No. Omnia is the conversational intelligence inside Vizra. Vizra itself is the broader creative environment for turning ideas into creative work.";
+    } else if (lower.includes('vizra') && !citations?.length) {
+      // If asking about a specific feature, capability, pricing, release, integration, or roadmap of Vizra not documented
+      if (/\b(pricing|release|roadmap|feature|integration|api\s*key|subscription|tier|cost|plan)\b/i.test(lower)) {
+        responseText = "That isn't currently documented in my verified Vizra knowledge.";
+      } else {
+        responseText = "Vizra is an AI creative studio built to make AI-powered creation simpler for creators, animators, motion designers, developers, and beginners.";
+      }
     } else {
       responseText = lang === 'hinglish'
         ? "Anytime! Batao agar kuch aur poochhna ho ya help chahiye."
@@ -800,9 +807,11 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
           const topDoc = citations[0];
           responseText = `According to verified documentation in **${topDoc.fileName}** (${topDoc.section}):\n\n${topDoc.excerpt}\n\n[Doc: ${topDoc.fileName}#${topDoc.section}]`;
         } else if (needWebResearch) {
-          // Rule 4: NO EVIDENCE = NO FAKE CONFIDENCE. Strictly never invent sources!
-          responseText = "I couldn't verify that information from a reliable source. Live web search is currently unavailable, and to prevent hallucination no unverified sources are cited.";
+          // Rule 21: If no reliable source can be verified, say exact sentence:
+          responseText = "I couldn't verify that from a reliable source.";
           sources = [];
+        } else if (lower.includes('vizra') || lower.includes('omnia')) {
+          responseText = "That isn't currently documented in my verified Vizra knowledge.";
         } else if (lang === 'hindi') {
           responseText = `यह एक महत्वपूर्ण विषय है। इसके मुख्य पहलुओं में इसकी मूलभूत परिभाषा, इसके काम करने के सिद्धांत और इसके व्यावहारिक अनुप्रयोग शामिल हैं। क्या आप इसके किसी विशिष्ट भाग को विस्तार से समझना चाहते हैं?`;
         } else if (lang === 'hinglish') {
