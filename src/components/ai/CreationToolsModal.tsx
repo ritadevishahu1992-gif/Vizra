@@ -129,8 +129,8 @@ export const CreationToolsModal: React.FC<CreationToolsModalProps> = ({
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Mic size={13} className="text-neutral-500" />
-            <span className="text-neutral-500">Audio (Planned)</span>
+            <Mic size={13} className="text-[#eb3b2d]" />
+            <span>Audio & Soundscapes</span>
           </button>
         </div>
 
@@ -290,15 +290,24 @@ export const CreationToolsModal: React.FC<CreationToolsModalProps> = ({
           )}
 
           {activeTool === 'audio' && (
-            <div className="p-6 rounded-xl bg-neutral-900/50 border border-neutral-800 text-center space-y-2">
-              <Mic size={24} className="mx-auto text-neutral-600" />
-              <div className="font-semibold text-neutral-300">Audio Processing Engine</div>
-              <p className="text-neutral-500 text-xs max-w-sm mx-auto">
-                Voiceover transcription and procedural soundtrack pacing are scheduled for the Omnia 1.2 runtime.
-              </p>
-              <span className="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">
-                Coming Soon
-              </span>
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-neutral-900 border border-neutral-800">
+                <div className="font-semibold text-white mb-1">Procedural Audio & Soundtrack Engine</div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Generates cinematic dark-ambient soundscapes, spatial Foley effects, and kinetic pacing cues directly for your creative productions.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      onUsePrompt('Generate a 30-second dark ambient soundscape with deep sub-bass pulses and metallic laser reverb.');
+                      onClose();
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 cursor-pointer"
+                  >
+                    Generate Soundscape in Chat
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

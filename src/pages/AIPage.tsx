@@ -15,6 +15,12 @@ import { CitationDrawer } from '../components/ai/CitationDrawer';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
+import { useAuth } from '../context/AuthContext';
+import {
+  getUserProjectsFromFirestore,
+  saveUserProjectToFirestore,
+  saveChatMessageToFirestore,
+} from '../services/firestoreService';
 import {
   getAllProjects,
   saveProject,
@@ -86,6 +92,7 @@ const initialConversations: Conversation[] = [
 ];
 
 export const AIPage: React.FC = () => {
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>('conv-1');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -117,11 +124,29 @@ export const AIPage: React.FC = () => {
     }
   }, []);
 
-  // Load stored projects on mount
+  // Load stored projects on mount and sync with Firestore if authenticated
   useEffect(() => {
     const loadedProjects = getAllProjects();
     setProjects(loadedProjects);
-  }, []);
+
+    if (user?.uid) {
+      getUserProjectsFromFirestore(user.uid)
+        .then((remoteProjects) => {
+          if (remoteProjects && remoteProjects.length > 0) {
+            setProjects((prev) => {
+              const combined = [...remoteProjects];
+              for (const local of prev) {
+                if (!combined.some((p) => p.id === local.id)) {
+                  combined.push(local);
+                }
+              }
+              return combined;
+            });
+          }
+        })
+        .catch((err) => console.warn('Could not sync remote projects:', err));
+    }
+  }, [user?.uid]);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const messages = activeConversation ? activeConversation.messages : [];
@@ -171,10 +196,21 @@ export const AIPage: React.FC = () => {
     const newProject = createProjectFromPrompt(title, desc, cat);
     setProjects((prev) => [newProject, ...prev]);
     setActiveProjectId(newProject.id);
+
+    if (user?.uid) {
+      saveUserProjectToFirestore(user.uid, newProject).catch((err) =>
+        console.warn('Failed to save project to Firestore:', err)
+      );
+    }
   };
 
   const handleProjectUpdated = (updated: Project) => {
     setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    if (user?.uid) {
+      saveUserProjectToFirestore(user.uid, updated).catch((err) =>
+        console.warn('Failed to update project in Firestore:', err)
+      );
+    }
   };
 
   const handleRefineStageInChat = (stage: ProjectWorkflowStage) => {
@@ -336,6 +372,21 @@ export const AIPage: React.FC = () => {
           return conv;
         })
       );
+
+      // If user is authenticated, persist conversation messages to Firestore
+      if (user?.uid) {
+        saveChatMessageToFirestore(user.uid, targetConvId, {
+          id: userMessage.id,
+          role: 'user',
+          content: userMessage.content,
+        }).catch((err) => console.warn('Could not save user message to Firestore:', err));
+
+        saveChatMessageToFirestore(user.uid, targetConvId, {
+          id: assistantPlaceholderId,
+          role: 'assistant',
+          content: result.fullText,
+        }).catch((err) => console.warn('Could not save assistant message to Firestore:', err));
+      }
 
       // Handle immediate workflow execution triggered by user intent
       if (result.actionTrigger === 'create_project' && result.projectDraft) {

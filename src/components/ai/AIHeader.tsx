@@ -5,6 +5,7 @@ import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
 import { CapabilitiesMenu } from './CapabilitiesMenu';
 import { OmniaModel } from '../../types/ai';
+import { UserMenu } from '../auth/UserMenu';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -110,11 +111,8 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           <Settings size={16} />
         </button>
 
-        <div
-          className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-medium text-neutral-300 cursor-pointer hover:border-neutral-700 transition-colors ml-1"
-          title="Creator Profile"
-        >
-          <User size={15} />
+        <div className="ml-1">
+          <UserMenu />
         </div>
       </div>
     </header>

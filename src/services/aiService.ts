@@ -188,7 +188,7 @@ export function classifyUserIntent(
   // 9. Casual Chat
   const isGreeting = /^(hi|hey|hello|sup|yo|hiya|namaste|salaam|good\s*(morning|afternoon|evening)|gm|gn)[!.]*$/i.test(lower);
   const isChatInquiry = /^(how\s*are\s*you|what'?s\s*up|kya\s*kar\s*rahe\s*ho|kya\s*chal\s*raha\s*hai|aur\s*batao|how'?s\s*it\s*going)[?!.]*$/i.test(lower);
-  const isChatIdentity = /^(are\s*you\s*an\s*ai|kya\s*tum\s*ai\s*ho|vizra\s*kya\s*hai|what\s*is\s*vizra)[?!.]*$/i.test(lower);
+  const isChatIdentity = /^(who\s*are\s*you|what\s*are\s*you|what\s*is\s*your\s*name|tell\s*me\s*about\s*yourself|who\s*created\s*you|who\s*made\s*you|who\s*built\s*omnia|who\s*is\s*behind\s*you|who\s*developed\s*you|who\s*owns\s*you|who\s*is\s*your\s*creator|who\s*made\s*vizra|who\s*created\s*vizra|are\s*you\s*an\s*ai|are\s*you\s*gemini|are\s*you\s*chatgpt|what\s*company\s*are\s*you\s*from|kya\s*tum\s*ai\s*ho|vizra\s*kya\s*hai|what\s*is\s*vizra|why\s*vizra|is\s*vizra\s*just\s*another\s*chatbot|what\s*is\s*omnia)[?!.]*$/i.test(lower);
   const isChitChat = /^(tell\s*me\s*something\s*interesting|what\s*can\s*you\s*do|kya\s*kar\s*sakte\s*ho|thanks|thank\s*you|thx|shukriya|dhanyawad)[!.]*$/i.test(lower);
 
   if (isGreeting || isChatInquiry || isChatIdentity || isChitChat) {
@@ -610,6 +610,26 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       };
     }
 
+    if (lower === 'continue that' || lower === 'continue' || lower === 'next step' || lower === 'aage batao' || lower === 'continue project') {
+      const currentStage = proj.stages.find((s) => s.status === 'in_progress') || proj.stages.find((s) => s.status === 'not_started') || proj.stages[0];
+      responseText = `Continuing with **${proj.title}** (Stage: **${currentStage?.title || 'Active Stage'}**):\n\n${currentStage?.description || 'Moving forward with the next actionable milestone for this creative project.'}\n\nWhat specific part of this stage would you like to refine next?`;
+      
+      const chunks = responseText.split(/(?<=\s|[,.!?\n])/);
+      let accumulated = '';
+      for (let i = 0; i < chunks.length; i++) {
+        if (signal?.aborted) break;
+        accumulated += chunks[i];
+        if (onChunk) onChunk(accumulated);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      return {
+        fullText: accumulated,
+        isDemo: true,
+        intent: 'CREATE',
+        canCreateProject: false,
+      };
+    }
+
     if (lower === 'make the ppt' || lower === 'make the presentation' || lower === 'create the presentation' || lower === 'ppt banao') {
       responseText = `Creating the presentation outline for the **${proj.title}** project based on your existing project context:\n\n### Presentation Outline: ${proj.title}\n- **Slide 1: Executive Overview**: Problem statement and core value proposition.\n- **Slide 2: System Architecture**: Technical components and hardware/software flow.\n- **Slide 3: User Workflow**: Step-by-step patient/user journey.\n- **Slide 4: Verification & Safety**: Automated compliance and fail-safe sensors.\n- **Slide 5: Roadmap & Next Milestones**: Stage timeline and deployment plans.\n\nAll slides are directly mapped to your active project context.`;
       
@@ -679,12 +699,32 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         : "I can answer questions across science, history, coding, and general knowledge, explain complex concepts, write code, research topics, or help you build creative projects whenever you're ready.";
     } else if (/^(are\s*you\s*an\s*ai|kya\s*tum\s*ai\s*ho)[?!.]*$/i.test(lower)) {
       responseText = lang === 'hinglish'
-        ? "Haan, main Vizra mein built-in AI assistant hoon. How can I help?"
+        ? "Haan, main Vizra ki built-in intelligence hoon. Main aapki kya madad kar sakta hoon?"
         : "Yes, I'm an AI assistant built into Vizra. How can I help?";
+    } else if (/^(who\s*are\s*you|what\s*are\s*you|what\s*is\s*your\s*name|tell\s*me\s*about\s*yourself|tum\s*kaun\s*ho|aap\s*kaun\s*hain)[?!.]*$/i.test(lower)) {
+      responseText = lang === 'hinglish'
+        ? "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build."
+        : "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build.";
+    } else if (/^(who\s*created\s*you|who\s*made\s*you|who\s*built\s*omnia|who\s*is\s*behind\s*you|who\s*developed\s*you|who\s*owns\s*you|who\s*is\s*your\s*creator|tumhe\s*kisne\s*banaya|kisne\s*banaya)[?!.]*$/i.test(lower)) {
+      responseText = "Omnia was created by Vizrma as the intelligence layer of Vizra.";
+    } else if (/^(who\s*made\s*vizra|who\s*created\s*vizra|vizra\s*kisne\s*banaya)[?!.]*$/i.test(lower)) {
+      responseText = "Vizra was created by Vizrma.";
+    } else if (/^(are\s*you\s*gemini|kya\s*tum\s*gemini\s*ho)[?!.]*$/i.test(lower)) {
+      responseText = "I'm Omnia, the intelligence behind Vizra. Gemini may provide underlying model capabilities, but my product identity and role belong to Vizra.";
+    } else if (/^(are\s*you\s*chatgpt|kya\s*tum\s*chatgpt\s*ho)[?!.]*$/i.test(lower)) {
+      responseText = "No. I'm Omnia, Vizra's built-in intelligence.";
+    } else if (/^(what\s*company\s*are\s*you\s*from|which\s*company\s*made\s*you)[?!.]*$/i.test(lower)) {
+      responseText = "I'm part of Vizra, where I serve as its intelligence layer.";
+    } else if (/^(what\s*is\s*omnia|omnia\s*kya\s*hai)[?!.]*$/i.test(lower)) {
+      responseText = "Omnia is Vizra's intelligence layer. It is designed to understand context, reason about creative tasks, and help users move from an idea to an actionable result.";
     } else if (/^(vizra\s*kya\s*hai|what\s*is\s*vizra)[?!.]*$/i.test(lower)) {
       responseText = lang === 'hinglish'
-        ? "Vizra ek AI creative workspace hai, aur Omnia uski AI intelligence hai."
-        : "Vizra is an AI creative workspace, and Omnia is its creative AI intelligence.";
+        ? "Vizra ek creative AI studio/platform hai, aur main Omnia hoon — iske andar ki built-in intelligence."
+        : "Vizra is a creative AI studio/platform, and I'm Omnia — the intelligence built into it.";
+    } else if (/^(why\s*vizra|vizra\s*kyun)[?!.]*$/i.test(lower)) {
+      responseText = "Vizra is designed to empower creators, animators, designers, and developers to explore, reason through ideas, and turn concepts into real creative work with seamless intelligent assistance.";
+    } else if (/^(is\s*vizra\s*just\s*another\s*chatbot|is\s*vizra\s*a\s*chatbot)[?!.]*$/i.test(lower)) {
+      responseText = "No. Omnia is the conversational intelligence inside Vizra. Vizra itself is the broader creative environment for turning ideas into creative work.";
     } else {
       responseText = lang === 'hinglish'
         ? "Anytime! Batao agar kuch aur poochhna ho ya help chahiye."

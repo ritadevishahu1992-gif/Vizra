@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { VizraLogo } from './VizraLogo';
 import { Menu, X } from 'lucide-react';
+import { UserMenu } from './auth/UserMenu';
 
 interface NavbarProps {
   onLaunchOmnia: () => void;
@@ -78,8 +79,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
           </div>
         </div>
 
-        {/* Right Side: Launch Omnia Action */}
+        {/* Right Side: Launch Omnia & User Account Actions */}
         <div className="flex items-center gap-3">
+          <UserMenu />
+
           <motion.button
             whileHover={{ scale: 1.02, opacity: 0.95 }}
             whileTap={{ scale: 0.98 }}

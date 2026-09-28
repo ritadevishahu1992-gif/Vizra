@@ -11,7 +11,7 @@
       "updatedAt": "2026-09-01T00:00:00Z",
       "status": "APPROVED",
       "trustLevel": "verified_internal",
-      "rawContent": "# Vizra Platform Architecture & Core Principles\nVizra is the dark-matter operating system for human curiosity.\n- Obsidian Aesthetics: Strict black (#000000) canvas with surgical crimson accent (#eb3b2d).\n- Omnia AI: Native multimodal reasoning engine grounded in verified RAG and continuous learning.\n- Tenant Boundaries: Isolation between global, workspace, and isolated project tiers.",
+      "rawContent": "# Vizra Platform Architecture & Core Principles\nVizra is the dark-matter operating system for human curiosity.\n- Obsidian Aesthetics: Strict black (#000000) canvas with surgical crimson accent (#eb3b2d).\n- Zero AI Slop: No generic blue pills, fluid kinetic transitions at 60fps.\n- Omnia AI: Native multimodal reasoning engine grounded in verified RAG and continuous learning.\n- Knowledge Isolation: Strict tenant boundaries between global, workspace, and isolated project tiers.",
       "chunkCount": 3,
       "tokenCount": 160,
       "tier": "vizra",
@@ -19,7 +19,9 @@
       "validationScore": 98,
       "validationNotes": [
         "Verified internal Vizra platform constitution"
-      ]
+      ],
+      "extractedConceptsCount": 2,
+      "extractedRulesCount": 2
     },
     {
       "sourceId": "src_omnia_rag_spec",
@@ -39,7 +41,9 @@
       "validationScore": 96,
       "validationNotes": [
         "Official OMNIA 1.0 architecture standard"
-      ]
+      ],
+      "extractedConceptsCount": 2,
+      "extractedRulesCount": 3
     },
     {
       "sourceId": "src_smart_dispenser_specs",
@@ -48,8 +52,8 @@
       "contentHash": "hash_90e25a8f3c2002bb",
       "version": 1,
       "createdAt": "2026-09-20T10:00:00Z",
-      "updatedAt": "2026-09-28T14:22:18.854Z",
-      "status": "CONFLICTED",
+      "updatedAt": "2026-09-28T14:49:56.094Z",
+      "status": "APPROVED",
       "trustLevel": "trusted_partner",
       "rawContent": "# Smart Medicine Dispenser Hardware Specifications\n- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.\n- Carousel: 14 partitioned pods with micro-servo lock.\n- Conflicting report with Clinical Compliance protocol (800ms threshold).",
       "chunkCount": 1,
@@ -57,10 +61,12 @@
       "tier": "project",
       "accessLevel": "private",
       "projectId": "proj_med_dispenser",
-      "validationScore": 88,
+      "validationScore": 92,
       "validationNotes": [
-        "Trust level verified: trusted_partner (Score: 88%)"
+        "Heuristic extraction: 1 concepts, 1 rules, 1 relations."
       ],
+      "extractedConceptsCount": 1,
+      "extractedRulesCount": 1,
       "conflictDetails": {
         "conflictingSourceId": "src_clinical_safety_protocol",
         "conflictingTopic": "Medicine Dispenser Transit Timing",
@@ -111,204 +117,385 @@
       "validationScore": 75
     }
   ],
+  "concepts": [
+    {
+      "id": "c_vizra_design_constitution",
+      "topic": "Vizra Platform Aesthetics",
+      "concept": "Obsidian & Surgical Red Constitution",
+      "level": 5,
+      "simpleExplanation": "Vizra uses pure black (#000000) backgrounds with targeted 4% surgical red (#eb3b2d) highlights instead of generic blue pills.",
+      "technicalExplanation": "Design standard enforcing strict monochromatic dark-matter canvas (#000000), 60fps kinetic motion with cubic-bezier(0.16, 1, 0.3, 1), and zero generic AI slop.",
+      "practicalMeaning": "Every user interface and state transition must feel sharp, tactile, and editorial rather than generic corporate SaaS.",
+      "example": "Pulsing crimson indicators for online systems, high contrast typography with Instrument Serif.",
+      "whenToUse": [
+        "Building all Vizra UI views",
+        "Designing new tools and modals"
+      ],
+      "whenNotToUse": [
+        "Never introduce blue pill badges or round generic cards"
+      ],
+      "commonMistakes": [
+        "Overusing accent colors beyond 4% viewport ratio"
+      ],
+      "relatedConcepts": [
+        "Design Constitution",
+        "Kinetic Transitions",
+        "Editorial Typography"
+      ],
+      "facts": [
+        "Primary background: #000000",
+        "Accent: #eb3b2d",
+        "Frame target: 60fps"
+      ],
+      "rawKnowledge": "Vizra Platform Architecture & Core Principles",
+      "sourceId": "src_vizra_core_principles",
+      "sourceType": "documentation",
+      "confidence": 0.98,
+      "status": "APPROVED",
+      "version": 1,
+      "createdAt": "2026-09-01T00:00:00Z",
+      "updatedAt": "2026-09-01T00:00:00Z",
+      "tags": [
+        "design",
+        "aesthetics",
+        "constitution"
+      ]
+    },
+    {
+      "id": "c_omnia_hybrid_rag",
+      "topic": "Omnia AI Architecture",
+      "concept": "Hybrid Dense-Sparse RAG",
+      "level": 4,
+      "simpleExplanation": "Omnia retrieves knowledge using both keyword search (BM25) and conceptual semantic meaning (vectors) blended together.",
+      "technicalExplanation": "60% Dense Cosine Similarity (384d / Gemini embeddings) + 40% Sparse BM25 lexical token matching with Reciprocal Rank Fusion (k=60).",
+      "practicalMeaning": "Ensures Omnia finds exact part numbers/IDs while understanding conceptual and conversational phrasing.",
+      "example": "Searching \"optical IR drop sensor timeout\" retrieves exact 1200ms timing specs.",
+      "whenToUse": [
+        "Every grounded question and factual retrieval task"
+      ],
+      "whenNotToUse": [
+        "Pure creative brain-storming with no factual requirement"
+      ],
+      "commonMistakes": [
+        "Relying solely on vector embeddings without lexical fallback for exact identifiers"
+      ],
+      "relatedConcepts": [
+        "Vector Store",
+        "BM25",
+        "Rank Fusion",
+        "Grounding Gate"
+      ],
+      "facts": [
+        "Ratio: 60% Dense / 40% Sparse",
+        "RRF constant: 60",
+        "Embedding dim: 384d"
+      ],
+      "rawKnowledge": "OMNIA 1.0 RAG & Verification Architecture Specification",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceType": "internal",
+      "confidence": 0.96,
+      "status": "APPROVED",
+      "version": 1,
+      "createdAt": "2026-09-15T12:00:00Z",
+      "updatedAt": "2026-09-15T12:00:00Z",
+      "tags": [
+        "rag",
+        "retrieval",
+        "hybrid",
+        "architecture"
+      ]
+    },
+    {
+      "id": "c_dispenser_transit_timing",
+      "topic": "Medical Dispenser Hardware Timing",
+      "concept": "Optical IR Drop Window",
+      "level": 3,
+      "simpleExplanation": "The medicine dispenser checks if a pill fell through the chute within a specific time before reversing the motor.",
+      "technicalExplanation": "Optical IR drop sensor window configured to detect pill occlusion during chute transit before triggering stepper retry sequence.",
+      "practicalMeaning": "Hardware timing controls jam detection and prevents double-dispensing.",
+      "example": "Pill drops past IR beam in 400ms -> motor proceeds to next slot.",
+      "whenToUse": [
+        "Calibrating dispense cycles and jam recovery"
+      ],
+      "whenNotToUse": [
+        "When carousel shutter lock is open"
+      ],
+      "commonMistakes": [
+        "Ignoring clinical safety regulations regarding aperture exposure latency"
+      ],
+      "relatedConcepts": [
+        "NEMA-17 Stepper",
+        "Jam Detection",
+        "IR Break Beam"
+      ],
+      "facts": [
+        "Hardware spec timeout: 1200ms",
+        "Clinical protocol limit: 800ms",
+        "Carousel pods: 14"
+      ],
+      "rawKnowledge": "Smart Medicine Dispenser Hardware Specifications",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceType": "document",
+      "confidence": 0.88,
+      "status": "CONFLICTED",
+      "version": 1,
+      "createdAt": "2026-09-20T10:00:00Z",
+      "updatedAt": "2026-09-20T10:00:00Z",
+      "tags": [
+        "hardware",
+        "dispenser",
+        "timing"
+      ]
+    },
+    {
+      "id": "c_src_smart_dispenser_specs_primary",
+      "topic": "Smart Medicine Dispenser Hardware Specifications",
+      "concept": "Smart Medicine Dispenser Hardware Specifications",
+      "level": 2,
+      "simpleExplanation": "Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse..",
+      "technicalExplanation": "# Smart Medicine Dispenser Hardware Specifications\n- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.\n- Carousel: 14 partitioned pods with micro-servo lock.\n- Conflicting report with Clinical Compliance protocol (800ms threshold).",
+      "practicalMeaning": "Operational guidance for Smart Medicine Dispenser Hardware Specifications across Vizra workflows.",
+      "example": "Carousel: 14 partitioned pods with micro-servo lock.",
+      "whenToUse": [
+        "When evaluating parameters or behavior defined in Smart Medicine Dispenser Hardware Specifications",
+        "When verifying architectural compliance"
+      ],
+      "whenNotToUse": [
+        "When working outside the verified operational bounds of this domain"
+      ],
+      "commonMistakes": [
+        "Assuming unverified assumptions rather than adhering to explicit specifications"
+      ],
+      "relatedConcepts": [
+        "document",
+        "Omnia RAG",
+        "Continuous Learning"
+      ],
+      "facts": [
+        "Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.",
+        "Carousel: 14 partitioned pods with micro-servo lock.",
+        "Conflicting report with Clinical Compliance protocol (800ms threshold)."
+      ],
+      "rawKnowledge": "# Smart Medicine Dispenser Hardware Specifications\n- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.\n- Carousel: 14 partitioned pods with micro-servo lock.\n- Conflicting report with Clinical Compliance protocol (800ms threshold).",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceType": "document",
+      "confidence": 0.85,
+      "status": "CONFLICTED",
+      "version": 1,
+      "createdAt": "2026-09-28T14:49:56.093Z",
+      "updatedAt": "2026-09-28T14:49:56.093Z",
+      "tags": [
+        "document",
+        "humanized_v1"
+      ]
+    }
+  ],
+  "logicRules": [
+    {
+      "id": "rule_rag_hybrid_weighting",
+      "topic": "Omnia AI Architecture",
+      "name": "Hybrid Retrieval Weighting Rule",
+      "logicType": "RULE",
+      "condition": "IF performing knowledge retrieval across Omnia Knowledge Base",
+      "action": "THEN compute combined score = 0.6 * denseScore + 0.4 * sparseBM25Score",
+      "sourceId": "src_omnia_rag_spec",
+      "status": "APPROVED",
+      "confidence": 0.98,
+      "version": 1,
+      "createdAt": "2026-09-15T12:00:00Z",
+      "updatedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "rule_zero_hallucination",
+      "topic": "Omnia AI Architecture",
+      "name": "Zero Hallucination Citation Mandate",
+      "logicType": "CONSTRAINT",
+      "condition": "IF making factual assertions regarding verified technical architecture",
+      "action": "THEN cite verified source ID and excerpt; if ungrounded, state uncertainty",
+      "exception": "UNLESS user explicitly requests creative hypothetical fiction",
+      "sourceId": "src_omnia_rag_spec",
+      "status": "APPROVED",
+      "confidence": 0.99,
+      "version": 1,
+      "createdAt": "2026-09-15T12:00:00Z",
+      "updatedAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "rule_dispenser_jam_sequence",
+      "topic": "Medical Dispenser Hardware Timing",
+      "name": "Dispenser Jam Reversal Sequence",
+      "logicType": "PROCEDURE",
+      "condition": "IF optical IR sensor does not detect pill drop within configured timeout",
+      "action": "THEN execute 3-step reverse oscillation protocol",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Stop Carousel",
+          "action": "Immediately halt forward stepper pulse"
+        },
+        {
+          "step": 2,
+          "title": "Reverse Oscillation",
+          "action": "Pulse stepper 15 degrees backward for 200ms"
+        },
+        {
+          "step": 3,
+          "title": "Re-attempt Drop",
+          "action": "Step forward to target pod position and verify IR beam"
+        }
+      ],
+      "sourceId": "src_smart_dispenser_specs",
+      "status": "APPROVED",
+      "confidence": 0.94,
+      "version": 1,
+      "createdAt": "2026-09-20T10:00:00Z",
+      "updatedAt": "2026-09-20T10:00:00Z"
+    },
+    {
+      "id": "rule_src_smart_dispenser_specs_default",
+      "topic": "Smart Medicine Dispenser Hardware Specifications",
+      "name": "Smart Medicine Dispenser Hardware Specifications Application Rule",
+      "logicType": "RULE",
+      "condition": "IF querying or operating within domain of \"Smart Medicine Dispenser Hardware Specifications\"",
+      "action": "THEN strictly adhere to verified specifications in source v1",
+      "sourceId": "src_smart_dispenser_specs",
+      "status": "APPROVED",
+      "confidence": 0.95,
+      "version": 1,
+      "createdAt": "2026-09-28T14:49:56.093Z",
+      "updatedAt": "2026-09-28T14:49:56.093Z"
+    }
+  ],
+  "graphRelations": [
+    {
+      "id": "rel_1",
+      "fromConcept": "Obsidian & Surgical Red Constitution",
+      "relationType": "implements",
+      "toConcept": "Vizra Platform Architecture",
+      "description": "Defines the UI and motion physics standard",
+      "sourceId": "src_vizra_core_principles",
+      "confidence": 0.98,
+      "createdAt": "2026-09-01T00:00:00Z"
+    },
+    {
+      "id": "rel_2",
+      "fromConcept": "Hybrid Dense-Sparse RAG",
+      "relationType": "depends_on",
+      "toConcept": "Vector Store & BM25 Index",
+      "description": "Combines dual retrieval indices with Reciprocal Rank Fusion",
+      "sourceId": "src_omnia_rag_spec",
+      "confidence": 0.96,
+      "createdAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": "rel_3",
+      "fromConcept": "Optical IR Drop Window",
+      "relationType": "conflicts_with",
+      "toConcept": "Clinical Compliance Safety Directive",
+      "description": "1200ms hardware transit window clashes with 800ms tamper limit",
+      "sourceId": "src_smart_dispenser_specs",
+      "confidence": 0.9,
+      "createdAt": "2026-09-20T10:00:00Z"
+    },
+    {
+      "id": "rel_src_smart_dispenser_specs_0",
+      "fromConcept": "Smart Medicine Dispenser Hardware Specifications",
+      "relationType": "implements",
+      "toConcept": "Vizra Platform Architecture",
+      "description": "Extends platform intelligence and reasoning logic",
+      "sourceId": "src_smart_dispenser_specs",
+      "confidence": 0.95,
+      "createdAt": "2026-09-28T14:49:56.093Z"
+    }
+  ],
   "metrics": {
     "documentsProcessed": 4,
-    "chunksCreated": 27,
+    "chunksCreated": 28,
     "embeddingsGenerated": 24,
-    "knowledgeApproved": 5,
+    "conceptsExtracted": 4,
+    "rulesExtracted": 4,
+    "graphRelationsCount": 4,
+    "knowledgeApproved": 6,
     "knowledgeRejected": 1,
     "conflictsDetected": 1,
-    "lastSuccessfulTrainingTime": "2026-09-28T14:22:18.854Z",
-    "lastSyncTime": "2026-09-28T14:22:18.854Z",
+    "lastSuccessfulTrainingTime": "2026-09-28T14:49:56.095Z",
+    "lastSyncTime": "2026-09-28T14:49:56.095Z",
     "activeStatus": "Active",
     "failedJobs": 1
   },
   "logs": [
     {
-      "id": "log_1790605338854_3fyg",
-      "timestamp": "2026-09-28T14:22:18.854Z",
+      "id": "log_1790606996095_eeyw",
+      "timestamp": "2026-09-28T14:49:56.095Z",
       "stage": "COMPLETED",
-      "message": "Workflow run finished. Processed: 2, Approved: 1, Rejected: 0, Conflicts: 0, Skipped: 0",
+      "message": "Omnia Learning Pipeline finished. Processed: 1, Concepts: 1, Rules: 1, Graph: 1, Approved: 1, Skipped: 0",
       "level": "success"
     },
     {
-      "id": "log_1790605338854_7cje",
-      "timestamp": "2026-09-28T14:22:18.854Z",
+      "id": "log_1790606996095_wowy",
+      "timestamp": "2026-09-28T14:49:56.095Z",
       "stage": "COMPLETED",
-      "message": "Successfully integrated \"Correction on: \"When did Curiosity land?...\"\" (v1, 1 chunks, status: APPROVED) into Omnia RAG knowledge index.",
-      "level": "success",
-      "sourceId": "src_corr_1790604403761",
-      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
-    },
-    {
-      "id": "log_1790605338854_hp5s",
-      "timestamp": "2026-09-28T14:22:18.854Z",
-      "stage": "INDEXING",
-      "message": "Generating embeddings for 1 chunks of \"Correction on: \"When did Curiosity land?...\"\"",
-      "level": "info",
-      "sourceId": "src_corr_1790604403761",
-      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
-    },
-    {
-      "id": "log_1790605338854_gt5g",
-      "timestamp": "2026-09-28T14:22:18.854Z",
-      "stage": "VALIDATING",
-      "message": "Validating factual integrity and safety for \"Correction on: \"When did Curiosity land?...\"\"",
-      "level": "info",
-      "sourceId": "src_corr_1790604403761",
-      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
-    },
-    {
-      "id": "log_1790605338854_6fjn",
-      "timestamp": "2026-09-28T14:22:18.854Z",
-      "stage": "PROCESSING",
-      "message": "[2/2] Processing \"Correction on: \"When did Curiosity land?...\"\" (correction)",
-      "level": "info",
-      "sourceId": "src_corr_1790604403761",
-      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
-    },
-    {
-      "id": "log_1790605338854_5auu",
-      "timestamp": "2026-09-28T14:22:18.854Z",
-      "stage": "COMPLETED",
-      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1, 1 chunks, status: CONFLICTED) into Omnia RAG knowledge index.",
+      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1): 1 concepts, 1 rules, 1 relations into Omnia Memory.",
       "level": "success",
       "sourceId": "src_smart_dispenser_specs",
       "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
     },
     {
-      "id": "log_1790605338854_bpme",
-      "timestamp": "2026-09-28T14:22:18.854Z",
+      "id": "log_1790606996094_yx5t",
+      "timestamp": "2026-09-28T14:49:56.094Z",
       "stage": "INDEXING",
-      "message": "Generating embeddings for 1 chunks of \"Smart Medicine Dispenser Hardware Specifications\"",
+      "message": "Generating embeddings and indexing 1 chunks into Omnia RAG vector store",
       "level": "info",
       "sourceId": "src_smart_dispenser_specs",
       "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
     },
     {
-      "id": "log_1790605338853_tvbn",
-      "timestamp": "2026-09-28T14:22:18.853Z",
-      "stage": "VALIDATING",
-      "message": "Validating factual integrity and safety for \"Smart Medicine Dispenser Hardware Specifications\"",
+      "id": "log_1790606995576_pd3n",
+      "timestamp": "2026-09-28T14:49:55.576Z",
+      "stage": "EXTRACTING_LOGIC",
+      "message": "Extracting humanized concepts, IF/THEN rules, procedures & graph triples for \"Smart Medicine Dispenser Hardware Specifications\"",
       "level": "info",
       "sourceId": "src_smart_dispenser_specs",
       "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
     },
     {
-      "id": "log_1790605338852_q68x",
-      "timestamp": "2026-09-28T14:22:18.853Z",
+      "id": "log_1790606995576_43w1",
+      "timestamp": "2026-09-28T14:49:55.576Z",
+      "stage": "UNDERSTANDING",
+      "message": "Normalizing content for \"Smart Medicine Dispenser Hardware Specifications\"",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1790606995576_zmgh",
+      "timestamp": "2026-09-28T14:49:55.576Z",
       "stage": "PROCESSING",
-      "message": "[1/2] Processing \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "message": "[1/1] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
       "level": "info",
       "sourceId": "src_smart_dispenser_specs",
       "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
     },
     {
-      "id": "log_1790605338751_ia0t",
-      "timestamp": "2026-09-28T14:22:18.751Z",
+      "id": "log_1790606995475_9ynx",
+      "timestamp": "2026-09-28T14:49:55.475Z",
       "stage": "RUNNING",
-      "message": "Evaluating 2 pending candidate sources",
+      "message": "Evaluating 1 candidate knowledge sources",
       "level": "info"
     },
     {
-      "id": "log_1790605338751_a8kr",
-      "timestamp": "2026-09-28T14:22:18.751Z",
+      "id": "log_1790606995475_blv1",
+      "timestamp": "2026-09-28T14:49:55.475Z",
       "stage": "QUEUED",
-      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790605338751_zw4ov]",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1790606995474_884rf]",
       "level": "info"
-    },
-    {
-      "id": "log_1790604403761",
-      "timestamp": "2026-09-28T14:06:43.761Z",
-      "level": "info",
-      "stage": "QUEUED",
-      "message": "User correction queued for review: \"When did Curiosity land?...\"",
-      "sourceId": "src_corr_1790604403761"
-    },
-    {
-      "id": "log_1790604376700_4tg7",
-      "timestamp": "2026-09-28T14:06:16.700Z",
-      "stage": "COMPLETED",
-      "message": "Workflow run finished. Processed: 1, Approved: 0, Rejected: 0, Conflicts: 0, Skipped: 0",
-      "level": "success"
-    },
-    {
-      "id": "log_1790604376700_66sc",
-      "timestamp": "2026-09-28T14:06:16.700Z",
-      "stage": "COMPLETED",
-      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1, 1 chunks, status: CONFLICTED) into Omnia RAG knowledge index.",
-      "level": "success",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790604376700_w0kn",
-      "timestamp": "2026-09-28T14:06:16.700Z",
-      "stage": "INDEXING",
-      "message": "Generating embeddings for 1 chunks of \"Smart Medicine Dispenser Hardware Specifications\"",
-      "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790604376699_9vdb",
-      "timestamp": "2026-09-28T14:06:16.699Z",
-      "stage": "VALIDATING",
-      "message": "Validating factual integrity and safety for \"Smart Medicine Dispenser Hardware Specifications\"",
-      "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790604376698_jxsw",
-      "timestamp": "2026-09-28T14:06:16.698Z",
-      "stage": "PROCESSING",
-      "message": "[1/1] Processing \"Smart Medicine Dispenser Hardware Specifications\" (document)",
-      "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790604376597_f6x0",
-      "timestamp": "2026-09-28T14:06:16.597Z",
-      "stage": "RUNNING",
-      "message": "Evaluating 1 pending candidate sources",
-      "level": "info"
-    },
-    {
-      "id": "log_1790604376597_k784",
-      "timestamp": "2026-09-28T14:06:16.597Z",
-      "stage": "QUEUED",
-      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790604376597_idqki]",
-      "level": "info"
-    },
-    {
-      "id": "log_1790604336139_azi4",
-      "timestamp": "2026-09-28T14:05:36.139Z",
-      "stage": "RUNNING",
-      "message": "Evaluating 1 pending candidate sources",
-      "level": "info"
-    },
-    {
-      "id": "log_1790604336139_patg",
-      "timestamp": "2026-09-28T14:05:36.139Z",
-      "stage": "QUEUED",
-      "message": "Omnia Learning Workflow initiated [Run ID: wf_learn_1790604336139_ojcfw]",
-      "level": "info"
-    },
-    {
-      "id": "log_cron_1790604324551",
-      "timestamp": "2026-09-28T14:05:24.551Z",
-      "level": "info",
-      "stage": "RUNNING",
-      "message": "Scheduled Omnia Synchronization Cron triggered."
     },
     {
       "id": "log_srv_1",
-      "timestamp": "2026-09-28T14:05:09.276Z",
+      "timestamp": "2026-09-28T14:49:35.035Z",
       "level": "success",
       "stage": "COMPLETED",
-      "message": "Omnia Continuous Learning system initialized with 4 verified sources."
+      "message": "Omnia Intelligence and Reasoning Layer initialized with 3 verified concepts, 3 logic rules, and 3 graph relations."
     }
   ],
   "feedback": [
@@ -343,7 +530,8 @@
       "statementB": "Clinical safety protocol requires pill transit timeout not to exceed 800ms to prevent user tampering while carousel aperture is exposed.",
       "detectedAt": "2026-09-24T10:30:00Z",
       "resolutionRule": "MANUAL_REVIEW",
-      "status": "UNRESOLVED"
+      "status": "UNRESOLVED",
+      "resolutionNotes": "Hardware bench specifies 1200ms; Clinical directive limits to 800ms."
     }
   ]
 }

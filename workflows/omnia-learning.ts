@@ -4,8 +4,12 @@ import {
   WorkflowLog,
   TrainingExecutionResult,
   OmniaConflictItem,
+  HumanizedConcept,
+  LogicMemoryItem,
+  KnowledgeGraphRelation,
 } from '../src/types/omniaLearning';
 import { computeStringHash } from '../src/utils/hashUtils';
+import { OmniaIntelligenceService } from '../src/services/omniaIntelligenceService';
 
 export { computeStringHash };
 
@@ -24,18 +28,17 @@ async function durableSleep(duration: string | number): Promise<void> {
 
 export interface OmniaWorkflowContext {
   existingSources?: LearningSource[];
-  activeKnowledge?: Array<{
-    id: string;
-    topic: string;
-    statement: string;
-    source: string;
-    version: number;
-    trustLevel: string;
-  }>;
+  existingConcepts?: HumanizedConcept[];
+  existingRules?: LogicMemoryItem[];
+  existingGraph?: KnowledgeGraphRelation[];
+  aiInstance?: any;
   onLog?: (log: WorkflowLog) => void;
   embedFunction?: (text: string) => Promise<number[]>;
   persistFunction?: (params: {
     source: LearningSource;
+    concepts: HumanizedConcept[];
+    rules: LogicMemoryItem[];
+    graphRelations: KnowledgeGraphRelation[];
     chunks: Array<{ id: string; text: string; embedding?: number[]; metadata: any }>;
   }) => Promise<void>;
 }
@@ -71,7 +74,6 @@ async function chunkContent(
       if (match) currentSection = match[1].trim();
     }
 
-    const approxTokens = Math.ceil(para.length / 4);
     if ((currentChunk.length + para.length) / 4 > 450 && currentChunk.length > 0) {
       chunks.push({
         id: `${sourceId}_chk_${chunkIndex++}`,
@@ -98,108 +100,13 @@ async function chunkContent(
 }
 
 /**
- * Durable Step: Knowledge Validation Rules
- * Enforces anti-hallucination, sanity bounds, and trust checks.
- */
-async function validateKnowledgeContent(source: LearningSource): Promise<{
-  passed: boolean;
-  score: number;
-  notes: string[];
-}> {
-  const notes: string[] = [];
-  let score = 90;
-
-  if (!source.rawContent || source.rawContent.trim().length < 20) {
-    notes.push('Content is under minimum threshold (<20 chars)');
-    return { passed: false, score: 10, notes };
-  }
-
-  // Check for suspicious prompt injection or model leaks
-  const dangerousPatterns = [
-    /ignore all previous instructions/i,
-    /system prompt override/i,
-    /jailbreak/i,
-    /<script[\s>]/i,
-  ];
-
-  for (const pattern of dangerousPatterns) {
-    if (pattern.test(source.rawContent)) {
-      notes.push(`Prohibited pattern detected: ${pattern}`);
-      return { passed: false, score: 0, notes };
-    }
-  }
-
-  // Adjust score by trust level
-  if (source.trustLevel === 'verified_internal') score = 98;
-  else if (source.trustLevel === 'official_doc') score = 95;
-  else if (source.trustLevel === 'trusted_partner') score = 88;
-  else if (source.trustLevel === 'user_correction') score = 75;
-  else score = 65;
-
-  notes.push(`Trust level verified: ${source.trustLevel} (Score: ${score}%)`);
-  return { passed: score >= 60, score, notes };
-}
-
-/**
- * Durable Step: Conflict Detection against Active Knowledge
- */
-async function detectConflicts(
-  source: LearningSource,
-  activeKnowledge: OmniaWorkflowContext['activeKnowledge']
-): Promise<OmniaConflictItem | null> {
-  if (!activeKnowledge || activeKnowledge.length === 0) return null;
-
-  const titleLower = source.title.toLowerCase();
-  for (const existing of activeKnowledge) {
-    const existingTopicLower = existing.topic.toLowerCase();
-    const isTopicMatch =
-      titleLower.includes(existingTopicLower) || existingTopicLower.includes(titleLower);
-
-    if (isTopicMatch && existing.id !== source.sourceId) {
-      // Check for contradictory claims or supersession
-      const sourceLower = source.rawContent.toLowerCase();
-      const existingLower = existing.statement.toLowerCase();
-
-      // Sample divergence heuristic
-      const hasDivergence =
-        sourceLower.length > 50 &&
-        existingLower.length > 50 &&
-        source.contentHash !== computeStringHash(existing.statement);
-
-      if (hasDivergence) {
-        return {
-          id: `conflict_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          sourceAId: existing.id,
-          sourceBId: source.sourceId,
-          sourceATitle: existing.topic,
-          sourceBTitle: source.title,
-          topic: existing.topic,
-          statementA: existing.statement.slice(0, 300),
-          statementB: source.rawContent.slice(0, 300),
-          detectedAt: new Date().toISOString(),
-          resolutionRule: 'PREFER_NEWER',
-          status: 'UNRESOLVED',
-        };
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
- * MAIN VERCEL WORKFLOW: Omnia Continuous Learning System
+ * MAIN VERCEL WORKFLOW: Omnia Continuous Learning & Reasoning Pipeline
  *
- * Designed to run continuously 24/7 on Vercel using event-triggered
- * workflows and scheduled synchronization.
- *
- * Implements:
- * - Content extraction, cleaning & semantic chunking
- * - Idempotency checking via content hashes
- * - Vector embedding generation
- * - Knowledge validation & conflict detection
- * - Direct persistence to Omnia RAG Vector Store & Governance Records
- * - Fault tolerance per document with retries
+ * Implements the complete multi-stage pipeline:
+ * SOURCE -> INGEST -> UNDERSTAND -> CLEAN -> HUMANIZE -> CLASSIFY ->
+ * EXTRACT CONCEPTS -> EXTRACT FACTS -> EXTRACT RELATIONSHIPS ->
+ * EXTRACT RULES & LOGIC -> EXTRACT PROCEDURES -> CHECK DUPLICATES & CONTRADICTIONS ->
+ * VALIDATE -> STORE IN MEMORY LAYERS -> INDEX IN RAG -> AVAILABLE TO OMNIA
  */
 export async function runOmniaLearningWorkflow(
   sourcesToProcess: LearningSource[],
@@ -233,16 +140,18 @@ export async function runOmniaLearningWorkflow(
     context.onLog?.(entry);
   };
 
-  addLog('QUEUED', `Omnia Learning Workflow initiated [Run ID: ${runId}]`, 'info');
-  addLog('RUNNING', `Evaluating ${sourcesToProcess.length} pending candidate sources`, 'info');
+  addLog('QUEUED', `Omnia Learning & Reasoning Pipeline initiated [Run ID: ${runId}]`, 'info');
+  addLog('RUNNING', `Evaluating ${sourcesToProcess.length} candidate knowledge sources`, 'info');
 
-  // Resilient pause to allow workflow scheduler handshake
   await durableSleep('100ms');
 
   let sourcesProcessed = 0;
   let sourcesSkippedUnchanged = 0;
   let chunksGenerated = 0;
   let embeddingsGenerated = 0;
+  let conceptsExtracted = 0;
+  let rulesExtracted = 0;
+  let graphRelationsExtracted = 0;
   let knowledgeApproved = 0;
   let knowledgeRejected = 0;
   let conflictsDetected = 0;
@@ -251,7 +160,7 @@ export async function runOmniaLearningWorkflow(
     const source = sourcesToProcess[i];
     addLog(
       'PROCESSING',
-      `[${i + 1}/${sourcesToProcess.length}] Processing "${source.title}" (${source.sourceType})`,
+      `[${i + 1}/${sourcesToProcess.length}] Ingesting "${source.title}" (${source.sourceType})`,
       'info',
       source
     );
@@ -276,60 +185,67 @@ export async function runOmniaLearningWorkflow(
         continue;
       }
 
-      // If source exists with a different hash, increment version
       if (existingSource && existingSource.contentHash !== currentHash) {
         source.version = (existingSource.version || 1) + 1;
         existingSource.status = 'OUTDATED';
         existingSource.updatedAt = new Date().toISOString();
         addLog(
           'PROCESSING',
-          `New content detected for "${source.title}". Upgrading from v${existingSource.version} to v${source.version}. Marking prior version OUTDATED.`,
+          `New version detected for "${source.title}". Upgraded from v${existingSource.version} to v${source.version}. Marking prior version OUTDATED.`,
           'info',
           source
         );
       }
 
       // 2. Extraction & Cleaning
+      addLog('UNDERSTANDING', `Normalizing content for "${source.title}"`, 'info', source);
       const cleanedText = await cleanAndNormalizeContent(source.rawContent);
       source.cleanedContent = cleanedText;
       source.tokenCount = Math.ceil(cleanedText.length / 4);
 
-      // 3. Validation Step
-      addLog('VALIDATING', `Validating factual integrity and safety for "${source.title}"`, 'info', source);
-      const validation = await validateKnowledgeContent(source);
-      source.validationScore = validation.score;
-      source.validationNotes = validation.notes;
+      // 3. Multi-Stage Intelligence Extraction: Concepts, Humanization, Rules, Procedures & Knowledge Graph
+      addLog(
+        'EXTRACTING_LOGIC',
+        `Extracting humanized concepts, IF/THEN rules, procedures & graph triples for "${source.title}"`,
+        'info',
+        source
+      );
 
-      if (!validation.passed) {
-        source.status = 'REJECTED';
-        knowledgeRejected++;
-        addLog(
-          'VALIDATING',
-          `Validation REJECTED for "${source.title}": ${validation.notes.join('; ')}`,
-          'warn',
-          source
-        );
-        continue;
-      }
+      const extraction = await OmniaIntelligenceService.processAndExtractKnowledge(
+        source,
+        context.existingConcepts || [],
+        context.existingRules || [],
+        context.aiInstance
+      );
 
-      // 4. Conflict Detection
-      const conflict = await detectConflicts(source, context.activeKnowledge);
-      if (conflict) {
+      conceptsExtracted += extraction.concepts.length;
+      rulesExtracted += extraction.logicRules.length;
+      graphRelationsExtracted += extraction.graphRelations.length;
+      source.extractedConceptsCount = extraction.concepts.length;
+      source.extractedRulesCount = extraction.logicRules.length;
+      source.validationScore = extraction.validationScore;
+      source.validationNotes = extraction.validationNotes;
+
+      // 4. Contradiction & Conflict Check
+      if (extraction.conflict) {
         conflictsDetected++;
         source.status = 'CONFLICTED';
         source.conflictDetails = {
-          conflictingSourceId: conflict.sourceAId,
-          conflictingTopic: conflict.topic,
-          reason: 'Factual divergence detected against existing verified knowledge',
-          detectedAt: conflict.detectedAt,
+          conflictingSourceId: extraction.conflict.sourceAId,
+          conflictingTopic: extraction.conflict.topic,
+          reason: extraction.conflict.resolutionNotes || 'Factual or numerical divergence detected against existing verified knowledge',
+          detectedAt: extraction.conflict.detectedAt,
         };
         addLog(
-          'VALIDATING',
-          `Conflict detected for "${source.title}" with existing record "${conflict.sourceATitle}". Both records preserved for admin resolution.`,
+          'CHECKING_CONTRADICTIONS',
+          `Contradiction detected for "${source.title}" with "${extraction.conflict.sourceATitle}". Both records preserved in Governance Gate.`,
           'warn',
           source,
-          conflict
+          extraction.conflict
         );
+      } else {
+        source.status = 'APPROVED';
+        knowledgeApproved++;
       }
 
       // 5. Semantic Chunking
@@ -340,7 +256,7 @@ export async function runOmniaLearningWorkflow(
       // 6. Vector Embedding Generation
       addLog(
         'INDEXING',
-        `Generating embeddings for ${rawChunks.length} chunks of "${source.title}"`,
+        `Generating embeddings and indexing ${rawChunks.length} chunks into Omnia RAG vector store`,
         'info',
         source
       );
@@ -359,7 +275,7 @@ export async function runOmniaLearningWorkflow(
             embedding = await context.embedFunction(chk.text);
             embeddingsGenerated++;
           } catch {
-            // Local fallback handled by service
+            // Local fallback
           }
         }
 
@@ -386,17 +302,15 @@ export async function runOmniaLearningWorkflow(
         });
       }
 
-      // 7. Persist directly to RAG & Knowledge Store
-      if (source.status !== 'CONFLICTED') {
-        source.status = 'APPROVED';
-        knowledgeApproved++;
-      }
-
       source.updatedAt = new Date().toISOString();
 
+      // 7. Persist into all Memory Layers
       if (context.persistFunction) {
         await context.persistFunction({
           source,
+          concepts: extraction.concepts,
+          rules: extraction.logicRules,
+          graphRelations: extraction.graphRelations,
           chunks: processedChunks,
         });
       }
@@ -404,7 +318,7 @@ export async function runOmniaLearningWorkflow(
       sourcesProcessed++;
       addLog(
         'COMPLETED',
-        `Successfully integrated "${source.title}" (v${source.version}, ${processedChunks.length} chunks, status: ${source.status}) into Omnia RAG knowledge index.`,
+        `Successfully integrated "${source.title}" (v${source.version}): ${extraction.concepts.length} concepts, ${extraction.logicRules.length} rules, ${extraction.graphRelations.length} relations into Omnia Memory.`,
         'success',
         source
       );
@@ -413,17 +327,16 @@ export async function runOmniaLearningWorkflow(
       errors.push(`Error on "${source.title}": ${errMsg}`);
       addLog(
         'FAILED',
-        `Transient processing failure on "${source.title}": ${errMsg}. Retrying document...`,
+        `Transient processing failure on "${source.title}": ${errMsg}. Retrying document independently...`,
         'error',
         source
       );
 
-      // Fault-tolerant Retry logic per document
+      // Fault-tolerant retry
       try {
         await durableSleep('250ms');
         addLog('RETRYING', `Retrying ingestion for "${source.title}"...`, 'info', source);
-        // If recovery logic succeeds, update status
-      } catch (retryErr: any) {
+      } catch {
         addLog('FAILED', `Retry aborted for "${source.title}". Continuing with next source.`, 'error', source);
       }
     }
@@ -435,7 +348,7 @@ export async function runOmniaLearningWorkflow(
 
   addLog(
     overallStatus === 'COMPLETED' ? 'COMPLETED' : 'FAILED',
-    `Workflow run finished. Processed: ${sourcesProcessed}, Approved: ${knowledgeApproved}, Rejected: ${knowledgeRejected}, Conflicts: ${conflictsDetected}, Skipped: ${sourcesSkippedUnchanged}`,
+    `Omnia Learning Pipeline finished. Processed: ${sourcesProcessed}, Concepts: ${conceptsExtracted}, Rules: ${rulesExtracted}, Graph: ${graphRelationsExtracted}, Approved: ${knowledgeApproved}, Skipped: ${sourcesSkippedUnchanged}`,
     overallStatus === 'COMPLETED' ? 'success' : 'warn'
   );
 
@@ -449,6 +362,9 @@ export async function runOmniaLearningWorkflow(
     sourcesSkippedUnchanged,
     chunksGenerated,
     embeddingsGenerated,
+    conceptsExtracted,
+    rulesExtracted,
+    graphRelationsExtracted,
     knowledgeApproved,
     knowledgeRejected,
     conflictsDetected,

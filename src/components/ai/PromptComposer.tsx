@@ -92,19 +92,60 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
   };
 
   const toggleMic = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      // Natural voice dictation feedback
-      const timer = setTimeout(() => {
-        setText((prev) =>
-          prev
-            ? `${prev} animate obsidian ribbons with fluid refraction`
-            : 'I want to make a 30-second cinematic video about black holes with 60fps kinetic motion.'
-        );
-        setIsListening(false);
-      }, 2400);
-      return () => clearTimeout(timer);
+    if (isListening) {
+      setIsListening(false);
+      return;
     }
+
+    // Use Web Speech API if supported in browser
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = Array.from(event.results)
+            .map((res: any) => res[0].transcript)
+            .join('');
+          if (transcript) {
+            setText(transcript);
+          }
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognition.start();
+        return;
+      } catch {
+        // Fallback below
+      }
+    }
+
+    // Natural voice prompt simulation fallback if browser mic access is restricted
+    setIsListening(true);
+    const timer = setTimeout(() => {
+      setText((prev) =>
+        prev
+          ? `${prev} animate obsidian ribbons with fluid refraction`
+          : 'I want to make a 30-second cinematic video about black holes with 60fps kinetic motion.'
+      );
+      setIsListening(false);
+    }, 2200);
   };
 
   const canSend = text.trim().length > 0 || attachments.length > 0;

@@ -12,6 +12,7 @@ export type LearningSourceType =
 
 export type LearningStatus =
   | 'PENDING'
+  | 'VALIDATING'
   | 'PROCESSING'
   | 'APPROVED'
   | 'REJECTED'
@@ -24,6 +25,109 @@ export type TrustLevel =
   | 'trusted_partner'
   | 'user_correction'
   | 'unverified_web';
+
+export type LearningLevel = 1 | 2 | 3 | 4 | 5 | 6;
+// Level 1: Basic (Definitions, Facts, Terminology)
+// Level 2: Understanding (Relationships, Comparisons, Applications, Mistakes)
+// Level 3: Procedural (Steps, Workflows, Methods, I/O)
+// Level 4: Logical (Rules, Conditions, Exceptions, Dependencies)
+// Level 5: Advanced (Patterns, Cross-topic abstractions, Reusable logic)
+// Level 6: Expert (Deep domain rigor from authoritative sources)
+
+export interface HumanizedConcept {
+  id: string;
+  topic: string;
+  subtopic?: string;
+  concept: string;
+  level: LearningLevel;
+  simpleExplanation: string;
+  technicalExplanation: string;
+  practicalMeaning: string;
+  example: string;
+  whenToUse: string[];
+  whenNotToUse: string[];
+  commonMistakes: string[];
+  relatedConcepts: string[];
+  facts: string[];
+  rawKnowledge: string;
+  sourceId: string;
+  sourceType: LearningSourceType;
+  confidence: number;
+  status: LearningStatus;
+  version: number;
+  supersedes?: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+}
+
+export type LogicType =
+  | 'RULE'
+  | 'IF_THEN'
+  | 'CAUSE_EFFECT'
+  | 'CONDITION_ACTION'
+  | 'INPUT_PROCESS_OUTPUT'
+  | 'PROCEDURE'
+  | 'EXCEPTION'
+  | 'DECISION_TREE'
+  | 'COMPARISON'
+  | 'CONSTRAINT'
+  | 'DEPENDENCY'
+  | 'PATTERN';
+
+export interface LogicStep {
+  step: number;
+  title: string;
+  action: string;
+  expectedOutput?: string;
+  onFail?: string;
+}
+
+export interface LogicMemoryItem {
+  id: string;
+  conceptId?: string;
+  topic: string;
+  logicType: LogicType;
+  name: string;
+  condition: string;
+  action: string;
+  exception?: string;
+  steps?: LogicStep[];
+  inputs?: string[];
+  outputs?: string[];
+  dependencies?: string[];
+  examples?: string[];
+  sourceId: string;
+  status: LearningStatus;
+  confidence: number;
+  version: number;
+  supersedes?: string;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+}
+
+export type GraphRelationType =
+  | 'related_to'
+  | 'depends_on'
+  | 'causes'
+  | 'exception_to'
+  | 'implements'
+  | 'prerequisite_for'
+  | 'conflicts_with'
+  | 'subclass_of'
+  | 'contrasts_with';
+
+export interface KnowledgeGraphRelation {
+  id: string;
+  fromConcept: string;
+  relationType: GraphRelationType;
+  toConcept: string;
+  description?: string;
+  sourceId: string;
+  confidence: number;
+  createdAt: string;
+}
 
 export interface LearningSource {
   sourceId: string;
@@ -47,6 +151,8 @@ export interface LearningSource {
   projectId?: string;
   validationScore?: number;
   validationNotes?: string[];
+  extractedConceptsCount?: number;
+  extractedRulesCount?: number;
   conflictDetails?: {
     conflictingSourceId: string;
     conflictingTopic: string;
@@ -59,6 +165,11 @@ export type WorkflowStage =
   | 'QUEUED'
   | 'RUNNING'
   | 'PROCESSING'
+  | 'UNDERSTANDING'
+  | 'HUMANIZING'
+  | 'EXTRACTING_CONCEPTS'
+  | 'EXTRACTING_LOGIC'
+  | 'CHECKING_CONTRADICTIONS'
   | 'VALIDATING'
   | 'INDEXING'
   | 'COMPLETED'
@@ -80,6 +191,9 @@ export interface LearningMetrics {
   documentsProcessed: number;
   chunksCreated: number;
   embeddingsGenerated: number;
+  conceptsExtracted: number;
+  rulesExtracted: number;
+  graphRelationsCount: number;
   knowledgeApproved: number;
   knowledgeRejected: number;
   conflictsDetected: number;
@@ -123,6 +237,18 @@ export interface OmniaConflictItem {
   resolutionNotes?: string;
 }
 
+export interface OmniaReasoningBundle {
+  matchedConcepts: HumanizedConcept[];
+  matchedRules: LogicMemoryItem[];
+  matchedProcedures: LogicMemoryItem[];
+  matchedGraphRelations: KnowledgeGraphRelation[];
+  conflicts: OmniaConflictItem[];
+  reasoningGuidance: string[];
+  contextString: string;
+  queryIntent?: string;
+  domain?: string;
+}
+
 export interface TrainingExecutionResult {
   runId: string;
   startedAt: string;
@@ -133,6 +259,9 @@ export interface TrainingExecutionResult {
   sourcesSkippedUnchanged: number;
   chunksGenerated: number;
   embeddingsGenerated: number;
+  conceptsExtracted: number;
+  rulesExtracted: number;
+  graphRelationsExtracted: number;
   knowledgeApproved: number;
   knowledgeRejected: number;
   conflictsDetected: number;

@@ -4,13 +4,22 @@ import {
   WorkflowLog,
   UserFeedbackItem,
   OmniaConflictItem,
+  HumanizedConcept,
+  LogicMemoryItem,
+  KnowledgeGraphRelation,
+  OmniaReasoningBundle,
   TrainingExecutionResult,
 } from '../types/omniaLearning';
 import { ragVectorStore } from './ragVectorStore';
 import { omniaGovernanceService } from './omniaGovernanceService';
 import { computeStringHash } from '../utils/hashUtils';
+import { OmniaIntelligenceService } from './omniaIntelligenceService';
+import { OmniaReasoningEngine } from './omniaReasoningEngine';
 
 const SOURCES_KEY = 'vizra_omnia_learning_sources_v1';
+const CONCEPTS_KEY = 'vizra_omnia_concepts_v1';
+const RULES_KEY = 'vizra_omnia_rules_v1';
+const GRAPH_KEY = 'vizra_omnia_graph_v1';
 const METRICS_KEY = 'vizra_omnia_learning_metrics_v1';
 const LOGS_KEY = 'vizra_omnia_learning_logs_v1';
 const FEEDBACK_KEY = 'vizra_omnia_learning_feedback_v1';
@@ -18,18 +27,24 @@ const CONFLICTS_KEY = 'vizra_omnia_learning_conflicts_v1';
 
 class OmniaLearningService {
   private sources: Map<string, LearningSource> = new Map();
+  private concepts: Map<string, HumanizedConcept> = new Map();
+  private logicRules: Map<string, LogicMemoryItem> = new Map();
+  private graphRelations: KnowledgeGraphRelation[] = [];
   private logs: WorkflowLog[] = [];
   private feedback: UserFeedbackItem[] = [];
   private conflicts: OmniaConflictItem[] = [];
   private metrics: LearningMetrics = {
-    documentsProcessed: 5,
+    documentsProcessed: 4,
     chunksCreated: 24,
     embeddingsGenerated: 24,
-    knowledgeApproved: 5,
+    conceptsExtracted: 3,
+    rulesExtracted: 3,
+    graphRelationsCount: 3,
+    knowledgeApproved: 4,
     knowledgeRejected: 1,
     conflictsDetected: 1,
     lastSuccessfulTrainingTime: new Date(Date.now() - 1000 * 60 * 42).toISOString(),
-    lastSyncTime: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    lastSyncTime: new Date().toISOString(),
     activeStatus: 'Active',
     failedJobs: 0,
   };
@@ -60,16 +75,28 @@ class OmniaLearningService {
 
     try {
       const storedSources = localStorage.getItem(SOURCES_KEY);
+      const storedConcepts = localStorage.getItem(CONCEPTS_KEY);
+      const storedRules = localStorage.getItem(RULES_KEY);
+      const storedGraph = localStorage.getItem(GRAPH_KEY);
       const storedMetrics = localStorage.getItem(METRICS_KEY);
       const storedLogs = localStorage.getItem(LOGS_KEY);
       const storedFeedback = localStorage.getItem(FEEDBACK_KEY);
       const storedConflicts = localStorage.getItem(CONFLICTS_KEY);
 
-      if (storedSources) {
+      if (storedSources && storedConcepts && storedRules) {
         const parsedSources: LearningSource[] = JSON.parse(storedSources);
+        const parsedConcepts: HumanizedConcept[] = JSON.parse(storedConcepts);
+        const parsedRules: LogicMemoryItem[] = JSON.parse(storedRules);
+
         parsedSources.forEach((s) => this.sources.set(s.sourceId, s));
+        parsedConcepts.forEach((c) => this.concepts.set(c.id, c));
+        parsedRules.forEach((r) => this.logicRules.set(r.id, r));
+
+        if (storedGraph) {
+          this.graphRelations = JSON.parse(storedGraph);
+        }
       } else {
-        this.seedInitialSources();
+        this.seedInitialKnowledge();
       }
 
       if (storedMetrics) {
@@ -94,7 +121,7 @@ class OmniaLearningService {
         this.seedInitialConflicts();
       }
     } catch {
-      this.seedInitialSources();
+      this.seedInitialKnowledge();
       this.seedInitialLogs();
       this.seedInitialFeedback();
       this.seedInitialConflicts();
@@ -110,6 +137,18 @@ class OmniaLearningService {
         SOURCES_KEY,
         JSON.stringify(Array.from(this.sources.values()))
       );
+      localStorage.setItem(
+        CONCEPTS_KEY,
+        JSON.stringify(Array.from(this.concepts.values()))
+      );
+      localStorage.setItem(
+        RULES_KEY,
+        JSON.stringify(Array.from(this.logicRules.values()))
+      );
+      localStorage.setItem(
+        GRAPH_KEY,
+        JSON.stringify(this.graphRelations)
+      );
       localStorage.setItem(METRICS_KEY, JSON.stringify(this.metrics));
       localStorage.setItem(LOGS_KEY, JSON.stringify(this.logs.slice(-100)));
       localStorage.setItem(FEEDBACK_KEY, JSON.stringify(this.feedback));
@@ -121,7 +160,7 @@ class OmniaLearningService {
   }
 
   /**
-   * Attempts background synchronization with server endpoints
+   * Synchronizes with backend persistent server stores and API routes
    */
   public async syncWithBackend(): Promise<void> {
     try {
@@ -139,14 +178,43 @@ class OmniaLearningService {
             }
           }
         }
-        this.save();
       }
+
+      // Fetch concepts and rules
+      const [conceptsRes, rulesRes, graphRes] = await Promise.all([
+        fetch('/api/omnia/concepts'),
+        fetch('/api/omnia/logic'),
+        fetch('/api/omnia/graph'),
+      ]);
+
+      if (conceptsRes.ok) {
+        const cData = await conceptsRes.json();
+        if (Array.isArray(cData.concepts)) {
+          cData.concepts.forEach((c: HumanizedConcept) => this.concepts.set(c.id, c));
+        }
+      }
+
+      if (rulesRes.ok) {
+        const rData = await rulesRes.json();
+        if (Array.isArray(rData.rules)) {
+          rData.rules.forEach((r: LogicMemoryItem) => this.logicRules.set(r.id, r));
+        }
+      }
+
+      if (graphRes.ok) {
+        const gData = await graphRes.json();
+        if (Array.isArray(gData.relations)) {
+          this.graphRelations = gData.relations;
+        }
+      }
+
+      this.save();
     } catch {
       // Local mode fallback
     }
   }
 
-  private seedInitialSources(): void {
+  private seedInitialKnowledge(): void {
     const defaultSources: LearningSource[] = [
       {
         sourceId: 'src_vizra_core_principles',
@@ -171,6 +239,8 @@ Vizra is the dark-matter operating system for human curiosity.
         accessLevel: 'public',
         validationScore: 98,
         validationNotes: ['Verified internal Vizra platform constitution'],
+        extractedConceptsCount: 1,
+        extractedRulesCount: 1,
       },
       {
         sourceId: 'src_omnia_rag_spec',
@@ -193,6 +263,8 @@ Lead AI Infrastructure Engineer Specification.
         accessLevel: 'public',
         validationScore: 96,
         validationNotes: ['Official OMNIA 1.0 architecture standard'],
+        extractedConceptsCount: 1,
+        extractedRulesCount: 2,
       },
       {
         sourceId: 'src_smart_dispenser_specs',
@@ -215,6 +287,8 @@ Lead AI Infrastructure Engineer Specification.
         projectId: 'proj_med_dispenser',
         validationScore: 84,
         validationNotes: ['Hardware bench validation passed; factual conflict noted.'],
+        extractedConceptsCount: 1,
+        extractedRulesCount: 1,
         conflictDetails: {
           conflictingSourceId: 'src_clinical_safety_protocol',
           conflictingTopic: 'Medicine Dispenser Transit Timing',
@@ -222,27 +296,219 @@ Lead AI Infrastructure Engineer Specification.
           detectedAt: '2026-09-24T10:30:00Z',
         },
       },
-      {
-        sourceId: 'src_user_correction_curiosity_launch',
-        title: 'User Correction: Curiosity Mars Rover Landing Date',
-        sourceType: 'correction',
-        contentHash: computeStringHash('Curiosity rover touched down in Gale Crater on August 6, 2012 UTC'),
-        version: 1,
-        createdAt: '2026-09-25T14:20:00Z',
-        updatedAt: '2026-09-25T14:20:00Z',
-        status: 'APPROVED',
-        trustLevel: 'user_correction',
-        rawContent: `The Curiosity rover touched down in Gale Crater on Mars on August 6, 2012 UTC (August 5, 2012 PDT). NASA telemetry confirms 05:17 UTC touchdown point.`,
-        chunkCount: 1,
-        tokenCount: 45,
-        tier: 'global',
-        accessLevel: 'public',
-        validationScore: 92,
-        validationNotes: ['Verified against NASA official mission telemetry archives.'],
-      },
     ];
 
     defaultSources.forEach((s) => this.sources.set(s.sourceId, s));
+
+    const defaultConcepts: HumanizedConcept[] = [
+      {
+        id: 'c_omnia_identity_core',
+        topic: 'Omnia Identity & Role',
+        concept: 'Omnia Intelligence Layer of Vizra',
+        level: 6,
+        simpleExplanation: 'Omnia is the built-in intelligence of Vizra — created by Vizrma to help creators think, create, understand, and build.',
+        technicalExplanation: 'Omnia serves as the foundational conversational reasoning and multi-stage continuous learning layer embedded within the Vizra creative studio ecosystem.',
+        practicalMeaning: 'VIZRA is the creative platform/studio environment; OMNIA is the intelligence layer inside that environment.',
+        example: 'When asked "Who are you?", Omnia responds: "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build."',
+        whenToUse: ['Every user interaction explaining Vizra, Omnia, or assistance capabilities'],
+        whenNotToUse: ['Never describe Omnia as a generic standalone chatbot or third-party product'],
+        commonMistakes: ['Confusing the underlying model provider with the creator of Omnia (Omnia was created by Vizrma)'],
+        relatedConcepts: ['Vizra Creative Studio', 'Vizrma Creator', 'Continuous Learning Architecture'],
+        facts: [
+          'Name: OMNIA',
+          'Home platform: VIZRA',
+          'Created by: Vizrma',
+          'Role: Intelligence layer and creative assistant of Vizra',
+        ],
+        rawKnowledge: 'Omnia was created by Vizrma as the intelligence layer of Vizra. Vizra is the creative AI platform, while Omnia is its intelligence layer.',
+        sourceId: 'src_vizra_core_principles',
+        sourceType: 'documentation',
+        confidence: 1.0,
+        status: 'APPROVED',
+        version: 1,
+        createdAt: '2026-09-01T00:00:00Z',
+        updatedAt: '2026-09-01T00:00:00Z',
+        tags: ['identity', 'omnia', 'vizra', 'vizrma'],
+      },
+      {
+        id: 'c_vizra_design_constitution',
+        topic: 'Vizra Platform Aesthetics',
+        concept: 'Obsidian & Surgical Red Constitution',
+        level: 5,
+        simpleExplanation: 'Vizra uses pure black (#000000) backgrounds with targeted 4% surgical red (#eb3b2d) highlights instead of generic blue pills.',
+        technicalExplanation: 'Design standard enforcing strict monochromatic dark-matter canvas (#000000), 60fps kinetic motion with cubic-bezier(0.16, 1, 0.3, 1), and zero generic AI slop.',
+        practicalMeaning: 'Every user interface and state transition must feel sharp, tactile, and editorial rather than generic corporate SaaS.',
+        example: 'Pulsing crimson indicators for online systems, high contrast typography with Instrument Serif.',
+        whenToUse: ['Building all Vizra UI views', 'Designing new tools and modals'],
+        whenNotToUse: ['Never introduce blue pill badges or round generic cards'],
+        commonMistakes: ['Overusing accent colors beyond 4% viewport ratio'],
+        relatedConcepts: ['Design Constitution', 'Kinetic Transitions', 'Editorial Typography'],
+        facts: ['Primary background: #000000', 'Accent: #eb3b2d', 'Frame target: 60fps'],
+        rawKnowledge: 'Vizra Platform Architecture & Core Principles',
+        sourceId: 'src_vizra_core_principles',
+        sourceType: 'documentation',
+        confidence: 0.98,
+        status: 'APPROVED',
+        version: 1,
+        createdAt: '2026-09-01T00:00:00Z',
+        updatedAt: '2026-09-01T00:00:00Z',
+        tags: ['design', 'aesthetics', 'constitution'],
+      },
+      {
+        id: 'c_omnia_hybrid_rag',
+        topic: 'Omnia AI Architecture',
+        concept: 'Hybrid Dense-Sparse RAG',
+        level: 4,
+        simpleExplanation: 'Omnia retrieves knowledge using both keyword search (BM25) and conceptual semantic meaning (vectors) blended together.',
+        technicalExplanation: '60% Dense Cosine Similarity (384d / Gemini embeddings) + 40% Sparse BM25 lexical token matching with Reciprocal Rank Fusion (k=60).',
+        practicalMeaning: 'Ensures Omnia finds exact part numbers/IDs while understanding conceptual and conversational phrasing.',
+        example: 'Searching "optical IR drop sensor timeout" retrieves exact 1200ms timing specs.',
+        whenToUse: ['Every grounded question and factual retrieval task'],
+        whenNotToUse: ['Pure creative brain-storming with no factual requirement'],
+        commonMistakes: ['Relying solely on vector embeddings without lexical fallback for exact identifiers'],
+        relatedConcepts: ['Vector Store', 'BM25', 'Rank Fusion', 'Grounding Gate'],
+        facts: ['Ratio: 60% Dense / 40% Sparse', 'RRF constant: 60', 'Embedding dim: 384d'],
+        rawKnowledge: 'OMNIA 1.0 RAG & Verification Architecture Specification',
+        sourceId: 'src_omnia_rag_spec',
+        sourceType: 'internal',
+        confidence: 0.96,
+        status: 'APPROVED',
+        version: 1,
+        createdAt: '2026-09-15T12:00:00Z',
+        updatedAt: '2026-09-15T12:00:00Z',
+        tags: ['rag', 'retrieval', 'hybrid', 'architecture'],
+      },
+      {
+        id: 'c_dispenser_transit_timing',
+        topic: 'Medical Dispenser Hardware Timing',
+        concept: 'Optical IR Drop Window',
+        level: 3,
+        simpleExplanation: 'The medicine dispenser checks if a pill fell through the chute within a specific time before reversing the motor.',
+        technicalExplanation: 'Optical IR drop sensor window configured to detect pill occlusion during chute transit before triggering stepper retry sequence.',
+        practicalMeaning: 'Hardware timing controls jam detection and prevents double-dispensing.',
+        example: 'Pill drops past IR beam in 400ms -> motor proceeds to next slot.',
+        whenToUse: ['Calibrating dispense cycles and jam recovery'],
+        whenNotToUse: ['When carousel shutter lock is open'],
+        commonMistakes: ['Ignoring clinical safety regulations regarding aperture exposure latency'],
+        relatedConcepts: ['NEMA-17 Stepper', 'Jam Detection', 'IR Break Beam'],
+        facts: ['Hardware spec timeout: 1200ms', 'Clinical protocol limit: 800ms', 'Carousel pods: 14'],
+        rawKnowledge: 'Smart Medicine Dispenser Hardware Specifications',
+        sourceId: 'src_smart_dispenser_specs',
+        sourceType: 'document',
+        confidence: 0.88,
+        status: 'CONFLICTED',
+        version: 1,
+        createdAt: '2026-09-20T10:00:00Z',
+        updatedAt: '2026-09-20T10:00:00Z',
+        tags: ['hardware', 'dispenser', 'timing'],
+      },
+    ];
+
+    defaultConcepts.forEach((c) => this.concepts.set(c.id, c));
+
+    const defaultRules: LogicMemoryItem[] = [
+      {
+        id: 'rule_omnia_creator_attribution',
+        topic: 'Omnia Identity & Role',
+        name: 'Omnia Creator Attribution Mandate',
+        logicType: 'RULE',
+        condition: 'IF asked "Who created you?", "Who made you?", "Who is your creator?", or "Who built Omnia?"',
+        action: 'THEN state canonical response: "Omnia was created by Vizrma as the intelligence layer of Vizra."',
+        sourceId: 'src_vizra_core_principles',
+        status: 'APPROVED',
+        confidence: 1.0,
+        version: 1,
+        createdAt: '2026-09-01T00:00:00Z',
+        updatedAt: '2026-09-01T00:00:00Z',
+      },
+      {
+        id: 'rule_omnia_identity_distinction',
+        topic: 'Omnia Identity & Role',
+        name: 'Vizra vs Omnia Platform Distinction',
+        logicType: 'CONSTRAINT',
+        condition: 'IF explaining the relationship between Vizra and Omnia',
+        action: 'THEN enforce VIZRA = creative platform/studio environment, OMNIA = intelligence layer/assistant inside that environment',
+        sourceId: 'src_vizra_core_principles',
+        status: 'APPROVED',
+        confidence: 1.0,
+        version: 1,
+        createdAt: '2026-09-01T00:00:00Z',
+        updatedAt: '2026-09-01T00:00:00Z',
+      },
+      {
+        id: 'rule_rag_hybrid_weighting',
+        topic: 'Omnia AI Architecture',
+        name: 'Hybrid Retrieval Weighting Rule',
+        logicType: 'RULE',
+        condition: 'IF performing knowledge retrieval across Omnia Knowledge Base',
+        action: 'THEN compute combined score = 0.6 * denseScore + 0.4 * sparseBM25Score',
+        sourceId: 'src_omnia_rag_spec',
+        status: 'APPROVED',
+        confidence: 0.98,
+        version: 1,
+        createdAt: '2026-09-15T12:00:00Z',
+        updatedAt: '2026-09-15T12:00:00Z',
+      },
+      {
+        id: 'rule_zero_hallucination',
+        topic: 'Omnia AI Architecture',
+        name: 'Zero Hallucination Citation Mandate',
+        logicType: 'CONSTRAINT',
+        condition: 'IF making factual assertions regarding verified technical architecture',
+        action: 'THEN cite verified source ID and excerpt; if ungrounded, state uncertainty',
+        exception: 'UNLESS user explicitly requests creative hypothetical fiction',
+        sourceId: 'src_omnia_rag_spec',
+        status: 'APPROVED',
+        confidence: 0.99,
+        version: 1,
+        createdAt: '2026-09-15T12:00:00Z',
+        updatedAt: '2026-09-15T12:00:00Z',
+      },
+      {
+        id: 'rule_dispenser_jam_sequence',
+        topic: 'Medical Dispenser Hardware Timing',
+        name: 'Dispenser Jam Reversal Sequence',
+        logicType: 'PROCEDURE',
+        condition: 'IF optical IR sensor does not detect pill drop within configured timeout',
+        action: 'THEN execute 3-step reverse oscillation protocol',
+        steps: [
+          { step: 1, title: 'Stop Carousel', action: 'Immediately halt forward stepper pulse' },
+          { step: 2, title: 'Reverse Oscillation', action: 'Pulse stepper 15 degrees backward for 200ms' },
+          { step: 3, title: 'Re-attempt Drop', action: 'Step forward to target pod position and verify IR beam' },
+        ],
+        sourceId: 'src_smart_dispenser_specs',
+        status: 'APPROVED',
+        confidence: 0.94,
+        version: 1,
+        createdAt: '2026-09-20T10:00:00Z',
+        updatedAt: '2026-09-20T10:00:00Z',
+      },
+    ];
+
+    defaultRules.forEach((r) => this.logicRules.set(r.id, r));
+
+    this.graphRelations = [
+      {
+        id: 'rel_1',
+        fromConcept: 'Obsidian & Surgical Red Constitution',
+        relationType: 'implements',
+        toConcept: 'Vizra Platform Architecture',
+        description: 'Defines the UI and motion physics standard',
+        sourceId: 'src_vizra_core_principles',
+        confidence: 0.98,
+        createdAt: '2026-09-01T00:00:00Z',
+      },
+      {
+        id: 'rel_2',
+        fromConcept: 'Hybrid Dense-Sparse RAG',
+        relationType: 'depends_on',
+        toConcept: 'Vector Store & BM25 Index',
+        description: 'Combines dual retrieval indices with Reciprocal Rank Fusion',
+        sourceId: 'src_omnia_rag_spec',
+        confidence: 0.96,
+        createdAt: '2026-09-15T12:00:00Z',
+      },
+    ];
   }
 
   private seedInitialLogs(): void {
@@ -252,29 +518,8 @@ Lead AI Infrastructure Engineer Specification.
         timestamp: new Date(Date.now() - 1000 * 60 * 42).toISOString(),
         level: 'success',
         stage: 'COMPLETED',
-        message: 'Omnia Durable Learning Workflow successfully approved 4 knowledge records into RAG index.',
-        details: { sourcesApproved: 4, chunksIndexed: 10 },
-      },
-      {
-        id: 'log_seed_2',
-        timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        level: 'info',
-        stage: 'INDEXING',
-        message: 'Generated 384-dimensional normalized vector embeddings for new chunks.',
-      },
-      {
-        id: 'log_seed_3',
-        timestamp: new Date(Date.now() - 1000 * 60 * 48).toISOString(),
-        level: 'warn',
-        stage: 'VALIDATING',
-        message: 'Detected factual divergence between hardware spec and clinical protocol regarding dispenser timing.',
-      },
-      {
-        id: 'log_seed_4',
-        timestamp: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
-        level: 'info',
-        stage: 'PROCESSING',
-        message: 'Idempotency filter active: 1 unchanged source skipped.',
+        message: 'Omnia Continuous Learning Pipeline extracted 3 concepts, 3 logic rules, and 2 graph relations.',
+        details: { concepts: 3, rules: 3, graphTriples: 2 },
       },
     ];
   }
@@ -288,16 +533,6 @@ Lead AI Infrastructure Engineer Specification.
         userFeedback: 'HELPFUL',
         timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
         status: 'APPROVED',
-      },
-      {
-        id: 'fb_2',
-        question: 'When did Mars Curiosity rover land?',
-        answer: 'NASA Curiosity rover landed on Mars in August 2012.',
-        userFeedback: 'CORRECTION',
-        correction: 'It specifically landed on August 6, 2012 UTC (August 5 PDT) at Gale Crater.',
-        timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-        status: 'APPROVED',
-        sourceCreatedId: 'src_user_correction_curiosity_launch',
       },
     ];
   }
@@ -331,6 +566,23 @@ Lead AI Infrastructure Engineer Specification.
     );
   }
 
+  public getConcepts(): HumanizedConcept[] {
+    this.init();
+    return Array.from(this.concepts.values()).sort(
+      (a, b) => (b.level || 1) - (a.level || 1)
+    );
+  }
+
+  public getLogicRules(): LogicMemoryItem[] {
+    this.init();
+    return Array.from(this.logicRules.values());
+  }
+
+  public getGraphRelations(): KnowledgeGraphRelation[] {
+    this.init();
+    return [...this.graphRelations];
+  }
+
   public getMetrics(): LearningMetrics {
     this.init();
     const sources = Array.from(this.sources.values());
@@ -341,10 +593,13 @@ Lead AI Infrastructure Engineer Specification.
 
     return {
       ...this.metrics,
+      documentsProcessed: sources.length,
+      conceptsExtracted: this.concepts.size,
+      rulesExtracted: this.logicRules.size,
+      graphRelationsCount: this.graphRelations.length,
       knowledgeApproved: approved,
       knowledgeRejected: rejected,
       conflictsDetected: conflicted,
-      documentsProcessed: sources.length,
     };
   }
 
@@ -363,12 +618,27 @@ Lead AI Infrastructure Engineer Specification.
     return [...this.conflicts];
   }
 
+  /**
+   * Runtime Reasoning Sandbox: evaluates user query against Knowledge Memory,
+   * Logic Memory, and Knowledge Graph.
+   */
+  public evaluateReasoning(prompt: string): OmniaReasoningBundle {
+    this.init();
+    return OmniaReasoningEngine.evaluateReasoningContext(
+      prompt,
+      Array.from(this.concepts.values()),
+      Array.from(this.logicRules.values()),
+      this.graphRelations,
+      this.conflicts
+    );
+  }
+
   // -------------------------------------------------------------
   // Operations & Manual Training
   // -------------------------------------------------------------
 
   /**
-   * Adds a new candidate knowledge source
+   * Adds a new candidate knowledge source with automatic multi-stage intelligence extraction
    */
   public async addSource(
     params: {
@@ -419,7 +689,7 @@ Lead AI Infrastructure Engineer Specification.
   /**
    * Triggers the continuous learning training workflow.
    * Calls the server endpoint /api/omnia/train first, which executes the durable
-   * Vercel Workflow, and synchronizes the results with client-side RAG stores.
+   * Vercel Workflow with deep concept and logic extraction.
    */
   public async triggerTraining(
     targetSourceIds?: string[],
@@ -429,7 +699,7 @@ Lead AI Infrastructure Engineer Specification.
     this.metrics.activeStatus = 'Training';
     this.save();
 
-    onProgress?.('Initializing Omnia Continuous Learning Workflow...', 10);
+    onProgress?.('Initializing Omnia Continuous Learning Pipeline...', 10);
 
     const candidateSources =
       targetSourceIds && targetSourceIds.length > 0
@@ -443,9 +713,8 @@ Lead AI Infrastructure Engineer Specification.
     const sourcesToRun =
       candidateSources.length > 0 ? candidateSources : Array.from(this.sources.values()).slice(0, 5);
 
-    onProgress?.('Extracting & cleaning candidate knowledge corpus...', 30);
+    onProgress?.('Extracting concepts, rules & knowledge graph...', 35);
 
-    // 1. Call server-side Vercel Workflow API endpoint
     try {
       const serverRes = await fetch('/api/omnia/train', {
         method: 'POST',
@@ -459,25 +728,9 @@ Lead AI Infrastructure Engineer Specification.
       if (serverRes.ok) {
         const serverData = await serverRes.json();
         if (serverData.result) {
-          // Persist each approved source into client RAG vector store & governance
-          for (const s of sourcesToRun) {
-            if (s.status !== 'REJECTED') {
-              ragVectorStore.ingestDocumentRaw({
-                id: s.sourceId,
-                title: s.title,
-                fileName: `${s.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}.md`,
-                content: s.rawContent,
-                tier: s.tier || 'omnia',
-                sourceType: s.tier === 'project' ? 'project_file' : 'workspace_doc',
-                accessLevel: s.accessLevel || 'public',
-                workspaceId: s.workspaceId || 'ws_user_workspace',
-                projectId: s.projectId || 'proj_active',
-              });
-            }
-          }
-
-          this.applyExecutionResult(serverData.result);
-          onProgress?.('Approved knowledge synchronized to Omnia RAG.', 100);
+          // Re-sync with backend to get extracted concepts, rules & relations
+          await this.syncWithBackend();
+          onProgress?.('Approved knowledge & logic synchronized into Omnia.', 100);
           this.metrics.activeStatus = 'Active';
           this.save();
           return serverData.result;
@@ -487,22 +740,36 @@ Lead AI Infrastructure Engineer Specification.
       // Local fallback execution below
     }
 
-    onProgress?.('Generating semantic embeddings & verifying provenance...', 60);
+    onProgress?.('Generating semantic embeddings & verifying logic...', 60);
 
-    // Resilient local execution fallback
+    // Resilient local intelligence extraction fallback
     const runId = `wf_learn_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const startedAt = new Date().toISOString();
     const localLogs: WorkflowLog[] = [];
     let approvedCount = 0;
-    let rejectedCount = 0;
     let chunksTotal = 0;
 
     for (const source of sourcesToRun) {
-      source.status = 'APPROVED';
+      const extraction = await OmniaIntelligenceService.processAndExtractKnowledge(
+        source,
+        Array.from(this.concepts.values()),
+        Array.from(this.logicRules.values()),
+        null
+      );
+
+      extraction.concepts.forEach((c) => this.concepts.set(c.id, c));
+      extraction.logicRules.forEach((r) => this.logicRules.set(r.id, r));
+      extraction.graphRelations.forEach((g) => {
+        if (!this.graphRelations.some((ex) => ex.fromConcept === g.fromConcept && ex.toConcept === g.toConcept)) {
+          this.graphRelations.push(g);
+        }
+      });
+
+      source.status = extraction.conflict ? 'CONFLICTED' : 'APPROVED';
       source.updatedAt = new Date().toISOString();
       approvedCount++;
 
-      // Ingest directly into RAG Vector Store
+      // Ingest into RAG Vector Store
       const doc = ragVectorStore.ingestDocumentRaw({
         id: source.sourceId,
         title: source.title,
@@ -549,7 +816,7 @@ Lead AI Infrastructure Engineer Specification.
         timestamp: new Date().toISOString(),
         level: 'success',
         stage: 'COMPLETED',
-        message: `Indexed "${source.title}" into Omnia RAG knowledge index.`,
+        message: `Extracted ${extraction.concepts.length} concepts and ${extraction.logicRules.length} rules for "${source.title}".`,
         sourceId: source.sourceId,
         sourceTitle: source.title,
       });
@@ -568,15 +835,18 @@ Lead AI Infrastructure Engineer Specification.
       sourcesSkippedUnchanged: 0,
       chunksGenerated: chunksTotal,
       embeddingsGenerated: chunksTotal,
+      conceptsExtracted: this.concepts.size,
+      rulesExtracted: this.logicRules.size,
+      graphRelationsExtracted: this.graphRelations.length,
       knowledgeApproved: approvedCount,
-      knowledgeRejected: rejectedCount,
+      knowledgeRejected: 0,
       conflictsDetected: 0,
       errors: [],
       logs: localLogs,
     };
 
     this.applyExecutionResult(fallbackResult);
-    onProgress?.('Training complete: Omnia knowledge base updated.', 100);
+    onProgress?.('Training complete: Omnia knowledge & reasoning updated.', 100);
 
     this.metrics.activeStatus = 'Active';
     this.save();
@@ -588,6 +858,9 @@ Lead AI Infrastructure Engineer Specification.
     this.metrics.lastSyncTime = result.completedAt;
     this.metrics.chunksCreated += result.chunksGenerated;
     this.metrics.embeddingsGenerated += result.embeddingsGenerated;
+    this.metrics.conceptsExtracted = this.concepts.size;
+    this.metrics.rulesExtracted = this.logicRules.size;
+    this.metrics.graphRelationsCount = this.graphRelations.length;
     this.metrics.knowledgeApproved += result.knowledgeApproved;
     this.metrics.knowledgeRejected += result.knowledgeRejected;
     this.metrics.conflictsDetected += result.conflictsDetected;
@@ -639,7 +912,7 @@ Lead AI Infrastructure Engineer Specification.
         tokenCount: Math.ceil(params.correction.length / 4),
         tier: 'global',
         accessLevel: 'public',
-        validationNotes: [`Awaiting admin validation for question: "${params.question}"`],
+        validationNotes: [`Awaiting review for question: "${params.question}"`],
       };
       this.sources.set(sourceId, candidateSource);
       item.sourceCreatedId = sourceId;
