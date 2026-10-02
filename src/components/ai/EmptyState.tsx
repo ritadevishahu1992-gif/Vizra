@@ -63,9 +63,22 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           How can Omnia help you today?
         </h1>
 
-        <p className="text-neutral-400 text-sm md:text-base max-w-md leading-normal">
-          Ask a question, explore concepts, write code, or build a creative project.
+        <p className="text-neutral-400 text-sm md:text-base max-w-md leading-normal mb-3">
+          Your ideas. My knowledge. Our future.
         </p>
+
+        {/* Core Philosophy Pipeline Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-800 text-[11px] font-mono text-neutral-300">
+          <span className="text-[#eb3b2d]">RESEARCH</span>
+          <span className="text-neutral-600">→</span>
+          <span className="text-neutral-300">UNDERSTAND</span>
+          <span className="text-neutral-600">→</span>
+          <span className="text-neutral-300">PLAN</span>
+          <span className="text-neutral-600">→</span>
+          <span className="text-white font-medium">CREATE</span>
+          <span className="text-neutral-600">→</span>
+          <span className="text-[#eb3b2d]">EXECUTE</span>
+        </div>
       </motion.div>
 
       {/* Mode Quick Select Pills */}

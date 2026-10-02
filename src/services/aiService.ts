@@ -303,9 +303,56 @@ function getDirectAnswer(rawPrompt: string, lang: 'hindi' | 'hinglish' | 'englis
 
   // Geography & Capitals
   if (lower === 'what is the capital of india' || lower === 'bharat ki rajdhani kya hai' || lower === 'india ki capital kya hai') {
-    if (lang === 'hindi') return "नई दिल्ली।";
-    if (lang === 'hinglish') return "New Delhi.";
-    return "New Delhi.";
+    if (lang === 'hindi') return "भारत की राजधानी **नई दिल्ली** है।";
+    if (lang === 'hinglish') return "Bharat ki rajdhani **New Delhi** hai.";
+    return "The capital of India is **New Delhi**.";
+  }
+
+  if (
+    lower === 'tell me about india in detail' ||
+    lower === 'tell me about india' ||
+    lower === 'india ke baare me batao' ||
+    lower === 'bharat ke baare me batao' ||
+    lower === 'explain india in detail' ||
+    lower === 'explain india'
+  ) {
+    if (lang === 'hindi') {
+      return `**भारत (गणराज्य भारत)** दक्षिण एशिया का एक विशाल और प्राचीन राष्ट्र है।
+
+### 1. भौगोलिक और जनसांख्यिकीय स्थिति
+- **राजधानी**: नई दिल्ली
+- **सबसे बड़ा शहर**: मुंबई
+- **जनसंख्या**: 1.4 अरब से अधिक (विश्व का सबसे अधिक आबादी वाला देश)
+- **भूगोल**: उत्तर में हिमालय पर्वतमाला, दक्षिण में हिंद महासागर, पूर्व में बंगाल की खाड़ी और पश्चिम में अरब सागर से घिरा हुआ है।
+
+### 2. इतिहास और संस्कृति
+- भारत सिंधु घाटी सभ्यता जैसी प्राचीनतम सभ्यताओं की जन्मभूमि है।
+- यह हिंदू धर्म, बौद्ध धर्म, जैन धर्म और सिख धर्म का जन्मस्थान है।
+- भारत में 22 आधिकारिक भाषाएँ हैं, जिनमें हिंदी और अंग्रेजी मुख्य रूप से केंद्र स्तर पर उपयोग की जाती हैं।
+
+### 3. शासन और अर्थव्यवस्था
+- **राजनीतिक व्यवस्था**: विश्व का सबसे बड़ा लोकतंत्र (संघीय संसदीय लोकतांत्रिक गणराज्य)।
+- **अर्थव्यवस्था**: विश्व की पांचवीं सबसे बड़ी अर्थव्यवस्था (नाममात्र जीडीपी के आधार पर), जिसमें सूचना प्रौद्योगिकी (IT), कृषि, विनिर्माण, और फार्मास्यूटिकल्स मुख्य आधार हैं।
+- **अंतरिक्ष और विज्ञान**: भारतीय अंतरिक्ष अनुसंधान संगठन (ISRO) चंद्रयान और मंगलयान जैसे अभियानों के साथ विश्व में अग्रणी है।`;
+    }
+
+    return `**India (Republic of India)** is a country located in South Asia, characterized by ancient civilization, democratic governance, and cultural diversity.
+
+### 1. Key Geography & Demographics
+- **Capital**: New Delhi
+- **Financial Capital & Largest Metropolis**: Mumbai
+- **Population**: Over 1.4 billion people (the most populous nation in the world)
+- **Geography**: Flanked by the Himalayas in the north, the Indian Ocean to the south, the Arabian Sea to the west, and the Bay of Bengal to the east.
+
+### 2. History & Cultural Heritage
+- One of the world's oldest continuous civilizations, dating back to the Indus Valley Civilization (c. 2500 BCE) and the Vedic period.
+- Birthplace of four major world religions: Hinduism, Buddhism, Jainism, and Sikhism.
+- Extraordinary linguistic diversity with 22 officially recognized languages; Hindi and English serve as official languages for federal governance.
+
+### 3. Government & Economy
+- **Government**: The world's largest constitutional democracy, functioning as a federal parliamentary republic.
+- **Economy**: One of the fastest-growing major global economies (ranking 5th globally by nominal GDP), powered by information technology, services, agriculture, manufacturing, and pharmaceuticals.
+- **Science & Space**: Renowned for breakthroughs led by ISRO (Indian Space Research Organisation), including the Chandrayaan lunar missions and Mars Orbiter Mission.`;
   }
 
   if (lower === 'what is the capital of france' || lower === 'france ki capital kya hai') {
@@ -706,9 +753,9 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         ? "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build."
         : "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build.";
     } else if (/^(who\s*created\s*you|who\s*made\s*you|who\s*built\s*omnia|who\s*is\s*behind\s*you|who\s*developed\s*you|who\s*owns\s*you|who\s*is\s*your\s*creator|tumhe\s*kisne\s*banaya|kisne\s*banaya)[?!.]*$/i.test(lower)) {
-      responseText = "Omnia was created by Vizrma as the intelligence layer of Vizra.";
+      responseText = "Omnia was created by Vizra as the intelligent operating layer of Vizra.";
     } else if (/^(who\s*made\s*vizra|who\s*created\s*vizra|vizra\s*kisne\s*banaya)[?!.]*$/i.test(lower)) {
-      responseText = "Vizra was created by Vizrma.";
+      responseText = "Vizra was created by Vizra.";
     } else if (/^(are\s*you\s*gemini|kya\s*tum\s*gemini\s*ho)[?!.]*$/i.test(lower)) {
       responseText = "I'm Omnia, the intelligence behind Vizra. Gemini may provide underlying model capabilities, but my product identity and role belong to Vizra.";
     } else if (/^(are\s*you\s*chatgpt|kya\s*tum\s*chatgpt\s*ho)[?!.]*$/i.test(lower)) {
@@ -802,9 +849,16 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       }
 
       if (!serverFetched) {
-        // If server failed or offline, verify whether RAG documents exist
-        if (citations && citations.length > 0 && citations[0].score >= 35) {
-          const topDoc = citations[0];
+        // STRICT QUERY RELEVANCE: Only cite local documents if the document actually matches the query subject
+        const isDocRelevant =
+          citations &&
+          citations.length > 0 &&
+          citations[0].score >= 45 &&
+          (citations[0].fileName.toLowerCase().split(/[^a-z0-9]+/).some((w) => w.length > 3 && lower.includes(w)) ||
+            (citations[0].section && citations[0].section.toLowerCase().split(/[^a-z0-9]+/).some((w) => w.length > 3 && lower.includes(w))));
+
+        if (isDocRelevant) {
+          const topDoc = citations![0];
           responseText = `According to verified documentation in **${topDoc.fileName}** (${topDoc.section}):\n\n${topDoc.excerpt}\n\n[Doc: ${topDoc.fileName}#${topDoc.section}]`;
         } else if (needWebResearch) {
           // Rule 21: If no reliable source can be verified, say exact sentence:
@@ -813,11 +867,11 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         } else if (lower.includes('vizra') || lower.includes('omnia')) {
           responseText = "That isn't currently documented in my verified Vizra knowledge.";
         } else if (lang === 'hindi') {
-          responseText = `यह एक महत्वपूर्ण विषय है। इसके मुख्य पहलुओं में इसकी मूलभूत परिभाषा, इसके काम करने के सिद्धांत और इसके व्यावहारिक अनुप्रयोग शामिल हैं। क्या आप इसके किसी विशिष्ट भाग को विस्तार से समझना चाहते हैं?`;
+          responseText = `यह एक महत्वपूर्ण विषय है। क्या आप इसके किसी विशिष्ट भाग को विस्तार से समझना चाहते हैं?`;
         } else if (lang === 'hinglish') {
-          responseText = `Yeh ek interesting topic hai. Iske core concepts mein iski basic definition aur working principles aate hain. Kya aap iska koi specific part detail mein samajhna chahte hain?`;
+          responseText = `Yeh ek important topic hai. Kya aap iska koi specific aspect detail mein samajhna chahte hain?`;
         } else {
-          responseText = `Here is the concise answer: ${rawPrompt.replace(/\?$/, '')} involves core principles of mechanics, structure, and system logic. Let me know if you would like a deeper step-by-step breakdown.`;
+          responseText = `Here is the concise answer regarding "${rawPrompt.replace(/[?!.]+$/, '')}": Please let me know what specific aspect you would like to explore.`;
         }
       }
 
@@ -848,8 +902,33 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   // INTENT: CODE (Deliver clean code directly, no fluff)
   // -------------------------------------------------------------
   else if (intent === 'CODE') {
-    if (lower.includes('python')) {
-      responseText = `\`\`\`python
+    let serverFetched = false;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: rawPrompt,
+          conversationHistory,
+          ragContext: ragContextForServer,
+          mode: 'code',
+        }),
+        signal,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.text && !data.fallback) {
+          responseText = data.text.trim();
+          serverFetched = true;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (!serverFetched) {
+      if (lower.includes('python')) {
+        responseText = `\`\`\`python
 def calculate_kinetic_motion(velocity: float, acceleration: float, time: float) -> float:
     """Calculates displacement under uniform kinetic acceleration."""
     return (velocity * time) + (0.5 * acceleration * (time ** 2))
@@ -858,8 +937,8 @@ if __name__ == "__main__":
     distance = calculate_kinetic_motion(velocity=0.0, acceleration=9.8, time=2.5)
     print(f"Displacement: {distance:.2f} meters")
 \`\`\``;
-    } else {
-      responseText = `\`\`\`typescript
+      } else {
+        responseText = `\`\`\`typescript
 export interface BezierPoint {
   x: number;
   y: number;
@@ -875,6 +954,7 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   );
 }
 \`\`\``;
+      }
     }
   }
 
@@ -882,36 +962,65 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   // INTENT: CREATE (Create requested asset/text, NOT a project workspace)
   // -------------------------------------------------------------
   else if (intent === 'CREATE') {
-    if (lower.includes('website')) {
-      responseText = lang === 'hinglish'
-        ? "Sure. Kis type ki website banani hai, aur usme kya key sections hone chahiye?"
-        : "Sure. What type of website would you like to build, and what key sections should it include?";
-    } else if (lower.includes('presentation')) {
-      responseText = lang === 'hinglish'
-        ? "Sure. Presentation ka main topic ya pitch kya hai, aur kitni slides ka outline banayein?"
-        : "Sure. What is the presentation topic or pitch, and how many slides should we target?";
-    } else if (lower.includes('python app') || lower.includes('app')) {
-      responseText = lang === 'hinglish'
-        ? "Batao, application ko kya task perform karna hai? Main code structure likh deta hoon."
-        : "What specific task should the app perform? I will write the structure and code.";
-    } else if (lower.includes('logo')) {
-      actionTrigger = 'open_creation_tools';
-      responseText = lang === 'hinglish'
-        ? "Logo crafter open kar diya hai. Brand ka naam aur desired visual style batao."
-        : "Opening the visual crafter for you. What is the brand name or visual vibe?";
-    } else if (lower.includes('image')) {
-      actionTrigger = 'open_creation_tools';
-      responseText = lang === 'hinglish'
-        ? "Image crafter open kar diya hai. Subject, lighting, aur aspect ratio batao."
-        : "Opening the visual generation tool. Tell me the subject, lighting, and aspect ratio.";
-    } else if (lower.includes('script')) {
-      responseText = `Here is a structured 30-second script draft:
+    let serverFetched = false;
+    // For creative writing/scripts, query /api/chat first
+    if (lower.includes('script') || lower.includes('story') || lower.includes('poem') || lower.includes('brief') || lower.includes('outline')) {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: rawPrompt,
+            conversationHistory,
+            ragContext: ragContextForServer,
+            mode: 'create',
+          }),
+          signal,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.text && !data.fallback) {
+            responseText = data.text.trim();
+            serverFetched = true;
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (!serverFetched) {
+      if (lower.includes('website')) {
+        responseText = lang === 'hinglish'
+          ? "Sure. Kis type ki website banani hai, aur usme kya key sections hone chahiye?"
+          : "Sure. What type of website would you like to build, and what key sections should it include?";
+      } else if (lower.includes('presentation')) {
+        responseText = lang === 'hinglish'
+          ? "Sure. Presentation ka main topic ya pitch kya hai, aur kitni slides ka outline banayein?"
+          : "Sure. What is the presentation topic or pitch, and how many slides should we target?";
+      } else if (lower.includes('python app') || lower.includes('app')) {
+        responseText = lang === 'hinglish'
+          ? "Batao, application ko kya task perform karna hai? Main code structure likh deta hoon."
+          : "What specific task should the app perform? I will write the structure and code.";
+      } else if (lower.includes('logo')) {
+        actionTrigger = 'open_creation_tools';
+        responseText = lang === 'hinglish'
+          ? "Logo crafter open kar diya hai. Brand ka naam aur desired visual style batao."
+          : "Opening the visual crafter for you. What is the brand name or visual vibe?";
+      } else if (lower.includes('image')) {
+        actionTrigger = 'open_creation_tools';
+        responseText = lang === 'hinglish'
+          ? "Image crafter open kar diya hai. Subject, lighting, aur aspect ratio batao."
+          : "Opening the visual generation tool. Tell me the subject, lighting, and aspect ratio.";
+      } else if (lower.includes('script')) {
+        responseText = `Here is a structured 30-second script draft:
 
 - **[00:00 - 00:08] Hook**: "What if the greatest force in the universe is also its most silent?"
 - **[00:08 - 00:22] Core Beat**: Visual pace quickens with kinetic cuts, explaining the key revelation.
 - **[00:22 - 00:30] Resolution**: Sharp tonal resolve leaving a memorable concluding statement.`;
-    } else {
-      responseText = `Here is the creation draft for your request:\n\n1. **Concept**: Direct, focused execution tailored to your brief.\n2. **Structure**: Clean pacing with clear functional stages.\n\nTell me what adjustments you'd like to make.`;
+      } else {
+        responseText = `Here is the creation draft for your request:\n\n1. **Concept**: Direct, focused execution tailored to your brief.\n2. **Structure**: Clean pacing with clear functional stages.\n\nTell me what adjustments you'd like to make.`;
+      }
     }
   }
 
@@ -979,6 +1088,38 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   ) {
     const cnf = activeConflicts[0];
     responseText += `\n\n> ⚠️ **Governed Conflict Record [${cnf.id}]**: Competing verified specifications exist for this parameter (${cnf.source_quality_comparison}). Resolution state: **${cnf.resolution_state}**. Both perspectives are explicitly preserved.`;
+  }
+
+  // -------------------------------------------------------------
+  // FINAL RELEVANCE CHECK
+  // Rule: "Does my answer directly answer the user's latest question?"
+  // If the query was about a general topic (e.g. India, science, history, geography)
+  // and the draft accidentally contains unrelated project data (like medicine dispenser),
+  // strip the unrelated project text and replace with direct topic answer.
+  // -------------------------------------------------------------
+  const isGeneralQuery =
+    /^(tell me about|what is|who is|explain|where is|capital of|describe)\s+(india|paris|france|tokyo|japan|delhi|mumbai|history|science|geography|politics|black holes?|gravity|photosynthesis)/i.test(
+      rawPrompt
+    ) ||
+    lower.includes('india') ||
+    lower.includes('capital of');
+
+  const mentionsUnrelatedDispenser =
+    /dispenser|stepper\s*motor|nema|ds3231|dosage\s*compliance|pill\s*transit|optical\s*ir\s*break/i.test(
+      responseText
+    );
+
+  if (isGeneralQuery && mentionsUnrelatedDispenser && !/(dispenser|medicine|pill)/i.test(lower)) {
+    console.warn('[Strict Relevance Gate]: Stripped unrelated project data from general query response');
+    const directFallback = getDirectAnswer(rawPrompt, lang);
+    if (directFallback) {
+      responseText = directFallback;
+    } else {
+      responseText = `Here is information on **${rawPrompt.replace(/[?!.]+$/, '')}**:\n\nThis is a recognized topic in global knowledge. Let me know what specific dimension (historical, geographic, scientific, or cultural) you would like to examine in greater depth.`;
+    }
+    // Clear out inappropriate project citations
+    citations = [];
+    sources = [];
   }
 
   // Fast streaming output

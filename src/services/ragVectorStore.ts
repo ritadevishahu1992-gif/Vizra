@@ -580,9 +580,25 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
         continue;
       }
 
-      // Project filtering: if querying a specific project, include project chunks + public vizra/global docs
-      if (options.projectId && doc.tier === 'project' && doc.project_id !== options.projectId) {
-        continue;
+      // Project tier isolation: PROJECT DATA IS NOT GLOBAL KNOWLEDGE.
+      // Only include project-tier chunks if:
+      // 1. A specific projectId is passed in query options, OR
+      // 2. The user's query explicitly mentions that project by title or keyword.
+      if (doc.tier === 'project') {
+        const queryLower = trimmedQuery.toLowerCase();
+        const matchesQueryProject =
+          (doc.project_id === 'proj_med_dispenser' && /(dispenser|medicine|esp32|nema|medication|pill)/i.test(queryLower)) ||
+          (doc.project_id === 'proj_singularity' && /(singularity|kerr|film|cinematic|black hole film)/i.test(queryLower)) ||
+          (doc.title && queryLower.includes(doc.title.toLowerCase()));
+
+        if (options.projectId) {
+          if (doc.project_id !== options.projectId) {
+            continue;
+          }
+        } else if (!matchesQueryProject) {
+          // If no active project context and user didn't mention this project, DO NOT RETRIEVE project data!
+          continue;
+        }
       }
 
       // Workspace filtering

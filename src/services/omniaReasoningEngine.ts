@@ -39,6 +39,8 @@ export class OmniaReasoningEngine {
     }
 
     // 2. Knowledge Concept Retrieval & Scoring
+    // STRICT RELEVANCE: Project/domain-specific concepts must strictly match the query's subject.
+    // General queries (e.g. about India, science, history, geography) must NEVER pull dispenser or project files.
     const matchedConcepts: HumanizedConcept[] = [];
     for (const c of concepts) {
       if (c.status === 'REJECTED') continue;
@@ -46,19 +48,14 @@ export class OmniaReasoningEngine {
       const cConceptWords = c.concept.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
       const cTopicWords = c.topic.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
 
-      const conceptDirectMatch = cConceptWords.some((w) => lowerPrompt.includes(w));
-      const topicDirectMatch = cTopicWords.some((w) => lowerPrompt.includes(w));
-      const tagMatch = (c.tags || []).some((t) => lowerPrompt.includes(t.toLowerCase()));
-      const factMatch = (c.facts || []).some((f) =>
-        f.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3).some((w) => lowerPrompt.includes(w))
-      );
-      const contentMatch = (c.simpleExplanation + ' ' + c.technicalExplanation)
-        .toLowerCase()
-        .split(/[^a-z0-9]+/)
-        .filter((w) => w.length > 3)
-        .filter((w) => lowerPrompt.includes(w)).length >= 2;
+      // Strict matching: at least 2 distinct words from the concept/topic must match, or the exact concept name must be in the prompt
+      const exactConceptMatch = lowerPrompt.includes(c.concept.toLowerCase());
+      const conceptWordsMatchCount = cConceptWords.filter((w) => lowerPrompt.includes(w)).length;
+      const topicWordsMatchCount = cTopicWords.filter((w) => lowerPrompt.includes(w)).length;
 
-      if (conceptDirectMatch || topicDirectMatch || tagMatch || factMatch || contentMatch) {
+      const isSubstantiveMatch = exactConceptMatch || conceptWordsMatchCount >= 2 || (conceptWordsMatchCount >= 1 && topicWordsMatchCount >= 1);
+
+      if (isSubstantiveMatch) {
         matchedConcepts.push(c);
         if (c.topic) domain = c.topic;
       }
@@ -72,27 +69,26 @@ export class OmniaReasoningEngine {
     });
 
     // 3. Logic Memory & Rule Retrieval
+    // Rules must only be included if the prompt is explicitly about the topic or rule entity
     const matchedRules: LogicMemoryItem[] = [];
     const matchedProcedures: LogicMemoryItem[] = [];
 
-    for (const r of rules) {
-      if (r.status === 'REJECTED') continue;
+    if (matchedConcepts.length > 0 || /(dispenser|medicine|esp32|nema|carousel|pod|pill|kerr|singularity|film|black hole)/i.test(lowerPrompt)) {
+      for (const r of rules) {
+        if (r.status === 'REJECTED') continue;
 
-      const rNameWords = r.name.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
-      const rTopicWords = r.topic.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
-      const rCondWords = r.condition.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3);
-      const rActWords = r.action.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+        const rNameWords = r.name.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
+        const rTopicWords = r.topic.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
 
-      const ruleNameMatch = rNameWords.some((w) => lowerPrompt.includes(w));
-      const ruleTopicMatch = rTopicWords.some((w) => lowerPrompt.includes(w));
-      const condMatch = rCondWords.some((w) => lowerPrompt.includes(w));
-      const actMatch = rActWords.some((w) => lowerPrompt.includes(w));
+        const ruleNameMatch = rNameWords.filter((w) => lowerPrompt.includes(w)).length >= 2 || lowerPrompt.includes(r.name.toLowerCase());
+        const ruleTopicMatch = rTopicWords.filter((w) => lowerPrompt.includes(w)).length >= 2 || lowerPrompt.includes(r.topic.toLowerCase());
 
-      if (ruleNameMatch || ruleTopicMatch || condMatch || actMatch) {
-        if (r.logicType === 'PROCEDURE' || (r.steps && r.steps.length > 0)) {
-          matchedProcedures.push(r);
-        } else {
-          matchedRules.push(r);
+        if (ruleNameMatch || ruleTopicMatch) {
+          if (r.logicType === 'PROCEDURE' || (r.steps && r.steps.length > 0)) {
+            matchedProcedures.push(r);
+          } else {
+            matchedRules.push(r);
+          }
         }
       }
     }
@@ -101,24 +97,27 @@ export class OmniaReasoningEngine {
     const conceptNames = new Set(matchedConcepts.map((c) => c.concept.toLowerCase()));
     const matchedGraphRelations: KnowledgeGraphRelation[] = [];
 
-    for (const rel of graphRelations) {
-      const fromMatch = conceptNames.has(rel.fromConcept.toLowerCase()) || promptWords.some((w) => rel.fromConcept.toLowerCase().includes(w));
-      const toMatch = conceptNames.has(rel.toConcept.toLowerCase()) || promptWords.some((w) => rel.toConcept.toLowerCase().includes(w));
+    if (matchedConcepts.length > 0) {
+      for (const rel of graphRelations) {
+        const fromMatch = conceptNames.has(rel.fromConcept.toLowerCase());
+        const toMatch = conceptNames.has(rel.toConcept.toLowerCase());
 
-      if (fromMatch || toMatch) {
-        matchedGraphRelations.push(rel);
+        if (fromMatch || toMatch) {
+          matchedGraphRelations.push(rel);
+        }
       }
     }
 
     // 5. Conflict & Uncertainty Checking
+    // Strictly isolate: only attach conflict notes if the user's prompt is specifically asking about that conflicted topic
     const matchedConflicts: OmniaConflictItem[] = [];
     for (const conf of conflicts) {
       if (conf.status === 'UNRESOLVED') {
-        const matchA = promptWords.some((w) => conf.sourceATitle.toLowerCase().includes(w));
-        const matchB = promptWords.some((w) => conf.sourceBTitle.toLowerCase().includes(w));
-        const matchTopic = promptWords.some((w) => conf.topic.toLowerCase().includes(w));
+        const topicWords = conf.topic.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+        const matchTopicCount = topicWords.filter((w) => lowerPrompt.includes(w)).length;
+        const exactTopicMatch = lowerPrompt.includes(conf.topic.toLowerCase());
 
-        if (matchA || matchB || matchTopic) {
+        if (exactTopicMatch || matchTopicCount >= 2) {
           matchedConflicts.push(conf);
         }
       }

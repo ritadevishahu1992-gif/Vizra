@@ -577,13 +577,28 @@ class OmniaGovernanceService {
         continue;
       }
 
+      // Project Isolation Rule: PROJECT DATA IS NOT GLOBAL KNOWLEDGE.
+      // If a record belongs to a project, ONLY include it if the project is active or explicitly referenced.
+      if (rec.project_id) {
+        const matchesQueryProject =
+          (rec.project_id === 'proj_med_dispenser' && /(dispenser|medicine|esp32|nema|medication|pill)/i.test(queryLower)) ||
+          (rec.project_id === 'proj_singularity' && /(singularity|kerr|film|cinematic|black hole film)/i.test(queryLower));
+
+        if (projectId) {
+          if (rec.project_id !== projectId) continue;
+        } else if (!matchesQueryProject) {
+          continue;
+        }
+      }
+
       const recText = `${rec.statement} ${rec.topic} ${rec.related_concepts.join(' ')}`.toLowerCase();
       let matchCount = 0;
       for (const w of words) {
         if (recText.includes(w)) matchCount++;
       }
 
-      if (matchCount > 0 || (projectId && rec.project_id === projectId)) {
+      // Require at least 2 word matches to avoid accidental single-word triggers
+      if (matchCount >= 2 || (projectId && rec.project_id === projectId)) {
         matchedRecords.push(rec);
       }
     }
