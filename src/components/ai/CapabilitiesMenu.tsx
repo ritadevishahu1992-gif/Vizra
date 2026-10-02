@@ -3,12 +3,14 @@ import { Sparkles, ChevronDown, Check, Clock } from 'lucide-react';
 import { CapabilityItem } from '../../types/ai';
 
 const capabilities: CapabilityItem[] = [
+  { name: 'AI Music & Audio', description: 'Soundtracks, jingles & background audio (Lyria 3)', status: 'available' },
+  { name: 'Live Voice Conversations', description: 'Real-time two-way dialogue (gemini-3.8-live)', status: 'available' },
   { name: 'Reasoning', description: 'Advanced problem decomposition & logic', status: 'available' },
   { name: 'Creative Generation', description: 'Motion concepts, storyboards & direction', status: 'available' },
   { name: 'Coding', description: 'GLSL shaders, TypeScript & animation curves', status: 'available' },
   { name: 'Image Understanding', description: 'Inspect uploaded compositions & palettes', status: 'available' },
   { name: 'File Analysis', description: 'Parse project briefs & creative docs', status: 'available' },
-  { name: 'Web Research', description: 'Live real-time reference retrieval', status: 'planned' },
+  { name: 'Web Research', description: 'Live real-time reference retrieval & grounding', status: 'available' },
 ];
 
 export const CapabilitiesMenu: React.FC = () => {

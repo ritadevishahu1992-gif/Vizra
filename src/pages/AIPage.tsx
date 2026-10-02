@@ -12,6 +12,8 @@ import { IntegrationPermissionModal } from '../components/ai/IntegrationPermissi
 import { CreateHubModal, CreateHubCategory } from '../components/ai/CreateHubModal';
 import { RAGKnowledgeExplorer } from '../components/ai/RAGKnowledgeExplorer';
 import { CitationDrawer } from '../components/ai/CitationDrawer';
+import { MusicStudioModal } from '../components/ai/MusicStudioModal';
+import { VoiceLiveModal } from '../components/ai/VoiceLiveModal';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
@@ -106,6 +108,8 @@ export const AIPage: React.FC = () => {
   const [isCreateHubOpen, setIsCreateHubOpen] = useState(false);
   const [connectingIntegration, setConnectingIntegration] = useState<Integration | null>(null);
   const [isKnowledgeBaseOpen, setIsKnowledgeBaseOpen] = useState(false);
+  const [isMusicStudioOpen, setIsMusicStudioOpen] = useState(false);
+  const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState(false);
   const [isCitationDrawerOpen, setIsCitationDrawerOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationItem | null>(null);
 
@@ -483,6 +487,8 @@ export const AIPage: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenCreateHub={() => setIsCreateHubOpen(true)}
         onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
+        onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
+        onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
       />
 
       {/* Main Workspace: Left Sidebar + Workspace / Chat Column */}
@@ -582,11 +588,29 @@ export const AIPage: React.FC = () => {
                 onClearInitialPrompt={() => setInitialComposerPrompt(undefined)}
                 onOpenCreationTools={() => setIsCreationToolsOpen(true)}
                 onRequestConnectIntegration={(item) => setConnectingIntegration(item)}
+                onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
+                onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
               />
             </div>
           </div>
         )}
       </div>
+
+      {/* AI Music Studio Modal (Lyria 3) */}
+      <MusicStudioModal
+        isOpen={isMusicStudioOpen}
+        onClose={() => setIsMusicStudioOpen(false)}
+        initialPrompt={initialComposerPrompt}
+        onInsertToChat={(trackSummary) => {
+          handleSendMessage(trackSummary);
+        }}
+      />
+
+      {/* Real-time Voice Conversation Modal (gemini-3.8-live) */}
+      <VoiceLiveModal
+        isOpen={isLiveVoiceOpen}
+        onClose={() => setIsLiveVoiceOpen(false)}
+      />
 
       {/* Create Hub Modal */}
       <CreateHubModal

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Send, Square, Mic, MicOff, Sparkles, Layers } from 'lucide-react';
+import { Plus, Send, Square, Mic, MicOff, Sparkles, Layers, Music, Radio } from 'lucide-react';
 import { Attachment, AIMode, Integration } from '../../types/ai';
 import { AttachmentPreview } from './AttachmentPreview';
 import { IntegrationMenu } from './IntegrationMenu';
@@ -15,6 +15,8 @@ interface PromptComposerProps {
   onClearInitialPrompt?: () => void;
   onOpenCreationTools?: () => void;
   onRequestConnectIntegration?: (integration: Integration) => void;
+  onOpenMusicStudio?: () => void;
+  onOpenLiveVoice?: () => void;
 }
 
 export const PromptComposer: React.FC<PromptComposerProps> = ({
@@ -27,6 +29,8 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
   onClearInitialPrompt,
   onOpenCreationTools,
   onRequestConnectIntegration,
+  onOpenMusicStudio,
+  onOpenLiveVoice,
 }) => {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -160,6 +164,7 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
         onSelectCreativeMode={handleSelectCreativeMode}
         onOpenCreationTools={onOpenCreationTools}
         onRequestConnectIntegration={onRequestConnectIntegration}
+        onOpenMusicStudio={onOpenMusicStudio}
       />
 
       {/* Main Composer Box */}
@@ -221,6 +226,32 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
               >
                 <Sparkles size={12} className="text-[#eb3b2d]" />
                 <span>Tools</span>
+              </button>
+            )}
+
+            {/* AI Music Studio Button */}
+            {onOpenMusicStudio && (
+              <button
+                type="button"
+                onClick={onOpenMusicStudio}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                title="Create AI Music & Soundtracks (Lyria 3)"
+              >
+                <Music size={12} className="text-[#eb3b2d]" />
+                <span>Music</span>
+              </button>
+            )}
+
+            {/* Live Voice Conversation Button */}
+            {onOpenLiveVoice && (
+              <button
+                type="button"
+                onClick={onOpenLiveVoice}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                title="Talk live with gemini-3.8-live"
+              >
+                <Radio size={12} className="text-[#eb3b2d] animate-pulse" />
+                <span>Live</span>
               </button>
             )}
           </div>

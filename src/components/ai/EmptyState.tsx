@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
-import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2 } from 'lucide-react';
+import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2, Music } from 'lucide-react';
 import { AIMode } from '../../types/ai';
 
 interface EmptyStateProps {
@@ -12,11 +12,11 @@ interface EmptyStateProps {
 
 const suggestions = [
   {
-    category: 'General Knowledge',
-    icon: Sparkles,
-    mode: 'quick' as AIMode,
-    prompt: 'Why is the sky blue and how does atmospheric scattering work?',
-    desc: 'Direct answers, science & everyday explanations',
+    category: 'AI Music & Audio',
+    icon: Music,
+    mode: 'create' as AIMode,
+    prompt: 'Generate a 30-second dark ambient cinematic soundtrack with analog synths.',
+    desc: 'Audio clips, jingles & background music via Lyria 3',
   },
   {
     category: 'Concepts & Architecture',

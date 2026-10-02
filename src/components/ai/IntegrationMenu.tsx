@@ -22,6 +22,7 @@ import {
   FileCheck,
   CheckCircle,
   Lock,
+  Music,
 } from 'lucide-react';
 import { Attachment, Integration } from '../../types/ai';
 
@@ -32,6 +33,7 @@ interface IntegrationMenuProps {
   onSelectCreativeMode: (modeTitle: string) => void;
   onOpenCreationTools?: () => void;
   onRequestConnectIntegration?: (integration: Integration) => void;
+  onOpenMusicStudio?: () => void;
 }
 
 export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
@@ -41,6 +43,7 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
   onSelectCreativeMode,
   onOpenCreationTools,
   onRequestConnectIntegration,
+  onOpenMusicStudio,
 }) => {
   const [comingSoonNotice, setComingSoonNotice] = useState<string | null>(null);
   const [activeUploadAccept, setActiveUploadAccept] = useState<string>('*');
@@ -283,6 +286,31 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
                   </div>
                 </div>
                 <span className="text-[10px] font-mono text-[#eb3b2d]">Coming Soon</span>
+              </button>
+
+              {/* AI Music Studio Generator (Lyria 3) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenMusicStudio) {
+                    onOpenMusicStudio();
+                  } else {
+                    onSelectCreativeMode('Generate custom music soundtrack with Lyria');
+                  }
+                  onClose();
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
+                    <Music size={14} className="text-[#eb3b2d]" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-white text-xs">AI Music Studio</div>
+                    <div className="text-[11px] text-neutral-500">Custom soundtracks, jingles & background audio (Lyria 3)</div>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono text-[#eb3b2d]">Launch</span>
               </button>
 
               <button

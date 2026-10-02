@@ -1,6 +1,8 @@
 import express from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -681,6 +683,97 @@ When retrieved knowledge context is provided under [RETRIEVED KNOWLEDGE CONTEXT]
     }
   });
 
+  // Dedicated AI Music Generation Endpoint (Lyria 3 Clip & Pro)
+  app.post('/api/music/generate', async (req, res) => {
+    try {
+      const {
+        prompt,
+        model = 'lyria-3-clip-preview',
+        durationSeconds = 25,
+        genre = 'Cinematic Ambient',
+        imageBase64,
+        imageMimeType = 'image/jpeg',
+      } = req.body;
+
+      if (!prompt || typeof prompt !== 'string') {
+        res.status(400).json({ error: 'Prompt is required' });
+        return;
+      }
+
+      const selectedModel = model === 'lyria-3-pro-preview' ? 'lyria-3-pro-preview' : 'lyria-3-clip-preview';
+
+      if (!ai) {
+        res.status(503).json({ error: 'AI engine not configured on server', fallback: true });
+        return;
+      }
+
+      try {
+        let streamContents: any = prompt;
+        if (imageBase64) {
+          streamContents = {
+            parts: [
+              { text: prompt },
+              { inlineData: { data: imageBase64, mimeType: imageMimeType } },
+            ],
+          };
+        }
+
+        const streamResponse = await ai.models.generateContentStream({
+          model: selectedModel,
+          contents: streamContents,
+          config: {
+            responseModalities: [Modality.AUDIO],
+          },
+        });
+
+        let audioBase64 = '';
+        let lyrics = '';
+        let mimeType = 'audio/wav';
+
+        for await (const chunk of streamResponse) {
+          const parts = chunk.candidates?.[0]?.content?.parts;
+          if (!parts) continue;
+
+          for (const part of parts) {
+            if (part.inlineData?.data) {
+              if (!audioBase64 && part.inlineData.mimeType) {
+                mimeType = part.inlineData.mimeType;
+              }
+              audioBase64 += part.inlineData.data;
+            }
+            if (part.text && !lyrics) {
+              lyrics = part.text;
+            }
+          }
+        }
+
+        if (audioBase64) {
+          res.json({
+            id: 'lyria_' + Date.now().toString(36),
+            title: prompt.slice(0, 40),
+            audioBase64,
+            mimeType,
+            lyrics,
+            model: selectedModel,
+            durationSeconds,
+            genre,
+            isAiGenerated: true,
+          });
+          return;
+        }
+
+        // If model didn't return binary audio stream, signal fallback
+        res.status(200).json({ fallback: true, message: 'Lyria stream yielded no inline audio' });
+      } catch (lyriaErr: any) {
+        console.warn('Lyria live generation failed (falling back to procedural audio):', lyriaErr.message);
+        res.status(200).json({ fallback: true, error: lyriaErr.message });
+      }
+    } catch (err: any) {
+      console.error('Server music generation error:', err);
+      res.status(500).json({ error: err.message || 'Error generating music', fallback: true });
+    }
+  });
+
   // RAG Embedding single endpoint
   app.post('/api/rag/embed', async (req, res) => {
     try {
@@ -764,7 +857,80 @@ When retrieved knowledge context is provided under [RETRIEVED KNOWLEDGE CONTEXT]
     });
   }
 
-  app.listen(port, '0.0.0.0', () => {
+  // Create native HTTP server so WebSockets can share port 3000
+  const server = http.createServer(app);
+
+  // Initialize WebSocket Server for Gemini Live API Voice Conversations
+  const wss = new WebSocketServer({ server, path: '/live' });
+
+  wss.on('connection', async (clientWs: WebSocket) => {
+    console.log('[Live API] Client connected to Voice Conversation');
+
+    if (!ai) {
+      clientWs.send(JSON.stringify({ error: 'AI Live API is not configured on this server' }));
+      clientWs.close();
+      return;
+    }
+
+    try {
+      // Connect to Gemini Live API with model gemini-3.8-live
+      const session = await (ai as any).live.connect({
+        model: 'gemini-3.8-live',
+        callbacks: {
+          onmessage: (message: LiveServerMessage) => {
+            const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+            if (audio) {
+              clientWs.send(JSON.stringify({ audio }));
+            }
+            if (message.serverContent?.interrupted) {
+              clientWs.send(JSON.stringify({ interrupted: true }));
+            }
+          },
+        },
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
+          },
+          systemInstruction:
+            'You are Omnia, the voice intelligence of Vizra Creative Studio. Speak concisely, naturally, and supportively. Help the user brainstorm, compose ideas, and create.',
+        },
+      });
+
+      clientWs.on('message', (data: any) => {
+        try {
+          const parsed = JSON.parse(data.toString());
+          if (parsed.audio) {
+            session.sendRealtimeInput({
+              audio: { data: parsed.audio, mimeType: 'audio/pcm;rate=16000' },
+            });
+          }
+        } catch (msgErr) {
+          console.error('[Live API] Error handling client audio packet:', msgErr);
+        }
+      });
+
+      clientWs.on('close', () => {
+        console.log('[Live API] Voice session ended');
+        try {
+          if (session && typeof session.close === 'function') {
+            session.close();
+          }
+        } catch {
+          // Silent cleanup
+        }
+      });
+    } catch (liveConnectErr: any) {
+      console.error('[Live API] Failed to connect to gemini-3.8-live:', liveConnectErr.message);
+      clientWs.send(
+        JSON.stringify({
+          error: `Live voice connection unavailable: ${liveConnectErr.message}`,
+        })
+      );
+    }
+  });
+
+  server.listen(port, '0.0.0.0', () => {
     console.log(`Vizra Omnia server listening on http://0.0.0.0:${port}`);
   });
 }
