@@ -113,14 +113,27 @@ Return a valid JSON object matching this schema:
   ]
 }`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        temperature: 0.2,
-      },
-    });
+    const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash'];
+    let response: any;
+    for (const m of models) {
+      try {
+        response = await ai.models.generateContent({
+          model: m,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        });
+        if (response && response.text) break;
+      } catch (e: any) {
+        // Continue to next model if quota limit or error
+      }
+    }
+
+    if (!response || !response.text) {
+      return null;
+    }
 
     const jsonText = response.text || '';
     const parsed = JSON.parse(jsonText);

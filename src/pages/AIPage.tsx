@@ -14,6 +14,7 @@ import { RAGKnowledgeExplorer } from '../components/ai/RAGKnowledgeExplorer';
 import { CitationDrawer } from '../components/ai/CitationDrawer';
 import { MusicStudioModal } from '../components/ai/MusicStudioModal';
 import { VoiceLiveModal } from '../components/ai/VoiceLiveModal';
+import { ScienceHubModal } from '../components/ai/ScienceHubModal';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
@@ -110,6 +111,7 @@ export const AIPage: React.FC = () => {
   const [isKnowledgeBaseOpen, setIsKnowledgeBaseOpen] = useState(false);
   const [isMusicStudioOpen, setIsMusicStudioOpen] = useState(false);
   const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState(false);
+  const [isScienceHubOpen, setIsScienceHubOpen] = useState(false);
   const [isCitationDrawerOpen, setIsCitationDrawerOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationItem | null>(null);
 
@@ -489,6 +491,7 @@ export const AIPage: React.FC = () => {
         onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
         onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
         onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
+        onOpenScienceHub={() => setIsScienceHubOpen(true)}
       />
 
       {/* Main Workspace: Left Sidebar + Workspace / Chat Column */}
@@ -610,6 +613,16 @@ export const AIPage: React.FC = () => {
       <VoiceLiveModal
         isOpen={isLiveVoiceOpen}
         onClose={() => setIsLiveVoiceOpen(false)}
+      />
+
+      {/* Omnia Science & DeepMind Research Suite Modal */}
+      <ScienceHubModal
+        isOpen={isScienceHubOpen}
+        onClose={() => setIsScienceHubOpen(false)}
+        onSelectPrompt={(prompt) => {
+          setCurrentMode('science');
+          handleSendMessage(prompt);
+        }}
       />
 
       {/* Create Hub Modal */}

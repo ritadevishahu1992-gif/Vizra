@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio } from 'lucide-react';
+import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
 import { CapabilitiesMenu } from './CapabilitiesMenu';
@@ -17,6 +17,7 @@ interface AIHeaderProps {
   onOpenKnowledgeBase?: () => void;
   onOpenMusicStudio?: () => void;
   onOpenLiveVoice?: () => void;
+  onOpenScienceHub?: () => void;
 }
 
 export const AIHeader: React.FC<AIHeaderProps> = ({
@@ -29,6 +30,7 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onOpenKnowledgeBase,
   onOpenMusicStudio,
   onOpenLiveVoice,
+  onOpenScienceHub,
 }) => {
   return (
     <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none">
@@ -79,6 +81,17 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           >
             <Sparkles size={13} className="text-[#eb3b2d]" />
             <span>Create Hub</span>
+          </button>
+        )}
+
+        {onOpenScienceHub && (
+          <button
+            onClick={onOpenScienceHub}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+            title="Open Omnia Science Suite (DeepMind Science Skills)"
+          >
+            <Atom size={13} className="text-[#eb3b2d]" />
+            <span>Science</span>
           </button>
         )}
 

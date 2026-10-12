@@ -3,6 +3,7 @@ import { Sparkles, ChevronDown, Check, Clock } from 'lucide-react';
 import { CapabilityItem } from '../../types/ai';
 
 const capabilities: CapabilityItem[] = [
+  { name: 'Science & Discovery', description: 'AlphaFold 3D structures, PubChem & PubMed', status: 'available' },
   { name: 'AI Music & Audio', description: 'Soundtracks, jingles & background audio (Lyria 3)', status: 'available' },
   { name: 'Live Voice Conversations', description: 'Real-time two-way dialogue (gemini-3.8-live)', status: 'available' },
   { name: 'Reasoning', description: 'Advanced problem decomposition & logic', status: 'available' },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
-import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2, Music } from 'lucide-react';
+import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2, Music, Atom } from 'lucide-react';
 import { AIMode } from '../../types/ai';
 
 interface EmptyStateProps {
@@ -11,6 +11,13 @@ interface EmptyStateProps {
 }
 
 const suggestions = [
+  {
+    category: 'Science & Discovery',
+    icon: Atom,
+    mode: 'science' as AIMode,
+    prompt: 'Analyze human p53 (TP53) structure in AlphaFold DB and find associated PubMed clinical trials.',
+    desc: 'AlphaFold DB predictions, PubChem chemical structures & PubMed citations',
+  },
   {
     category: 'AI Music & Audio',
     icon: Music,
@@ -31,13 +38,6 @@ const suggestions = [
     mode: 'research' as AIMode,
     prompt: 'Research the latest astrophysics discoveries on supermassive black holes.',
     desc: 'Fact-checked synthesis, academic sources & verification',
-  },
-  {
-    category: 'Hindi / Hinglish',
-    icon: Sparkles,
-    mode: 'quick' as AIMode,
-    prompt: 'Photosynthesis simple shabdon mein samjhao.',
-    desc: 'Natural multilingual understanding & answers',
   },
 ];
 
@@ -88,6 +88,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             { id: 'quick', label: 'Quick' },
             { id: 'think', label: 'Think' },
             { id: 'research', label: 'Research' },
+            { id: 'science', label: 'Science' },
             { id: 'create', label: 'Create' },
             { id: 'code', label: 'Code' },
             { id: 'analyze', label: 'Analyze' },

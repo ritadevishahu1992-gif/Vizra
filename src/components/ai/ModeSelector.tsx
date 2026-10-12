@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Zap, Brain, Globe, Sparkles, Terminal, BarChart2, ChevronDown, Check } from 'lucide-react';
+import { Zap, Brain, Globe, Sparkles, Terminal, BarChart2, Atom, ChevronDown, Check } from 'lucide-react';
 import { AIMode, AIModeOption } from '../../types/ai';
 
 export const AI_MODES: AIModeOption[] = [
@@ -23,6 +23,14 @@ export const AI_MODES: AIModeOption[] = [
     shortDesc: 'Web & citations',
     description: 'Fact-checked synthesis with transparent sources and citations.',
     icon: 'Globe',
+  },
+  {
+    id: 'science',
+    name: 'Science',
+    shortDesc: 'Bio, chemistry & literature',
+    description: 'Proteins (AlphaFold), compounds (PubChem), and PubMed research.',
+    icon: 'Atom',
+    badge: 'DeepMind',
   },
   {
     id: 'create',
@@ -88,6 +96,8 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
         return <Terminal size={size} className={className} />;
       case 'BarChart2':
         return <BarChart2 size={size} className={className} />;
+      case 'Atom':
+        return <Atom size={size} className={className} />;
       default:
         return <Zap size={size} className={className} />;
     }

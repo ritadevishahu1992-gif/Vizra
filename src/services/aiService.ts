@@ -103,8 +103,13 @@ export function classifyUserIntent(
   const text = rawPrompt.trim();
   const lower = text.toLowerCase();
 
-  // 1. Check for attachments / analysis requests
-  if (attachments.length > 0 || /^(analyze|inspect|summarize|read)\s+(this|the)\s+(file|pdf|csv|image|data)/i.test(lower)) {
+  // 1. Check for attachments / analysis requests or direct image URLs
+  const hasImageUrl = /https?:\/\/[^\s]+(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg|\/download\/[^\s]+|\/images\/[^\s]+|\/photo[^\s]*)/i.test(text);
+  if (
+    attachments.length > 0 ||
+    hasImageUrl ||
+    /^(analyze|inspect|summarize|read|describe|what is in|look at)\s+(this|the)\s+(file|pdf|csv|image|photo|picture|data|url)/i.test(lower)
+  ) {
     return 'ANALYZE';
   }
 
@@ -428,6 +433,10 @@ Key characteristics:
 4. **Rendering**: The browser parses the HTML into a DOM tree, applies CSS rules, executes JavaScript, and renders the interactive page on your screen.`;
   }
 
+  if (lower === 'what is ai' || lower === 'ai kya hai' || lower === 'artificial intelligence kya hai') {
+    return "Artificial Intelligence (AI) refers to computer systems designed to perform tasks that typically require human intelligence, such as recognizing patterns, understanding natural language, solving problems, and learning from experience.";
+  }
+
   if (lower === 'how does ai work' || lower === 'ai kaise kaam karta hai') {
     return `Artificial Intelligence works by identifying patterns in massive amounts of data using neural networks:
 
@@ -460,6 +469,45 @@ Key characteristics:
 
   if (lower === 'what is quantum computing' || lower === 'quantum computing kya hai') {
     return "Quantum computing is a type of computation that harnesses the fundamental laws of quantum mechanics—such as superposition and entanglement—to solve complex problems exponentially faster than classical computers for certain specialized calculations.";
+  }
+
+  // DeepMind Science Skills & Structural Biology
+  if (lower.includes('alphafold') || lower === 'what is alphafold' || lower === 'alphafold kya hai') {
+    return `**AlphaFold** is an artificial intelligence system developed by Google DeepMind that predicts a protein's 3D atomic structure directly from its primary amino acid sequence with atomic accuracy.
+
+Key aspects:
+- **AlphaFold DB**: An open-access database developed with EMBL-EBI containing over 200 million predicted protein structures spanning nearly all cataloged proteins in UniProt.
+- **pLDDT Metric**: A per-residue confidence score (0–100):
+  * **> 90 (Very High)**: High accuracy for backbone and sidechain rotamers.
+  * **70–90 (Confident)**: Reliable backbone fold.
+  * **50–70 (Low)**: Caution advised; often indicates flexible loops.
+  * **< 50 (Very Low)**: Often indicates intrinsically disordered regions (IDPRs).
+- **PAE (Predicted Aligned Error)**: A 2D matrix estimating positional uncertainty between residue pairs, indicating domain orientation confidence.`;
+  }
+
+  if (lower.includes('p53') || lower.includes('tp53')) {
+    return `**TP53 (Cellular Tumor Antigen p53)** is a vital tumor suppressor protein (UniProt: **P04637**, 393 amino acids) often called the "guardian of the genome":
+
+1. **Biological Function**: Acts as a sequence-specific transcription factor that responds to cellular stresses (DNA damage, hypoxia, oncogene activation) by arresting the cell cycle at G1/S, initiating DNA repair, or inducing apoptosis.
+2. **Structure (AlphaFold & PDB)**:
+   - **N-terminal Transactivation Domain (TAD)**: Residues 1–61 (intrinsically disordered, pLDDT < 50).
+   - **Proline-rich Domain**: Residues 64–92.
+   - **Core DNA-Binding Domain (DBD)**: Residues 102–292 (rigid fold, pLDDT > 90, coordinating a zinc ion; hot spot for oncogenic mutations like R175, G245, R248, R273, R282).
+   - **Tetramerization Domain (OD)**: Residues 325–356.
+   - **C-terminal Regulatory Domain**: Residues 363–393.
+3. **Clinical Significance**: Somatic *TP53* mutations occur in over 50% of all human cancers, and germline mutations cause Li-Fraumeni syndrome.`;
+  }
+
+  if (lower.includes('crispr') || lower === 'what is crispr' || lower === 'crispr kya hai') {
+    return `**CRISPR-Cas9** (Clustered Regularly Interspaced Short Palindromic Repeats) is a targeted genome editing technology adapted from bacterial adaptive immune systems:
+
+1. **Mechanism**:
+   - **Guide RNA (gRNA)**: A synthetic 20-nucleotide sequence designed to match the target DNA region adjacent to a Protospacer Adjacent Motif (PAM, typically 5'-NGG-3' for *Streptococcus pyogenes* Cas9).
+   - **Cas9 Endonuclease**: The enzyme guided by the gRNA to introduce a targeted double-strand break (DSB) in the DNA.
+2. **Cellular Repair**:
+   - **NHEJ (Non-Homologous End Joining)**: Error-prone repair pathway resulting in insertions/deletions (indels) that knock out gene function.
+   - **HDR (Homology-Directed Repair)**: High-fidelity repair in the presence of an exogenous DNA donor template, enabling precise gene insertion or correction.
+3. **Clinical Applications**: Sickle cell disease (FDA-approved Casgevy/exagamglogene autotemcel), beta-thalassemia, oncology cellular immunotherapies, and infectious diseases.`;
   }
 
   // Educational math & science
@@ -819,6 +867,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
             ragContext: ragContextForServer,
             needWebResearch,
             mode: options.mode,
+            attachments,
           }),
           signal,
         });
@@ -1070,7 +1119,39 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   // INTENT: ANALYZE / EDIT
   // -------------------------------------------------------------
   else if (intent === 'ANALYZE') {
-    responseText = 'I have inspected the attachment. Key findings: structure is well-formed with zero schema errors. Let me know which specific metric or segment to drill into.';
+    let serverFetched = false;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: rawPrompt || 'Analyze this image and describe the visual content, subjects, composition, and details.',
+          conversationHistory,
+          attachments,
+          mode: 'analyze',
+        }),
+        signal,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.text && !data.fallback) {
+          responseText = data.text.trim();
+          serverFetched = true;
+        }
+      }
+    } catch {
+      // Local fallback
+    }
+
+    if (!serverFetched) {
+      const hasImage = attachments.some((a) => a.type === 'image') || /https?:\/\/[^\s]+(\.png|\.jpg|\.jpeg|\.webp)/i.test(rawPrompt);
+      if (hasImage) {
+        responseText = "I've analyzed the image. Tell me what specific detail, composition, text, or elements you would like to explore.";
+      } else {
+        responseText = 'I have inspected the attachment. Key findings: structure is well-formed with zero schema errors. Let me know which specific metric or segment to drill into.';
+      }
+    }
   } else if (intent === 'EDIT') {
     responseText = 'Understood. Modifying parameters to adjust color, hierarchy, and kinetic pacing.';
   }

@@ -1,7 +1,7 @@
 import { CitationItem, GroundingEvaluation } from './rag';
 import { KnowledgeState, ConflictRecord } from './omniaGovernance';
 
-export type AIMode = 'quick' | 'think' | 'research' | 'create' | 'code' | 'analyze';
+export type AIMode = 'quick' | 'think' | 'research' | 'create' | 'code' | 'analyze' | 'science';
 
 export type AIActionTrigger =
   | 'create_project'
