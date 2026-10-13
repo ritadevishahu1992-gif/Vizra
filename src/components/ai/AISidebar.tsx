@@ -12,9 +12,11 @@ import {
   Sparkles,
   ChevronDown,
   ChevronRight,
+  Keyboard,
 } from 'lucide-react';
 import { Conversation, Project } from '../../types/ai';
 import { VizraLogo } from '../VizraLogo';
+import { modKey } from '../../hooks/useKeyboardShortcuts';
 
 interface AISidebarProps {
   conversations: Conversation[];
@@ -26,6 +28,8 @@ interface AISidebarProps {
   onDeleteConversation: (id: string) => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
+  isOpenDesktop?: boolean;
+  onOpenShortcutsHelp?: () => void;
   projects?: Project[];
   activeProjectId?: string | null;
   onSelectProject?: (id: string) => void;
@@ -42,6 +46,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
   onDeleteConversation,
   isOpenMobile,
   onCloseMobile,
+  isOpenDesktop = true,
+  onOpenShortcutsHelp,
   projects = [],
   activeProjectId,
   onSelectProject,
@@ -334,24 +340,42 @@ export const AISidebar: React.FC<AISidebarProps> = ({
       )}
 
       {/* Bottom of Sidebar */}
-      <div className="p-3.5 border-t border-neutral-900 bg-black/40 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <VizraLogo size={18} />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-white tracking-tight">Vizra</span>
-              <span className="text-[10px] text-neutral-500 font-mono">Omnia 1.0</span>
+      <div className="p-3 border-t border-neutral-900 bg-black/40 shrink-0 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <VizraLogo size={18} />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white tracking-tight">Vizra</span>
+                <span className="text-[10px] text-neutral-500 font-mono">Omnia 1.0</span>
+              </div>
+              <span className="text-[10px] text-neutral-500 block">Multimodal Creative OS</span>
             </div>
-            <span className="text-[10px] text-neutral-500 block">Multimodal Creative OS</span>
           </div>
         </div>
+
+        {onOpenShortcutsHelp && (
+          <button
+            onClick={onOpenShortcutsHelp}
+            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            title={`Keyboard Shortcuts (${modKey}/)`}
+          >
+            <div className="flex items-center gap-1.5">
+              <Keyboard size={12} className="text-neutral-400" />
+              <span>Shortcuts</span>
+            </div>
+            <kbd className="px-1 py-0.2 text-[9px] font-mono bg-neutral-950 border border-neutral-800 rounded text-neutral-400">
+              {modKey}/
+            </kbd>
+          </button>
+        )}
       </div>
     </div>
   );
 
   return (
     <>
-      <div className="hidden md:block h-full shrink-0">{content}</div>
+      {isOpenDesktop && <div className="hidden md:block h-full shrink-0 animate-in fade-in duration-150">{content}</div>}
 
       {isOpenMobile && (
         <div className="fixed inset-0 z-50 md:hidden flex">

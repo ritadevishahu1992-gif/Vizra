@@ -10,17 +10,68 @@ import {
   setupOmniaLearningRoutes,
   getApprovedKnowledgeContext,
 } from './src/services/serverOmniaLearning';
+import {
+  securityHeadersMiddleware,
+  chatRateLimiter,
+  scienceRateLimiter,
+  musicRateLimiter,
+  validateExternalUrlForSSRF,
+  validatePrompt,
+  validateAttachments,
+  adminAuthMiddleware,
+} from './src/server/security';
+import {
+  observabilityMiddleware,
+  recordModelCall,
+  recordSsrfBlock,
+  getObservabilityMetrics,
+  logStructured,
+} from './src/server/observability';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function validateServerEnvironment(): { valid: boolean; warnings: string[] } {
+  const warnings: string[] = [];
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim().length <= 5) {
+    warnings.push('GEMINI_API_KEY not configured. Falling back to local intelligence on client.');
+  } else {
+    // Redacted confirmation in logs
+    const masked = `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
+    console.log(`[Config] GEMINI_API_KEY detected (${masked}, length: ${apiKey.length})`);
+  }
+
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || cronSecret === 'your_vercel_cron_secret') {
+    warnings.push('CRON_SECRET is unconfigured. Vercel cron endpoints require authentication in production.');
+  }
+
+  const adminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
+  if (!adminKey || adminKey === 'your_admin_api_key') {
+    warnings.push('ADMIN_API_KEY is unconfigured. Admin training endpoints require authentication in production.');
+  }
+
+  return { valid: true, warnings };
+}
+
 async function startServer() {
+  const envCheck = validateServerEnvironment();
+  if (envCheck.warnings.length > 0) {
+    envCheck.warnings.forEach((w) => console.warn(`[Config Warning] ${w}`));
+  }
+
   const app = express();
   const port = parseInt(process.env.PORT || '3000', 10);
 
-  app.use(express.json());
+  // Body parser with 15MB limit for multimodal attachments
+  app.use(express.json({ limit: '15mb' }));
+
+  // Security headers & Request-ID observability tracking
+  app.use(securityHeadersMiddleware);
+  app.use(observabilityMiddleware);
 
   // Server-side Gemini initialization
   let ai: GoogleGenAI | null = null;
@@ -35,6 +86,7 @@ async function startServer() {
           },
         },
       });
+      console.log('[AI Engine] Initialized GoogleGenAI with server-side proxy');
     } catch (e) {
       console.warn('Could not initialize GoogleGenAI with provided key:', e);
     }
@@ -371,7 +423,8 @@ Revise only where necessary. Do not expose this checklist or describe internal r
   }
 
   // Proxy endpoint for AI chat & Web Grounding
-  app.post('/api/chat', async (req, res) => {
+  app.post('/api/chat', chatRateLimiter.getMiddleware(), async (req, res) => {
+    const requestId = (req as any).id || `req_${Date.now()}`;
     try {
       const {
         prompt,
@@ -379,32 +432,60 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         ragContext,
         needWebResearch = false,
         mode = 'quick',
+        attachments = [],
       } = req.body;
 
-      if (!prompt || typeof prompt !== 'string') {
-        res.status(400).json({ error: 'Prompt is required' });
+      // 1. Input Validation
+      const promptCheck = validatePrompt(prompt);
+      if (!promptCheck.valid) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_PROMPT',
+            message: promptCheck.error,
+            requestId,
+          },
+        });
+        return;
+      }
+
+      const attCheck = validateAttachments(attachments);
+      if (!attCheck.valid) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_ATTACHMENTS',
+            message: attCheck.error,
+            requestId,
+          },
+        });
         return;
       }
 
       if (!ai) {
         // Signal client to use local engine
-        res.status(503).json({ error: 'Gemini API not configured on server', fallback: true });
+        res.status(503).json({
+          error: {
+            code: 'SERVER_GEMINI_NOT_CONFIGURED',
+            message: 'Gemini API not configured on server',
+            requestId,
+          },
+          fallback: true,
+        });
         return;
       }
 
-      // Format conversation history for Gemini
+      // Format conversation history for Gemini (capped to last 8 turns)
       const contents: Array<{ role: 'user' | 'model'; parts: Array<any> }> = [];
 
-      for (const msg of conversationHistory.slice(-6)) {
+      for (const msg of conversationHistory.slice(-8)) {
         if (msg.role === 'user' && msg.content) {
           contents.push({
             role: 'user',
-            parts: [{ text: msg.content }],
+            parts: [{ text: msg.content.slice(0, 15000) }],
           });
         } else if (msg.role === 'assistant' && msg.content) {
           contents.push({
             role: 'model',
-            parts: [{ text: msg.content }],
+            parts: [{ text: msg.content.slice(0, 15000) }],
           });
         }
       }
@@ -426,57 +507,84 @@ Revise only where necessary. Do not expose this checklist or describe internal r
 
       const userParts: any[] = [{ text: finalUserText }];
 
-      // Check for attached images in request
-      const { attachments = [] } = req.body;
+      // Check for attached images or documents in request
       for (const att of attachments) {
-        if (att && att.type === 'image') {
-          if (att.previewUrl && att.previewUrl.startsWith('data:image/')) {
-            const matches = att.previewUrl.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-            if (matches) {
-              userParts.push({
-                inlineData: {
-                  mimeType: matches[1],
-                  data: matches[2],
-                },
-              });
-            }
+        if (!att) continue;
+
+        // 1. Attached Image: inlineData
+        if (att.type === 'image' && att.previewUrl && att.previewUrl.startsWith('data:image/')) {
+          const matches = att.previewUrl.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+          if (matches) {
+            userParts.push({
+              inlineData: {
+                mimeType: matches[1],
+                data: matches[2],
+              },
+            });
           }
+        }
+
+        // 2. Attached PDF: native multimodal document comprehension via inlineData
+        if (att.type === 'pdf' && att.previewUrl && att.previewUrl.startsWith('data:application/pdf')) {
+          const matches = att.previewUrl.match(/^data:application\/pdf;base64,(.+)$/);
+          if (matches) {
+            userParts.push({
+              inlineData: {
+                mimeType: 'application/pdf',
+                data: matches[1],
+              },
+            });
+          }
+        }
+
+        // 3. Attached CSV, Code, Text, or Markdown document: append real content to user prompt
+        if (att.content && typeof att.content === 'string') {
+          const docHeader = `\n\n--- [Attached Document: ${att.name || 'document'} (${att.type || 'text'})] ---\n${att.content.slice(0, 50000)}\n--- [End of Attached Document] ---\n`;
+          userParts[0].text += docHeader;
         }
       }
 
-      // Detect standalone Image URLs in prompt (e.g. https://... .png/.jpg/.jpeg/.webp or image services)
+      // Detect standalone Image URLs in prompt (with strict SSRF validation)
       const urlMatches = prompt.match(/https?:\/\/[^\s<>"'{}|\\^`]+(\.png|\.jpg|\.jpeg|\.webp|\.gif|\.bmp|\.svg|\/download\/[^\s]+|\/images\/[^\s]+|\/photo[^\s]*)/i) ||
         prompt.match(/https?:\/\/[^\s<>"'{}|\\^`]+/);
 
       if (urlMatches && urlMatches[0]) {
         const potentialUrl = urlMatches[0].replace(/[),.;]+$/, '');
-        try {
-          // Attempt to retrieve image URL with timeout & size limit
-          const imgHeadOrGet = await fetch(potentialUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            },
-            signal: AbortSignal.timeout(5000),
-          });
+        // Validate URL against SSRF attack vectors before fetching
+        const ssrfCheck = await validateExternalUrlForSSRF(potentialUrl);
 
-          const contentType = imgHeadOrGet.headers.get('content-type') || '';
-          if (imgHeadOrGet.ok && (contentType.startsWith('image/') || /\.(png|jpe?g|webp|gif)/i.test(potentialUrl))) {
-            const arrayBuf = await imgHeadOrGet.arrayBuffer();
-            // Up to 10MB image limit
-            if (arrayBuf.byteLength > 100 && arrayBuf.byteLength < 10 * 1024 * 1024) {
-              const b64 = Buffer.from(arrayBuf).toString('base64');
-              const finalMime = contentType.startsWith('image/') ? contentType.split(';')[0] : 'image/jpeg';
-              userParts.push({
-                inlineData: {
-                  mimeType: finalMime,
-                  data: b64,
-                },
-              });
+        if (!ssrfCheck.safe) {
+          recordSsrfBlock();
+          console.warn(`[SSRF Blocked] Potential URL: ${potentialUrl}. Reason: ${ssrfCheck.reason}`);
+        } else {
+          try {
+            // Retrieve image URL with strict 5s timeout & size limit
+            const imgHeadOrGet = await fetch(potentialUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+              },
+              signal: AbortSignal.timeout(5000),
+            });
+
+            const contentType = imgHeadOrGet.headers.get('content-type') || '';
+            if (imgHeadOrGet.ok && (contentType.startsWith('image/') || /\.(png|jpe?g|webp|gif)/i.test(potentialUrl))) {
+              const arrayBuf = await imgHeadOrGet.arrayBuffer();
+              // Up to 10MB image limit
+              if (arrayBuf.byteLength > 100 && arrayBuf.byteLength < 10 * 1024 * 1024) {
+                const b64 = Buffer.from(arrayBuf).toString('base64');
+                const finalMime = contentType.startsWith('image/') ? contentType.split(';')[0] : 'image/jpeg';
+                userParts.push({
+                  inlineData: {
+                    mimeType: finalMime,
+                    data: b64,
+                  },
+                });
+              }
             }
+          } catch {
+            // Inaccessible external image or timeout: the model will explain the specific limitation honestly per rule 4
           }
-        } catch {
-          // Inaccessible external image or timeout: the model will explain the specific limitation honestly per rule 4
         }
       }
 
@@ -502,25 +610,34 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       }
 
       let response: any;
-      const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-3.1-flash-lite',
-        'gemini-3.8-flash',
-        'gemini-flash-latest',
-      ];
+      let usedModel = 'gemini-3.8-flash';
+      let isFallback = false;
+      const isComplexTask =
+        mode === 'code' ||
+        mode === 'think' ||
+        mode === 'science' ||
+        /^(code|function|debug|solve|calculate|equation|derive|algorithm)/i.test(prompt);
+
+      const modelsToTry = isComplexTask
+        ? ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest']
+        : ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
       let lastError: any = null;
 
-      for (const m of modelsToTry) {
+      for (let idx = 0; idx < modelsToTry.length; idx++) {
+        const m = modelsToTry[idx];
         try {
           response = await ai.models.generateContent({
             model: m,
             contents,
             config: generateConfig,
           });
-          if (response && response.text) break;
+          if (response && response.text) {
+            usedModel = m;
+            if (idx > 0) isFallback = true;
+            break;
+          }
         } catch (err: any) {
           lastError = err;
-          // Silent automatic failover on known 429 quota exhaustion; only log non-quota or debug info
           const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
           if (!isQuota) {
             console.warn(`[AI Model Fallback] Model ${m} failed (${err.message || 'Error'}). Trying next candidate...`);
@@ -528,22 +645,26 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         }
       }
 
-      // If googleSearch tool failed across all models due to 429 quota exhaustion on free tier:
-      // Per Rule 13: "If live search is unavailable, clearly state that live web research is unavailable for that request and answer only from verified internal knowledge. Never fabricate sources."
+      // If googleSearch tool failed across all models due to 429 quota exhaustion:
       if (!response && enableWebSearch) {
-        console.warn('[AI Model Fallback] Google Search Grounding tool unavailable or rate-limited; fulfilling prompt with direct model knowledge per Rule 13...');
+        console.warn('[AI Model Fallback] Google Search Grounding tool unavailable or rate-limited; fulfilling prompt with direct model knowledge...');
         const standardConfig = {
           systemInstruction,
           temperature: 0.7,
         };
-        for (const m of modelsToTry) {
+        for (let idx = 0; idx < modelsToTry.length; idx++) {
+          const m = modelsToTry[idx];
           try {
             response = await ai.models.generateContent({
               model: m,
               contents,
               config: standardConfig,
             });
-            if (response && response.text) break;
+            if (response && response.text) {
+              usedModel = m;
+              isFallback = true;
+              break;
+            }
           } catch (fallbackErr: any) {
             lastError = fallbackErr;
           }
@@ -551,17 +672,31 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       }
 
       if (!response) {
-        throw lastError || new Error('Model unavailable');
+        recordModelCall({
+          model: usedModel,
+          success: false,
+          fallbackTriggered: true,
+          inputChars: finalUserText.length,
+          outputChars: 0,
+        });
+        throw lastError || new Error('All model candidates unavailable');
       }
 
       let text = response.text || '';
       const grounding = response.candidates?.[0]?.groundingMetadata;
       const { sources, webSearchQueries } = extractVerifiedWebSources(grounding, text);
 
-      // Section 4: If research was required but no sources were grounded and model has low certainty
       if (enableWebSearch && sources.length === 0 && (!text || text.length < 20)) {
         text = "I couldn't verify that from a reliable source.";
       }
+
+      recordModelCall({
+        model: usedModel,
+        success: true,
+        fallbackTriggered: isFallback,
+        inputChars: finalUserText.length,
+        outputChars: text.length,
+      });
 
       res.json({
         text,
@@ -578,40 +713,69 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       });
     } catch (err: any) {
       console.error('Server chat error:', err);
-      res.status(500).json({ error: err.message || 'Error processing request', fallback: true });
+      res.status(500).json({
+        error: {
+          code: 'CHAT_PROCESSING_ERROR',
+          message: err.message || 'Error processing request',
+          requestId,
+        },
+        fallback: true,
+      });
     }
   });
 
   // Dedicated Web Research Endpoint
-  app.post('/api/research', async (req, res) => {
+  app.post('/api/research', chatRateLimiter.getMiddleware(), async (req, res) => {
+    const requestId = (req as any).id || `req_${Date.now()}`;
     try {
       const { query } = req.body;
-      if (!query || typeof query !== 'string') {
-        res.status(400).json({ error: 'Query is required' });
+      const queryCheck = validatePrompt(query);
+      if (!queryCheck.valid) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_QUERY',
+            message: queryCheck.error,
+            requestId,
+          },
+        });
         return;
       }
 
       if (!ai) {
-        res.status(503).json({ error: 'Gemini API not configured on server', fallback: true });
+        res.status(503).json({
+          error: {
+            code: 'SERVER_GEMINI_NOT_CONFIGURED',
+            message: 'Gemini API not configured on server',
+            requestId,
+          },
+          fallback: true,
+        });
         return;
       }
 
       let response: any;
-      const researchModels = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
+      let usedModel = 'gemini-3.8-flash';
+      let isFallback = false;
+      const researchModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
       let lastResearchError: any = null;
 
-      for (const rm of researchModels) {
+      for (let idx = 0; idx < researchModels.length; idx++) {
+        const rm = researchModels[idx];
         try {
           response = await ai.models.generateContent({
             model: rm,
-            contents: `Conduct grounded web research on the following user query: "${query}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
+            contents: `Conduct grounded web research on the following user query: "${queryCheck.cleanText}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
             config: {
               systemInstruction,
               tools: [{ googleSearch: {} }],
               temperature: 0.3,
             },
           });
-          if (response && response.text) break;
+          if (response && response.text) {
+            usedModel = rm;
+            if (idx > 0) isFallback = true;
+            break;
+          }
         } catch (err: any) {
           lastResearchError = err;
           const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
@@ -623,17 +787,22 @@ Revise only where necessary. Do not expose this checklist or describe internal r
 
       if (!response) {
         // Fallback without search tool if search tool quota exhausted
-        for (const rm of researchModels) {
+        for (let idx = 0; idx < researchModels.length; idx++) {
+          const rm = researchModels[idx];
           try {
             response = await ai.models.generateContent({
               model: rm,
-              contents: `Answer the following user query directly from verified knowledge: "${query}".`,
+              contents: `Answer the following user query directly from verified knowledge: "${queryCheck.cleanText}".`,
               config: {
                 systemInstruction,
                 temperature: 0.3,
               },
             });
-            if (response && response.text) break;
+            if (response && response.text) {
+              usedModel = rm;
+              isFallback = true;
+              break;
+            }
           } catch (fallbackErr: any) {
             lastResearchError = fallbackErr;
           }
@@ -641,6 +810,13 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       }
 
       if (!response) {
+        recordModelCall({
+          model: usedModel,
+          success: false,
+          fallbackTriggered: true,
+          inputChars: queryCheck.cleanText?.length || 0,
+          outputChars: 0,
+        });
         throw lastResearchError || new Error('Research models unavailable');
       }
 
@@ -651,6 +827,14 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       if (sources.length === 0 && (!text || text.length < 20)) {
         text = "I couldn't verify that from a reliable source.";
       }
+
+      recordModelCall({
+        model: usedModel,
+        success: true,
+        fallbackTriggered: isFallback,
+        inputChars: queryCheck.cleanText?.length || 0,
+        outputChars: text.length,
+      });
 
       res.json({
         text,
@@ -666,12 +850,19 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       });
     } catch (err: any) {
       console.error('Server research error:', err);
-      res.status(500).json({ error: err.message || 'Error conducting research', fallback: true });
+      res.status(500).json({
+        error: {
+          code: 'RESEARCH_ERROR',
+          message: err.message || 'Error conducting research',
+          requestId,
+        },
+        fallback: true,
+      });
     }
   });
 
   // Dedicated Science Skill Endpoints (DeepMind Science Suite: AlphaFold, PubChem, PubMed)
-  app.post('/api/science/query', async (req, res) => {
+  app.post('/api/science/query', scienceRateLimiter.getMiddleware(), async (req, res) => {
     try {
       const { domain, query } = req.body;
       if (!query || typeof query !== 'string') {
@@ -747,7 +938,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
   });
 
   // Dedicated AI Music Generation Endpoint (Lyria 3 Clip & Pro)
-  app.post('/api/music/generate', async (req, res) => {
+  app.post('/api/music/generate', musicRateLimiter.getMiddleware(), async (req, res) => {
     try {
       const {
         prompt,
@@ -900,9 +1091,63 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     }
   });
 
-  // Health check endpoint
+  // Health check endpoint with system metrics & environment status
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', hasGemini: !!ai });
+    const mem = process.memoryUsage();
+    res.json({
+      status: 'ok',
+      service: 'Vizra AI Creative Studio',
+      engine: 'Omnia 1.0',
+      hasGemini: !!ai,
+      uptimeSeconds: Math.floor(process.uptime()),
+      environment: process.env.NODE_ENV || 'development',
+      memory: {
+        heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024),
+        heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024),
+        rssMb: Math.round(mem.rss / 1024 / 1024),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Dedicated Real-time Observability & Telemetry Metrics (protected by admin auth)
+  app.get('/api/metrics', adminAuthMiddleware, (_req, res) => {
+    res.json({
+      success: true,
+      service: 'Vizra / Omnia 1.0 Observability',
+      metrics: getObservabilityMetrics(),
+    });
+  });
+
+  // Data Privacy, Storage, and Tenant Isolation Specification Endpoint
+  app.get('/api/privacy/summary', (_req, res) => {
+    res.json({
+      success: true,
+      platform: 'Vizra AI Creative Studio',
+      assistant: 'Omnia 1.0',
+      dataStorage: {
+        conversations: 'Browser localStorage (anonymous); Firestore users/{userId}/conversations (authenticated)',
+        projects: 'Browser localStorage (anonymous); Firestore users/{userId}/projects (authenticated)',
+        personalMemory: 'Browser localStorage (vizra_user_memories); user-controlled toggle with zero-persistence wipe',
+        learningGraph: 'Local data store (data/omnia_learning_store.json) for approved public platform benchmarks',
+      },
+      isolation: {
+        tenantIsolation: 'Strict user-specific Firestore security rules (request.auth.uid == userId)',
+        crossUserAccess: 'Forbidden. No global collection list permissions exist for user profiles or private documents.',
+        promptExfiltration: 'Project assets and personal memories are isolated per turn; general queries never leak private files.',
+      },
+      thirdPartyModelProviders: [
+        {
+          provider: 'Google Gemini API',
+          purpose: 'Text generation, multimodal vision, speech, and embeddings',
+          dataRetention: 'Server proxy prevents client-side key leakage; ephemeral inference only',
+        },
+      ],
+      complianceAndControls: {
+        instantPurge: 'User can delete individual conversations, memories, or reset the studio at any time',
+        telemetry: 'Zero external tracking scripts; privacy-preserving aggregated server metrics only',
+      },
+    });
   });
 
   // In development, mount Vite's middleware

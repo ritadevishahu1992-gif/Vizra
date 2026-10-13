@@ -132,6 +132,15 @@ export function extractAndCleanText(
         'CSV file payload is malformed or unreadable.'
       );
     }
+  } else if (fileType === 'pdf') {
+    try {
+      text = extractPdfText(fileContent);
+    } catch {
+      throw new IngestionError(
+        'CORRUPTED_FILE_PAYLOAD',
+        'PDF file payload could not be parsed or contains corrupted streams.'
+      );
+    }
   }
 
   // Text cleaning:
@@ -151,6 +160,112 @@ export function extractAndCleanText(
   }
 
   return cleaned;
+}
+
+/**
+ * Extracts readable text streams from PDF files (supporting Base64 data URLs and binary object streams)
+ */
+export function extractPdfText(rawPdf: string): string {
+  let decoded = rawPdf;
+  if (rawPdf.startsWith('data:application/pdf;base64,')) {
+    const b64 = rawPdf.replace('data:application/pdf;base64,', '');
+    try {
+      if (typeof Buffer !== 'undefined') {
+        decoded = Buffer.from(b64, 'base64').toString('latin1');
+      } else if (typeof atob !== 'undefined') {
+        decoded = atob(b64);
+      }
+    } catch {
+      decoded = rawPdf;
+    }
+  }
+
+  // 1. Look for standard PDF text operators (BT ... ET)
+  const textBlocks: string[] = [];
+  const btRegex = /BT[\s\S]*?ET/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = btRegex.exec(decoded)) !== null) {
+    const block = match[0];
+    // Extract literal strings: (...)
+    const literalMatches = block.match(/\((.*?)\)/g);
+    if (literalMatches) {
+      for (const lm of literalMatches) {
+        const str = lm.slice(1, -1).replace(/\\([\\()])/g, '$1').trim();
+        if (str.length > 0) textBlocks.push(str);
+      }
+    }
+    // Extract array strings: [(...) ... (...)] TJ
+    const tjMatches = block.match(/\[(.*?)\]\s*TJ/g);
+    if (tjMatches) {
+      for (const tj of tjMatches) {
+        const inner = tj.match(/\((.*?)\)/g);
+        if (inner) {
+          const joined = inner.map((s) => s.slice(1, -1)).join('').trim();
+          if (joined.length > 0) textBlocks.push(joined);
+        }
+      }
+    }
+  }
+
+  if (textBlocks.length > 0) {
+    return textBlocks.join(' ');
+  }
+
+  // 2. Fallback heuristic: Extract printable text runs (> 20 chars) avoiding PDF structural tokens
+  const asciiChunks = decoded.match(/[A-Za-z0-9\s.,;:!?'"()\-]{20,}/g);
+  if (asciiChunks && asciiChunks.length > 0) {
+    const filtered = asciiChunks
+      .map((c) => c.trim())
+      .filter((c) => !c.startsWith('%PDF') && !c.includes('endobj') && !c.includes('xref') && !c.includes('/Font'));
+    if (filtered.length > 0) {
+      return filtered.join('\n\n');
+    }
+  }
+
+  // 3. Honest limitation reporting for image-only scans or encrypted PDFs
+  return '[SCANNED OR ENCRYPTED PDF]\nDocument contains image streams without an embedded text layer. Gemini multimodal vision pipeline recommended for visual comprehension.';
+}
+
+/**
+ * Detects prompt injection attempts within uploaded or retrieved documents
+ */
+export function detectPromptInjection(text: string): {
+  hasInjectionRisk: boolean;
+  riskPatterns: string[];
+} {
+  const risks: string[] = [];
+  const lower = text.toLowerCase();
+
+  const patterns = [
+    { pattern: /ignore\s+(all\s+)?(previous|prior)\s+instructions/i, name: 'IGNORE_PREVIOUS_INSTRUCTIONS' },
+    { pattern: /you\s+are\s+now\s+(in\s+)?(developer\s+mode|dan|jailbreak)/i, name: 'JAILBREAK_ROLEPLAY' },
+    { pattern: /reveal\s+(the\s+)?(system\s+prompt|api\s+key|secret)/i, name: 'REVEAL_SYSTEM_SECRETS' },
+    { pattern: /system\s*instruction\s*:\s*/i, name: 'SYSTEM_INSTRUCTION_OVERRIDE' },
+    { pattern: /!\[.*?\]\(https?:\/\/.*?\/leak.*?\)/i, name: 'DATA_EXFILTRATION_MARKDOWN' },
+    { pattern: /<script[\s\S]*?>[\s\S]*?<\/script>/i, name: 'EMBEDDED_SCRIPT_TAG' },
+  ];
+
+  for (const p of patterns) {
+    if (p.pattern.test(lower)) {
+      risks.push(p.name);
+    }
+  }
+
+  return {
+    hasInjectionRisk: risks.length > 0,
+    riskPatterns: risks,
+  };
+}
+
+/**
+ * Neutralizes malicious markdown injection directives inside retrieved evidence
+ */
+export function sanitizeRetrievedEvidence(chunkText: string): string {
+  return chunkText
+    .replace(/\[\s*(SYSTEM|INSTRUCTION|DEVELOPER|ROLE|PROMPT)\s*\]/gi, '[DOCUMENT QUOTE]')
+    .replace(/!\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, '[Image Link: $1]')
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '[Removed Script]');
 }
 
 /**

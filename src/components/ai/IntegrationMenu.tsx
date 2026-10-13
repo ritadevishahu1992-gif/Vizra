@@ -56,11 +56,27 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
     if (!files || files.length === 0) return;
 
     const file = files[0];
+    const maxSizeBytes = 10 * 1024 * 1024; // 10MB limit
+
+    if (file.size > maxSizeBytes) {
+      alert(`File "${file.name}" exceeds the 10MB limit. Please upload a smaller file.`);
+      return;
+    }
+
+    const fileNameLower = file.name.toLowerCase();
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
     const isAudio = file.type.startsWith('audio/');
-    const isPdf = file.type.includes('pdf') || file.name.endsWith('.pdf');
-    const isCsv = file.name.endsWith('.csv') || file.name.endsWith('.xlsx');
+    const isPdf = file.type.includes('pdf') || fileNameLower.endsWith('.pdf');
+    const isCsv = fileNameLower.endsWith('.csv') || fileNameLower.endsWith('.tsv') || file.type.includes('csv');
+    const isText =
+      file.type.startsWith('text/') ||
+      fileNameLower.endsWith('.txt') ||
+      fileNameLower.endsWith('.md') ||
+      fileNameLower.endsWith('.json') ||
+      fileNameLower.endsWith('.ts') ||
+      fileNameLower.endsWith('.js') ||
+      fileNameLower.endsWith('.py');
 
     const attachmentType: Attachment['type'] = isImage
       ? 'image'
@@ -74,12 +90,75 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
       ? 'pdf'
       : 'document';
 
+    // 1. Image handling: Create Data URL for preview and inline multimodal processing
+    if (isImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        onAddAttachment({
+          id: Date.now().toString(),
+          name: file.name,
+          type: 'image',
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          previewUrl: dataUrl,
+        });
+      };
+      reader.onerror = () => {
+        console.error('Failed to read image file');
+      };
+      reader.readAsDataURL(file);
+      onClose();
+      return;
+    }
+
+    // 2. PDF handling: Read as Data URL (Base64) for native document comprehension
+    if (isPdf) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        onAddAttachment({
+          id: Date.now().toString(),
+          name: file.name,
+          type: 'pdf',
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          previewUrl: dataUrl,
+        });
+      };
+      reader.onerror = () => {
+        console.error('Failed to read PDF file');
+      };
+      reader.readAsDataURL(file);
+      onClose();
+      return;
+    }
+
+    // 3. Text, CSV, Markdown, Code handling: Extract real text content directly
+    if (isCsv || isText || file.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const textContent = (reader.result as string) || '';
+        onAddAttachment({
+          id: Date.now().toString(),
+          name: file.name,
+          type: isCsv ? 'csv' : 'document',
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          content: textContent,
+        });
+      };
+      reader.onerror = () => {
+        console.error('Failed to read text/document file');
+      };
+      reader.readAsText(file);
+      onClose();
+      return;
+    }
+
+    // Default fallback for other file formats
     const attachment: Attachment = {
       id: Date.now().toString(),
       name: file.name,
       type: attachmentType,
       size: `${(file.size / 1024).toFixed(1)} KB`,
-      previewUrl: isImage ? URL.createObjectURL(file) : undefined,
     };
 
     onAddAttachment(attachment);

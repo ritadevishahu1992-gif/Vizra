@@ -24,11 +24,32 @@ const defaultPersonalMemories: PersonalMemoryItem[] = [
   },
 ];
 
+const inMemoryStorage = new Map<string, string>();
+
+function safeStorageGet(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+  } catch {}
+  return inMemoryStorage.get(key) || null;
+}
+
+function safeStorageSet(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+      return;
+    }
+  } catch {}
+  inMemoryStorage.set(key, value);
+}
+
 export function getPersonalMemories(): PersonalMemoryItem[] {
   try {
-    const raw = localStorage.getItem(PERSONAL_MEMORY_KEY);
+    const raw = safeStorageGet(PERSONAL_MEMORY_KEY);
     if (!raw) {
-      localStorage.setItem(PERSONAL_MEMORY_KEY, JSON.stringify(defaultPersonalMemories));
+      safeStorageSet(PERSONAL_MEMORY_KEY, JSON.stringify(defaultPersonalMemories));
       return defaultPersonalMemories;
     }
     return JSON.parse(raw);
@@ -39,7 +60,7 @@ export function getPersonalMemories(): PersonalMemoryItem[] {
 
 export function savePersonalMemories(memories: PersonalMemoryItem[]): void {
   try {
-    localStorage.setItem(PERSONAL_MEMORY_KEY, JSON.stringify(memories));
+    safeStorageSet(PERSONAL_MEMORY_KEY, JSON.stringify(memories));
   } catch (err) {
     console.error('Failed to save memories', err);
   }
@@ -70,7 +91,7 @@ export function clearAllPersonalMemories(): void {
 
 export function isMemoryEnabled(): boolean {
   try {
-    const val = localStorage.getItem(MEMORY_ENABLED_KEY);
+    const val = safeStorageGet(MEMORY_ENABLED_KEY);
     return val !== 'false';
   } catch {
     return true;
@@ -79,7 +100,7 @@ export function isMemoryEnabled(): boolean {
 
 export function setMemoryEnabled(enabled: boolean): void {
   try {
-    localStorage.setItem(MEMORY_ENABLED_KEY, enabled ? 'true' : 'false');
+    safeStorageSet(MEMORY_ENABLED_KEY, enabled ? 'true' : 'false');
   } catch (err) {
     console.error('Failed to toggle memory', err);
   }

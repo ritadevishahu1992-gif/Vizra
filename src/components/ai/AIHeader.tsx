@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom } from 'lucide-react';
+import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom, Search, Keyboard } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
 import { CapabilitiesMenu } from './CapabilitiesMenu';
 import { OmniaModel } from '../../types/ai';
 import { UserMenu } from '../auth/UserMenu';
+import { modKey } from '../../hooks/useKeyboardShortcuts';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -18,6 +19,8 @@ interface AIHeaderProps {
   onOpenMusicStudio?: () => void;
   onOpenLiveVoice?: () => void;
   onOpenScienceHub?: () => void;
+  onOpenCommandPalette?: () => void;
+  onOpenShortcutsHelp?: () => void;
 }
 
 export const AIHeader: React.FC<AIHeaderProps> = ({
@@ -31,6 +34,8 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onOpenMusicStudio,
   onOpenLiveVoice,
   onOpenScienceHub,
+  onOpenCommandPalette,
+  onOpenShortcutsHelp,
 }) => {
   return (
     <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none">
@@ -130,20 +135,46 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
 
       {/* Right: Actions (New Chat, Settings, Profile) */}
       <div className="flex items-center gap-1.5 md:gap-2">
+        {onOpenCommandPalette && (
+          <button
+            onClick={onOpenCommandPalette}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-300 hover:text-white transition-colors cursor-pointer"
+            title={`Search actions & commands (${modKey}K)`}
+            aria-label="Command Palette"
+          >
+            <Search size={13} className="text-neutral-400" />
+            <span className="hidden md:inline">Commands</span>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-800 rounded">
+              {modKey}K
+            </kbd>
+          </button>
+        )}
+
         <button
           onClick={onNewChat}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-white transition-colors cursor-pointer"
-          title="Start new conversation"
+          title={`Start new conversation (${modKey}N)`}
           aria-label="New Chat"
         >
           <Plus size={14} className="text-[#eb3b2d]" />
           <span className="hidden md:inline">New Chat</span>
         </button>
 
+        {onOpenShortcutsHelp && (
+          <button
+            onClick={onOpenShortcutsHelp}
+            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            title={`Keyboard Shortcuts (${modKey}/)`}
+            aria-label="Keyboard Shortcuts"
+          >
+            <Keyboard size={16} />
+          </button>
+        )}
+
         <button
           onClick={onOpenSettings}
           className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
-          title="Settings"
+          title={`Settings (${modKey},)`}
           aria-label="Settings"
         >
           <Settings size={16} />

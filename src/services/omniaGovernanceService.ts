@@ -63,6 +63,7 @@ class OmniaGovernanceService {
 
   private save(): void {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
       localStorage.setItem(
         KNOWLEDGE_RECORDS_KEY,
         JSON.stringify(Array.from(this.records.values()))

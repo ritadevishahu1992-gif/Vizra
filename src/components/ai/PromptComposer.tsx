@@ -187,11 +187,12 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
         <div className="px-4 pt-3 pb-2">
           <textarea
             ref={textareaRef}
+            id="omnia-prompt-textarea"
             rows={1}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Omnia…"
+            placeholder="Message Omnia… (Press / to focus, ⌘K for commands)"
             className="w-full bg-transparent text-white placeholder-neutral-500 text-sm md:text-base focus:outline-none resize-none leading-relaxed max-h-[180px] overflow-y-auto font-sans"
           />
         </div>

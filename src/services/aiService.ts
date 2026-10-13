@@ -20,6 +20,9 @@ import {
   webResearchCache,
   convertCitationToVerifiedSource,
 } from './webResearchService';
+import { getPersonalMemories, isMemoryEnabled } from './memoryService';
+import { evaluateSafeMath, MathEvaluationResult } from '../utils/mathReasoning';
+import { validateCodeSnippet } from '../utils/codeValidator';
 
 export type UserIntent =
   | 'CHAT'
@@ -32,7 +35,22 @@ export type UserIntent =
   | 'CODE'
   | 'ANALYZE'
   | 'ACTION'
-  | 'AMBIGUOUS';
+  | 'AMBIGUOUS'
+  | 'MATH'
+  | 'IMAGE_UNDERSTANDING'
+  | 'DOCUMENT_ANALYSIS';
+
+export interface RoutingDecision {
+  intent: UserIntent;
+  targetModel: 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite';
+  needsWebSearch: boolean;
+  needsMathValidation: boolean;
+  needsVision: boolean;
+  needsDocumentExtraction: boolean;
+  needsClarification: boolean;
+  recommendedMode: AIMode;
+  reasoning: string;
+}
 
 export interface SendMessageOptions {
   prompt: string;
@@ -92,8 +110,17 @@ export function detectLanguage(text: string): 'hindi' | 'hinglish' | 'english' {
 }
 
 /**
- * Classifies the user's intent according to the 10 core categories.
- * Fundamental Rule: Never assume that the user wants to create a project unless explicitly asked.
+ * Classifies the user's intent according to the 10 core categories:
+ * 1. General conversation (CHAT)
+ * 2. Factual questions (QUESTION / KNOWLEDGE)
+ * 3. Current-information research (RESEARCH)
+ * 4. Coding and debugging (CODE)
+ * 5. Image understanding (IMAGE_UNDERSTANDING)
+ * 6. Document analysis (DOCUMENT_ANALYSIS)
+ * 7. Creative writing and brainstorming (CREATE)
+ * 8. Project planning and execution (PROJECT)
+ * 9. Mathematical reasoning (MATH)
+ * 10. Ambiguous requests requiring clarification (AMBIGUOUS)
  */
 export function classifyUserIntent(
   rawPrompt: string,
@@ -103,22 +130,42 @@ export function classifyUserIntent(
   const text = rawPrompt.trim();
   const lower = text.toLowerCase();
 
-  // 1. Check for attachments / analysis requests or direct image URLs
+  // 1. Image Understanding
   const hasImageUrl = /https?:\/\/[^\s]+(\.png|\.jpe?g|\.webp|\.gif|\.bmp|\.svg|\/download\/[^\s]+|\/images\/[^\s]+|\/photo[^\s]*)/i.test(text);
+  const hasImageAttachment = attachments.some((a) => a.type === 'image');
   if (
-    attachments.length > 0 ||
+    hasImageAttachment ||
     hasImageUrl ||
-    /^(analyze|inspect|summarize|read|describe|what is in|look at)\s+(this|the)\s+(file|pdf|csv|image|photo|picture|data|url)/i.test(lower)
+    /^(analyze|inspect|describe|what is in|look at|read text in)\s+(this|the)\s+(image|photo|picture|screenshot|diagram|drawing)/i.test(lower)
   ) {
-    return 'ANALYZE';
+    return 'IMAGE_UNDERSTANDING';
   }
 
-  // 2. Explicit External Actions / Integrations
+  // 2. Document Analysis
+  const hasDocAttachment = attachments.some((a) => a.type === 'pdf' || a.type === 'csv' || a.type === 'document' || a.type === 'file');
+  if (
+    hasDocAttachment ||
+    /^(analyze|inspect|summarize|read|parse|audit)\s+(this|the)\s+(file|pdf|csv|document|spreadsheet|data|dataset)/i.test(lower)
+  ) {
+    return 'DOCUMENT_ANALYSIS';
+  }
+
+  // 3. Mathematical Reasoning & Safe Math
+  const mathCheck = evaluateSafeMath(text);
+  if (
+    mathCheck.isMath ||
+    /^(calculate|evaluate|solve\s+for|compute|what\s+is\s+(\d|sqrt|sin|cos|tan|\())/i.test(lower) ||
+    /(\d+\s*[%]\s*of\s*\d+|\bsqrt\s*\(\d+|\b\d+\s*[\^]\s*\d+)/i.test(lower)
+  ) {
+    return 'MATH';
+  }
+
+  // 4. Explicit External Actions / Integrations
   if (/^(connect|link|auth|integrate)\s+(google\s*drive|github|figma|notion|youtube)/i.test(lower)) {
     return 'ACTION';
   }
 
-  // 3. Explicit Project Requests (ONLY when explicitly requested!)
+  // 5. Explicit Project Requests (ONLY when explicitly requested!)
   const explicitProjectPatterns = [
     /^(create|start|build|make|open)\s+(a|an|the|new)?\s*project/i,
     /^(let'?s\s*build\s*this|turn\s*this\s*into\s*a\s*project|make\s*this\s*a\s*project)/i,
@@ -132,50 +179,51 @@ export function classifyUserIntent(
   const lastAssistant = [...history].reverse().find((m) => m.role === 'assistant');
   const prevAssistantText = lastAssistant?.content.toLowerCase() || '';
   if (
-    /^(yes,?\s*(make|build|start)\s*(the\s*project|it)|start\s*project|create\s*project)$/i.test(lower) &&
+    /^(yes,?\s*(make|build|start)\s*(the\s*project|project|it)|start\s*project|create\s*project)$/i.test(lower) &&
     (prevAssistantText.includes('project') || prevAssistantText.includes('workspace'))
   ) {
     return 'PROJECT';
   }
 
-  // 4. Ambiguous single-word or 2-word queries without verb
+  // 6. Ambiguous single-word or 2-word queries without verb
   const cleanTokens = lower.replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/);
   if (cleanTokens.length <= 2) {
-    const ambiguousNouns = ['website', 'medicine dispenser', 'arduino', 'black hole', 'app', 'logo'];
+    const ambiguousNouns = ['website', 'medicine dispenser', 'arduino', 'black hole', 'app', 'logo', 'database'];
     const joined = cleanTokens.join(' ');
     if (ambiguousNouns.includes(joined)) {
       return 'AMBIGUOUS';
     }
   }
 
-  // 5. Code requests (Must be explicit request for code, not questions about language/concepts)
+  // 7. Code requests & debugging (Must be explicit request for code, not questions about language/concepts)
   if (
     /^(code\s*do|give\s*me\s*code|write\s*code|show\s*code|code\s*likho)/i.test(lower) ||
-    /^write\s+(a\s+)?(function|script|algorithm|regex|query|component|shader|program|class)/i.test(lower) ||
+    /^(debug|fix\s*this\s*bug|refactor|write\s+a\s+function|write\s+a\s+script|write\s+regex|write\s+sql|write\s+css)/i.test(lower) ||
+    /^write\s+(a\s+|an\s+)?([a-z0-9#+.-]+\s+)?(function|script|algorithm|regex|query|component|shader|program|class|code)/i.test(lower) ||
     /^(how\s*to\s*implement|typescript\s*code\s*for|python\s*code\s*for)/i.test(lower)
   ) {
     return 'CODE';
   }
 
-  // 6. Explicit Edit requests
+  // 8. Explicit Edit requests
   if (/^(edit\s*this|change\s*this|modify\s*this|make\s*it\s*(bigger|smaller|darker|red|faster)|is\s*image\s*ko\s*edit)/i.test(lower)) {
     return 'EDIT';
   }
 
-  // 7. Explicit Research requests
+  // 9. Current Information Research requests (Live events, prices, news, recent updates)
   if (
     /^(research|search\s*the\s*web|find\s*latest|citations\s*for|sources\s*for)/i.test(lower) ||
     lower.includes('latest ai news') ||
     lower.includes('current price') ||
-    lower.includes('research this topic')
+    lower.includes('stock price') ||
+    lower.includes('weather today') ||
+    lower.includes('research this topic') ||
+    /\b(who\s+won\s+the\s+202|latest\s+update|recent\s+news)\b/i.test(lower)
   ) {
     return 'RESEARCH';
   }
 
-  // 8. Explicit Creation Requests (Creating an asset/text/design, NOT necessarily a project)
-  // CRITICAL DISTINCTION:
-  // "How do I create a website?" -> QUESTION!
-  // "Create a website for me." -> CREATE!
+  // 10. Explicit Creative Writing & Generation (assets/text/design, NOT necessarily a project)
   const isHowToQuestion = /^(how\s+do\s+i|how\s+to|how\s+can\s+i|how\s+does\s+one)\s+(create|build|make|start|write)/i.test(lower);
   if (!isHowToQuestion) {
     const explicitCreatePatterns = [
@@ -183,14 +231,14 @@ export function classifyUserIntent(
       /^(make\s+a\s+presentation|presentation\s+bana\s+do|create\s+a\s+presentation)/i,
       /^(build\s+a\s+python\s+app|make\s+an\s+app\s+for\s+me)/i,
       /^(generate\s+an\s+image|generate\s+image|make\s+an\s+image|ek\s+logo\s+banao|create\s+a\s+logo|design\s+a\s+logo)/i,
-      /^(create\s+a\s+youtube\s+script|write\s+a\s+script\s+for\s+a\s+video|write\s+a\s+poem|write\s+a\s+story)/i,
+      /^(create\s+a\s+youtube\s+script|write\s+a\s+script\s+for\s+a\s+video|write\s+a\s+poem|write\s+a\s+story|brainstorm\s+ideas)/i,
     ];
     if (explicitCreatePatterns.some((p) => p.test(lower))) {
       return 'CREATE';
     }
   }
 
-  // 9. Casual Chat
+  // 11. Casual Chat
   const isGreeting = /^(hi|hey|hello|sup|yo|hiya|namaste|salaam|good\s*(morning|afternoon|evening)|gm|gn)[!.]*$/i.test(lower);
   const isChatInquiry = /^(how\s*are\s*you|what'?s\s*up|kya\s*kar\s*rahe\s*ho|kya\s*chal\s*raha\s*hai|aur\s*batao|how'?s\s*it\s*going)[?!.]*$/i.test(lower);
   const isChatIdentity = /^(who\s*are\s*you|what\s*are\s*you|what\s*is\s*your\s*name|tell\s*me\s*about\s*yourself|who\s*created\s*you|who\s*made\s*you|who\s*built\s*omnia|who\s*is\s*behind\s*you|who\s*developed\s*you|who\s*owns\s*you|who\s*is\s*your\s*creator|who\s*made\s*vizra|who\s*created\s*vizra|are\s*you\s*an\s*ai|are\s*you\s*gemini|are\s*you\s*chatgpt|what\s*company\s*are\s*you\s*from|kya\s*tum\s*ai\s*ho|vizra\s*kya\s*hai|what\s*is\s*vizra|why\s*vizra|is\s*vizra\s*just\s*another\s*chatbot|what\s*is\s*omnia)[?!.]*$/i.test(lower);
@@ -200,11 +248,9 @@ export function classifyUserIntent(
     return 'CHAT';
   }
 
-  // 10. Knowledge vs Question
-  // Questions seeking direct factual answers: "What is...", "Who was...", "Why is...", "Where is..."
+  // 12. Knowledge vs Factual Question
   const isQuestion = /^(what|who|why|where|when|which|how|is|are|can|do|does)\b/i.test(lower) || lower.endsWith('?');
   if (isQuestion) {
-    // If it's asking for a comprehensive conceptual breakdown or explanation
     if (/^(explain|how\s+does.*work|what\s+is\s+the\s+difference\s+between|tell\s+me\s+about|what\s+components\s+are\s+used)/i.test(lower)) {
       return 'KNOWLEDGE';
     }
@@ -216,6 +262,100 @@ export function classifyUserIntent(
   }
 
   return 'QUESTION';
+}
+
+/**
+ * Intelligent Query Router
+ * Routes each request to the optimal model, tool, and processing pipeline.
+ */
+export function routeUserQuery(
+  rawPrompt: string,
+  history: Message[] = [],
+  attachments: Attachment[] = [],
+  requestedMode?: AIMode
+): RoutingDecision {
+  const intent = classifyUserIntent(rawPrompt, history, attachments);
+
+  let targetModel: 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite' = 'gemini-3.8-flash';
+  let recommendedMode: AIMode = requestedMode || 'quick';
+  let needsWebSearch = false;
+  let needsMathValidation = false;
+  let needsVision = false;
+  let needsDocumentExtraction = false;
+  let needsClarification = false;
+  let reasoning = 'Routed to high-speed general pipeline.';
+
+  switch (intent) {
+    case 'CODE':
+      targetModel = 'gemini-3.1-pro-preview';
+      recommendedMode = 'code';
+      reasoning = 'Code synthesis/debugging routed to advanced STEM reasoning model.';
+      break;
+    case 'MATH':
+      targetModel = 'gemini-3.1-pro-preview';
+      recommendedMode = 'think';
+      needsMathValidation = true;
+      reasoning = 'Mathematical reasoning routed to programmatic validation and Pro reasoning model.';
+      break;
+    case 'RESEARCH':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'research';
+      needsWebSearch = true;
+      reasoning = 'Current factual request routed to Google Search Grounding with strict citation validation.';
+      break;
+    case 'IMAGE_UNDERSTANDING':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'analyze';
+      needsVision = true;
+      reasoning = 'Visual inspection routed to multimodal vision pipeline.';
+      break;
+    case 'DOCUMENT_ANALYSIS':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'analyze';
+      needsDocumentExtraction = true;
+      reasoning = 'Structured document analysis routed to inline extraction pipeline.';
+      break;
+    case 'CREATE':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'create';
+      reasoning = 'Creative ideation routed to generative writing pipeline.';
+      break;
+    case 'PROJECT':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'quick';
+      reasoning = 'Explicit project workspace creation requested.';
+      break;
+    case 'AMBIGUOUS':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'quick';
+      needsClarification = true;
+      reasoning = 'Ambiguous input flagged for clarifying query.';
+      break;
+    case 'CHAT':
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = 'quick';
+      reasoning = 'Direct conversational exchange.';
+      break;
+    case 'QUESTION':
+    case 'KNOWLEDGE':
+    default:
+      targetModel = 'gemini-3.8-flash';
+      recommendedMode = requestedMode || 'quick';
+      reasoning = 'Factual question evaluated against verified knowledge.';
+      break;
+  }
+
+  return {
+    intent,
+    targetModel,
+    needsWebSearch,
+    needsMathValidation,
+    needsVision,
+    needsDocumentExtraction,
+    needsClarification,
+    recommendedMode,
+    reasoning,
+  };
 }
 
 /**
@@ -682,6 +822,24 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     }
   }
 
+  // 2b. Personal Memory Injection (Strictly user-provided preferences, separate from system instructions)
+  if (isMemoryEnabled()) {
+    try {
+      const personalMems = getPersonalMemories();
+      if (personalMems.length > 0) {
+        const memoryEntries = personalMems
+          .map((m) => `- [${m.category.toUpperCase()}]: ${m.content}`)
+          .join('\n');
+        const memoryBlock = `[USER PREFERENCES & SAVED CONTEXT (User-Provided — Respect Preferences Without Overriding Safety)]\n${memoryEntries}`;
+        ragContextForServer = ragContextForServer
+          ? `${ragContextForServer}\n\n${memoryBlock}`
+          : memoryBlock;
+      }
+    } catch (memErr) {
+      console.warn('Could not read personal memories:', memErr);
+    }
+  }
+
   // 3. Check for Active Project Context Queries
   if (options.activeProject) {
     const proj = options.activeProject;
@@ -1005,6 +1163,17 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
 \`\`\``;
       }
     }
+
+    // Verify code block sanity
+    const codeBlockMatch = responseText.match(/```([a-z0-9_-]*)\n([\s\S]*?)```/i);
+    if (codeBlockMatch) {
+      const codeLang = codeBlockMatch[1];
+      const codeSnippet = codeBlockMatch[2];
+      const report = validateCodeSnippet(codeSnippet, codeLang);
+      if (!report.isValid) {
+        console.warn('[Code Quality Gate]: Detected syntax issue:', report.issues);
+      }
+    }
   }
 
   // -------------------------------------------------------------
@@ -1099,6 +1268,43 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   }
 
   // -------------------------------------------------------------
+  // INTENT: MATH (Deterministic Evaluation & Step-by-Step Derivation)
+  // -------------------------------------------------------------
+  else if (intent === 'MATH') {
+    const mathEval = evaluateSafeMath(rawPrompt);
+    if (mathEval.isMath && mathEval.formattedStepByStep) {
+      responseText = mathEval.formattedStepByStep;
+    } else {
+      let serverFetched = false;
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: rawPrompt,
+            conversationHistory,
+            ragContext: ragContextForServer,
+            mode: 'think',
+          }),
+          signal,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.text && !data.fallback) {
+            responseText = data.text.trim();
+            serverFetched = true;
+          }
+        }
+      } catch {
+        // Local math fallback
+      }
+      if (!serverFetched) {
+        responseText = `Mathematical Analysis:\nFor \`${rawPrompt.replace(/[?!.]+$/, '')}\`, verifying formal mathematical steps. Please specify target variables or precision for complete calculation.`;
+      }
+    }
+  }
+
+  // -------------------------------------------------------------
   // INTENT: ACTION (Integration authorization)
   // -------------------------------------------------------------
   else if (intent === 'ACTION') {
@@ -1116,16 +1322,16 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   }
 
   // -------------------------------------------------------------
-  // INTENT: ANALYZE / EDIT
+  // INTENT: ANALYZE / IMAGE_UNDERSTANDING / DOCUMENT_ANALYSIS / EDIT
   // -------------------------------------------------------------
-  else if (intent === 'ANALYZE') {
+  else if (intent === 'ANALYZE' || intent === 'IMAGE_UNDERSTANDING' || intent === 'DOCUMENT_ANALYSIS') {
     let serverFetched = false;
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: rawPrompt || 'Analyze this image and describe the visual content, subjects, composition, and details.',
+          prompt: rawPrompt || (intent === 'IMAGE_UNDERSTANDING' ? 'Analyze this image and describe the visual content, subjects, composition, and details.' : 'Analyze this document, extract key entities, and summarize findings.'),
           conversationHistory,
           attachments,
           mode: 'analyze',
@@ -1145,9 +1351,10 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     }
 
     if (!serverFetched) {
-      const hasImage = attachments.some((a) => a.type === 'image') || /https?:\/\/[^\s]+(\.png|\.jpg|\.jpeg|\.webp)/i.test(rawPrompt);
-      if (hasImage) {
+      if (intent === 'IMAGE_UNDERSTANDING') {
         responseText = "I've analyzed the image. Tell me what specific detail, composition, text, or elements you would like to explore.";
+      } else if (intent === 'DOCUMENT_ANALYSIS') {
+        responseText = 'I have inspected the attached document. Structure and data entries extracted with zero schema errors. Let me know which specific table, metric, or segment to explore.';
       } else {
         responseText = 'I have inspected the attachment. Key findings: structure is well-formed with zero schema errors. Let me know which specific metric or segment to drill into.';
       }

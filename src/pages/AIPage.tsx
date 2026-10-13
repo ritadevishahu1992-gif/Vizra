@@ -15,6 +15,9 @@ import { CitationDrawer } from '../components/ai/CitationDrawer';
 import { MusicStudioModal } from '../components/ai/MusicStudioModal';
 import { VoiceLiveModal } from '../components/ai/VoiceLiveModal';
 import { ScienceHubModal } from '../components/ai/ScienceHubModal';
+import { CommandPaletteModal } from '../components/ai/CommandPaletteModal';
+import { ShortcutsModal } from '../components/ai/ShortcutsModal';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
@@ -103,6 +106,7 @@ export const AIPage: React.FC = () => {
 
   const [currentModel, setCurrentModel] = useState<OmniaModel>('omnia-1.0');
   const [currentMode, setCurrentMode] = useState<AIMode>('quick');
+  const [isSidebarOpenDesktop, setIsSidebarOpenDesktop] = useState(true);
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCreationToolsOpen, setIsCreationToolsOpen] = useState(false);
@@ -113,6 +117,8 @@ export const AIPage: React.FC = () => {
   const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState(false);
   const [isScienceHubOpen, setIsScienceHubOpen] = useState(false);
   const [isCitationDrawerOpen, setIsCitationDrawerOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationItem | null>(null);
 
   const [isStreaming, setIsStreaming] = useState(false);
@@ -120,6 +126,132 @@ export const AIPage: React.FC = () => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Global Keyboard Shortcuts Handlers
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpenMobile((prev) => !prev);
+    } else {
+      setIsSidebarOpenDesktop((prev) => !prev);
+    }
+  };
+
+  const handleFocusComposer = () => {
+    const textarea = document.getElementById('omnia-prompt-textarea') as HTMLTextAreaElement | null;
+    if (textarea) {
+      textarea.focus();
+    }
+  };
+
+  const handleCloseTopOverlay = (): boolean => {
+    if (isCommandPaletteOpen) {
+      setIsCommandPaletteOpen(false);
+      return true;
+    }
+    if (isShortcutsHelpOpen) {
+      setIsShortcutsHelpOpen(false);
+      return true;
+    }
+    if (isCitationDrawerOpen) {
+      setIsCitationDrawerOpen(false);
+      return true;
+    }
+    if (isScienceHubOpen) {
+      setIsScienceHubOpen(false);
+      return true;
+    }
+    if (isMusicStudioOpen) {
+      setIsMusicStudioOpen(false);
+      return true;
+    }
+    if (isLiveVoiceOpen) {
+      setIsLiveVoiceOpen(false);
+      return true;
+    }
+    if (isCreateHubOpen) {
+      setIsCreateHubOpen(false);
+      return true;
+    }
+    if (isCreationToolsOpen) {
+      setIsCreationToolsOpen(false);
+      return true;
+    }
+    if (isKnowledgeBaseOpen) {
+      setIsKnowledgeBaseOpen(false);
+      return true;
+    }
+    if (isSettingsOpen) {
+      setIsSettingsOpen(false);
+      return true;
+    }
+    if (connectingIntegration) {
+      setConnectingIntegration(null);
+      return true;
+    }
+    if (isSidebarOpenMobile) {
+      setIsSidebarOpenMobile(false);
+      return true;
+    }
+    if (activeProjectId) {
+      setActiveProjectId(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleSelectModeByIndex = (index: number) => {
+    const modes: AIMode[] = ['quick', 'think', 'research', 'science', 'create', 'code', 'analyze'];
+    if (index >= 1 && index <= modes.length) {
+      setCurrentMode(modes[index - 1]);
+    }
+  };
+
+  const handleExportConversation = () => {
+    const conv = conversations.find((c) => c.id === activeConversationId);
+    if (!conv || conv.messages.length === 0) return;
+
+    const transcript = conv.messages
+      .map((m) => `### ${m.role === 'user' ? 'User' : 'Omnia'} (${m.timestamp})\n\n${m.content}\n\n`)
+      .join('---\n\n');
+
+    const blob = new Blob([`# ${conv.title}\n\n${transcript}`], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${conv.title.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'chat-transcript'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Register Global Keyboard Shortcuts Manager
+  useKeyboardShortcuts({
+    onOpenCommandPalette: () => setIsCommandPaletteOpen(true),
+    onOpenShortcutsHelp: () => setIsShortcutsHelpOpen(true),
+    onNewChat: () => {
+      // Clean chat reset
+      const newConv: Conversation = {
+        id: `conv-${Date.now()}`,
+        title: 'New Conversation',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        messages: [],
+        group: 'today',
+      };
+      setConversations((prev) => [newConv, ...prev]);
+      setActiveConversationId(newConv.id);
+      setActiveProjectId(null);
+    },
+    onToggleSidebar: handleToggleSidebar,
+    onCloseTopOverlay: handleCloseTopOverlay,
+    onOpenSettings: () => setIsSettingsOpen(true),
+    onOpenScienceHub: () => setIsScienceHubOpen(true),
+    onOpenMusicStudio: () => setIsMusicStudioOpen(true),
+    onOpenLiveVoice: () => setIsLiveVoiceOpen(true),
+    onOpenKnowledgeBase: () => setIsKnowledgeBaseOpen(true),
+    onOpenCreateHub: () => setIsCreateHubOpen(true),
+    onFocusComposer: handleFocusComposer,
+    onSelectMode: handleSelectModeByIndex,
+  });
 
   // Check for initial prompt passed via explore/homepage
   useEffect(() => {
@@ -485,13 +617,15 @@ export const AIPage: React.FC = () => {
         currentModel={currentModel}
         onSelectModel={setCurrentModel}
         onNewChat={handleNewChat}
-        onToggleSidebar={() => setIsSidebarOpenMobile(!isSidebarOpenMobile)}
+        onToggleSidebar={handleToggleSidebar}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenCreateHub={() => setIsCreateHubOpen(true)}
         onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
         onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
         onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
         onOpenScienceHub={() => setIsScienceHubOpen(true)}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenShortcutsHelp={() => setIsShortcutsHelpOpen(true)}
       />
 
       {/* Main Workspace: Left Sidebar + Workspace / Chat Column */}
@@ -507,6 +641,8 @@ export const AIPage: React.FC = () => {
           onDeleteConversation={handleDeleteConversation}
           isOpenMobile={isSidebarOpenMobile}
           onCloseMobile={() => setIsSidebarOpenMobile(false)}
+          isOpenDesktop={isSidebarOpenDesktop}
+          onOpenShortcutsHelp={() => setIsShortcutsHelpOpen(true)}
           projects={projects}
           activeProjectId={activeProjectId}
           onSelectProject={handleSelectProject}
@@ -677,6 +813,36 @@ export const AIPage: React.FC = () => {
           setIsCitationDrawerOpen(false);
           setIsKnowledgeBaseOpen(true);
         }}
+      />
+
+      {/* Global Command Palette (⌘K) */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNewChat={handleNewChat}
+        onToggleSidebar={handleToggleSidebar}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenScienceHub={() => setIsScienceHubOpen(true)}
+        onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
+        onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
+        onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
+        onOpenCreateHub={() => setIsCreateHubOpen(true)}
+        onOpenCreationTools={() => setIsCreationToolsOpen(true)}
+        onOpenShortcutsHelp={() => setIsShortcutsHelpOpen(true)}
+        onFocusComposer={handleFocusComposer}
+        onClearHistory={handleClearAllHistory}
+        onExportConversation={handleExportConversation}
+        currentMode={currentMode}
+        onSelectMode={setCurrentMode}
+        currentModel={currentModel}
+        onSelectModel={setCurrentModel}
+      />
+
+      {/* Global Keyboard Shortcuts Help Modal (⌘/ or ?) */}
+      <ShortcutsModal
+        isOpen={isShortcutsHelpOpen}
+        onClose={() => setIsShortcutsHelpOpen(false)}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
     </div>
   );

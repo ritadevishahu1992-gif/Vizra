@@ -18,6 +18,11 @@ import { computeStringHash } from '../utils/hashUtils';
 import { runOmniaLearningWorkflow } from '../../workflows/omnia-learning';
 import { OmniaReasoningEngine } from './omniaReasoningEngine';
 import { OmniaIntelligenceService } from './omniaIntelligenceService';
+import {
+  adminAuthMiddleware,
+  cronAuthMiddleware,
+  adminRateLimiter,
+} from '../server/security';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -606,8 +611,12 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   });
 
   // 6. TRIGGER TRAINING WORKFLOW (MANUAL / PROGRAMMATIC)
-  app.post('/api/omnia/train', async (req, res) => {
-    loadStoredData();
+  app.post(
+    '/api/omnia/train',
+    adminRateLimiter.getMiddleware(),
+    adminAuthMiddleware,
+    async (req, res) => {
+      loadStoredData();
     metricsData.activeStatus = 'Training';
 
     try {
@@ -707,8 +716,12 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   });
 
   // 8. ADD NEW KNOWLEDGE SOURCE (AUTOMATIC EXTRACTION & TRAINING)
-  app.post('/api/omnia/knowledge', async (req, res) => {
-    loadStoredData();
+  app.post(
+    '/api/omnia/knowledge',
+    adminRateLimiter.getMiddleware(),
+    adminAuthMiddleware,
+    async (req, res) => {
+      loadStoredData();
     try {
       const {
         title,
@@ -930,6 +943,6 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     }
   };
 
-  app.get('/api/cron/omnia-sync', handleCronSync);
-  app.post('/api/cron/omnia-sync', handleCronSync);
+  app.get('/api/cron/omnia-sync', cronAuthMiddleware, handleCronSync);
+  app.post('/api/cron/omnia-sync', cronAuthMiddleware, handleCronSync);
 }

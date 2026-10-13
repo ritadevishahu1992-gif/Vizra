@@ -14,6 +14,7 @@ import {
   extractAndCleanText,
   computeContentHash,
   estimateTokens,
+  sanitizeRetrievedEvidence,
   CHUNK_CONFIG,
 } from './ragIngestionService';
 
@@ -42,6 +43,47 @@ const STOP_WORDS = new Set([
   'with', 'won\'t', 'would', 'wouldn\'t', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your',
   'yours', 'yourself', 'yourselves'
 ]);
+
+/**
+ * Expands conversational follow-up queries with referenced context from conversation history
+ */
+export function expandQueryWithConversationHistory(
+  query: string,
+  history: Array<{ role: string; content: string }> = []
+): string {
+  const trimmed = query.trim();
+  const lower = trimmed.toLowerCase();
+
+  const isFollowUp =
+    /^(how\s+does\s+(it|this|that)|what\s+about\s+(it|this|that)|explain\s+(it|this|that)|tell\s+me\s+more|its\s+|their\s+|does\s+it|how\s+is\s+it)\b/i.test(lower) ||
+    lower.split(/\s+/).length <= 4;
+
+  if (isFollowUp && history.length > 0) {
+    for (let i = history.length - 1; i >= 0; i--) {
+      const msg = history[i];
+      if (msg.role === 'user' && msg.content && msg.content !== query) {
+        const keyTerms = msg.content
+          .replace(/[?!.,]/g, '')
+          .split(/\s+/)
+          .filter((w) => w.length > 4 && !STOP_WORDS.has(w.toLowerCase()));
+        if (keyTerms.length > 0) {
+          return `${trimmed} (${keyTerms.slice(0, 3).join(' ')})`;
+        }
+      }
+    }
+  }
+
+  return trimmed;
+}
+
+/**
+ * Reciprocal Rank Fusion formula for combining dense and sparse ranking lists
+ */
+export function calculateReciprocalRankFusion(denseRank: number, sparseRank: number, k = 60): number {
+  const dScore = denseRank > 0 ? 1 / (k + denseRank) : 0;
+  const sScore = sparseRank > 0 ? 1 / (k + sparseRank) : 0;
+  return dScore + sScore;
+}
 
 /**
  * Provider-independent Embedding Service
@@ -196,21 +238,23 @@ class RAGVectorStore {
   private initializeStore(): void {
     if (this.isInitialized) return;
     try {
-      const storedDocs = localStorage.getItem(RAG_DOCUMENTS_KEY);
-      const storedChunks = localStorage.getItem(RAG_CHUNKS_KEY);
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        const storedDocs = localStorage.getItem(RAG_DOCUMENTS_KEY);
+        const storedChunks = localStorage.getItem(RAG_CHUNKS_KEY);
 
-      if (storedDocs && storedChunks) {
-        const parsedDocs: RAGDocument[] = JSON.parse(storedDocs);
-        const parsedChunks: RAGChunk[] = JSON.parse(storedChunks);
+        if (storedDocs && storedChunks) {
+          const parsedDocs: RAGDocument[] = JSON.parse(storedDocs);
+          const parsedChunks: RAGChunk[] = JSON.parse(storedChunks);
 
-        parsedDocs.forEach((d) => this.documents.set(d.id, d));
-        parsedChunks.forEach((c) => this.chunks.set(c.id, c));
-      } else {
-        // Seed default Knowledge Hierarchy corpus
-        this.seedDefaultKnowledgeCorpus();
+          parsedDocs.forEach((d) => this.documents.set(d.id, d));
+          parsedChunks.forEach((c) => this.chunks.set(c.id, c));
+          this.isInitialized = true;
+          return;
+        }
       }
+      // Seed default Knowledge Hierarchy corpus
+      this.seedDefaultKnowledgeCorpus();
     } catch (e) {
-      console.warn('Could not load RAG vector store from localStorage, seeding default corpus', e);
       this.seedDefaultKnowledgeCorpus();
     }
     this.isInitialized = true;
@@ -218,12 +262,13 @@ class RAGVectorStore {
 
   private saveToStorage(): void {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
       const docsArray = Array.from(this.documents.values());
       const chunksArray = Array.from(this.chunks.values());
       localStorage.setItem(RAG_DOCUMENTS_KEY, JSON.stringify(docsArray));
       localStorage.setItem(RAG_CHUNKS_KEY, JSON.stringify(chunksArray));
     } catch (e) {
-      console.error('Failed to persist RAG vector store to localStorage', e);
+      // Ignore or log error
     }
   }
 
@@ -652,14 +697,24 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
     // Sort descending by hybrid score
     scoredResults.sort((a, b) => b.hybridScore - a.hybridScore);
 
-    // Assign rank and pack context within token budget
+    // Assign rank and pack context within token budget with deduplication
     const packedResults: RetrievalResult[] = [];
+    const seenHashes = new Set<string>();
     let accumulatedTokens = 0;
 
     for (let i = 0; i < scoredResults.length; i++) {
       if (packedResults.length >= topK) break;
       const res = scoredResults[i];
-      res.rank = i + 1;
+
+      // Deduplicate by content hash
+      const hash = res.chunk.metadata.content_hash;
+      if (seenHashes.has(hash)) continue;
+      seenHashes.add(hash);
+
+      res.rank = packedResults.length + 1;
+
+      // Sanitize retrieved chunk text against prompt injection attempts
+      res.chunk.text = sanitizeRetrievedEvidence(res.chunk.text);
 
       const chunkTokens = res.chunk.metadata.token_count || estimateTokens(res.chunk.text);
       if (accumulatedTokens + chunkTokens <= tokenBudget || packedResults.length === 0) {
@@ -708,6 +763,29 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
 
     this.saveToStorage();
     return true;
+  }
+
+  /**
+   * Deletes all documents and chunks associated with a specific project
+   */
+  public deleteProjectDocuments(projectId: string): number {
+    this.initializeStore();
+    let deletedCount = 0;
+    const docIdsToDelete: string[] = [];
+
+    for (const doc of this.documents.values()) {
+      if (doc.project_id === projectId) {
+        docIdsToDelete.push(doc.id);
+      }
+    }
+
+    for (const docId of docIdsToDelete) {
+      if (this.deleteDocument(docId)) {
+        deletedCount++;
+      }
+    }
+
+    return deletedCount;
   }
 
   /**
