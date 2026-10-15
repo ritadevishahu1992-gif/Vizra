@@ -25,7 +25,7 @@
         "photoURL": {
           "type": "string",
           "description": "Avatar photo URL",
-          "maxLength": 2048
+          "maxLength": 4096
         },
         "createdAt": {
           "type": "string",

@@ -5,7 +5,7 @@
       "title": "Vizra Platform Architecture & Core Principles",
       "sourceType": "documentation",
       "sourceUrl": "https://vizra.ai/docs/principles",
-      "contentHash": "hash_f985f49f3f9fcd9f",
+      "contentHash": "hash_fbc9659bd2f286f1",
       "version": 1,
       "createdAt": "2026-09-01T00:00:00Z",
       "updatedAt": "2026-09-01T00:00:00Z",
@@ -27,7 +27,7 @@
       "sourceId": "src_omnia_rag_spec",
       "title": "OMNIA 1.0 RAG & Verification Architecture Specification",
       "sourceType": "internal",
-      "contentHash": "hash_a176af56d8654122",
+      "contentHash": "hash_529f956b440655d1",
       "version": 1,
       "createdAt": "2026-09-15T12:00:00Z",
       "updatedAt": "2026-09-15T12:00:00Z",
@@ -79,7 +79,7 @@
       "sourceId": "src_user_correction_curiosity_launch",
       "title": "User Correction: Curiosity Mars Rover Landing Date",
       "sourceType": "correction",
-      "contentHash": "hash_da5697ba2a626ebc",
+      "contentHash": "hash_47bf897a69cad28a",
       "version": 1,
       "createdAt": "2026-09-25T14:20:00Z",
       "updatedAt": "2026-09-25T14:20:00Z",
@@ -418,84 +418,867 @@
     "knowledgeApproved": 6,
     "knowledgeRejected": 1,
     "conflictsDetected": 1,
-    "lastSuccessfulTrainingTime": "2026-09-28T14:49:56.095Z",
-    "lastSyncTime": "2026-09-28T14:49:56.095Z",
+    "lastSuccessfulTrainingTime": "2026-10-15T13:43:36.595Z",
+    "lastSyncTime": "2026-10-15T13:43:36.595Z",
     "activeStatus": "Active",
     "failedJobs": 1
   },
   "logs": [
     {
-      "id": "log_1790606996095_eeyw",
-      "timestamp": "2026-09-28T14:49:56.095Z",
+      "id": "log_1792071816595_hbzp",
+      "timestamp": "2026-10-15T13:43:36.595Z",
       "stage": "COMPLETED",
-      "message": "Omnia Learning Pipeline finished. Processed: 1, Concepts: 1, Rules: 1, Graph: 1, Approved: 1, Skipped: 0",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
       "level": "success"
     },
     {
-      "id": "log_1790606996095_wowy",
-      "timestamp": "2026-09-28T14:49:56.095Z",
-      "stage": "COMPLETED",
-      "message": "Successfully integrated \"Smart Medicine Dispenser Hardware Specifications\" (v1): 1 concepts, 1 rules, 1 relations into Omnia Memory.",
-      "level": "success",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790606996094_yx5t",
-      "timestamp": "2026-09-28T14:49:56.094Z",
+      "id": "log_1792071816595_a5qq",
+      "timestamp": "2026-10-15T13:43:36.595Z",
       "stage": "INDEXING",
-      "message": "Generating embeddings and indexing 1 chunks into Omnia RAG vector store",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
       "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
     },
     {
-      "id": "log_1790606995576_pd3n",
-      "timestamp": "2026-09-28T14:49:55.576Z",
-      "stage": "EXTRACTING_LOGIC",
-      "message": "Extracting humanized concepts, IF/THEN rules, procedures & graph triples for \"Smart Medicine Dispenser Hardware Specifications\"",
-      "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790606995576_43w1",
-      "timestamp": "2026-09-28T14:49:55.576Z",
-      "stage": "UNDERSTANDING",
-      "message": "Normalizing content for \"Smart Medicine Dispenser Hardware Specifications\"",
-      "level": "info",
-      "sourceId": "src_smart_dispenser_specs",
-      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
-    },
-    {
-      "id": "log_1790606995576_zmgh",
-      "timestamp": "2026-09-28T14:49:55.576Z",
+      "id": "log_1792071816595_aqbs",
+      "timestamp": "2026-10-15T13:43:36.595Z",
       "stage": "PROCESSING",
-      "message": "[1/1] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1792071816595_thmw",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1792071816595_as08",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1792071816595_2p4h",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
       "level": "info",
       "sourceId": "src_smart_dispenser_specs",
       "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
     },
     {
-      "id": "log_1790606995475_9ynx",
-      "timestamp": "2026-09-28T14:49:55.475Z",
+      "id": "log_1792071816595_vpak",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1792071816595_gx1i",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1792071816595_48js",
+      "timestamp": "2026-10-15T13:43:36.595Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1792071816594_8119",
+      "timestamp": "2026-10-15T13:43:36.594Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1792071816594_hbh7",
+      "timestamp": "2026-10-15T13:43:36.594Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1792071816493_ah4v",
+      "timestamp": "2026-10-15T13:43:36.493Z",
       "stage": "RUNNING",
-      "message": "Evaluating 1 candidate knowledge sources",
+      "message": "Evaluating 5 candidate knowledge sources",
       "level": "info"
     },
     {
-      "id": "log_1790606995475_blv1",
-      "timestamp": "2026-09-28T14:49:55.475Z",
+      "id": "log_1792071816493_piyj",
+      "timestamp": "2026-10-15T13:43:36.493Z",
       "stage": "QUEUED",
-      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1790606995474_884rf]",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1792071816493_wiwsj]",
       "level": "info"
     },
     {
-      "id": "log_srv_1",
-      "timestamp": "2026-09-28T14:49:35.035Z",
-      "level": "success",
+      "id": "log_1791988741798_79m5",
+      "timestamp": "2026-10-14T14:39:01.798Z",
       "stage": "COMPLETED",
-      "message": "Omnia Intelligence and Reasoning Layer initialized with 3 verified concepts, 3 logic rules, and 3 graph relations."
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791988741798_tb05",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791988741798_rser",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791988741798_htk3",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791988741798_98ut",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791988741798_ogk7",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791988741798_oo8z",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791988741798_cekh",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791988741798_53b0",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791988741798_ds9m",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791988741798_37oj",
+      "timestamp": "2026-10-14T14:39:01.798Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791988741697_n1y6",
+      "timestamp": "2026-10-14T14:39:01.697Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791988741697_ij19",
+      "timestamp": "2026-10-14T14:39:01.697Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791988741697_k7mfp]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791988394644_aljo",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791988394644_m62y",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791988394644_7y0w",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791988394644_y3mq",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791988394644_wymj",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791988394644_3ryz",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791988394644_uj8g",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791988394644_iadz",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791988394644_ljcc",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791988394644_rdc4",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791988394643_v6gq",
+      "timestamp": "2026-10-14T14:33:14.644Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791988394542_z4fw",
+      "timestamp": "2026-10-14T14:33:14.542Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791988394542_y5vm",
+      "timestamp": "2026-10-14T14:33:14.542Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791988394542_jzii6]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905708280_lz92",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791905708280_yu13",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905708280_p1de",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905708280_h8ui",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905708280_r7tw",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905708280_56a4",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905708280_ugjt",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905708280_fecw",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905708280_i9oc",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905708280_f5ld",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905708280_qeuu",
+      "timestamp": "2026-10-13T15:35:08.280Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905708179_npev",
+      "timestamp": "2026-10-13T15:35:08.179Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905708179_0ad5",
+      "timestamp": "2026-10-13T15:35:08.179Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791905708179_6z14z]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905591560_va5r",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791905591560_nybe",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905591560_hstn",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905591560_8cer",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905591560_7a16",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905591560_y2cz",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905591560_64yv",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905591560_brwf",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905591560_d0ig",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905591560_hawe",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905591560_nriu",
+      "timestamp": "2026-10-13T15:33:11.560Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905591459_8b9d",
+      "timestamp": "2026-10-13T15:33:11.459Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905591459_0cz3",
+      "timestamp": "2026-10-13T15:33:11.459Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791905591459_t9gdg]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905491650_z2w2",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791905491650_ro2u",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905491650_ouu0",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905491650_x7o8",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905491650_oqcr",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905491650_4ab5",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905491650_1z57",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905491650_0wfg",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905491650_ugbh",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905491650_afch",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905491650_n9cg",
+      "timestamp": "2026-10-13T15:31:31.650Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905491549_q4v1",
+      "timestamp": "2026-10-13T15:31:31.549Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905491549_80vt",
+      "timestamp": "2026-10-13T15:31:31.549Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791905491549_0h5ch]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905379376_hcit",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791905379376_d2yz",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905379376_zltl",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905379376_8t16",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905379376_4anl",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905379376_1xhf",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905379376_nnf1",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905379376_tnf2",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905379376_zemr",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905379376_2wza",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Vizra Platform Architecture & Core Principles\" (Content hash hash_fbc9659... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905379376_mq4t",
+      "timestamp": "2026-10-13T15:29:39.376Z",
+      "stage": "PROCESSING",
+      "message": "[1/5] Ingesting \"Vizra Platform Architecture & Core Principles\" (documentation)",
+      "level": "info",
+      "sourceId": "src_vizra_core_principles",
+      "sourceTitle": "Vizra Platform Architecture & Core Principles"
+    },
+    {
+      "id": "log_1791905379275_jama",
+      "timestamp": "2026-10-13T15:29:39.275Z",
+      "stage": "RUNNING",
+      "message": "Evaluating 5 candidate knowledge sources",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905379275_kyrp",
+      "timestamp": "2026-10-13T15:29:39.275Z",
+      "stage": "QUEUED",
+      "message": "Omnia Learning & Reasoning Pipeline initiated [Run ID: wf_learn_1791905379275_lrgoo]",
+      "level": "info"
+    },
+    {
+      "id": "log_1791905178862_r0se",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "COMPLETED",
+      "message": "Omnia Learning Pipeline finished. Processed: 0, Concepts: 0, Rules: 0, Graph: 0, Approved: 0, Skipped: 5",
+      "level": "success"
+    },
+    {
+      "id": "log_1791905178862_26mw",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Correction on: \"When did Curiosity land?...\"\" (Content hash hash_0c7606e... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905178862_tjvn",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "PROCESSING",
+      "message": "[5/5] Ingesting \"Correction on: \"When did Curiosity land?...\"\" (correction)",
+      "level": "info",
+      "sourceId": "src_corr_1790604403761",
+      "sourceTitle": "Correction on: \"When did Curiosity land?...\""
+    },
+    {
+      "id": "log_1791905178862_gpl8",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"User Correction: Curiosity Mars Rover Landing Date\" (Content hash hash_47bf897... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905178862_d4e6",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "PROCESSING",
+      "message": "[4/5] Ingesting \"User Correction: Curiosity Mars Rover Landing Date\" (correction)",
+      "level": "info",
+      "sourceId": "src_user_correction_curiosity_launch",
+      "sourceTitle": "User Correction: Curiosity Mars Rover Landing Date"
+    },
+    {
+      "id": "log_1791905178862_jnj2",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"Smart Medicine Dispenser Hardware Specifications\" (Content hash hash_90e25a8... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905178862_1ye2",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "PROCESSING",
+      "message": "[3/5] Ingesting \"Smart Medicine Dispenser Hardware Specifications\" (document)",
+      "level": "info",
+      "sourceId": "src_smart_dispenser_specs",
+      "sourceTitle": "Smart Medicine Dispenser Hardware Specifications"
+    },
+    {
+      "id": "log_1791905178862_ersz",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "INDEXING",
+      "message": "Skipped unchanged source \"OMNIA 1.0 RAG & Verification Architecture Specification\" (Content hash hash_529f956... matched approved v1)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
+    },
+    {
+      "id": "log_1791905178862_41m4",
+      "timestamp": "2026-10-13T15:26:18.862Z",
+      "stage": "PROCESSING",
+      "message": "[2/5] Ingesting \"OMNIA 1.0 RAG & Verification Architecture Specification\" (internal)",
+      "level": "info",
+      "sourceId": "src_omnia_rag_spec",
+      "sourceTitle": "OMNIA 1.0 RAG & Verification Architecture Specification"
     }
   ],
   "feedback": [

@@ -73,12 +73,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
-        await syncUserProfile({
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName,
-          photoURL: result.user.photoURL,
-        });
+        try {
+          await syncUserProfile({
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+          });
+        } catch (syncErr) {
+          console.warn('Profile sync non-fatal warning:', syncErr);
+        }
+
+        // Trigger server-verified dual login notification (User + Admin) asynchronously
+        try {
+          const idToken = await result.user.getIdToken();
+          fetch('/api/auth/login-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`,
+            },
+          }).catch((notifyErr) => {
+            console.warn('[Notification] Non-blocking dispatch warning:', notifyErr);
+          });
+        } catch (tokenErr) {
+          console.warn('[Notification] Could not retrieve ID token for notification:', tokenErr);
+        }
+
         setIsLoginModalOpen(false);
       }
     } catch (err: any) {

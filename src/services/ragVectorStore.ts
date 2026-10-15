@@ -226,7 +226,7 @@ function hashString(str: string): number {
 /**
  * In-Memory & LocalStorage Vector Store
  */
-class RAGVectorStore {
+export class RAGVectorStore {
   private documents: Map<string, RAGDocument> = new Map();
   private chunks: Map<string, RAGChunk> = new Map();
   private isInitialized = false;

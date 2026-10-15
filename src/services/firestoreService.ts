@@ -42,36 +42,34 @@ export async function syncUserProfile(user: {
   const path = `users/${user.uid}`;
   try {
     const userRef = doc(db, 'users', user.uid);
-    const existingSnap = await getDoc(userRef);
+    let existing: Partial<UserProfileData> | null = null;
+    
+    try {
+      const existingSnap = await getDoc(userRef);
+      if (existingSnap.exists()) {
+        existing = existingSnap.data() as UserProfileData;
+      }
+    } catch (readErr) {
+      console.warn('[Firestore] Profile pre-read non-fatal warning:', readErr);
+    }
 
     const now = new Date().toISOString();
-    if (!existingSnap.exists()) {
-      const newProfile: UserProfileData = {
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || 'Vizra Creator',
-        photoURL: user.photoURL || '',
-        createdAt: now,
-        updatedAt: now,
-      };
-      await setDoc(userRef, newProfile);
-    } else {
-      const existing = existingSnap.data() as UserProfileData;
-      await setDoc(
-        userRef,
-        {
-          uid: user.uid,
-          email: user.email || existing.email,
-          displayName: user.displayName || existing.displayName || 'Vizra Creator',
-          photoURL: user.photoURL || existing.photoURL || '',
-          createdAt: existing.createdAt || now,
-          updatedAt: now,
-        },
-        { merge: true }
-      );
-    }
+    const profilePayload: UserProfileData = {
+      uid: user.uid,
+      email: (user.email || existing?.email || '').slice(0, 254),
+      displayName: (user.displayName || existing?.displayName || 'Vizra Creator').slice(0, 100),
+      photoURL: (user.photoURL || existing?.photoURL || '').slice(0, 4000),
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    };
+
+    await setDoc(userRef, profilePayload);
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
+    try {
+      handleFirestoreError(error, OperationType.WRITE, path);
+    } catch (loggedErr) {
+      console.warn('[Firestore] syncUserProfile handled warning:', loggedErr);
+    }
   }
 }
 

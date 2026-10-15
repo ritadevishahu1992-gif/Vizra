@@ -1,136 +1,387 @@
 import React, { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, ExternalLink } from 'lucide-react';
 
 interface MarkdownRendererProps {
   content: string;
 }
 
+interface BlockItem {
+  type: 'code' | 'table' | 'header' | 'blockquote' | 'list' | 'paragraph';
+  content: string;
+  language?: string;
+  level?: number;
+  items?: Array<{ text: string; indent: number; isOrdered: boolean; orderNumber?: string }>;
+  tableData?: { headers: string[]; rows: string[][] };
+}
+
+/**
+ * Robust, production-grade Markdown Renderer for OMNIA 1.0
+ * Handles:
+ * - Completed and streaming/unclosed code blocks
+ * - Markdown tables (| col | col |)
+ * - Ordered and unordered nested lists
+ * - Safe hyperlinks with XSS protection
+ * - Headers, blockquotes, inline formatting (bold, italic, code)
+ */
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
-  // Parse code blocks vs standard text
-  const parts = content.split(/(```[\s\S]*?```)/g);
+  if (!content) return null;
+
+  const blocks = parseBlocks(content);
 
   return (
     <div className="space-y-3 text-neutral-200 text-sm md:text-base leading-relaxed break-words">
-      {parts.map((part, index) => {
-        if (part.startsWith('```')) {
-          // Code block
-          const match = part.match(/^```([a-zA-Z0-9_-]*)\n([\s\S]*?)```$/);
-          const lang = match ? match[1] : '';
-          const code = match ? match[2] : part.slice(3, -3);
-
-          return <CodeBlock key={index} code={code.trim()} language={lang} />;
+      {blocks.map((block, idx) => {
+        if (block.type === 'code') {
+          return <CodeBlock key={idx} code={block.content} language={block.language} />;
         }
 
-        // Render regular markdown text paragraphs and lists
-        const paragraphs = part.split(/\n\n+/);
+        if (block.type === 'table' && block.tableData) {
+          return <TableBlock key={idx} tableData={block.tableData} />;
+        }
+
+        if (block.type === 'header') {
+          const Tag = (
+            block.level === 1 ? 'h1' :
+            block.level === 2 ? 'h2' :
+            block.level === 3 ? 'h3' : 'h4'
+          ) as keyof React.JSX.IntrinsicElements;
+
+          const headerClass =
+            block.level === 1 ? 'text-2xl font-bold text-white tracking-tight mt-6 mb-3' :
+            block.level === 2 ? 'text-xl font-semibold text-white tracking-tight mt-5 mb-2' :
+            block.level === 3 ? 'text-lg font-semibold text-white tracking-tight mt-4 mb-2' :
+            'text-sm font-semibold text-neutral-300 uppercase tracking-wider mt-3 mb-1 font-mono';
+
+          return (
+            <Tag key={idx} className={headerClass}>
+              {renderInline(block.content)}
+            </Tag>
+          );
+        }
+
+        if (block.type === 'blockquote') {
+          return (
+            <blockquote
+              key={idx}
+              className="border-l-2 border-[#eb3b2d] pl-4 my-2 text-neutral-300 italic bg-neutral-900/30 py-1.5 rounded-r-md"
+            >
+              {renderInline(block.content)}
+            </blockquote>
+          );
+        }
+
+        if (block.type === 'list' && block.items) {
+          return (
+            <ul key={idx} className="space-y-1.5 my-2 list-none pl-1">
+              {block.items.map((item, itemIdx) => (
+                <li
+                  key={itemIdx}
+                  className={`flex items-start gap-2.5 ${item.indent > 0 ? 'ml-5' : ''}`}
+                >
+                  {item.isOrdered ? (
+                    <span className="font-mono text-xs font-semibold text-[#eb3b2d] shrink-0 mt-0.5 min-w-[1.2rem]">
+                      {item.orderNumber}.
+                    </span>
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d] mt-2 shrink-0" />
+                  )}
+                  <span className="text-neutral-300 flex-1 leading-relaxed">
+                    {renderInline(item.text)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        // Paragraph
         return (
-          <React.Fragment key={index}>
-            {paragraphs.map((para, pIdx) => {
-              const trimmed = para.trim();
-              if (!trimmed) return null;
-
-              // Headers
-              if (trimmed.startsWith('### ')) {
-                return (
-                  <h3 key={pIdx} className="text-lg font-semibold text-white tracking-tight mt-4 mb-2">
-                    {renderInline(trimmed.replace(/^###\s+/, ''))}
-                  </h3>
-                );
-              }
-              if (trimmed.startsWith('#### ')) {
-                return (
-                  <h4 key={pIdx} className="text-sm font-semibold text-neutral-300 uppercase tracking-wider mt-3 mb-1 font-mono">
-                    {renderInline(trimmed.replace(/^####\s+/, ''))}
-                  </h4>
-                );
-              }
-              if (trimmed.startsWith('## ')) {
-                return (
-                  <h2 key={pIdx} className="text-xl font-semibold text-white tracking-tight mt-5 mb-2">
-                    {renderInline(trimmed.replace(/^##\s+/, ''))}
-                  </h2>
-                );
-              }
-              if (trimmed.startsWith('# ')) {
-                return (
-                  <h1 key={pIdx} className="text-2xl font-bold text-white tracking-tight mt-6 mb-3">
-                    {renderInline(trimmed.replace(/^#\s+/, ''))}
-                  </h1>
-                );
-              }
-
-              // Blockquotes
-              if (trimmed.startsWith('> ')) {
-                return (
-                  <blockquote
-                    key={pIdx}
-                    className="border-l-2 border-[#eb3b2d] pl-4 my-2 text-neutral-300 italic bg-neutral-900/30 py-1.5 rounded-r-md"
-                  >
-                    {renderInline(trimmed.replace(/^>\s*/, ''))}
-                  </blockquote>
-                );
-              }
-
-              // List items
-              if (trimmed.split('\n').every(line => /^\s*[-*]\s+/.test(line) || /^\s*\d+\.\s+/.test(line) || line.trim() === '')) {
-                const lines = trimmed.split('\n');
-                return (
-                  <ul key={pIdx} className="space-y-1.5 pl-4 my-2 list-none">
-                    {lines.map((line, lIdx) => {
-                      const listText = line.replace(/^\s*[-*]\s+/, '').replace(/^\s*\d+\.\s+/, '');
-                      return (
-                        <li key={lIdx} className="flex items-start gap-2.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d] mt-2 shrink-0" />
-                          <span>{renderInline(listText)}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                );
-              }
-
-              // Normal paragraph with linebreaks
-              return (
-                <p key={pIdx} className="my-1.5 text-neutral-300">
-                  {trimmed.split('\n').map((line, lIdx, arr) => (
-                    <React.Fragment key={lIdx}>
-                      {renderInline(line)}
-                      {lIdx < arr.length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
-                </p>
-              );
-            })}
-          </React.Fragment>
+          <p key={idx} className="my-1.5 text-neutral-300 leading-relaxed">
+            {block.content.split('\n').map((line, lIdx, arr) => (
+              <React.Fragment key={lIdx}>
+                {renderInline(line)}
+                {lIdx < arr.length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </p>
         );
       })}
     </div>
   );
 };
 
+function parseBlocks(rawText: string): BlockItem[] {
+  const blocks: BlockItem[] = [];
+
+  // Extract code blocks (including unclosed code blocks during streaming)
+  const codeRegex = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)(?:```|$)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = codeRegex.exec(rawText)) !== null) {
+    if (match.index > lastIndex) {
+      const textChunk = rawText.slice(lastIndex, match.index);
+      blocks.push(...parseTextBlocks(textChunk));
+    }
+
+    const lang = match[1] || '';
+    const code = match[2] || '';
+    blocks.push({
+      type: 'code',
+      content: code.trim(),
+      language: lang,
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < rawText.length) {
+    const remainingText = rawText.slice(lastIndex);
+    blocks.push(...parseTextBlocks(remainingText));
+  }
+
+  return blocks;
+}
+
+function parseTextBlocks(text: string): BlockItem[] {
+  const items: BlockItem[] = [];
+  const paragraphs = text.split(/\n\n+/);
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) continue;
+
+    // 1. Table detection (header + separator + data rows)
+    const lines = trimmed.split('\n');
+    if (lines.length >= 2 && lines[0].includes('|') && /^\s*\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?\s*$/.test(lines[1])) {
+      const tableData = parseTableData(lines);
+      if (tableData) {
+        items.push({
+          type: 'table',
+          content: trimmed,
+          tableData,
+        });
+        continue;
+      }
+    }
+
+    // 2. Headers
+    if (/^#{1,4}\s+/.test(trimmed)) {
+      const headerMatch = trimmed.match(/^(#{1,4})\s+(.*)$/);
+      if (headerMatch) {
+        items.push({
+          type: 'header',
+          level: headerMatch[1].length,
+          content: headerMatch[2],
+        });
+        continue;
+      }
+    }
+
+    // 3. Blockquotes
+    if (trimmed.startsWith('>')) {
+      const bqText = lines.map((l) => l.replace(/^>\s?/, '')).join('\n');
+      items.push({
+        type: 'blockquote',
+        content: bqText,
+      });
+      continue;
+    }
+
+    // 4. Mixed lines containing lists or pure lists
+    const isList = lines.some((l) => /^\s*([-*]|\d+\.)\s+/.test(l));
+    if (isList) {
+      let currentNonList: string[] = [];
+      let currentList: Array<{ text: string; indent: number; isOrdered: boolean; orderNumber?: string }> = [];
+
+      for (const line of lines) {
+        const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
+        if (listMatch) {
+          if (currentNonList.length > 0) {
+            items.push({
+              type: 'paragraph',
+              content: currentNonList.join('\n'),
+            });
+            currentNonList = [];
+          }
+          const indentSpaces = listMatch[1].length;
+          const marker = listMatch[2];
+          const isOrdered = /^\d+\./.test(marker);
+          const orderNum = isOrdered ? marker.replace('.', '') : undefined;
+          currentList.push({
+            indent: indentSpaces >= 2 ? 1 : 0,
+            isOrdered,
+            orderNumber: orderNum,
+            text: listMatch[3],
+          });
+        } else {
+          if (currentList.length > 0) {
+            items.push({
+              type: 'list',
+              content: '',
+              items: currentList,
+            });
+            currentList = [];
+          }
+          currentNonList.push(line);
+        }
+      }
+
+      if (currentList.length > 0) {
+        items.push({
+          type: 'list',
+          content: '',
+          items: currentList,
+        });
+      }
+      if (currentNonList.length > 0) {
+        items.push({
+          type: 'paragraph',
+          content: currentNonList.join('\n'),
+        });
+      }
+      continue;
+    }
+
+    // 5. Standard paragraph
+    items.push({
+      type: 'paragraph',
+      content: trimmed,
+    });
+  }
+
+  return items;
+}
+
+function parseTableData(lines: string[]): { headers: string[]; rows: string[][] } | null {
+  try {
+    const parseRow = (line: string) => {
+      let trimmed = line.trim();
+      if (trimmed.startsWith('|')) trimmed = trimmed.slice(1);
+      if (trimmed.endsWith('|')) trimmed = trimmed.slice(0, -1);
+      return trimmed.split('|').map((c) => c.trim());
+    };
+
+    const headers = parseRow(lines[0]);
+    const rows: string[][] = [];
+
+    for (let i = 2; i < lines.length; i++) {
+      if (!lines[i].trim() || !lines[i].includes('|')) continue;
+      rows.push(parseRow(lines[i]));
+    }
+
+    return { headers, rows };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Safely parses inline markdown:
+ * - Bold: **text** or __text__
+ * - Italic: *text* or _text_
+ * - Inline code: `code`
+ * - Safe hyperlinks: [text](url) with javascript: filtering
+ */
 function renderInline(text: string): React.ReactNode {
-  // Process bold: **text**
-  // Process inline code: `code`
-  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+  // Regex to match code, bold, links, italic
+  const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\[([^\]]+)\]\(([^)]+)\)|\*[^*]+\*|_[^_]+_)/g;
+  const parts = text.split(inlineRegex);
 
   return parts.map((part, i) => {
+    if (!part) return null;
+
+    // Inline code
     if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
       return (
-        <code key={i} className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 font-mono text-xs text-[#eb3b2d]">
+        <code
+          key={i}
+          className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 font-mono text-xs text-[#eb3b2d]"
+        >
           {part.slice(1, -1)}
         </code>
       );
     }
-    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+
+    // Bold
+    if ((part.startsWith('**') && part.endsWith('**')) || (part.startsWith('__') && part.endsWith('__'))) {
+      if (part.length > 4) {
+        return (
+          <strong key={i} className="font-semibold text-white">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+    }
+
+    // Safe Markdown Link: [label](url)
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      const label = linkMatch[1];
+      let href = linkMatch[2].trim();
+
+      // XSS Protection: Disallow javascript: and data: URIs
+      if (/^(javascript:|data:|vbscript:)/i.test(href)) {
+        href = '#';
+      }
+
       return (
-        <strong key={i} className="font-semibold text-white">
-          {part.slice(2, -2)}
-        </strong>
+        <a
+          key={i}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[#eb3b2d] hover:text-[#ff5242] underline underline-offset-2 transition-colors font-medium"
+        >
+          <span>{label}</span>
+          <ExternalLink size={11} className="inline shrink-0" />
+        </a>
       );
     }
+
+    // Italic
+    if ((part.startsWith('*') && part.endsWith('*')) || (part.startsWith('_') && part.endsWith('_'))) {
+      if (part.length > 2) {
+        return (
+          <em key={i} className="italic text-neutral-200">
+            {part.slice(1, -1)}
+          </em>
+        );
+      }
+    }
+
     return part;
   });
 }
+
+const TableBlock: React.FC<{ tableData: { headers: string[]; rows: string[][] } }> = ({ tableData }) => {
+  return (
+    <div className="my-3 overflow-x-auto rounded-xl border border-neutral-800 bg-[#0c0c0c]/80">
+      <table className="w-full text-left text-xs md:text-sm text-neutral-300">
+        <thead className="bg-neutral-900/80 text-white font-semibold border-b border-neutral-800">
+          <tr>
+            {tableData.headers.map((h, idx) => (
+              <th key={idx} className="px-4 py-2.5 font-mono text-xs uppercase tracking-wider">
+                {renderInline(h)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-800/60 font-sans">
+          {tableData.rows.map((row, rIdx) => (
+            <tr key={rIdx} className="hover:bg-neutral-900/40 transition-colors">
+              {row.map((cell, cIdx) => (
+                <td key={cIdx} className="px-4 py-2 leading-relaxed">
+                  {renderInline(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, language }) => {
   const [copied, setCopied] = useState(false);
@@ -150,7 +401,7 @@ const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, langua
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
           title="Copy to clipboard"
           aria-label="Copy code"
         >
