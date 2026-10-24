@@ -8,7 +8,7 @@ import {
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
-  getFirestore,
+  initializeFirestore,
   doc,
   getDocFromServer,
   Firestore,
@@ -18,8 +18,14 @@ import firebaseConfig from '../../firebase-applet-config.json';
 // Initialize the Firebase application
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore specifying database ID
-export const db: Firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Initialize Firestore specifying database ID and long-polling to avoid iframe/proxy stream timeouts
+export const db: Firestore = initializeFirestore(
+  app,
+  {
+    experimentalForceLongPolling: true,
+  },
+  firebaseConfig.firestoreDatabaseId
+);
 
 // Initialize Firebase Authentication
 export const auth = getAuth(app);
