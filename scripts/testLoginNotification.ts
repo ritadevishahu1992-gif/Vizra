@@ -197,18 +197,26 @@ export async function runLoginNotificationTests() {
   // SCENARIO 8: Unconfigured provider runs safely in simulated sandbox mode
   await assertTest('NOTIF-08', 'Unconfigured email provider degrades gracefully to simulation', async () => {
     clearIdempotencyStoreForTesting();
-    // Temporarily unset mock dispatcher to test native simulation logic
     setMockEmailDispatcher(null);
+    const savedApiKey = process.env.RESEND_API_KEY;
+    delete process.env.RESEND_API_KEY;
 
-    const record = await processLoginNotifications({
-      uid: 'user_sim_test',
-      email: 'simulated_creator@vizra.ai',
-      authTime: 1700030000,
-    });
+    try {
+      const record = await processLoginNotifications({
+        uid: 'user_sim_test',
+        email: 'simulated_creator@vizra.ai',
+        authTime: 1700030000,
+      });
 
-    // When RESEND_API_KEY is not set or placeholder, both return 'simulated'
-    const isSimulated = record.userDelivery.status === 'simulated' || record.userDelivery.status === 'sent';
-    return isSimulated && record.eventId.length > 0;
+      const isSimulated =
+        record.userDelivery.status === 'simulated' &&
+        record.adminDelivery.status === 'simulated';
+      return isSimulated && record.eventId.length > 0;
+    } finally {
+      if (savedApiKey !== undefined) {
+        process.env.RESEND_API_KEY = savedApiKey;
+      }
+    }
   });
 
   // SCENARIO 9: Token validation rejects forged / unauthenticated requests

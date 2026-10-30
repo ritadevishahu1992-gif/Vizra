@@ -18,6 +18,7 @@ import {
   renderAdminLoginEmailHtml,
   renderAdminLoginEmailText,
 } from './templates/signatureFusionTemplates';
+import { sendTransactionalEmail, getDefaultSenderEmail } from '../../lib/email';
 
 export interface LoginNotificationRequest {
   uid: string;
@@ -71,7 +72,7 @@ export function clearIdempotencyStoreForTesting(): void {
 }
 
 /**
- * Dispatches an email via Resend REST API or test/sandbox dispatcher with bounded retries.
+ * Dispatches an email via the Resend SDK service (src/lib/email.ts) or test/sandbox dispatcher with bounded retries.
  */
 async function dispatchEmailWithRetries(
   payload: {
@@ -96,65 +97,32 @@ async function dispatchEmailWithRetries(
     }
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-
-  // 2. If no provider API key configured, operate safely in SIMULATED sandbox mode
-  if (!apiKey || apiKey === 're_placeholder_key' || apiKey.trim().length <= 5) {
-    const maskedTo = payload.to.replace(/(?<=.)[^@](?=[^@]*?@)|(?<=@.)[^.](?=[^.]*?\.)/g, '*');
-    console.log(`[Notification Engine: Simulated] Email to ${maskedTo} prepared (${payload.subject}). Provider API key unconfigured in environment.`);
-    return {
-      status: 'simulated',
-      messageId: `sim_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
-      attempts: 1,
-    };
-  }
-
-  // 3. Real Resend API dispatch with bounded retries & AbortController timeout
+  // 2. Dispatch via Resend SDK service with bounded retries
   let attempts = 0;
   let lastError = '';
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     attempts++;
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
+    const result = await sendTransactionalEmail({
+      from: payload.from || getDefaultSenderEmail(),
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    });
 
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey.trim()}`,
-          'Content-Type': 'application/json',
-          'User-Agent': 'Vizra-Security-Notification/1.0',
-        },
-        body: JSON.stringify({
-          from: payload.from,
-          to: [payload.to],
-          subject: payload.subject,
-          html: payload.html,
-          text: payload.text,
-        }),
-        signal: controller.signal,
-      });
+    if (result.status === 'sent' || result.status === 'simulated') {
+      return {
+        status: result.status,
+        messageId: result.messageId,
+        attempts,
+      };
+    }
 
-      clearTimeout(timeout);
-
-      if (response.ok) {
-        const data = (await response.json()) as any;
-        return {
-          status: 'sent',
-          messageId: data.id || `resend_${Date.now()}`,
-          attempts,
-        };
-      } else {
-        const errorText = await response.text();
-        lastError = `HTTP ${response.status}: ${errorText.slice(0, 200)}`;
-        // Permanent 4xx errors (except 429) should not retry
-        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          break;
-        }
-      }
-    } catch (fetchErr: any) {
-      lastError = fetchErr.name === 'AbortError' ? 'Dispatch request timed out after 5000ms' : fetchErr.message;
+    lastError = result.error || 'Unknown email dispatch error';
+    // Do not retry permanent validation errors
+    if (lastError.includes('validation_error') || lastError.includes('Invalid recipient')) {
+      break;
     }
 
     if (attempt < maxRetries) {
