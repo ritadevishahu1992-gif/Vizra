@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AuthProvider } from './context/AuthContext';
 import { LoginModal } from './components/auth/LoginModal';
 import { LandingPage } from './pages/LandingPage';
@@ -19,6 +20,7 @@ export default function App() {
         </Routes>
         <LoginModal />
         <Analytics />
+        <SpeedInsights />
       </BrowserRouter>
     </AuthProvider>
   );
