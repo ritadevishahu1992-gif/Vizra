@@ -1,11 +1,36 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { MessageActions } from './MessageActions';
 import { Message, SmartSuggestion } from '../../types/ai';
+import { EngageLifecycleState } from '../../types/engage';
 import { CitationItem } from '../../types/rag';
 import { SourcesBar } from './SourcesBar';
+import { VizraEngageBanner } from './engage/VizraEngageBanner';
+import { OmniaResponseSkeleton } from './MessageListSkeleton';
+
+export function deriveEngageLifecycleFromMessage(
+  message: Pick<Message, 'status' | 'content'>
+): EngageLifecycleState {
+  const hasTokens = Boolean(message.content && message.content.length > 0);
+  if (message.status === 'streaming' && !hasTokens) {
+    return 'generating';
+  }
+  if (message.status === 'streaming' && hasTokens) {
+    return 'streaming';
+  }
+  if (message.status === 'done') {
+    return 'completed';
+  }
+  if (message.status === 'cancelled') {
+    return 'cancelled';
+  }
+  if (message.status === 'error') {
+    return 'failed';
+  }
+  return 'idle';
+}
 import {
   FileText,
   Image as ImageIcon,
@@ -65,7 +90,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       className={`py-4 w-full flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
-      <div className={`max-w-[92%] md:max-w-[85%] ${isUser ? 'ml-auto' : 'mr-auto'}`}>
+      <div className={`max-w-[92%] md:max-w-[85%] ${isUser ? 'ml-auto' : 'w-full mr-auto'}`}>
         {/* User Message Bubble */}
         {isUser ? (
           <div className="space-y-2 group">
@@ -266,21 +291,53 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               </div>
             )}
 
-            {/* Assistant Body or Thinking Indicator */}
-            {message.status === 'streaming' && !message.content ? (
-              <div className="flex items-center gap-2 text-xs font-mono text-neutral-400 py-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d] animate-pulse" />
-                <span>Omnia is synthesizing…</span>
-              </div>
-            ) : (
-              <div className="text-neutral-200">
-                <MarkdownRenderer content={message.content} />
+            {/* Assistant Body, VIZRA Engage & Awaiting-Response Skeleton */}
+            {(() => {
+              const hasTokens = Boolean(message.content && message.content.length > 0);
+              const engageLifecycleState = deriveEngageLifecycleFromMessage(message);
+              const displayContent = hasTokens
+                ? message.content
+                : message.status === 'error'
+                ? 'An error occurred during inference. Please retry.'
+                : message.status === 'cancelled'
+                ? 'Synthesis cancelled by user.'
+                : '';
 
-                {message.status === 'streaming' && (
-                  <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-[#eb3b2d] animate-pulse" />
-                )}
-              </div>
-            )}
+              return (
+                <>
+                  {(engageLifecycleState === 'generating' ||
+                    engageLifecycleState === 'streaming') && (
+                    <VizraEngageBanner
+                      lifecycleState={engageLifecycleState}
+                      mode={message.mode}
+                      hasStreamedTokens={hasTokens}
+                    />
+                  )}
+                  <AnimatePresence mode="wait">
+                    {engageLifecycleState === 'generating' && !displayContent ? (
+                      <OmniaResponseSkeleton
+                        key="awaiting-omnia-skeleton"
+                        mode={message.mode}
+                      />
+                    ) : displayContent ? (
+                      <motion.div
+                        key="omnia-response-content"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                        className="text-neutral-200"
+                      >
+                        <MarkdownRenderer content={displayContent} />
+
+                        {message.status === 'streaming' && (
+                          <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-[#eb3b2d] animate-pulse motion-reduce:animate-none" />
+                        )}
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </>
+              );
+            })()}
 
             {/* Unified OMNIA Sources Bar (Web + Documents) */}
             {((message.sources && message.sources.length > 0) || (message.citations && message.citations.length > 0)) && (

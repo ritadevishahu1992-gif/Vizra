@@ -3,12 +3,23 @@ import { motion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
 import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2, Music, Atom } from 'lucide-react';
 import { AIMode } from '../../types/ai';
+import { Tooltip } from '../ui/Tooltip';
 
 interface EmptyStateProps {
   onSelectPrompt: (prompt: string, mode?: AIMode) => void;
   activeMode?: AIMode;
   onSelectMode?: (mode: AIMode) => void;
 }
+
+const MODE_TOOLTIPS: Record<AIMode, string> = {
+  quick: 'Fast, concise answers for everyday questions.',
+  think: 'Deep step-by-step reasoning for complex logic and math.',
+  research: 'Live web research with verified source citations.',
+  science: 'Analyze proteins, chemical molecules, and PubMed papers.',
+  create: 'Draft scripts, storyboards, and 10-stage creative projects.',
+  code: 'Write, debug, and refactor production-ready code.',
+  analyze: 'Inspect uploaded PDFs, CSV spreadsheets, and images.',
+};
 
 const suggestions = [
   {
@@ -85,26 +96,32 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {onSelectMode && (
         <div className="flex flex-wrap items-center justify-center gap-1.5 mb-6 max-w-lg">
           {[
-            { id: 'quick', label: 'Quick' },
-            { id: 'think', label: 'Think' },
-            { id: 'research', label: 'Research' },
-            { id: 'science', label: 'Science' },
-            { id: 'create', label: 'Create' },
-            { id: 'code', label: 'Code' },
-            { id: 'analyze', label: 'Analyze' },
+            { id: 'quick' as AIMode, label: 'Quick' },
+            { id: 'think' as AIMode, label: 'Think' },
+            { id: 'research' as AIMode, label: 'Research' },
+            { id: 'science' as AIMode, label: 'Science' },
+            { id: 'create' as AIMode, label: 'Create' },
+            { id: 'code' as AIMode, label: 'Code' },
+            { id: 'analyze' as AIMode, label: 'Analyze' },
           ].map((m) => (
-            <button
+            <Tooltip
               key={m.id}
-              type="button"
-              onClick={() => onSelectMode(m.id as AIMode)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                activeMode === m.id
-                  ? 'bg-white text-black border-white shadow-sm'
-                  : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
-              }`}
+              label={`${m.label} Mode`}
+              text={MODE_TOOLTIPS[m.id]}
+              position="top"
             >
-              {m.label}
-            </button>
+              <button
+                type="button"
+                onClick={() => onSelectMode(m.id)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                  activeMode === m.id
+                    ? 'bg-white text-black border-white shadow-sm'
+                    : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                }`}
+              >
+                {m.label}
+              </button>
+            </Tooltip>
           ))}
         </div>
       )}

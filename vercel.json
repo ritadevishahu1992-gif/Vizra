@@ -8,6 +8,10 @@
   ],
   "rewrites": [
     {
+      "source": "/googlef66bb3a90d865a89.html",
+      "destination": "/googlef66bb3a90d865a89.html"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom, Search, Keyboard } from 'lucide-react';
+import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom, Search, Keyboard, BarChart3 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
 import { CapabilitiesMenu } from './CapabilitiesMenu';
 import { OmniaModel } from '../../types/ai';
 import { UserMenu } from '../auth/UserMenu';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
+import { Tooltip } from '../ui/Tooltip';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -21,6 +22,7 @@ interface AIHeaderProps {
   onOpenScienceHub?: () => void;
   onOpenCommandPalette?: () => void;
   onOpenShortcutsHelp?: () => void;
+  onOpenEngageAdmin?: () => void;
 }
 
 export const AIHeader: React.FC<AIHeaderProps> = ({
@@ -36,6 +38,7 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onOpenScienceHub,
   onOpenCommandPalette,
   onOpenShortcutsHelp,
+  onOpenEngageAdmin,
 }) => {
   return (
     <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none">
@@ -52,7 +55,7 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
         <Link
           to="/"
           className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-1 focus-visible:ring-[#eb3b2d] rounded py-1"
-          title="Back to Vizra Home"
+          aria-label="Back to Vizra Home"
         >
           <VizraLogo size={22} />
           <span className="text-base font-bold tracking-tight text-white group-hover:opacity-90 transition-opacity">
@@ -79,106 +82,182 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
         <CapabilitiesMenu />
 
         {onOpenCreateHub && (
-          <button
-            onClick={onOpenCreateHub}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
-            title="Open Create Hub (8 disciplines)"
+          <Tooltip
+            label="Create Hub"
+            text="Launch guided creative workflows across 8 disciplines including video scripts, storyboards, and 10-stage projects."
+            position="bottom"
           >
-            <Sparkles size={13} className="text-[#eb3b2d]" />
-            <span>Create Hub</span>
-          </button>
+            <button
+              onClick={onOpenCreateHub}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Open Create Hub"
+            >
+              <Sparkles size={13} className="text-[#eb3b2d]" />
+              <span>Create Hub</span>
+            </button>
+          </Tooltip>
         )}
 
         {onOpenScienceHub && (
-          <button
-            onClick={onOpenScienceHub}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
-            title="Open Omnia Science Suite (DeepMind Science Skills)"
+          <Tooltip
+            label="Omnia Science Suite"
+            text="Explore 3D protein structures (AlphaFold), chemical molecules (PubChem), and peer-reviewed PubMed research."
+            position="bottom"
           >
-            <Atom size={13} className="text-[#eb3b2d]" />
-            <span>Science</span>
-          </button>
+            <button
+              onClick={onOpenScienceHub}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Open Omnia Science Suite"
+            >
+              <Atom size={13} className="text-[#eb3b2d]" />
+              <span>Science</span>
+            </button>
+          </Tooltip>
         )}
 
         {onOpenKnowledgeBase && (
-          <button
-            onClick={onOpenKnowledgeBase}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
-            title="Open OMNIA 1.0 RAG Knowledge Base"
+          <Tooltip
+            label="Knowledge Base"
+            text="Browse and manage verified documents, project specs, and citations used to ground Omnia's answers."
+            position="bottom"
           >
-            <Database size={13} className="text-[#eb3b2d]" />
-            <span>Knowledge Base</span>
-          </button>
+            <button
+              onClick={onOpenKnowledgeBase}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Open Knowledge Base"
+            >
+              <Database size={13} className="text-[#eb3b2d]" />
+              <span>Knowledge Base</span>
+            </button>
+          </Tooltip>
         )}
+
         {onOpenMusicStudio && (
-          <button
-            onClick={onOpenMusicStudio}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
-            title="Open AI Music Studio (Lyria 3)"
+          <Tooltip
+            label="AI Music Studio"
+            text="Compose custom instrumental soundtracks, ambient loops, and audio cues from text prompts using Lyria 3."
+            position="bottom"
           >
-            <Music size={13} className="text-[#eb3b2d]" />
-            <span>AI Music</span>
-          </button>
+            <button
+              onClick={onOpenMusicStudio}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Open AI Music Studio"
+            >
+              <Music size={13} className="text-[#eb3b2d]" />
+              <span>AI Music</span>
+            </button>
+          </Tooltip>
         )}
 
         {onOpenLiveVoice && (
-          <button
-            onClick={onOpenLiveVoice}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
-            title="Start real-time voice conversation (gemini-3.8-live)"
+          <Tooltip
+            label="Live Voice Studio"
+            text="Start a real-time, hands-free voice conversation with Omnia for live brainstorming and creative direction."
+            position="bottom"
           >
-            <Radio size={13} className="text-[#eb3b2d] animate-pulse" />
-            <span>Live Voice</span>
-          </button>
+            <button
+              onClick={onOpenLiveVoice}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Start Live Voice Conversation"
+            >
+              <Radio size={13} className="text-[#eb3b2d] animate-pulse" />
+              <span>Live Voice</span>
+            </button>
+          </Tooltip>
+        )}
+
+        {onOpenEngageAdmin && (
+          <Tooltip
+            label="Vizra Engage Studio"
+            text="Manage interactive learning cards, creative tips, and visual experiences displayed while responses generate."
+            position="bottom"
+          >
+            <button
+              onClick={onOpenEngageAdmin}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              aria-label="Open Vizra Engage Studio"
+            >
+              <BarChart3 size={13} className="text-[#eb3b2d]" />
+              <span>Engage</span>
+            </button>
+          </Tooltip>
         )}
       </div>
 
       {/* Right: Actions (New Chat, Settings, Profile) */}
       <div className="flex items-center gap-1.5 md:gap-2">
         {onOpenCommandPalette && (
-          <button
-            onClick={onOpenCommandPalette}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-300 hover:text-white transition-colors cursor-pointer"
-            title={`Search actions & commands (${modKey}K)`}
-            aria-label="Command Palette"
+          <Tooltip
+            label="Command Palette"
+            shortcut={`${modKey}K`}
+            text="Quickly search and launch any creative tool, mode, or workspace command from one place."
+            position="bottom"
+            align="end"
           >
-            <Search size={13} className="text-neutral-400" />
-            <span className="hidden md:inline">Commands</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-800 rounded">
-              {modKey}K
-            </kbd>
-          </button>
+            <button
+              onClick={onOpenCommandPalette}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-300 hover:text-white transition-colors cursor-pointer"
+              aria-label="Command Palette"
+            >
+              <Search size={13} className="text-neutral-400" />
+              <span className="hidden md:inline">Commands</span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-800 rounded">
+                {modKey}K
+              </kbd>
+            </button>
+          </Tooltip>
         )}
 
-        <button
-          onClick={onNewChat}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-white transition-colors cursor-pointer"
-          title={`Start new conversation (${modKey}N)`}
-          aria-label="New Chat"
+        <Tooltip
+          label="New Conversation"
+          shortcut={`${modKey}N`}
+          text="Start a fresh chat session while keeping your previous conversations saved in the sidebar."
+          position="bottom"
+          align="end"
         >
-          <Plus size={14} className="text-[#eb3b2d]" />
-          <span className="hidden md:inline">New Chat</span>
-        </button>
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-white transition-colors cursor-pointer"
+            aria-label="New Chat"
+          >
+            <Plus size={14} className="text-[#eb3b2d]" />
+            <span className="hidden md:inline">New Chat</span>
+          </button>
+        </Tooltip>
 
         {onOpenShortcutsHelp && (
-          <button
-            onClick={onOpenShortcutsHelp}
-            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
-            title={`Keyboard Shortcuts (${modKey}/)`}
-            aria-label="Keyboard Shortcuts"
+          <Tooltip
+            label="Keyboard Shortcuts"
+            shortcut={`${modKey}/`}
+            text="View all keyboard shortcuts to navigate tools and switch modes faster."
+            position="bottom"
+            align="end"
           >
-            <Keyboard size={16} />
-          </button>
+            <button
+              onClick={onOpenShortcutsHelp}
+              className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+              aria-label="Keyboard Shortcuts"
+            >
+              <Keyboard size={16} />
+            </button>
+          </Tooltip>
         )}
 
-        <button
-          onClick={onOpenSettings}
-          className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
-          title={`Settings (${modKey},)`}
-          aria-label="Settings"
+        <Tooltip
+          label="Preferences & Memory"
+          shortcut={`${modKey},`}
+          text="Customize Omnia's language, response style, personal memory, and display settings."
+          position="bottom"
+          align="end"
         >
-          <Settings size={16} />
-        </button>
+          <button
+            onClick={onOpenSettings}
+            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            aria-label="Settings"
+          >
+            <Settings size={16} />
+          </button>
+        </Tooltip>
 
         <div className="ml-1">
           <UserMenu />

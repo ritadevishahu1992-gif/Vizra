@@ -13,6 +13,7 @@ import {
   Sliders,
 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
+import { Tooltip } from '../ui/Tooltip';
 
 interface CreationToolsModalProps {
   isOpen: boolean;
@@ -72,66 +73,98 @@ export const CreationToolsModal: React.FC<CreationToolsModalProps> = ({
         </div>
 
         {/* Tool Category Selector Tabs */}
-        <div className="flex gap-1.5 pt-3 pb-4 border-b border-neutral-900 shrink-0 overflow-x-auto text-xs">
-          <button
-            onClick={() => setActiveTool('image')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTool === 'image'
-                ? 'bg-neutral-900 text-white border border-neutral-700'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+        <div className="flex flex-wrap gap-1.5 pt-3 pb-4 border-b border-neutral-900 shrink-0 text-xs">
+          <Tooltip
+            label="Image Crafter"
+            text="Compose structured visual prompts with subject geometry, lighting treatment, and aspect ratio presets."
+            position="bottom"
+            align="start"
           >
-            <Sparkles size={13} className="text-[#eb3b2d]" />
-            <span>Image Crafter</span>
-          </button>
+            <button
+              onClick={() => setActiveTool('image')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTool === 'image'
+                  ? 'bg-neutral-900 text-white border border-neutral-700'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Sparkles size={13} className="text-[#eb3b2d]" />
+              <span>Image Crafter</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTool('animation')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTool === 'animation'
-                ? 'bg-neutral-900 text-white border border-neutral-700'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+          <Tooltip
+            label="Kinetic Curves"
+            text="Fine-tune 60fps cubic-bezier motion easing curves for smooth UI and shader animations."
+            position="bottom"
           >
-            <Activity size={13} className="text-[#eb3b2d]" />
-            <span>Kinetic Curves</span>
-          </button>
+            <button
+              onClick={() => setActiveTool('animation')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTool === 'animation'
+                  ? 'bg-neutral-900 text-white border border-neutral-700'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Activity size={13} className="text-[#eb3b2d]" />
+              <span>Kinetic Curves</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTool('video')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTool === 'video'
-                ? 'bg-neutral-900 text-white border border-neutral-700'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+          <Tooltip
+            label="Video Director"
+            text="Generate multi-shot cinematic storyboards, camera movements, and pacing breakdowns."
+            position="bottom"
           >
-            <Film size={13} className="text-[#eb3b2d]" />
-            <span>Video Director</span>
-          </button>
+            <button
+              onClick={() => setActiveTool('video')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTool === 'video'
+                  ? 'bg-neutral-900 text-white border border-neutral-700'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Film size={13} className="text-[#eb3b2d]" />
+              <span>Video Director</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTool('code')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTool === 'code'
-                ? 'bg-neutral-900 text-white border border-neutral-700'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+          <Tooltip
+            label="Code Workspace"
+            text="Launch interactive UI component, WebGL shader, or full-stack architecture prompt templates."
+            position="bottom"
           >
-            <Code size={13} className="text-[#eb3b2d]" />
-            <span>Code Workspace</span>
-          </button>
+            <button
+              onClick={() => setActiveTool('code')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTool === 'code'
+                  ? 'bg-neutral-900 text-white border border-neutral-700'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Code size={13} className="text-[#eb3b2d]" />
+              <span>Code Workspace</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTool('audio')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTool === 'audio'
-                ? 'bg-neutral-900 text-white border border-neutral-700'
-                : 'text-neutral-400 hover:text-white'
-            }`}
+          <Tooltip
+            label="Audio & Soundscapes"
+            text="Create voiceover scripts, spatial foley cues, or ambient electronic soundscape briefs."
+            position="bottom"
+            align="end"
           >
-            <Mic size={13} className="text-[#eb3b2d]" />
-            <span>Audio & Soundscapes</span>
-          </button>
+            <button
+              onClick={() => setActiveTool('audio')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                activeTool === 'audio'
+                  ? 'bg-neutral-900 text-white border border-neutral-700'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Mic size={13} className="text-[#eb3b2d]" />
+              <span>Audio & Soundscapes</span>
+            </button>
+          </Tooltip>
         </div>
 
         {/* Tool Body */}

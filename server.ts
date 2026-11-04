@@ -3,7 +3,7 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
+import { GoogleGenAI, Modality, LiveServerMessage, ThinkingLevel } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -30,8 +30,17 @@ import {
 } from './src/server/observability';
 import { verifyFirebaseIdToken, parseDeviceSummary } from './src/server/authVerification';
 import { processLoginNotifications } from './src/server/email/loginNotificationService';
+import { setupVizraEngageRoutes } from './src/server/engage/engageRoutes';
 
 dotenv.config();
+
+process.on('uncaughtException', (err) => {
+  console.error('[Server Guard] Uncaught exception intercepted:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Server Guard] Unhandled promise rejection intercepted:', reason);
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -103,7 +112,7 @@ async function startServer() {
   async function generateContentWithTimeout(
     aiInstance: GoogleGenAI,
     params: { model: string; contents: any; config?: any },
-    timeoutMs: number = 15000
+    timeoutMs: number = 45000
   ): Promise<any> {
     return Promise.race([
       aiInstance.models.generateContent(params),
@@ -111,6 +120,33 @@ async function startServer() {
         setTimeout(() => reject(new Error(`Model call to ${params.model} timed out after ${timeoutMs}ms`)), timeoutMs)
       ),
     ]);
+  }
+
+  function buildConfigForModel(
+    modelName: string,
+    options: {
+      systemInstruction: string;
+      enableWebSearch?: boolean;
+      deepThink?: boolean;
+    }
+  ): any {
+    const cfg: any = {
+      systemInstruction: options.systemInstruction,
+    };
+
+    if (options.enableWebSearch) {
+      cfg.tools = [{ googleSearch: {} }];
+    }
+
+    if (modelName === 'gemini-3.8-flash') {
+      cfg.thinkingConfig = {
+        thinkingLevel: options.deepThink ? ThinkingLevel.HIGH : ThinkingLevel.LOW,
+      };
+    } else if (modelName !== 'gemini-4-argon') {
+      cfg.temperature = options.deepThink ? 0.3 : 0.7;
+    }
+
+    return cfg;
   }
 
   function generateFallbackResponse(prompt: string, mode?: string, context?: string): string {
@@ -141,6 +177,9 @@ async function startServer() {
 
   // Mount Vercel Workflows Continuous Learning & Reasoning API routes
   setupOmniaLearningRoutes(app, ai);
+
+  // Mount VIZRA Engage Hybrid Content, Monetization, Analytics & Admin API routes
+  setupVizraEngageRoutes(app);
 
   // System instruction for Omnia enforcing core Vizra identity, architecture, and behavior
   const systemInstruction = `You are OMNIA, the intelligent AI operating layer and assistant created by VIZRA.
@@ -648,14 +687,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         /^(search\s*the\s*web|research|citations\s*for|find\s*sources|latest\s*news)/i.test(prompt)
       );
 
-      const generateConfig: any = {
-        systemInstruction,
-        temperature: 0.7,
-      };
-
-      if (enableWebSearch) {
-        generateConfig.tools = [{ googleSearch: {} }];
-      }
+      const deepThink = mode === 'think';
 
       let response: any;
       let usedModel = 'gemini-3.8-flash';
@@ -667,18 +699,23 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         /^(code|function|debug|solve|calculate|equation|derive|algorithm)/i.test(prompt);
 
       const modelsToTry = isComplexTask
-        ? ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest']
-        : ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
+        ? ['gemini-3.8-flash', 'gemini-4-argon', 'gemini-3.1-flash-lite', 'gemini-flash-latest']
+        : ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-4-argon'];
       let lastError: any = null;
 
       for (let idx = 0; idx < modelsToTry.length; idx++) {
         const m = modelsToTry[idx];
         try {
+          const modelConfig = buildConfigForModel(m, {
+            systemInstruction,
+            enableWebSearch,
+            deepThink,
+          });
           response = await generateContentWithTimeout(ai, {
             model: m,
             contents,
-            config: generateConfig,
-          }, 15000);
+            config: modelConfig,
+          }, 45000);
           if (response && response.text) {
             usedModel = m;
             if (idx > 0) isFallback = true;
@@ -688,26 +725,27 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           lastError = err;
           const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
           if (!isQuota) {
-            console.warn(`[AI Model Fallback] Model ${m} failed (${err.message || 'Error'}). Trying next candidate...`);
+            console.info(`[AI Engine] Candidate ${m} unavailable (${err.message || 'transient'}); routing to next candidate...`);
           }
         }
       }
 
       // If googleSearch tool failed across all models due to 429 quota exhaustion:
       if (!response && enableWebSearch) {
-        console.warn('[AI Model Fallback] Google Search Grounding tool unavailable or rate-limited; fulfilling prompt with direct model knowledge...');
-        const standardConfig = {
-          systemInstruction,
-          temperature: 0.7,
-        };
+        console.info('[AI Engine] Google Search Grounding unavailable; fulfilling prompt with direct model knowledge...');
         for (let idx = 0; idx < modelsToTry.length; idx++) {
           const m = modelsToTry[idx];
           try {
+            const standardConfig = buildConfigForModel(m, {
+              systemInstruction,
+              enableWebSearch: false,
+              deepThink,
+            });
             response = await generateContentWithTimeout(ai, {
               model: m,
               contents,
               config: standardConfig,
-            }, 15000);
+            }, 45000);
             if (response && response.text) {
               usedModel = m;
               isFallback = true;
@@ -822,21 +860,22 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       let response: any;
       let usedModel = 'gemini-3.8-flash';
       let isFallback = false;
-      const researchModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
+      const researchModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-4-argon'];
       let lastResearchError: any = null;
 
       for (let idx = 0; idx < researchModels.length; idx++) {
         const rm = researchModels[idx];
         try {
+          const researchConfig = buildConfigForModel(rm, {
+            systemInstruction,
+            enableWebSearch: true,
+            deepThink: false,
+          });
           response = await generateContentWithTimeout(ai, {
             model: rm,
             contents: `Conduct grounded web research on the following user query: "${queryCheck.cleanText}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
-            config: {
-              systemInstruction,
-              tools: [{ googleSearch: {} }],
-              temperature: 0.3,
-            },
-          }, 15000);
+            config: researchConfig,
+          }, 45000);
           if (response && response.text) {
             usedModel = rm;
             if (idx > 0) isFallback = true;
@@ -846,7 +885,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           lastResearchError = err;
           const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
           if (!isQuota) {
-            console.warn(`[Research Model Fallback] Model ${rm} failed (${err.message || 'Error'}). Trying next candidate...`);
+            console.info(`[Research Engine] Candidate ${rm} unavailable (${err.message || 'transient'}); routing to next candidate...`);
           }
         }
       }
@@ -856,14 +895,16 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         for (let idx = 0; idx < researchModels.length; idx++) {
           const rm = researchModels[idx];
           try {
+            const fallbackConfig = buildConfigForModel(rm, {
+              systemInstruction,
+              enableWebSearch: false,
+              deepThink: false,
+            });
             response = await generateContentWithTimeout(ai, {
               model: rm,
               contents: `Answer the following user query directly from verified knowledge: "${queryCheck.cleanText}".`,
-              config: {
-                systemInstruction,
-                temperature: 0.3,
-              },
-            }, 15000);
+              config: fallbackConfig,
+            }, 45000);
             if (response && response.text) {
               usedModel = rm;
               isFallback = true;
@@ -1193,15 +1234,18 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     });
   });
 
-  // Cryptographically verified user login notification endpoint
-  app.post('/api/auth/login-notification', chatRateLimiter.getMiddleware(), async (req, res) => {
-    const authHeader = req.headers.authorization;
-    let token = '';
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.slice(7).trim();
-    } else if (req.body?.idToken && typeof req.body.idToken === 'string') {
-      token = req.body.idToken.trim();
-    }
+  // Cryptographically verified user login notification & webhook endpoints
+  app.post(
+    ['/api/auth/login-notification', '/api/auth/login-webhook'],
+    chatRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const authHeader = req.headers.authorization;
+      let token = '';
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.slice(7).trim();
+      } else if (req.body?.idToken && typeof req.body.idToken === 'string') {
+        token = req.body.idToken.trim();
+      }
 
     if (!token) {
       res.status(401).json({
@@ -1307,10 +1351,26 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     });
   });
 
-  // In development, mount Vite's middleware
+  // Google Search Console HTML file verification endpoint (permanent)
+  app.get('/googlef66bb3a90d865a89.html', (_req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send('google-site-verification: googlef66bb3a90d865a89.html');
+  });
+
+  // Create native HTTP server so WebSockets can share port 3000
+  const server = http.createServer(app);
+  server.on('error', (err) => {
+    console.error('[HTTP Server] Error:', err);
+  });
+
+  // In development, mount Vite's middleware with HMR disabled to prevent WebSocket upgrade conflicts
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        watch: null,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -1322,11 +1382,25 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     });
   }
 
-  // Create native HTTP server so WebSockets can share port 3000
-  const server = http.createServer(app);
+  // Initialize WebSocket Server for Gemini Live API Voice Conversations using noServer upgrade routing
+  const wss = new WebSocketServer({ noServer: true });
+  wss.on('error', (err) => {
+    console.error('[Live API WebSocket] Server error:', err);
+  });
 
-  // Initialize WebSocket Server for Gemini Live API Voice Conversations
-  const wss = new WebSocketServer({ server, path: '/live' });
+  server.on('upgrade', (request, socket, head) => {
+    socket.on('error', () => {
+      // Ignore transient socket upgrade errors
+    });
+    const pathname = request.url ? request.url.split('?')[0] : '';
+    if (pathname === '/live') {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    } else {
+      socket.destroy();
+    }
+  });
 
   wss.on('connection', async (clientWs: WebSocket) => {
     console.log('[Live API] Client connected to Voice Conversation');

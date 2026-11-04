@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Zap, Brain, Globe, Sparkles, Terminal, BarChart2, Atom, ChevronDown, Check } from 'lucide-react';
 import { AIMode, AIModeOption } from '../../types/ai';
+import { Tooltip } from '../ui/Tooltip';
 
 export const AI_MODES: AIModeOption[] = [
   {
@@ -105,25 +106,36 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
 
   return (
     <div className="relative inline-block" ref={containerRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 rounded-lg border transition-all cursor-pointer select-none ${
-          compact
-            ? 'px-2 py-1 bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-xs text-neutral-200'
-            : 'px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-xs text-white'
-        }`}
-        title="Switch Omnia AI Mode"
+      <Tooltip
+        label={`Mode: ${activeOption.name}`}
+        text={
+          isOpen
+            ? ''
+            : `${activeOption.description} Click to switch between Quick, Think, Research, Science, Create, Code, or Analyze modes.`
+        }
+        position="bottom"
+        align="start"
       >
-        <span className="text-[#eb3b2d]">
-          {renderIcon(activeOption.icon, 13)}
-        </span>
-        <span className="font-medium">{activeOption.name}</span>
-        <ChevronDown
-          size={12}
-          className={`text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </button>
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={`flex items-center gap-1.5 rounded-lg border transition-all cursor-pointer select-none ${
+            compact
+              ? 'px-2 py-1 bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-xs text-neutral-200'
+              : 'px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-xs text-white'
+          }`}
+          aria-label="Switch Omnia AI Mode"
+        >
+          <span className="text-[#eb3b2d]">
+            {renderIcon(activeOption.icon, 13)}
+          </span>
+          <span className="font-medium">{activeOption.name}</span>
+          <ChevronDown
+            size={12}
+            className={`text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+      </Tooltip>
 
       {isOpen && (
         <div className="absolute left-0 mt-1.5 w-64 rounded-xl bg-neutral-950 border border-neutral-800 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">

@@ -4,6 +4,7 @@ import { Attachment, AIMode, Integration } from '../../types/ai';
 import { AttachmentPreview } from './AttachmentPreview';
 import { IntegrationMenu } from './IntegrationMenu';
 import { ModeSelector } from './ModeSelector';
+import { Tooltip } from '../ui/Tooltip';
 
 interface PromptComposerProps {
   onSendMessage: (text: string, attachments: Attachment[]) => void;
@@ -142,7 +143,7 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
 
     // Natural voice prompt simulation fallback if browser mic access is restricted
     setIsListening(true);
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       setText((prev) =>
         prev
           ? `${prev} animate obsidian ribbons with fluid refraction`
@@ -201,105 +202,153 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
         <div className="px-3 pb-2.5 pt-1 flex items-center justify-between">
           {/* Left: Plus Integration Button & Mode Selector */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800/80 transition-colors cursor-pointer group"
-              title="Add files, tools or creative inputs"
-              aria-label="Add integration"
+            <Tooltip
+              label="Attachments & Creative Inputs"
+              text="Upload images, PDFs, or CSV spreadsheets, connect external workspaces, or insert creative project templates."
+              position="top"
+              align="start"
             >
-              <Plus
-                size={16}
-                className="group-hover:rotate-90 group-hover:text-[#eb3b2d] transition-all duration-200"
-              />
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800/80 transition-colors cursor-pointer group"
+                aria-label="Add files, tools or creative inputs"
+              >
+                <Plus
+                  size={16}
+                  className="group-hover:rotate-90 group-hover:text-[#eb3b2d] transition-all duration-200"
+                />
+              </button>
+            </Tooltip>
 
             {/* In-Composer Mode Selector */}
             <ModeSelector currentMode={currentMode} onSelectMode={onSelectMode} compact />
 
             {/* Quick Creation Tools Shortcut */}
             {onOpenCreationTools && (
-              <button
-                type="button"
-                onClick={onOpenCreationTools}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                title="Open Creation Tools"
+              <Tooltip
+                label="Creation Tools"
+                text="Open visual generators for logos, cinematic camera prompts, color palettes, and motion keyframes."
+                position="top"
               >
-                <Sparkles size={12} className="text-[#eb3b2d]" />
-                <span>Tools</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onOpenCreationTools}
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Open Creation Tools"
+                >
+                  <Sparkles size={12} className="text-[#eb3b2d]" />
+                  <span>Tools</span>
+                </button>
+              </Tooltip>
             )}
 
             {/* AI Music Studio Button */}
             {onOpenMusicStudio && (
-              <button
-                type="button"
-                onClick={onOpenMusicStudio}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                title="Create AI Music & Soundtracks (Lyria 3)"
+              <Tooltip
+                label="AI Music Generator"
+                text="Create custom background music, ambient loops, and soundtracks from text descriptions."
+                position="top"
               >
-                <Music size={12} className="text-[#eb3b2d]" />
-                <span>Music</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onOpenMusicStudio}
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Open AI Music Generator"
+                >
+                  <Music size={12} className="text-[#eb3b2d]" />
+                  <span>Music</span>
+                </button>
+              </Tooltip>
             )}
 
             {/* Live Voice Conversation Button */}
             {onOpenLiveVoice && (
-              <button
-                type="button"
-                onClick={onOpenLiveVoice}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                title="Talk live with gemini-3.8-live"
+              <Tooltip
+                label="Live Voice Mode"
+                text="Speak naturally with Omnia in real time for hands-free brainstorming and instant voice responses."
+                position="top"
               >
-                <Radio size={12} className="text-[#eb3b2d] animate-pulse" />
-                <span>Live</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onOpenLiveVoice}
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800/80 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Open Live Voice Mode"
+                >
+                  <Radio size={12} className="text-[#eb3b2d] animate-pulse" />
+                  <span>Live</span>
+                </button>
+              </Tooltip>
             )}
           </div>
 
           {/* Right: Mic & Send Buttons */}
           <div className="flex items-center gap-2">
             {/* Microphone Button */}
-            <button
-              type="button"
-              onClick={toggleMic}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+            <Tooltip
+              label={isListening ? 'Stop Dictation' : 'Voice Dictation'}
+              text={
                 isListening
-                  ? 'bg-[#eb3b2d] text-white border-[#eb3b2d]'
-                  : 'bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border-neutral-800/80'
-              }`}
-              title={isListening ? 'Stop listening' : 'Dictate prompt'}
-              aria-label="Microphone"
+                  ? 'Click to stop recording your spoken prompt.'
+                  : 'Dictate your prompt using your microphone instead of typing.'
+              }
+              position="top"
+              align="end"
             >
-              {isListening ? <MicOff size={15} /> : <Mic size={15} />}
-            </button>
+              <button
+                type="button"
+                onClick={toggleMic}
+                className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                  isListening
+                    ? 'bg-[#eb3b2d] text-white border-[#eb3b2d]'
+                    : 'bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white border-neutral-800/80'
+                }`}
+                aria-label="Microphone"
+              >
+                {isListening ? <MicOff size={15} /> : <Mic size={15} />}
+              </button>
+            </Tooltip>
 
             {/* Send / Stop Button */}
             {isStreaming ? (
-              <button
-                type="button"
-                onClick={onStopStreaming}
-                className="w-8 h-8 rounded-full bg-white text-black hover:bg-neutral-200 flex items-center justify-center transition-colors cursor-pointer shadow-sm"
-                title="Stop generation"
-                aria-label="Stop generation"
+              <Tooltip
+                label="Stop Generation"
+                shortcut="Esc"
+                text="Immediately cancel the active response stream."
+                position="top"
+                align="end"
               >
-                <Square size={13} fill="currentColor" />
-              </button>
+                <button
+                  type="button"
+                  onClick={onStopStreaming}
+                  className="w-8 h-8 rounded-full bg-white text-black hover:bg-neutral-200 flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                  aria-label="Stop generation"
+                >
+                  <Square size={13} fill="currentColor" />
+                </button>
+              </Tooltip>
             ) : (
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={!canSend}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm ${
-                  canSend
-                    ? 'bg-white text-black hover:bg-neutral-200 scale-100'
-                    : 'bg-neutral-900 text-neutral-600 border border-neutral-800 cursor-not-allowed'
-                }`}
-                title="Send message"
-                aria-label="Send message"
+              <Tooltip
+                label="Send Message"
+                shortcut="Enter"
+                text="Submit your prompt and attachments to Omnia (use Shift + Enter for a new line)."
+                position="top"
+                align="end"
               >
-                <Send size={14} className={canSend ? 'text-black' : 'text-neutral-600'} />
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={!canSend}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm ${
+                    canSend
+                      ? 'bg-white text-black hover:bg-neutral-200 scale-100'
+                      : 'bg-neutral-900 text-neutral-600 border border-neutral-800 cursor-not-allowed'
+                  }`}
+                  aria-label="Send message"
+                >
+                  <Send size={14} className={canSend ? 'text-black' : 'text-neutral-600'} />
+                </button>
+              </Tooltip>
             )}
           </div>
         </div>

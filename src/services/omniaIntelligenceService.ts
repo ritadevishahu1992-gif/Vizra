@@ -113,7 +113,7 @@ Return a valid JSON object matching this schema:
   ]
 }`;
 
-    const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash'];
+    const models = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
     let response: any;
     for (const m of models) {
       try {
@@ -122,7 +122,6 @@ Return a valid JSON object matching this schema:
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
-            temperature: 0.2,
           },
         });
         if (response && response.text) break;

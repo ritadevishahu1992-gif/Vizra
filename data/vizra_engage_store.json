@@ -1,0 +1,794 @@
+{
+  "config": {
+    "enabled": true,
+    "sponsoredEnabled": true,
+    "affiliateEnabled": true,
+    "educationalEnabled": true,
+    "interactiveEnabled": true,
+    "collapseOnCompleteDelayMs": 350,
+    "rotationIntervalMs": 6500,
+    "maxSponsoredRatio": 0.35,
+    "defaultDisclosureText": "Independent placement via VIZRA Engage. Does not influence Omnia 1.0 answers or citations.",
+    "respectReducedMotion": true,
+    "updatedAt": 1793545246663,
+    "updatedBy": "admin@vizra.ai"
+  },
+  "partners": [
+    {
+      "id": "partner-vercel",
+      "name": "Vercel Cloud Platform",
+      "domain": "vercel.com",
+      "contactEmail": "partnerships@vercel.com",
+      "verified": true,
+      "status": "active",
+      "tier": "direct_brand",
+      "allowedDestinations": [
+        "https://vercel.com",
+        "https://vercel.com/ai"
+      ],
+      "createdAt": 1792332857359,
+      "updatedAt": 1793369657359
+    },
+    {
+      "id": "partner-figma",
+      "name": "Figma Design Systems",
+      "domain": "figma.com",
+      "contactEmail": "affiliates@figma.com",
+      "verified": true,
+      "status": "active",
+      "tier": "affiliate_network",
+      "allowedDestinations": [
+        "https://www.figma.com",
+        "https://www.figma.com/design-systems"
+      ],
+      "createdAt": 1792678457359,
+      "updatedAt": 1793456057359
+    },
+    {
+      "id": "partner-vizra-studio",
+      "name": "VIZRA Creative Ecosystem",
+      "domain": "vizra.ai",
+      "contactEmail": "studio@vizra.ai",
+      "verified": true,
+      "status": "active",
+      "tier": "ecosystem_partner",
+      "allowedDestinations": [
+        "https://vizra.ai",
+        "https://docs.vizra.ai"
+      ],
+      "createdAt": 1790950457359,
+      "updatedAt": 1793542457359
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "camp-vercel-edge-2026",
+      "name": "Vercel AI Cloud & Fluid Compute",
+      "partnerId": "partner-vercel",
+      "partnerName": "Vercel Cloud Platform",
+      "type": "direct_sponsorship",
+      "sponsorshipLabel": "Sponsored",
+      "destinationUrl": "https://vercel.com/ai",
+      "affiliateParams": "utm_source=vizra_engage&utm_medium=chat_wait",
+      "status": "active",
+      "approvalStatus": "approved",
+      "budgetUsd": 5000,
+      "spentUsd": 412.5,
+      "cpmUsd": 18,
+      "cpcUsd": 1.45,
+      "cpaUsd": 12,
+      "startDate": "2025-01-01T00:00:00.000Z",
+      "endDate": "2027-12-31T23:59:59.000Z",
+      "targetModes": [
+        "code",
+        "quick",
+        "think",
+        "analyze"
+      ],
+      "priority": 82,
+      "impressionGoal": 250000,
+      "createdAt": 1792505657359,
+      "updatedAt": 1793456057359
+    },
+    {
+      "id": "camp-figma-variables-2026",
+      "name": "Figma Design Token Architecture",
+      "partnerId": "partner-figma",
+      "partnerName": "Figma Design Systems",
+      "type": "affiliate",
+      "sponsorshipLabel": "Affiliate",
+      "destinationUrl": "https://www.figma.com/design-systems",
+      "affiliateParams": "ref=vizra_creative_studio&aff_id=vz901",
+      "status": "active",
+      "approvalStatus": "approved",
+      "budgetUsd": 3200,
+      "spentUsd": 268,
+      "cpmUsd": 14,
+      "cpcUsd": 1.15,
+      "cpaUsd": 9.5,
+      "startDate": "2025-01-01T00:00:00.000Z",
+      "endDate": "2027-12-31T23:59:59.000Z",
+      "targetModes": [
+        "create",
+        "quick",
+        "research"
+      ],
+      "priority": 76,
+      "impressionGoal": 150000,
+      "createdAt": 1792764857359,
+      "updatedAt": 1793456057359
+    }
+  ],
+  "content": [
+    {
+      "id": "eng-vis-neural-synthesis",
+      "title": "Multi-Stage Context Synthesis",
+      "subtitle": "Omnia 1.0 Neural Topology",
+      "body": "Omnia cross-validates semantic embeddings, structured project memory, and live verification gates in parallel before streaming tokens.",
+      "type": "visualization",
+      "category": "AI Architecture",
+      "targetModes": [
+        "quick",
+        "think",
+        "research",
+        "science",
+        "analyze",
+        "code",
+        "create"
+      ],
+      "sponsorshipLabel": "None",
+      "priority": 95,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "frequencyCapPerSession": 20,
+      "createdBy": "system@vizra.ai",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793110457359,
+      "createdAt": 1792678457359,
+      "updatedAt": 1793369657359
+    },
+    {
+      "id": "eng-know-rag-grounding",
+      "title": "How Epistemic Verification Prevents Hallucination",
+      "subtitle": "Knowledge Architecture",
+      "body": "Every factual claim in Research and Science mode passes through a 6-point source validation gate checking domain authority, retrieval freshness, and semantic entailment.",
+      "type": "knowledge_card",
+      "category": "Epistemic Governance",
+      "targetModes": [
+        "research",
+        "science",
+        "think",
+        "analyze",
+        "quick"
+      ],
+      "sponsorshipLabel": "None",
+      "priority": 90,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "frequencyCapPerSession": 12,
+      "createdBy": "system@vizra.ai",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793196857359,
+      "createdAt": 1792851257359,
+      "updatedAt": 1793369657359
+    },
+    {
+      "id": "eng-tip-creative-workflow",
+      "title": "Pro Tip: Convert Any Synthesis Into a 10-Stage Project",
+      "subtitle": "Creative & Productivity Mastery",
+      "body": "Press Cmd/Ctrl + K at any time to open the Command Palette, switch reasoning modes, or promote an architectural blueprint into a full multi-stage workspace.",
+      "type": "creative_tip",
+      "category": "Studio Productivity",
+      "targetModes": [
+        "create",
+        "code",
+        "quick",
+        "think"
+      ],
+      "sponsorshipLabel": "None",
+      "priority": 88,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "frequencyCapPerSession": 12,
+      "createdBy": "system@vizra.ai",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793196857359,
+      "createdAt": 1792937657359,
+      "updatedAt": 1793456057359
+    },
+    {
+      "id": "eng-mini-micro-quiz",
+      "title": "Quick Architecture Pulse",
+      "subtitle": "Interactive Mini-Experience",
+      "body": "Which technique best isolates tenant context in multi-project RAG pipelines?",
+      "type": "mini_experience",
+      "category": "Interactive Challenge",
+      "targetModes": [
+        "code",
+        "think",
+        "research",
+        "science",
+        "analyze",
+        "quick",
+        "create"
+      ],
+      "sponsorshipLabel": "None",
+      "interactiveConfig": {
+        "kind": "poll",
+        "question": "Which layer guarantees zero cross-tenant vector leakage during hybrid retrieval?",
+        "options": [
+          "Strict namespace partitioning + verified UID pre-filters",
+          "Post-generation regex redaction only",
+          "Shared global cache with client-side filtering"
+        ],
+        "correctIndex": 0,
+        "explanation": "Namespace partitioning combined with cryptographic UID pre-filtering prevents unauthorized embeddings from ever entering the candidate pool."
+      },
+      "priority": 86,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "frequencyCapPerSession": 8,
+      "createdBy": "system@vizra.ai",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793283257359,
+      "createdAt": 1793024057359,
+      "updatedAt": 1793456057359
+    },
+    {
+      "id": "eng-spon-vercel-ai",
+      "title": "Deploy Low-Latency AI Workloads on Vercel Fluid Compute",
+      "subtitle": "Vercel Cloud Platform",
+      "body": "Scale streaming inference routes, background queues, and edge middleware with zero cold-start penalties.",
+      "type": "sponsored_card",
+      "category": "Cloud Infrastructure",
+      "targetModes": [
+        "code",
+        "quick",
+        "think",
+        "analyze"
+      ],
+      "ctaLabel": "Explore Vercel AI",
+      "destinationUrl": "https://vercel.com/ai",
+      "sponsorshipLabel": "Sponsored",
+      "disclosureText": "Sponsored Partner Placement • Independent of Omnia 1.0 reasoning & citations.",
+      "campaignId": "camp-vercel-edge-2026",
+      "partnerId": "partner-vercel",
+      "priority": 78,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "scheduleStart": "2025-01-01T00:00:00.000Z",
+      "scheduleEnd": "2027-12-31T23:59:59.000Z",
+      "expiresAt": "2027-12-31T23:59:59.000Z",
+      "frequencyCapPerSession": 4,
+      "createdBy": "ritadevishahu1992@gmail.com",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793369657359,
+      "createdAt": 1793110457359,
+      "updatedAt": 1793456057359
+    },
+    {
+      "id": "eng-aff-figma-tokens",
+      "title": "Architect Multi-Brand Design Systems with Figma Variables",
+      "subtitle": "Figma Design Systems",
+      "body": "Synchronize typography scales, charcoal-and-crimson surface tokens, and interactive prototypes directly with production code.",
+      "type": "affiliate_card",
+      "category": "Design Tooling",
+      "targetModes": [
+        "create",
+        "quick",
+        "research"
+      ],
+      "ctaLabel": "Inspect Token Kit",
+      "destinationUrl": "https://www.figma.com/design-systems",
+      "sponsorshipLabel": "Affiliate",
+      "disclosureText": "Affiliate Recommendation • VIZRA may earn a commission at no cost to you. Never influences AI answers.",
+      "campaignId": "camp-figma-variables-2026",
+      "partnerId": "partner-figma",
+      "affiliateCode": "vz901",
+      "priority": 74,
+      "approvalStatus": "approved",
+      "enabled": true,
+      "scheduleStart": "2025-01-01T00:00:00.000Z",
+      "scheduleEnd": "2027-12-31T23:59:59.000Z",
+      "expiresAt": "2027-12-31T23:59:59.000Z",
+      "frequencyCapPerSession": 4,
+      "createdBy": "ritadevishahu1992@gmail.com",
+      "reviewedBy": "ritadevishahu1992@gmail.com",
+      "reviewedAt": 1793369657360,
+      "createdAt": 1793110457360,
+      "updatedAt": 1793456057360
+    },
+    {
+      "id": "eng-pending-sample",
+      "title": "Quantum Protein Folding Benchmarks 2026",
+      "subtitle": "Pending Editorial Review",
+      "body": "Comparative latency benchmarks for AlphaFold 3 structural docking workflows in computational biology.",
+      "type": "knowledge_card",
+      "category": "Scientific Computing",
+      "targetModes": [
+        "science",
+        "research"
+      ],
+      "sponsorshipLabel": "None",
+      "priority": 70,
+      "approvalStatus": "pending_review",
+      "enabled": true,
+      "frequencyCapPerSession": 5,
+      "createdBy": "editor@vizra.ai",
+      "createdAt": 1793520857360,
+      "updatedAt": 1793520857360
+    }
+  ],
+  "events": [
+    {
+      "id": "ev-1793542507543-ciavq",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "dedupe-session-99",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 11,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793542507543
+    },
+    {
+      "id": "ev-1793542550226-dp6ec",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "dedupe-session-99",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 11,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793542550226
+    },
+    {
+      "id": "ev-1793543146321-f4zej",
+      "eventType": "impression",
+      "contentId": "local-vis-neural",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "ses-mvxxa40w-s1b370",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 26,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543146321
+    },
+    {
+      "id": "ev-1793543146515-mejld",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "ses-mvxxa40w-s1b370",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 482,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543146515
+    },
+    {
+      "id": "ev-1793543153031-tnmv0",
+      "eventType": "impression",
+      "contentId": "eng-know-rag-grounding",
+      "contentType": "knowledge_card",
+      "category": "Epistemic Governance",
+      "sessionHash": "ses-mvxxa40w-s1b370",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 6996,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543153031
+    },
+    {
+      "id": "ev-1793543159526-4s3yv",
+      "eventType": "impression",
+      "contentId": "eng-tip-creative-workflow",
+      "contentType": "creative_tip",
+      "category": "Studio Productivity",
+      "sessionHash": "ses-mvxxa40w-s1b370",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 13497,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543159526
+    },
+    {
+      "id": "ev-1793543166049-z59ah",
+      "eventType": "impression",
+      "contentId": "eng-mini-micro-quiz",
+      "contentType": "mini_experience",
+      "category": "Interactive Challenge",
+      "sessionHash": "ses-mvxxa40w-s1b370",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 20019,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543166049
+    },
+    {
+      "id": "ev-1793543533121-5uk1q",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "dedupe-session-99",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 11,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793543533121
+    },
+    {
+      "id": "ev-1793545246638-676hd",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "dedupe-session-99",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 11,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1793545246638
+    }
+  ],
+  "auditLog": [
+    {
+      "id": "audit-init-1",
+      "actor": "system@vizra.ai",
+      "action": "INITIALIZE_ENGAGE_INVENTORY",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Initialized VIZRA Engage Hybrid Content Engine & Governance Store",
+      "timestamp": 1793110457360
+    },
+    {
+      "id": "aud-1793542457362-94gt",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542457362
+    },
+    {
+      "id": "aud-1793542457365-7yob",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542457365-nmba6",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1793542457365
+    },
+    {
+      "id": "aud-1793542457366-l6vv",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542457365-nmba6",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1793542457366
+    },
+    {
+      "id": "aud-1793542457366-m5fs",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542457366-r76lz",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1793542457366
+    },
+    {
+      "id": "aud-1793542457366-h7ho",
+      "actor": "ritadevishahu1992@gmail.com",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1793542457366-r76lz",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1793542457366
+    },
+    {
+      "id": "aud-1793542457367-pzlv",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542457366-r76lz",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1793542457367
+    },
+    {
+      "id": "aud-1793542507337-s39z",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542507337
+    },
+    {
+      "id": "aud-1793542507348-0l25",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542507347-wqtb2",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1793542507348
+    },
+    {
+      "id": "aud-1793542507349-ou0i",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542507347-wqtb2",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1793542507349
+    },
+    {
+      "id": "aud-1793542507350-sb6t",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542507350-vu8jr",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1793542507350
+    },
+    {
+      "id": "aud-1793542507351-pbdg",
+      "actor": "ritadevishahu1992@gmail.com",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1793542507350-vu8jr",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1793542507351
+    },
+    {
+      "id": "aud-1793542507351-h21t",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542507350-vu8jr",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1793542507351
+    },
+    {
+      "id": "aud-1793542507620-i8fe",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542507620
+    },
+    {
+      "id": "aud-1793542507620-putr",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542507620
+    },
+    {
+      "id": "aud-1793542549425-yvyg",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542549425
+    },
+    {
+      "id": "aud-1793542549430-1iga",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542549430-2wmai",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1793542549430
+    },
+    {
+      "id": "aud-1793542549436-s10x",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542549430-2wmai",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1793542549436
+    },
+    {
+      "id": "aud-1793542549436-mmcm",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542549436-gwl4x",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1793542549436
+    },
+    {
+      "id": "aud-1793542549520-qc09",
+      "actor": "ritadevishahu1992@gmail.com",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1793542549436-gwl4x",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1793542549520
+    },
+    {
+      "id": "aud-1793542549521-kuf7",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793542549436-gwl4x",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1793542549521
+    },
+    {
+      "id": "aud-1793542550418-2lfg",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542550418
+    },
+    {
+      "id": "aud-1793542550424-ac74",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793542550424
+    },
+    {
+      "id": "aud-1793543532920-i23g",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793543532920
+    },
+    {
+      "id": "aud-1793543532923-oh2c",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793543532923-f0f3x",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1793543532923
+    },
+    {
+      "id": "aud-1793543532923-cj9s",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793543532923-f0f3x",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1793543532923
+    },
+    {
+      "id": "aud-1793543532924-zu4b",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793543532924-jtsph",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1793543532924
+    },
+    {
+      "id": "aud-1793543532925-moci",
+      "actor": "ritadevishahu1992@gmail.com",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1793543532924-jtsph",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1793543532925
+    },
+    {
+      "id": "aud-1793543532925-9ni5",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793543532924-jtsph",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1793543532925
+    },
+    {
+      "id": "aud-1793543533138-jvzp",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793543533138
+    },
+    {
+      "id": "aud-1793543533138-904g",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793543533138
+    },
+    {
+      "id": "aud-1793545246431-u594",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793545246431
+    },
+    {
+      "id": "aud-1793545246434-d7ff",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793545246434-96x80",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1793545246434
+    },
+    {
+      "id": "aud-1793545246435-auvv",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793545246434-96x80",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1793545246435
+    },
+    {
+      "id": "aud-1793545246436-35ob",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793545246436-n2qz9",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1793545246436
+    },
+    {
+      "id": "aud-1793545246437-x2kd",
+      "actor": "ritadevishahu1992@gmail.com",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1793545246436-n2qz9",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1793545246437
+    },
+    {
+      "id": "aud-1793545246438-fk3p",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1793545246436-n2qz9",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1793545246438
+    },
+    {
+      "id": "aud-1793545246662-rmsv",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793545246662
+    },
+    {
+      "id": "aud-1793545246663-taqy",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1793545246663
+    }
+  ]
+}

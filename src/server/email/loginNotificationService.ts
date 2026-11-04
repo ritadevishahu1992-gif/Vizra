@@ -18,7 +18,11 @@ import {
   renderAdminLoginEmailHtml,
   renderAdminLoginEmailText,
 } from './templates/signatureFusionTemplates';
-import { sendTransactionalEmail, getDefaultSenderEmail } from '../../lib/email';
+import {
+  sendTransactionalEmail,
+  getDefaultSenderEmail,
+  getAdminNotificationEmail,
+} from '../../lib/email';
 
 export interface LoginNotificationRequest {
   uid: string;
@@ -167,9 +171,9 @@ export async function processLoginNotifications(
   const securityUrl = `${appBaseUrl}/ai`; // Existing trusted HTTPS destination
   const adminDashboardUrl = `${appBaseUrl}/api/metrics`; // Existing authenticated server telemetry destination
 
-  const senderEmail = process.env.VIZRA_EMAIL_FROM || 'VIZRA Security <onboarding@resend.dev>';
+  const senderEmail = getDefaultSenderEmail();
   // System administrator recipient is strictly server-configured and cannot be modified by user
-  const adminEmail = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL || 'ritadevishahu1992@gmail.com';
+  const adminEmail = getAdminNotificationEmail();
 
   // 2. Render templates
   const userHtml = renderUserLoginEmailHtml({

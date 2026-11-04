@@ -101,7 +101,7 @@ export interface Message {
   content: string;
   timestamp: string;
   attachments?: Attachment[];
-  status?: 'sending' | 'streaming' | 'done' | 'error';
+  status?: 'sending' | 'streaming' | 'done' | 'error' | 'cancelled';
   isDemo?: boolean;
   mode?: AIMode;
   thoughtProcess?: ThoughtStep[];

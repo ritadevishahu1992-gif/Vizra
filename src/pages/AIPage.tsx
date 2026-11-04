@@ -3,6 +3,7 @@ import { AIHeader } from '../components/ai/AIHeader';
 import { AISidebar } from '../components/ai/AISidebar';
 import { EmptyState } from '../components/ai/EmptyState';
 import { ChatMessage } from '../components/ai/ChatMessage';
+import { MessageListSkeleton } from '../components/ai/MessageListSkeleton';
 import { PromptComposer } from '../components/ai/PromptComposer';
 import { SettingsModal } from '../components/ai/SettingsModal';
 import { DemoBanner } from '../components/ai/DemoBanner';
@@ -17,10 +18,12 @@ import { VoiceLiveModal } from '../components/ai/VoiceLiveModal';
 import { ScienceHubModal } from '../components/ai/ScienceHubModal';
 import { CommandPaletteModal } from '../components/ai/CommandPaletteModal';
 import { ShortcutsModal } from '../components/ai/ShortcutsModal';
+import { EngageAdminModal } from '../components/ai/engage/EngageAdminModal';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
+import { logSafeInteractionEvent } from '../services/engageEventLogger';
 import { useAuth } from '../context/AuthContext';
 import {
   getUserProjectsFromFirestore,
@@ -98,7 +101,7 @@ const initialConversations: Conversation[] = [
 ];
 
 export const AIPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading: isAuthLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>('conv-1');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -119,13 +122,16 @@ export const AIPage: React.FC = () => {
   const [isCitationDrawerOpen, setIsCitationDrawerOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
+  const [isEngageAdminOpen, setIsEngageAdminOpen] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitationItem | null>(null);
 
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isInitialMessagesLoading, setIsInitialMessagesLoading] = useState(true);
   const [initialComposerPrompt, setInitialComposerPrompt] = useState<string | undefined>(undefined);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const hydrationTimerRef = useRef<number | null>(null);
 
   // Global Keyboard Shortcuts Handlers
   const handleToggleSidebar = () => {
@@ -228,7 +234,12 @@ export const AIPage: React.FC = () => {
     onOpenCommandPalette: () => setIsCommandPaletteOpen(true),
     onOpenShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     onNewChat: () => {
-      // Clean chat reset
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      setIsStreaming(false);
+      // Clean chat reset and mark any in-flight message as cancelled
       const newConv: Conversation = {
         id: `conv-${Date.now()}`,
         title: 'New Conversation',
@@ -237,7 +248,21 @@ export const AIPage: React.FC = () => {
         messages: [],
         group: 'today',
       };
-      setConversations((prev) => [newConv, ...prev]);
+      setConversations((prev) => [
+        newConv,
+        ...prev.map((c) => ({
+          ...c,
+          messages: c.messages.map((m) =>
+            m.status === 'streaming'
+              ? {
+                  ...m,
+                  status: 'cancelled' as const,
+                  content: m.content || 'Synthesis cancelled by user.',
+                }
+              : m
+          ),
+        })),
+      ]);
       setActiveConversationId(newConv.id);
       setActiveProjectId(null);
     },
@@ -253,13 +278,25 @@ export const AIPage: React.FC = () => {
     onSelectMode: handleSelectModeByIndex,
   });
 
-  // Check for initial prompt passed via explore/homepage
+  // Check for initial prompt passed via explore/homepage and complete initial message hydration
   useEffect(() => {
     const savedPrompt = sessionStorage.getItem('vizra_initial_prompt');
     if (savedPrompt) {
       sessionStorage.removeItem('vizra_initial_prompt');
       setInitialComposerPrompt(savedPrompt);
     }
+
+    hydrationTimerRef.current = window.setTimeout(() => {
+      setIsInitialMessagesLoading(false);
+      hydrationTimerRef.current = null;
+    }, 280);
+
+    return () => {
+      if (hydrationTimerRef.current !== null) {
+        window.clearTimeout(hydrationTimerRef.current);
+        hydrationTimerRef.current = null;
+      }
+    };
   }, []);
 
   // Load stored projects on mount and sync with Firestore if authenticated
@@ -300,28 +337,47 @@ export const AIPage: React.FC = () => {
     }
   }, [messages, isStreaming, activeProjectId]);
 
-  const handleNewChat = () => {
-    if (isStreaming && abortControllerRef.current) {
+  const cancelInFlightStreamingMessages = () => {
+    if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      setIsStreaming(false);
+      abortControllerRef.current = null;
+    }
+    setIsStreaming(false);
+    setConversations((prev) =>
+      prev.map((conv) => ({
+        ...conv,
+        messages: conv.messages.map((m) =>
+          m.status === 'streaming'
+            ? {
+                ...m,
+                status: 'cancelled',
+                content: m.content || 'Synthesis cancelled by user.',
+              }
+            : m
+        ),
+      }))
+    );
+  };
+
+  const handleNewChat = () => {
+    if (isStreaming || abortControllerRef.current) {
+      cancelInFlightStreamingMessages();
     }
     setActiveProjectId(null);
     setActiveConversationId(null);
   };
 
   const handleSelectConversation = (id: string) => {
-    if (isStreaming && abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsStreaming(false);
+    if ((isStreaming || abortControllerRef.current) && id !== activeConversationId) {
+      cancelInFlightStreamingMessages();
     }
     setActiveProjectId(null);
     setActiveConversationId(id);
   };
 
   const handleSelectProject = (id: string) => {
-    if (isStreaming && abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsStreaming(false);
+    if (isStreaming || abortControllerRef.current) {
+      cancelInFlightStreamingMessages();
     }
     setActiveProjectId(id);
   };
@@ -444,9 +500,19 @@ export const AIPage: React.FC = () => {
       })
     );
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setIsStreaming(true);
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
+    const turnStartedAt = Date.now();
+
+    logSafeInteractionEvent('chat_initiated', {
+      mode: currentMode,
+      model: currentModel,
+      hasAttachments: attachments.length > 0,
+    });
 
     try {
       const result = await sendMessage({
@@ -511,6 +577,12 @@ export const AIPage: React.FC = () => {
         })
       );
 
+      logSafeInteractionEvent('chat_completed', {
+        mode: currentMode,
+        model: currentModel,
+        durationMs: Date.now() - turnStartedAt,
+      });
+
       // If user is authenticated, persist conversation messages to Firestore
       if (user?.uid) {
         saveChatMessageToFirestore(user.uid, targetConvId, {
@@ -548,7 +620,33 @@ export const AIPage: React.FC = () => {
         }, 400);
       }
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
+      if (err.name === 'AbortError' || abortController.signal.aborted) {
+        setConversations((prev) =>
+          prev.map((conv) => {
+            if (conv.id === targetConvId) {
+              return {
+                ...conv,
+                messages: conv.messages.map((m) =>
+                  m.id === assistantPlaceholderId && m.status === 'streaming'
+                    ? {
+                        ...m,
+                        status: 'cancelled',
+                        content: m.content || 'Synthesis cancelled by user.',
+                      }
+                    : m
+                ),
+              };
+            }
+            return conv;
+          })
+        );
+      } else {
+        logSafeInteractionEvent('chat_failed', {
+          mode: currentMode,
+          model: currentModel,
+          durationMs: Date.now() - turnStartedAt,
+          reason: err.name || 'InferenceError',
+        });
         setConversations((prev) =>
           prev.map((conv) => {
             if (conv.id === targetConvId) {
@@ -570,16 +668,19 @@ export const AIPage: React.FC = () => {
         );
       }
     } finally {
-      setIsStreaming(false);
-      abortControllerRef.current = null;
+      if (abortControllerRef.current === abortController) {
+        setIsStreaming(false);
+        abortControllerRef.current = null;
+      }
     }
   };
 
   const handleStopStreaming = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setIsStreaming(false);
+    logSafeInteractionEvent('chat_cancelled', {
+      mode: currentMode,
+      model: currentModel,
+    });
+    cancelInFlightStreamingMessages();
   };
 
   const handleSelectSuggestion = (suggestion: SmartSuggestion) => {
@@ -626,6 +727,7 @@ export const AIPage: React.FC = () => {
         onOpenScienceHub={() => setIsScienceHubOpen(true)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenShortcutsHelp={() => setIsShortcutsHelpOpen(true)}
+        onOpenEngageAdmin={() => setIsEngageAdminOpen(true)}
       />
 
       {/* Main Workspace: Left Sidebar + Workspace / Chat Column */}
@@ -684,7 +786,9 @@ export const AIPage: React.FC = () => {
 
             {/* Scrollable Conversation Container */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-4 md:px-8 pt-4">
-              {messages.length === 0 ? (
+              {isInitialMessagesLoading || (isAuthLoading && messages.length > 0 && !isStreaming) ? (
+                <MessageListSkeleton turns={2} mode={currentMode} />
+              ) : messages.length === 0 ? (
                 <EmptyState
                   onSelectPrompt={handleSelectEmptyPrompt}
                   activeMode={currentMode}
@@ -710,6 +814,14 @@ export const AIPage: React.FC = () => {
                       }}
                     />
                   ))}
+                  {isStreaming &&
+                    messages.length > 0 &&
+                    messages[messages.length - 1].role === 'user' && (
+                      <MessageListSkeleton
+                        variant="awaiting-response"
+                        mode={currentMode}
+                      />
+                    )}
                   <div ref={messagesEndRef} className="h-4" />
                 </div>
               )}
@@ -843,6 +955,12 @@ export const AIPage: React.FC = () => {
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+      />
+
+      {/* VIZRA Engage Administration & Monetization Studio Modal */}
+      <EngageAdminModal
+        isOpen={isEngageAdminOpen}
+        onClose={() => setIsEngageAdminOpen(false)}
       />
     </div>
   );

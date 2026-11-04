@@ -2,8 +2,8 @@
  * VIZRA SERVER-SIDE TRANSACTIONAL EMAIL SERVICE
  *
  * Uses the official Resend SDK to dispatch transactional emails securely.
- * All credentials and sender configurations are fetched strictly from server-side
- * environment variables (never hardcoded or exposed to the client).
+ * All credentials and sender/recipient configurations are fetched strictly from
+ * server-side environment variables (never hardcoded or exposed to the client).
  */
 
 import { Resend } from 'resend';
@@ -15,7 +15,10 @@ export interface TransactionalEmailPayload {
   subject: string;
   html: string;
   text?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
   replyTo?: string;
+  headers?: Record<string, string>;
   tags?: Array<{ name: string; value: string }>;
 }
 
@@ -41,6 +44,13 @@ function getResendApiKey(): string | null {
 }
 
 /**
+ * Checks whether a live Resend API key is configured in the environment.
+ */
+export function isEmailServiceConfigured(): boolean {
+  return getResendApiKey() !== null;
+}
+
+/**
  * Safely retrieves the default sender address from server-side environment variables.
  */
 export function getDefaultSenderEmail(): string {
@@ -48,7 +58,14 @@ export function getDefaultSenderEmail(): string {
 }
 
 /**
- * Instantiates a fresh or cached Resend client using the environment API key.
+ * Safely retrieves the administrator security notification email from server-side environment variables.
+ */
+export function getAdminNotificationEmail(): string {
+  return process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL?.trim() || 'ritadevishahu1992@gmail.com';
+}
+
+/**
+ * Instantiates a Resend client using the environment API key.
  * Returns null if the API key is not configured.
  */
 export function getResendClient(): Resend | null {
@@ -106,7 +123,10 @@ export async function sendTransactionalEmail(
       subject: payload.subject,
       html: payload.html,
       ...(payload.text ? { text: payload.text } : {}),
+      ...(payload.cc ? { cc: payload.cc } : {}),
+      ...(payload.bcc ? { bcc: payload.bcc } : {}),
       ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
+      ...(payload.headers ? { headers: payload.headers } : {}),
       ...(payload.tags ? { tags: payload.tags } : {}),
     });
 
@@ -131,3 +151,9 @@ export async function sendTransactionalEmail(
     };
   }
 }
+
+/**
+ * Convenience alias for sendTransactionalEmail.
+ */
+export const sendEmail = sendTransactionalEmail;
+
