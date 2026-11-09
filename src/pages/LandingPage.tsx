@@ -5,6 +5,7 @@ import { HeroSection } from '../components/HeroSection';
 import { WhyVizraSection } from '../components/WhyVizraSection';
 import { BrandStatement } from '../components/BrandStatement';
 import { StudioEngines } from '../components/StudioEngines';
+import { VizraComingSoon } from '../components/VizraComingSoon';
 import { EarlyAccessForm } from '../components/EarlyAccessForm';
 import { Footer } from '../components/Footer';
 
@@ -38,7 +39,10 @@ export const LandingPage: React.FC = () => {
         {/* Section 4: Studio Engines & Creative Architecture */}
         <StudioEngines onLaunch={handleNavigateToAI} />
 
-        {/* Section 5: Early Access & Private Beta */}
+        {/* Section 5: Coming Soon & Future Features Roadmap */}
+        <VizraComingSoon />
+
+        {/* Section 6: Early Access & Private Beta */}
         <EarlyAccessForm />
       </main>
 
