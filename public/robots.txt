@@ -1,0 +1,26 @@
+# VIZRA Robots Configuration
+User-agent: *
+Allow: /
+Allow: /explore
+Allow: /ai
+Allow: /seo-diagnostics
+Allow: /crawler-audit
+
+# Dedicated AI Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Sitemap Declaration
+Sitemap: https://vizra.vercel.app/sitemap.xml

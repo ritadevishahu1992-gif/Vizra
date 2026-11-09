@@ -12,12 +12,13 @@
  * 9. API failure handling & honest limitation reporting
  */
 
-import { detectLanguage, classifyUserIntent, routeUserQuery, UserIntent } from './aiService';
+import { detectLanguage, classifyUserIntent, routeUserQuery, UserIntent, getDirectAnswer } from './aiService';
 import { evaluateSafeMath } from '../utils/mathReasoning';
 import { validateCodeSnippet } from '../utils/codeValidator';
 import {
   runSourceValidationGate,
   shouldPerformWebResearch,
+  isAmbiguousEntityQuery,
 } from './webResearchService';
 import { ragVectorStore } from './ragVectorStore';
 import { omniaGovernanceService } from './omniaGovernanceService';
@@ -542,6 +543,86 @@ export function add(a: number, b: number): number {
 
     const gate = runSourceValidationGate(maliciousSources, 'Explain photosynthesis');
     return gate.passedSources.length === 1 && gate.passedSources[0].url.startsWith('https://');
+  });
+
+  // ==============================================================
+  // 16. Omnia 1.0 Root Cause Verification (8 Core Scenarios)
+  // ==============================================================
+
+  // Test 1: Basic factual question ("What is Google Gemini 4 Argon?")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 1: Factual question triggers web research and direct explanation without generic clarification', () => {
+    const prompt = 'What is the Google Gemini 4 Argon?';
+    const triggersResearch = shouldPerformWebResearch(prompt);
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const noFluff = !answer.includes('Please let me know what specific aspect you would like to explore');
+    const hasFacts = answer.includes('Gemini 4 Argon') && answer.includes('reasoning model');
+    return triggersResearch && noFluff && hasFacts;
+  });
+
+  // Test 2: Technical question ("Explain the architecture of Google Gemini 4 Argon.")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 2: Explains architecture, states unavailable proprietary details, and contains zero VIZRA leakage', () => {
+    const prompt = 'Explain the architecture of Google Gemini 4 Argon.';
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const hasArchitecture = answer.includes('Transformer') && answer.includes('Multimodal');
+    const hasProprietaryCaveat = answer.includes('Proprietary Information') || answer.includes('not been publicly released');
+    const zeroVizraLeakage = !answer.includes('dispenser') && !answer.includes('Kerr') && !answer.includes('Obsidian & Surgical Red');
+    return hasArchitecture && hasProprietaryCaveat && zeroVizraLeakage;
+  });
+
+  // Test 3: Comparison ("Compare Google Gemini 4 Argon with other AI models.")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 3: Structured dimension-by-dimension comparison across models', () => {
+    const prompt = 'Compare Google Gemini 4 Argon with other AI models.';
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const comparesGPT4o = answer.includes('GPT-4o');
+    const comparesClaude = answer.includes('Claude 3.5 Sonnet');
+    const comparesFlash = answer.includes('Gemini 1.5 Flash');
+    return comparesGPT4o && comparesClaude && comparesFlash;
+  });
+
+  // Test 4: API question ("What is the official API model ID?")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 4: Correctly identifies official API model ID as gemini-4-argon', () => {
+    const prompt = 'What is the official API model ID for Google Gemini 4 Argon?';
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    return answer.includes('gemini-4-argon');
+  });
+
+  // Test 5: Latest information ("What are the latest developments in AI agents?")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 5: Identifies current AI agent developments (MCP, multi-agent frameworks)', () => {
+    const prompt = 'What are the latest developments in AI agents?';
+    const triggersResearch = shouldPerformWebResearch(prompt);
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const mentionsMCP = answer.includes('Model Context Protocol') || answer.includes('MCP');
+    const mentionsAgents = answer.includes('Multi-Agent') || answer.includes('Autonomous');
+    return triggersResearch && mentionsMCP && mentionsAgents;
+  });
+
+  // Test 6: Unrelated topic ("What caused the French Revolution?")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 6: Explains French Revolution causes with zero VIZRA internal project contamination', () => {
+    const prompt = 'What caused the French Revolution?';
+    const triggersResearch = shouldPerformWebResearch(prompt);
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const hasHistoricalCauses = answer.includes('Estates') && answer.includes('Financial Crisis') && answer.includes('Enlightenment');
+    const zeroVizra = !answer.includes('Vizra') && !answer.includes('Omnia') && !answer.includes('dispenser');
+    return triggersResearch && hasHistoricalCauses && zeroVizra;
+  });
+
+  // Test 7: Ambiguous question ("Tell me about Argon.")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 7: Disambiguates between chemical element Argon and Google Gemini 4 Argon model', () => {
+    const prompt = 'Tell me about Argon.';
+    const ambig = isAmbiguousEntityQuery(prompt);
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const distinguishesElement = answer.toLowerCase().includes('chemical element') && answer.toLowerCase().includes('noble gas');
+    const distinguishesModel = answer.toLowerCase().includes('gemini 4 argon') && answer.toLowerCase().includes('ai model');
+    return ambig.isAmbiguous && distinguishesElement && distinguishesModel;
+  });
+
+  // Test 8: No reliable sources ("What is an unannounced product called Project X?")
+  record('16. Root Cause Verification (8 Core Scenarios)', 'Test 8: Transparently reports lack of reliable sources for unannounced product', () => {
+    const prompt = 'What is an unannounced product called Project X?';
+    const answer = getDirectAnswer(prompt, 'english') || '';
+    const statesUnverified = answer.includes("couldn't verify that from a reliable source") || answer.includes('no official or reliable public documentation');
+    const zeroHallucination = !answer.includes('Project X is a flagship hardware');
+    return statesUnverified && zeroHallucination;
   });
 
   const totalTests = results.length;

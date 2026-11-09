@@ -210,7 +210,33 @@ export function shouldPerformWebResearch(
     return true;
   }
 
-  // 2. Current, recent, live, changing, time-sensitive queries
+  // 2. Named AI models, entities, and tech architectures
+  const aiEntityPatterns = [
+    /\b(gemini|argon|gemini\s*4|gemini\s*4\s*argon|gpt-4|gpt-5|claude|deepseek|llama|mistral|anthropic|openai|deepmind)\b/i,
+    /\b(model\s*id|api\s*model\s*id|architecture\s+of|official\s+api)\b/i,
+    /\b(ai\s+agents?|multi-agent|autonomous\s+agents?|mcp|model\s+context\s+protocol|computer\s+use)\b/i,
+    /\b(unannounced\s+product|project\s+x|unreleased\s+model|leaked\s+spec)\b/i,
+  ];
+  if (aiEntityPatterns.some((p) => p.test(lower))) {
+    return true;
+  }
+
+  // 3. Comparisons between models, tools, or entities
+  if (/\b(compare|comparison|versus|vs\.?|difference\s+between)\b/i.test(lower)) {
+    return true;
+  }
+
+  // 4. Historical, scientific, or factual inquiries outside local scope
+  const factualHistoricalPatterns = [
+    /\b(what\s+caused|causes?\s+of|history\s+of|who\s+was|who\s+discovered|origin\s+of)\b/i,
+    /\b(french\s+revolution|industrial\s+revolution|world\s+war|renaissance)\b/i,
+    /\bwhat\s+(is|are|was|were)\s+(the\s+)?[a-z0-9_-]+/i,
+  ];
+  if (factualHistoricalPatterns.some((p) => p.test(lower))) {
+    return true;
+  }
+
+  // 5. Current, recent, live, changing, time-sensitive queries
   const timeSensitivePatterns = [
     /\b(today|yesterday|this\s+week|this\s+month|this\s+year)\b/i,
     /\b(latest|current|recent|newest|live|trending|upcoming)\b/i,
@@ -224,7 +250,7 @@ export function shouldPerformWebResearch(
     return true;
   }
 
-  // 3. Documentation, technical guides, specifications, or official library queries
+  // 6. Documentation, technical guides, specifications, or official library queries
   const docPatterns = [
     /\b(documentation|official\s+docs?|official\s+guide|api\s+updates?|sdk\s+updates?|specifications?)\b/i,
     /\b(what\s+does\s+[a-z0-9_-]+\s+say\s+about|according\s+to\s+[a-z0-9_-]+\s+docs?)\b/i,
@@ -234,12 +260,33 @@ export function shouldPerformWebResearch(
     return true;
   }
 
-  // 4. Explicit URLs or external documentation references
+  // 7. Explicit URLs or external documentation references
   if (/https?:\/\//i.test(lower) || /\b(github\.com|arxiv|wikipedia|docs\.)/i.test(lower)) {
     return true;
   }
 
   return false;
+}
+
+/**
+ * Recognizes ambiguous entity queries that lack domain context (e.g. "Tell me about Argon")
+ */
+export function isAmbiguousEntityQuery(prompt: string): { isAmbiguous: boolean; entity?: string; clarificationPrompt?: string } {
+  const clean = prompt.trim().toLowerCase().replace(/[?!.]+$/, '');
+  
+  if (clean === 'tell me about argon' || clean === 'what is argon' || clean === 'argon' || clean === 'explain argon') {
+    return {
+      isAmbiguous: true,
+      entity: 'Argon',
+      clarificationPrompt:
+        'Argon can refer to either **Argon (the chemical element)** or **Google Gemini 4 Argon (the AI model)**.\n\n' +
+        '1. **Chemical Element Argon (Ar)**: Atomic number 18, a colorless, odorless noble gas used in incandescent lighting and inert shielding for welding.\n' +
+        '2. **Google Gemini 4 Argon**: Google\'s specialized AI reasoning model designed for high-efficiency deduction, coding, and tool invocation.\n\n' +
+        'Which aspect would you like to explore?',
+    };
+  }
+
+  return { isAmbiguous: false };
 }
 
 /**

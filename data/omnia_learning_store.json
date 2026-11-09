@@ -1283,6 +1283,15 @@
   ],
   "feedback": [
     {
+      "id": "fb_1794220553669_jhuw",
+      "question": "Omnia Conversational Query",
+      "answer": "\"Gemini 4 Argon\" does not refer to an official, publicly released model or product from Google or any major research organization. \n\nIt is likely a confusion of naming conventions or a reference to internal project codenames that have not been confirmed. Google’s current Gemini series includes the **Gemini 1.5** family (Flash and Pro) and the **Gemini 2.0** models currently in various stages of testing and rollout.\n\nIf you are seeing this name in a specific technical context—such as a proprietary software update, a leak, or a specific API environment—please provide more context so I can verify the details for you.",
+      "retrievedSources": [],
+      "userFeedback": "NOT_HELPFUL",
+      "timestamp": "2026-11-09T10:35:53.669Z",
+      "status": "APPROVED"
+    },
+    {
       "id": "fb_1790604403761_w0zs",
       "question": "When did Curiosity land?",
       "answer": "August 2012",

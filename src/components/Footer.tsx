@@ -31,6 +31,9 @@ export const Footer: React.FC = () => {
             <span>Omnia AI</span>
             <span className="w-1 h-1 rounded-full bg-[#eb3b2d]" />
           </Link>
+          <Link to="/seo-diagnostics" className="hover:text-white text-neutral-300 transition-colors">
+            SEO & Crawler Audit
+          </Link>
           <a href="#studio" className="hover:text-white transition-colors">
             Studio
           </a>
