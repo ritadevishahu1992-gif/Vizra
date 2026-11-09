@@ -724,7 +724,15 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   const isSimpleGreeting = /^(hi|hey|hello|sup|yo|hiya|namaste|good\s*(morning|afternoon|evening))[!.]*$/i.test(lower);
   const isSimpleStatus = /^(how\s*are\s*you|how'?s\s*it\s*going|kya\s*kar\s*rahe\s*ho)[?!.]*$/i.test(lower);
 
-  if (!isSimpleGreeting && !isSimpleStatus && options.ragScope !== 'off') {
+  const isEligibleForRAG =
+    !isSimpleGreeting &&
+    !isSimpleStatus &&
+    options.ragScope !== 'off' &&
+    (Boolean(options.activeProject?.id) ||
+      options.ragScope === 'project' ||
+      /\b(vizra|omnia|studio|architecture|constitution|governance|rag\s*spec)\b/i.test(lower));
+
+  if (isEligibleForRAG) {
     try {
       const matchedChunks = await ragVectorStore.query(rawPrompt, {
         projectId: options.activeProject?.id,
@@ -1032,7 +1040,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
 
         if (res.ok) {
           const data = await res.json();
-          if (data.text && !data.fallback) {
+          if (data.text && typeof data.text === 'string' && data.text.trim()) {
             responseText = data.text.trim();
             serverFetched = true;
 
@@ -1124,7 +1132,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.text && !data.fallback) {
+        if (data.text && typeof data.text === 'string' && data.text.trim()) {
           responseText = data.text.trim();
           serverFetched = true;
         }
@@ -1197,7 +1205,7 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.text && !data.fallback) {
+          if (data.text && typeof data.text === 'string' && data.text.trim()) {
             responseText = data.text.trim();
             serverFetched = true;
           }
@@ -1290,7 +1298,7 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.text && !data.fallback) {
+          if (data.text && typeof data.text === 'string' && data.text.trim()) {
             responseText = data.text.trim();
             serverFetched = true;
           }
@@ -1341,7 +1349,7 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
 
       if (res.ok) {
         const data = await res.json();
-        if (data.text && !data.fallback) {
+        if (data.text && typeof data.text === 'string' && data.text.trim()) {
           responseText = data.text.trim();
           serverFetched = true;
         }
@@ -1438,12 +1446,14 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     conflict_ids: activeConflicts.map((c) => c.id),
   });
 
-  // Convert document citations to verified sources (Section 9)
-  const docSources =
-    citations && citations.length > 0
-      ? citations.map((c) => convertCitationToVerifiedSource(c))
-      : [];
-  if (docSources.length > 0) {
+  // Convert document citations to verified sources ONLY if query explicitly targeted internal documentation
+  const isInternalQuery =
+    Boolean(options.activeProject?.id) ||
+    options.ragScope === 'project' ||
+    /\b(vizra|omnia|studio|architecture|constitution|governance|rag\s*spec)\b/i.test(lower);
+
+  if (isInternalQuery && citations && citations.length > 0) {
+    const docSources = citations.map((c) => convertCitationToVerifiedSource(c));
     const existing = sources || [];
     // Deduplicate against any already present document sources
     const newDocs = docSources.filter((d) => !existing.some((e) => e.sourceId === d.sourceId));

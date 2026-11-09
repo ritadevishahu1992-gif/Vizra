@@ -35,7 +35,12 @@ export const SourcesBar: React.FC<SourcesBarProps> = ({
   const [copiedExcerpt, setCopiedExcerpt] = useState(false);
 
   // Group sources into WEB and DOCUMENTS (Section 9)
-  const webSources = sources.filter((s) => s.sourceType === 'web' && s.validationStatus === 'verified');
+  const webSources = sources.filter(
+    (s) =>
+      s.sourceType === 'web' &&
+      s.validationStatus === 'verified' &&
+      Boolean(s.url && (s.url.startsWith('http://') || s.url.startsWith('https://')))
+  );
 
   // Convert citations to document sources if not already present
   const docSourcesMap = new Map<string, VerifiedSource>();
@@ -152,16 +157,18 @@ export const SourcesBar: React.FC<SourcesBarProps> = ({
                   </span>
 
                   {/* Direct Link Anchor */}
-                  <a
-                    href={src.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neutral-500 hover:text-white p-0.5 transition-colors cursor-pointer"
-                    title={`Open verified source: ${src.url}`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ExternalLink size={10} />
-                  </a>
+                  {src.url && (src.url.startsWith('http://') || src.url.startsWith('https://')) ? (
+                    <a
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-neutral-500 hover:text-white p-0.5 transition-colors cursor-pointer"
+                      title={`Open verified source: ${src.url}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                  ) : null}
 
                   {/* Detail trigger */}
                   <button
@@ -359,7 +366,9 @@ export const SourcesBar: React.FC<SourcesBarProps> = ({
                 </div>
 
                 {/* Direct Link if Web Source */}
-                {selectedSource.sourceType === 'web' && selectedSource.url.startsWith('http') && (
+                {selectedSource.sourceType === 'web' &&
+                  selectedSource.url &&
+                  (selectedSource.url.startsWith('http://') || selectedSource.url.startsWith('https://')) && (
                   <div className="space-y-1.5">
                     <div className="text-[11px] font-mono text-neutral-400 uppercase">
                       Exact Verified Source URL

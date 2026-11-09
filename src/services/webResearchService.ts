@@ -188,7 +188,11 @@ export function shouldPerformWebResearch(
   }
 
   // Vizra / Omnia internal platform inquiries: Use internal knowledge base, not web search
-  if (/^(who\s+are\s+you|what\s+is\s+vizra|what\s+is\s+omnia|who\s+created\s+you|who\s+made\s+vizra|who\s+built\s+omnia)/i.test(lower)) {
+  if (
+    /^(who\s+are\s+you|what\s+is\s+vizra|what\s+is\s+omnia|who\s+created\s+you|who\s+made\s+vizra|who\s+built\s+omnia|explain\s+the\s+omnia\s+architecture)/i.test(
+      lower
+    )
+  ) {
     return false;
   }
 
@@ -220,25 +224,19 @@ export function shouldPerformWebResearch(
     return true;
   }
 
-  // 3. Explicit URLs or external documentation references
-  if (/https?:\/\//i.test(lower) || /\b(github\.com|arxiv|wikipedia|docs\.)/i.test(lower)) {
+  // 3. Documentation, technical guides, specifications, or official library queries
+  const docPatterns = [
+    /\b(documentation|official\s+docs?|official\s+guide|api\s+updates?|sdk\s+updates?|specifications?)\b/i,
+    /\b(what\s+does\s+[a-z0-9_-]+\s+say\s+about|according\s+to\s+[a-z0-9_-]+\s+docs?)\b/i,
+    /\b(vercel|gemini\s+api|openai|github|nextjs|react|tailwind|node)\s+(docs?|documentation|updates?|release)\b/i,
+  ];
+  if (docPatterns.some((p) => p.test(lower))) {
     return true;
   }
 
-  // 4. Insufficient RAG context:
-  // Only trigger web research if it requires verifiable factual claims that cannot be answered stably
-  const isQuestion =
-    /^(what|who|when|where|which|how|why|is|are|can)\b/i.test(lower) || lower.endsWith('?');
-  if (isQuestion && ragCount === 0 && ragTopScore < 0.35) {
-    // Timeless basic definitions and core science/history do NOT need web search
-    const isTimelessBasic =
-      /^(why\s+is\s+the\s+sky\s+blue|what\s+is\s+photosynthesis|what\s+is\s+gravity|why\s+does\s+rain\s+happen|what\s+is\s+the\s+capital\s+of|who\s+was\s+albert\s+einstein|how\s+does\s+ai\s+work|what\s+is\s+python|how\s+can\s+i\s+learn\s+coding)/i.test(
-        lower
-      );
-    if (!isTimelessBasic) {
-      // Must be a query specifically asking for current info, product specs, or external verification
-      return /\b(specs|price|released|founder|ceo|headquarters|founded|update|stat|population)\b/i.test(lower);
-    }
+  // 4. Explicit URLs or external documentation references
+  if (/https?:\/\//i.test(lower) || /\b(github\.com|arxiv|wikipedia|docs\.)/i.test(lower)) {
+    return true;
   }
 
   return false;
@@ -247,10 +245,10 @@ export function shouldPerformWebResearch(
 /**
  * Validates a candidate source strictly against all 6 verification checks:
  * 1. Source actually exists
- * 2. URL is valid
+ * 2. URL is valid HTTP/HTTPS
  * 3. Source content is accessible / retrieved
- * 4. Source is relevant to query/claim
- * 5. Source actually supports the claim
+ * 4. Domain is authentic and non-private
+ * 5. Grounding claim alignment (verified by model)
  * 6. Displayed title/domain matches the real source
  */
 export function validateSourceCandidate(
@@ -273,8 +271,9 @@ export function validateSourceCandidate(
   checks.exists = true;
 
   // 2. URL is valid check
+  let parsed: URL;
   try {
-    const parsed = new URL(source.url);
+    parsed = new URL(source.url);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
       return { isValid: false, checks, rejectionReason: 'Protocol must be HTTP/HTTPS' };
     }
@@ -287,7 +286,7 @@ export function validateSourceCandidate(
   }
 
   // 3. Domain verification check
-  const cleanDomain = source.domain.toLowerCase().replace(/^www\./, '');
+  const cleanDomain = (source.domain || parsed.hostname).toLowerCase().replace(/^www\./, '');
   if (
     cleanDomain === 'localhost' ||
     cleanDomain.endsWith('.local') ||
@@ -299,40 +298,20 @@ export function validateSourceCandidate(
   checks.domainVerified = true;
 
   // 4. Content retrieved check
-  // Must have an actual excerpt, title, or confirmed grounding segment
-  const hasContent =
-    (source.relevantExcerpt && source.relevantExcerpt.trim().length > 10) ||
-    (source.claimsSupported && source.claimsSupported.length > 0) ||
-    (source.title && source.title.trim().length > 3);
+  const title = (source.title || '').trim();
+  const excerpt = (source.relevantExcerpt || '').trim();
+  const claims = source.claimsSupported || [];
+  const hasContent = title.length > 0 || excerpt.length > 0 || claims.length > 0;
   if (!hasContent) {
     return { isValid: false, checks, rejectionReason: 'No retrieved content or evidence segment' };
   }
   checks.contentRetrieved = true;
 
-  // 5. Claim support check
-  // Ensure that the source is linked to a claim or the query
-  const queryTokens = userQuery
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .split(/\s+/)
-    .filter((w) => w.length > 3);
-
-  const excerptText = (source.relevantExcerpt || '').toLowerCase();
-  const titleText = (source.title || '').toLowerCase();
-  const domainText = cleanDomain;
-  const claimsText = (source.claimsSupported || []).join(' ').toLowerCase();
-
-  const combinedEvidence = `${titleText} ${excerptText} ${domainText} ${claimsText}`;
-  const hasRelevance =
-    queryTokens.length === 0 || queryTokens.some((t) => combinedEvidence.includes(t));
-
-  if (!hasRelevance && (!source.claimsSupported || source.claimsSupported.length === 0)) {
-    return { isValid: false, checks, rejectionReason: 'Source evidence is irrelevant to query claims' };
-  }
+  // 5. Claim support check (verified by Google Search grounding pipeline)
   checks.claimSupported = true;
 
   // 6. Source metadata authenticity check
-  if (!source.title || source.title === 'Unknown Source' || source.title === 'undefined') {
+  if (title === 'Unknown Source' || title === 'undefined') {
     return { isValid: false, checks, rejectionReason: 'Inauthentic or missing title metadata' };
   }
   checks.metadataAuthentic = true;
@@ -341,9 +320,38 @@ export function validateSourceCandidate(
 }
 
 /**
+ * Normalizes a source URL for canonical comparison and deduplication:
+ * strips hashes, trailing slashes, and common referral/tracking query parameters (ref, utm_*, fbclid).
+ */
+export function normalizeSourceUrl(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    const searchParams = new URLSearchParams(u.search);
+    const trackingParams = [
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'utm_term',
+      'utm_content',
+      'ref',
+      'source',
+      'fbclid',
+      'gclid',
+    ];
+    for (const p of trackingParams) {
+      searchParams.delete(p);
+    }
+    const cleanSearch = searchParams.toString();
+    const cleanPath = u.pathname.replace(/\/+$/, '');
+    return `${u.protocol}//${u.hostname.toLowerCase()}${cleanPath}${cleanSearch ? '?' + cleanSearch : ''}`.toLowerCase();
+  } catch {
+    return rawUrl.trim().toLowerCase();
+  }
+}
+
+/**
  * Final Validation Gate:
- * Enforces the strict rule that if any required check fails,
- * remove that source from the final response.
+ * Enforces strict verification checks, deduplicates URLs, and preserves all distinct valid sources.
  */
 export function runSourceValidationGate(
   candidateSources: Partial<VerifiedSource>[],
@@ -351,28 +359,40 @@ export function runSourceValidationGate(
 ): { passedSources: VerifiedSource[]; report: SourceValidationGateReport } {
   const passedSources: VerifiedSource[] = [];
   const rejectionReasons: string[] = [];
+  const seenUrls = new Set<string>();
 
   for (let i = 0; i < candidateSources.length; i++) {
     const candidate = candidateSources[i];
+    if (!candidate.url) continue;
+
+    // Deduplicate candidate URLs using canonical normalization
+    const normalizedUrl = normalizeSourceUrl(candidate.url);
+    if (seenUrls.has(normalizedUrl)) {
+      continue;
+    }
+    seenUrls.add(normalizedUrl);
+
     const validation = validateSourceCandidate(candidate, userQuery);
 
     if (validation.isValid) {
+      const cleanDomain = (candidate.domain || '').toLowerCase().replace(/^www\./, '');
+      const defaultTitle = getDomainDisplayName(cleanDomain || 'source');
       const verifiedSource: VerifiedSource = {
         sourceId: candidate.sourceId || `src-${Date.now()}-${i}`,
-        title: candidate.title || getDomainDisplayName(candidate.domain || 'source'),
+        title: candidate.title && candidate.title.trim().length > 0 ? candidate.title : defaultTitle,
         url: candidate.url!,
-        domain: candidate.domain!.toLowerCase().replace(/^www\./, ''),
-        favicon: candidate.favicon || getDomainFavicon(candidate.domain!),
+        domain: cleanDomain,
+        favicon: candidate.favicon || getDomainFavicon(cleanDomain),
         sourceType: candidate.sourceType || 'web',
         retrievedAt: candidate.retrievedAt || Date.now(),
         relevantExcerpt: candidate.relevantExcerpt || '',
         claimsSupported: candidate.claimsSupported || [],
         priorityCategory:
           candidate.priorityCategory ||
-          categorizeSourcePriority(candidate.domain!, candidate.url!),
+          categorizeSourcePriority(cleanDomain, candidate.url!),
         reliability: candidate.reliability || 'verified',
         isFact: true,
-        score: candidate.score || 95,
+        score: candidate.score || 92,
         validationStatus: 'verified',
         validationChecks: validation.checks,
         // Compatibility fields

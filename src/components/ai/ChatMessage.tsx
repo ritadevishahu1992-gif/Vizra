@@ -234,7 +234,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
 
             {/* OMNIA RAG Grounding Banner */}
-            {message.grounding && message.grounding.isGrounded && (
+            {message.grounding && message.grounding.isGrounded && message.citations && message.citations.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/70 border border-neutral-800 text-[11px] font-mono text-neutral-300">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -293,7 +293,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
             {/* Assistant Body, VIZRA Engage & Awaiting-Response Skeleton */}
             {(() => {
-              const hasTokens = Boolean(message.content && message.content.length > 0);
+              const hasTokens = Boolean(message.content && message.content.trim().length > 0);
               const engageLifecycleState = deriveEngageLifecycleFromMessage(message);
               const displayContent = hasTokens
                 ? message.content
@@ -301,6 +301,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 ? 'An error occurred during inference. Please retry.'
                 : message.status === 'cancelled'
                 ? 'Synthesis cancelled by user.'
+                : message.status === 'done'
+                ? 'I was unable to generate an answer for this prompt. Please try again or rephrase your question.'
                 : '';
 
               return (

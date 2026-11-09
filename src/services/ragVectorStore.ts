@@ -625,6 +625,14 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
         continue;
       }
 
+      // Platform internal documentation isolation: do not pull Vizra architecture for general inquiries
+      if (doc.tier === 'global' || doc.tier === 'vizra' || doc.tier === 'omnia') {
+        const isPlatformQuery = /(vizra|omnia|platform\s*architecture|creative\s*engine|design\s*constitution|rag\s*specification)/i.test(trimmedQuery);
+        if (!isPlatformQuery && (!options.tiers || options.tiers.length === 0)) {
+          continue;
+        }
+      }
+
       // Project tier isolation: PROJECT DATA IS NOT GLOBAL KNOWLEDGE.
       // Only include project-tier chunks if:
       // 1. A specific projectId is passed in query options, OR

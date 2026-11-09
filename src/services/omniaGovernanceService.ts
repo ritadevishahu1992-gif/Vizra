@@ -578,6 +578,14 @@ class OmniaGovernanceService {
         continue;
       }
 
+      // Platform Constitution Isolation Rule: Internal platform documents must ONLY match if the query is explicitly about Vizra/Omnia
+      const isInternalPlatformQuery =
+        /(vizra|omnia|platform\s*architecture|creative\s*engine|design\s*constitution|rag\s*specification)/i.test(queryLower);
+
+      if (!rec.project_id && !isInternalPlatformQuery) {
+        continue;
+      }
+
       // Project Isolation Rule: PROJECT DATA IS NOT GLOBAL KNOWLEDGE.
       // If a record belongs to a project, ONLY include it if the project is active or explicitly referenced.
       if (rec.project_id) {
@@ -598,7 +606,7 @@ class OmniaGovernanceService {
         if (recText.includes(w)) matchCount++;
       }
 
-      // Require at least 2 word matches to avoid accidental single-word triggers
+      // Require at least 2 substantive word matches to avoid accidental single-word triggers
       if (matchCount >= 2 || (projectId && rec.project_id === projectId)) {
         matchedRecords.push(rec);
       }
