@@ -342,12 +342,15 @@ export function cronAuthMiddleware(req: Request, res: Response, next: NextFuncti
 // 4. SECURITY HEADERS & INPUT SANITIZATION
 // ============================================================================
 
-export function securityHeadersMiddleware(_req: Request, res: Response, next: NextFunction): void {
+export function securityHeadersMiddleware(req: Request, res: Response, next: NextFunction): void {
   res.removeHeader('X-Powered-By');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  // Apply X-Robots-Tag: noindex, nofollow strictly to API and private routes, never to public pages
+  if (req.path.startsWith('/api/') || req.path.startsWith('/live')) {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  }
   next();
 }
 

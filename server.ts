@@ -1946,6 +1946,19 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     res.status(200).send('google-site-verification: googlef66bb3a90d865a89.html');
   });
 
+  // Explicit robots.txt & sitemap.xml handlers guaranteeing plain-text / XML MIME types
+  app.get('/robots.txt', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.sendFile(path.resolve(__dirname, 'public', 'robots.txt'));
+  });
+
+  app.get('/sitemap.xml', (_req, res) => {
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.sendFile(path.resolve(__dirname, 'public', 'sitemap.xml'));
+  });
+
   // Create native HTTP server so WebSockets can share port 3000
   const server = http.createServer(app);
   server.on('error', (err) => {
