@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
     { label: 'Home', href: '/', isRoute: true },
     { label: 'Explore', href: '/explore', isRoute: true },
     { label: 'Omnia AI', href: '/ai', isRoute: true },
-    { label: 'SEO Audit', href: '/seo-diagnostics', isRoute: true },
+    { label: 'Admin Audit 🔒', href: '/seo-diagnostics', isRoute: true },
     { label: 'Studio', href: '/#studio', isRoute: false },
     { label: 'Roadmap', href: '/#coming-soon', isRoute: false },
     { label: 'About', href: '/#philosophy', isRoute: false },

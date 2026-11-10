@@ -347,6 +347,7 @@ export function securityHeadersMiddleware(_req: Request, res: Response, next: Ne
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   next();
 }
 

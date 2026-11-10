@@ -25,7 +25,10 @@ import {
 } from 'lucide-react';
 import { SeoAuditReport, RootCauseFinding, FixRecommendation } from '../types/seoDiagnostics';
 
+import { useAuth } from '../context/AuthContext';
+
 export const SeoDiagnosticPage: React.FC = () => {
+  const { user, signInWithGoogle, signOutUser, openLoginModal } = useAuth();
   const [report, setReport] = useState<SeoAuditReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [scanning, setScanning] = useState<boolean>(false);
@@ -36,6 +39,25 @@ export const SeoDiagnosticPage: React.FC = () => {
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
   const [copiedDetails, setCopiedDetails] = useState<boolean>(false);
 
+  // Private Admin Access Auth State
+  const [adminPasskey, setAdminPasskey] = useState<string>('');
+  const [passkeyError, setPasskeyError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const resolveAuthToken = async (): Promise<string | null> => {
+    if (user) {
+      try {
+        const token = await user.getIdToken();
+        if (token) return token;
+      } catch (e) {
+        console.warn('Could not get user ID token:', e);
+      }
+    }
+    const sessionKey = sessionStorage.getItem('vizra_admin_key');
+    if (sessionKey) return sessionKey;
+    return null;
+  };
+
   const fetchAudit = async (forceFresh = false) => {
     try {
       if (forceFresh) {
@@ -45,11 +67,28 @@ export const SeoDiagnosticPage: React.FC = () => {
       }
       setError(null);
 
+      const token = await resolveAuthToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        setScanning(false);
+        return;
+      }
+
       const res = await fetch('/api/seo-diagnostics/audit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ forceFresh }),
       });
+
+      if (res.status === 401 || res.status === 403) {
+        setIsAuthenticated(false);
+        sessionStorage.removeItem('vizra_admin_key');
+        throw new Error('Unauthorized: Valid administrator authentication required.');
+      }
 
       if (!res.ok) {
         throw new Error(`Diagnostic service returned status ${res.status}`);
@@ -57,6 +96,7 @@ export const SeoDiagnosticPage: React.FC = () => {
 
       const data: SeoAuditReport = await res.json();
       setReport(data);
+      setIsAuthenticated(true);
     } catch (err: any) {
       console.error('Failed to run SEO diagnostic:', err);
       setError(err.message || 'Error communicating with diagnostic engine');
@@ -68,7 +108,27 @@ export const SeoDiagnosticPage: React.FC = () => {
 
   useEffect(() => {
     fetchAudit(false);
-  }, []);
+  }, [user]);
+
+  const handlePasskeyAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminPasskey.trim()) {
+      setPasskeyError('Please enter administrator passkey.');
+      return;
+    }
+    setPasskeyError(null);
+    sessionStorage.setItem('vizra_admin_key', adminPasskey.trim());
+    fetchAudit(false);
+  };
+
+  const handleLockPortal = async () => {
+    sessionStorage.removeItem('vizra_admin_key');
+    setIsAuthenticated(false);
+    setReport(null);
+    if (user) {
+      await signOutUser();
+    }
+  };
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -165,26 +225,44 @@ ${rec.codeSnippet}
               <span className="font-serif text-xl tracking-wider text-white group-hover:text-[#dc2626] transition-colors">
                 VIZRA
               </span>
-              <span className="text-xs text-neutral-500 font-mono tracking-widest uppercase">
-                / DIAGNOSTICS
+              <span className="text-xs text-neutral-500 font-mono tracking-widest uppercase flex items-center gap-1">
+                <span>/ DIAGNOSTICS</span>
+                <Lock size={12} className="text-[#dc2626]" />
               </span>
             </Link>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-neutral-400 bg-neutral-900/80 px-3 py-1.5 rounded-lg border border-white/5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Target: https://vizra.vercel.app/</span>
-            </div>
+            {isAuthenticated ? (
+              <>
+                <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-neutral-300 bg-neutral-900 px-3 py-1.5 rounded-lg border border-white/10">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Admin Session Active</span>
+                </div>
 
-            <button
-              onClick={() => fetchAudit(true)}
-              disabled={scanning}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-medium transition-all shadow-sm disabled:opacity-50 cursor-pointer"
-            >
-              <RotateCw size={14} className={scanning ? 'animate-spin' : ''} />
-              <span>{scanning ? 'Auditing...' : 'Run Audit'}</span>
-            </button>
+                <button
+                  onClick={() => fetchAudit(true)}
+                  disabled={scanning}
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-medium transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                >
+                  <RotateCw size={14} className={scanning ? 'animate-spin' : ''} />
+                  <span>{scanning ? 'Auditing...' : 'Run Audit'}</span>
+                </button>
+
+                <button
+                  onClick={handleLockPortal}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-xs text-neutral-300 border border-white/10 transition-colors cursor-pointer"
+                >
+                  <Lock size={13} className="text-red-400" />
+                  <span>Lock Portal</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-xs font-mono text-neutral-400 bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-800/30">
+                <Lock size={13} className="text-red-400" />
+                <span>Private Portal Locked</span>
+              </div>
+            )}
 
             <Link
               to="/ai"
@@ -198,6 +276,80 @@ ${rec.codeSnippet}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!isAuthenticated ? (
+          <div className="py-16 max-w-lg mx-auto text-center">
+            <div className="p-8 rounded-2xl bg-[#111111] border border-white/10 shadow-2xl relative overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-[#dc2626]/10 border border-[#dc2626]/30 text-[#dc2626] flex items-center justify-center mx-auto mb-4">
+                <Lock size={22} />
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/60 border border-red-800/40 text-[11px] font-mono text-red-300 uppercase tracking-widest mb-3">
+                <span>Restricted Area</span>
+                <span aria-hidden="true">·</span>
+                <span>Authorized Personnel Only</span>
+              </div>
+
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                VIZRA Private Infrastructure Portal
+              </h1>
+              <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+                Public access to VIZRA website diagnostic scans, edge crawler findings, server response headers, and internal architecture analysis is disabled for privacy and security.
+              </p>
+
+              <div className="mt-6 space-y-4 text-left">
+                {/* Firebase Google Auth Button */}
+                <button
+                  onClick={signInWithGoogle}
+                  className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-white font-medium text-xs flex items-center justify-center gap-2.5 transition-all shadow-sm cursor-pointer"
+                >
+                  <Globe size={16} className="text-[#dc2626]" />
+                  <span>Sign in with Google (Firebase Admin)</span>
+                </button>
+
+                <div className="flex items-center gap-3 my-2 text-neutral-600 text-[11px] font-mono">
+                  <div className="h-px bg-neutral-800 flex-1" />
+                  <span>or enter Administrator Passkey</span>
+                  <div className="h-px bg-neutral-800 flex-1" />
+                </div>
+
+                {/* Admin Passkey Form */}
+                <form onSubmit={handlePasskeyAuth} className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                      Admin Access Key
+                    </label>
+                    <input
+                      type="password"
+                      value={adminPasskey}
+                      onChange={(e) => setAdminPasskey(e.target.value)}
+                      placeholder="Enter administrator passkey..."
+                      className="w-full bg-black border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#dc2626] font-mono"
+                    />
+                  </div>
+
+                  {passkeyError && (
+                    <div className="text-[11px] text-red-400 bg-red-950/40 border border-red-800/30 p-2 rounded-lg">
+                      {passkeyError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white font-medium text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Lock size={14} />
+                    <span>Unlock Diagnostic Portal</span>
+                  </button>
+                </form>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-white/5 text-[11px] text-neutral-500 font-mono">
+                All diagnostic requests and authentication attempts are cryptographically logged and rate-limited.
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Title & Diagnostic Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
           <div>
@@ -970,6 +1122,8 @@ ${rec.codeSnippet}
             )}
           </>
         )}
+        </>
+      )}
       </main>
     </div>
   );
