@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { VizraLogo } from './VizraLogo';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Sliders } from 'lucide-react';
+import { openCookiePreferencesModal } from './ui/CookieConsent';
 
 interface FooterLinkItem {
   label: string;
   to?: string;
   href?: string;
+  onClick?: () => void;
 }
 
 const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
@@ -44,15 +46,20 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     links: [
       { label: 'About VIZRA', to: '/about' },
       { label: 'Philosophy & Creed', to: '/about?section=philosophy' },
-      { label: 'Contact & Early Access', to: '/contact' },
+      { label: 'Contact / Privacy Requests', to: '/contact' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { label: 'Privacy Policy', to: '/privacy' },
-      { label: 'Terms of Service', to: '/terms' },
-      { label: 'Security & SSRF Governance', to: '/docs?section=security' },
+      { label: 'Terms & Conditions', to: '/terms-and-conditions' },
+      { label: 'Privacy Policy', to: '/privacy-policy' },
+      { label: 'Cookie Policy', to: '/cookie-policy' },
+      {
+        label: 'Manage Cookie Preferences',
+        onClick: () => openCookiePreferencesModal('Footer Settings'),
+      },
+      { label: 'Contact / Privacy Requests', to: '/contact' },
     ],
   },
   {
@@ -104,6 +111,20 @@ export const Footer: React.FC = () => {
                 </h3>
                 <ul className="space-y-2.5 text-xs">
                   {section.links.map((item) => {
+                    if (item.onClick) {
+                      return (
+                        <li key={item.label}>
+                          <button
+                            type="button"
+                            onClick={item.onClick}
+                            className="text-left text-neutral-400 hover:text-white transition-colors leading-snug cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] rounded-sm"
+                          >
+                            {item.label}
+                          </button>
+                        </li>
+                      );
+                    }
+
                     if (item.to) {
                       const baseRoute = item.to.split('?')[0];
                       const isActive =
@@ -112,7 +133,7 @@ export const Footer: React.FC = () => {
                           location.search === `?${item.to.split('?')[1]}`);
 
                       return (
-                        <li key={item.label}>
+                        <li key={`${section.title}-${item.label}`}>
                           <Link
                             to={item.to}
                             className={`transition-colors block leading-snug ${
@@ -147,21 +168,34 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Copyright & Route Bar */}
+        {/* Bottom Copyright & Persistent Privacy/Cookie Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex flex-wrap items-center gap-3">
             <span>&copy; {new Date().getFullYear()} Vizra Technologies Inc. All rights reserved.</span>
             <span aria-hidden="true">·</span>
-            <Link to="/privacy" className="hover:text-neutral-300 transition-colors">
-              Privacy
+            <Link to="/terms-and-conditions" className="hover:text-neutral-300 transition-colors">
+              Terms &amp; Conditions
             </Link>
             <span aria-hidden="true">·</span>
-            <Link to="/terms" className="hover:text-neutral-300 transition-colors">
-              Terms
+            <Link to="/privacy-policy" className="hover:text-neutral-300 transition-colors">
+              Privacy Policy
             </Link>
             <span aria-hidden="true">·</span>
-            <Link to="/docs" className="hover:text-neutral-300 transition-colors">
-              Documentation
+            <Link to="/cookie-policy" className="hover:text-neutral-300 transition-colors">
+              Cookie Policy
+            </Link>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
+              onClick={() => openCookiePreferencesModal('Footer Settings')}
+              className="hover:text-white text-neutral-400 transition-colors inline-flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] rounded-sm"
+            >
+              <Sliders size={11} className="text-[#EB3B2D]" />
+              <span>Manage Cookie Preferences</span>
+            </button>
+            <span aria-hidden="true">·</span>
+            <Link to="/contact" className="hover:text-neutral-300 transition-colors">
+              Contact / Privacy Requests
             </Link>
           </div>
 

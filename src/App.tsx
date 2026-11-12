@@ -33,51 +33,58 @@ export default function App() {
     () => getSavedCookieConsent()
   );
 
-  const allowAnalytics = cookieConsent ? cookieConsent.analytics : false;
+  // Optional performance telemetry (SpeedInsights) is strictly gated behind explicit Analytics consent
+  const allowOptionalAnalytics = Boolean(cookieConsent?.analytics);
 
   return (
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Multi-Page Website Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/tools" element={<ToolsPage />} />
-            <Route path="/studio" element={<StudioPage />} />
-            <Route path="/roadmap" element={<StudioPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="/privacy" element={<LegalPage />} />
-            <Route path="/terms" element={<LegalPage />} />
+          <BrowserRouter>
+            <Routes>
+              {/* Public Multi-Page Website Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/tools" element={<ToolsPage />} />
+              <Route path="/studio" element={<StudioPage />} />
+              <Route path="/roadmap" element={<StudioPage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/docs" element={<DocsPage />} />
 
-            {/* Core Studio Application & Diagnostic Consoles */}
-            <Route path="/ai" element={<AIPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/workspace" element={<WorkspaceDashboardPage />} />
-            <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
-            <Route path="/seo-diagnostics" element={<SeoDiagnosticPage />} />
-            <Route path="/crawler-audit" element={<SeoDiagnosticPage />} />
+              {/* Legal, Privacy & Cookie Policy Routes (including legacy aliases) */}
+              <Route path="/terms-and-conditions" element={<LegalPage />} />
+              <Route path="/terms" element={<LegalPage />} />
+              <Route path="/privacy-policy" element={<LegalPage />} />
+              <Route path="/privacy" element={<LegalPage />} />
+              <Route path="/cookie-policy" element={<LegalPage />} />
+              <Route path="/cookies" element={<LegalPage />} />
 
-            {/* Dedicated 404 Handler for Invalid Routes */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-          <LoginModal />
-          <CookieConsent onConsentChange={setCookieConsent} />
-          {allowAnalytics && (
-            <>
-              <Analytics />
-              <SpeedInsights />
-            </>
-          )}
-        </BrowserRouter>
-      </ToastProvider>
-    </AuthProvider>
+              {/* Core Studio Application & Diagnostic Consoles */}
+              <Route path="/ai" element={<AIPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/workspace" element={<WorkspaceDashboardPage />} />
+              <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
+              <Route path="/seo-diagnostics" element={<SeoDiagnosticPage />} />
+              <Route path="/crawler-audit" element={<SeoDiagnosticPage />} />
+
+              {/* Dedicated 404 Handler for Invalid Routes */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+            <LoginModal />
+            <CookieConsent onConsentChange={setCookieConsent} />
+
+            {/* Cookieless Vercel Web Analytics mounted independently of marketing/optional cookie consent */}
+            <Analytics />
+
+            {/* Optional Speed Insights telemetry strictly gated behind Analytics consent */}
+            {allowOptionalAnalytics && <SpeedInsights />}
+          </BrowserRouter>
+        </ToastProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

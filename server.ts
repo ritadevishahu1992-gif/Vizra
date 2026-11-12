@@ -31,6 +31,7 @@ import {
 import { verifyFirebaseIdToken, parseDeviceSummary } from './src/server/authVerification';
 import { processLoginNotifications } from './src/server/email/loginNotificationService';
 import { setupVizraEngageRoutes } from './src/server/engage/engageRoutes';
+import { setupConsentRoutes } from './src/server/consent/consentService';
 import { getOrRunVizraSeoAudit } from './src/services/seoDiagnosticsService';
 
 dotenv.config();
@@ -604,6 +605,9 @@ async function startServer() {
 
   // Mount VIZRA Engage Hybrid Content, Monetization, Analytics & Admin API routes
   setupVizraEngageRoutes(app);
+
+  // Mount VIZRA Privacy & Consent Management API routes (with optional Google Sheets audit export)
+  setupConsentRoutes(app);
 
   // System instruction for Omnia enforcing core Vizra identity, architecture, and behavior
   const systemInstruction = `You are OMNIA, the intelligent AI operating layer and assistant created by VIZRA.

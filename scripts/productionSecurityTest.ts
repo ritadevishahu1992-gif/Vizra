@@ -187,5 +187,168 @@ export async function runProductionSecurityEvaluation(): Promise<SecurityTestRes
     );
   });
 
+  // ==========================================================================
+  // Suite 6: Privacy, Legal Pages & Consent Management Lifecycle
+  // ==========================================================================
+  const {
+    processConsentSubmission,
+    getStoredConsentById,
+    formatConsentRowForSheets,
+    exportConsentEventToGoogleSheets,
+    CURRENT_CONSENT_VERSION,
+    CURRENT_POLICY_VERSION,
+  } = await import('../src/server/consent/consentService');
+
+  const testConsentId = `cns_test_${Date.now().toString(36)}`;
+
+  await test('17. Privacy & Consent Lifecycle', '1. Accept All saves all optional categories (Analytics, Functional, Marketing) as enabled', async () => {
+    const res = await processConsentSubmission(
+      {
+        consentId: testConsentId,
+        action: 'ACCEPT_ALL',
+        source: 'Cookie Banner',
+        region: 'US',
+      },
+      { bypassDedupWindow: true }
+    );
+    return (
+      res.ok &&
+      res.record?.necessary === true &&
+      res.record?.analytics === true &&
+      res.record?.functional === true &&
+      res.record?.marketing === true &&
+      res.record?.action === 'ACCEPT_ALL'
+    );
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '2. Reject Optional saves all optional categories as disabled', async () => {
+    const res = await processConsentSubmission(
+      {
+        consentId: testConsentId,
+        action: 'REJECT_OPTIONAL',
+        analytics: true, // Should be overridden to false
+        functional: true,
+        marketing: true,
+        source: 'Cookie Banner',
+      },
+      { bypassDedupWindow: true }
+    );
+    return (
+      res.ok &&
+      res.record?.necessary === true &&
+      res.record?.analytics === false &&
+      res.record?.functional === false &&
+      res.record?.marketing === false &&
+      res.record?.action === 'REJECT_OPTIONAL'
+    );
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '3. Customize saves only explicitly selected categories', async () => {
+    const res = await processConsentSubmission(
+      {
+        consentId: testConsentId,
+        action: 'CUSTOMIZE',
+        analytics: true,
+        functional: true,
+        marketing: false,
+        source: 'Settings',
+      },
+      { bypassDedupWindow: true }
+    );
+    return (
+      res.ok &&
+      res.record?.necessary === true &&
+      res.record?.analytics === true &&
+      res.record?.functional === true &&
+      res.record?.marketing === false &&
+      res.record?.action === 'CUSTOMIZE'
+    );
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '4. Withdrawal disables all optional categories and preserves audit history', async () => {
+    const res = await processConsentSubmission(
+      {
+        consentId: testConsentId,
+        action: 'WITHDRAW',
+        source: 'Cookie Policy Page',
+      },
+      { bypassDedupWindow: true }
+    );
+    const stored = getStoredConsentById(testConsentId);
+    return (
+      res.ok &&
+      stored.record?.analytics === false &&
+      stored.record?.functional === false &&
+      stored.record?.marketing === false &&
+      stored.record?.action === 'WITHDRAW' &&
+      stored.history.length >= 4
+    );
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '5. Deduplicates rapid identical consent submissions within 5s window', async () => {
+    const dedupId = `cns_dedup_${Date.now().toString(36)}`;
+    const first = await processConsentSubmission({
+      consentId: dedupId,
+      action: 'REJECT_OPTIONAL',
+      source: 'Cookie Banner',
+    });
+    const second = await processConsentSubmission({
+      consentId: dedupId,
+      action: 'REJECT_OPTIONAL',
+      source: 'Cookie Banner',
+    });
+    return first.ok && !first.isDuplicate && second.ok && Boolean(second.isDuplicate);
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '6. Google Sheets 12-column row format & graceful failure fallback', async () => {
+    const stored = getStoredConsentById(testConsentId);
+    const latestEvent = stored.history[stored.history.length - 1];
+    if (!latestEvent) return false;
+
+    const row = formatConsentRowForSheets(latestEvent);
+    const prevWebhook = process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL;
+
+    // Test simulated webhook success
+    process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL = 'https://script.google.com/macros/s/test/exec';
+    const syncOk = await exportConsentEventToGoogleSheets(latestEvent, async () => {
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    });
+
+    // Test simulated webhook network failure (must not throw or break consent)
+    const syncFailGraceful = await exportConsentEventToGoogleSheets(latestEvent, async () => {
+      throw new Error('Simulated Google Sheets network timeout');
+    });
+
+    if (prevWebhook === undefined) {
+      delete process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL;
+    } else {
+      process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL = prevWebhook;
+    }
+
+    return (
+      row.length === 12 &&
+      row[2] === CURRENT_CONSENT_VERSION &&
+      row[3] === testConsentId &&
+      row[5] === true &&
+      row[9] === CURRENT_POLICY_VERSION &&
+      syncOk === 'synced' &&
+      syncFailGraceful === 'failed_gracefully'
+    );
+  });
+
+  await test('17. Privacy & Consent Lifecycle', '7. Legal routes (/terms-and-conditions, /privacy-policy, /cookie-policy) & Vercel Analytics separation', () => {
+    const appCode = fs.readFileSync(path.resolve('./src/App.tsx'), 'utf-8');
+    const cookieCode = fs.readFileSync(path.resolve('./src/components/ui/CookieConsent.tsx'), 'utf-8');
+    return (
+      appCode.includes('path="/terms-and-conditions"') &&
+      appCode.includes('path="/privacy-policy"') &&
+      appCode.includes('path="/cookie-policy"') &&
+      appCode.includes('<Analytics />') &&
+      appCode.includes('{allowOptionalAnalytics && <SpeedInsights />}') &&
+      cookieCode.includes('useState(false)')
+    );
+  });
+
   return results;
 }
+
