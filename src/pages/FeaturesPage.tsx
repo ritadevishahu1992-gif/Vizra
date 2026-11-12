@@ -70,7 +70,8 @@ export const FeaturesPage: React.FC = () => {
   return (
     <PageLayout
       title="Features & Architecture — Vizra AI Creative Studio"
-      description="Explore how Vizra unites conversational intelligence, multimodal synthesis, and persistent 10-stage project workflows powered by Omnia 1.0."
+      description="Explore the 4 Core Pillars of Vizra (Think, Create, Build, Explore), our 5-step Idea-to-Finish pipeline, and 10-stage persistent project memory in Omnia 1.0."
+      canonicalPath="/features"
     >
       {/* Page Header */}
       <section className="pt-28 md:pt-36 pb-16 md:pb-20 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-b border-white/[0.06]">

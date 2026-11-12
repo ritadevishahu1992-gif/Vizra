@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogOut, FolderKanban, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { User, LogOut, FolderKanban, ShieldCheck, History, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const UserMenu: React.FC = () => {
@@ -67,11 +68,31 @@ export const UserMenu: React.FC = () => {
             </div>
           </div>
 
-          <div className="py-1">
-            <div className="px-3 py-2 text-xs text-neutral-400 flex items-center gap-2">
-              <FolderKanban size={13} className="text-neutral-500" />
-              <span>Firestore Sync: Active</span>
-            </div>
+          <div className="py-1 space-y-0.5">
+            <Link
+              to="/workspace"
+              onClick={() => setIsOpen(false)}
+              className="px-3 py-2 text-xs text-neutral-300 hover:text-white hover:bg-neutral-900 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <FolderKanban size={13} className="text-[#eb3b2d]" />
+              <span>Workspace Console</span>
+            </Link>
+            <Link
+              to="/history"
+              onClick={() => setIsOpen(false)}
+              className="px-3 py-2 text-xs text-neutral-300 hover:text-white hover:bg-neutral-900 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <History size={13} className="text-neutral-400" />
+              <span>Conversation History</span>
+            </Link>
+            <Link
+              to="/settings"
+              onClick={() => setIsOpen(false)}
+              className="px-3 py-2 text-xs text-neutral-300 hover:text-white hover:bg-neutral-900 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Settings size={13} className="text-neutral-400" />
+              <span>Application Settings</span>
+            </Link>
           </div>
 
           <div className="pt-1 border-t border-neutral-900">

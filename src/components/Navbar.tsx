@@ -69,13 +69,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
 
   const platformDropdownItems = [
     {
-      label: 'Omnia 1.0 AI Studio',
-      desc: 'Grounded multimodal reasoning, Lyria 3 music, and 10-stage creative workflows.',
-      href: '/ai',
-      icon: Sparkles,
-      tag: 'Live Workspace',
-    },
-    {
       label: 'Features Overview',
       desc: 'Core architecture, 5-step Idea-to-Finish pipeline, and persistent project context.',
       href: '/features',
@@ -97,11 +90,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
       tag: 'Engines',
     },
     {
-      label: 'Workspace & Developer Console',
-      desc: 'Unified dashboard for projects, assets, D3 usage analytics, and API keys.',
-      href: '/workspace',
-      icon: LayoutDashboard,
-      tag: 'Dashboard',
+      label: '3D Creative Showcase',
+      desc: 'Interactive 3D perspective tunnel featuring curated AI visuals and prompts.',
+      href: '/explore',
+      icon: Compass,
+      tag: 'Showcase',
+    },
+    {
+      label: 'Technical Documentation',
+      desc: 'Omnia 1.0 intent routing, 10-stage workflows, REST APIs, and security guides.',
+      href: '/docs',
+      icon: BookOpen,
+      tag: 'Reference',
     },
   ];
 
@@ -121,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
     return location.pathname === href || location.pathname.startsWith(`${href}/`);
   };
 
-  const isPlatformRouteActive = ['/ai', '/features', '/tools', '/studio', '/workspace', '/seo-diagnostics'].some(
+  const isPlatformRouteActive = ['/features', '/tools', '/studio', '/explore', '/docs'].some(
     (path) => isRouteActive(path)
   );
 
@@ -340,31 +340,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
 
             <div className="space-y-1 pt-3 border-t border-white/[0.06]">
               <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 px-2 pb-1">
-                Workspaces & Consoles
+                Legal &amp; Governance
               </div>
               <Link
-                to="/ai"
+                to="/terms-and-conditions"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-white hover:bg-white/[0.04]"
               >
-                <span>Omnia 1.0 AI Studio</span>
-                <span className="text-[10px] font-mono text-[#EB3B2D]">/ai</span>
+                <span>Terms &amp; Conditions</span>
               </Link>
               <Link
-                to="/workspace"
+                to="/privacy-policy"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-white hover:bg-white/[0.04]"
               >
-                <span>Workspace & Developer Console</span>
-                <span className="text-[10px] font-mono text-neutral-500">/workspace</span>
+                <span>Privacy Policy</span>
               </Link>
               <Link
-                to="/seo-diagnostics"
+                to="/cookie-policy"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-white hover:bg-white/[0.04]"
               >
-                <span>Technical SEO & Crawler Audit</span>
-                <span className="text-[10px] font-mono text-neutral-500">Admin</span>
+                <span>Cookie Policy</span>
               </Link>
             </div>
 

@@ -64,7 +64,8 @@ export const ContactPage: React.FC = () => {
   return (
     <PageLayout
       title="Contact & Studio Inquiries — Vizra AI Creative Studio"
-      description="Contact the Vizra team for enterprise studio onboarding, technical support, partnership inquiries, or private beta early access."
+      description="Contact the Vizra team for enterprise studio onboarding, technical support, partnership inquiries, or private beta early access to upcoming studio engines."
+      canonicalPath="/contact"
     >
       {/* Page Header */}
       <section className="pt-28 md:pt-36 pb-16 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-b border-white/[0.06]">

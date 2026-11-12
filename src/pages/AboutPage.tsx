@@ -41,7 +41,8 @@ export const AboutPage: React.FC = () => {
   return (
     <PageLayout
       title="About VIZRA & Core Philosophy — Vizra AI Creative Studio"
-      description="Learn about Vizra's mission, the Omnia 1.0 philosophy, and our commitment to transparent, grounded AI creative workflows."
+      description="Learn about Vizra’s mission, the Omnia 1.0 philosophy, and our commitment to response proportionality, verified citations, and persistent studio context."
+      canonicalPath="/about"
     >
       {/* Page Hero */}
       <section className="pt-28 md:pt-36 pb-20 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-b border-white/[0.06]">

@@ -112,10 +112,10 @@ export const LandingPage: React.FC = () => {
       icon: BookOpen,
     },
     {
-      title: 'Workspace & Dev Console',
-      desc: 'Manage 10-stage projects, D3 credit analytics, and API keys.',
-      to: '/workspace',
-      icon: LayoutDashboard,
+      title: 'About VIZRA & Core Creed',
+      desc: 'Explore our mission, response proportionality, and studio philosophy.',
+      to: '/about',
+      icon: Sparkles,
     },
   ];
 

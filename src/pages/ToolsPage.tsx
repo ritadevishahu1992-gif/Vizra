@@ -145,7 +145,8 @@ export const ToolsPage: React.FC = () => {
   return (
     <PageLayout
       title="AI Tools & Create Hub — Vizra AI Creative Studio"
-      description="Explore Vizra's suite of AI creation tools for writing, visual synthesis, React and GLSL coding, grounded research, and multimodal file analysis."
+      description="Launch 8 specialized AI creative tools in Omnia 1.0 for scriptwriting, design systems, visual synthesis, React and GLSL shaders, presentations, and research."
+      canonicalPath="/tools"
     >
       {/* Staging Toast Notice */}
       <AnimatePresence>

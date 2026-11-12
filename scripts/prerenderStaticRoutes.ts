@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import {
   PUBLIC_INDEXABLE_ROUTES,
+  PRIVATE_OR_UTILITY_ROUTES,
   resolveRouteSeoPayload,
   injectSeoIntoHtml,
 } from '../src/seo/routeMetadata';
@@ -10,22 +11,16 @@ import { ensurePublicOgImageExists } from '../src/server/seo/ogImageGenerator';
 /**
  * Post-build static route HTML pre-renderer for Vercel CDN.
  *
- * Because Vercel serves static Vite builds from `dist/`, a single `dist/index.html`
- * with `<link rel="canonical" href="https://vizra.vercel.app/" />` causes every
- * sub-route (`/features`, `/tools`, `/studio`, `/ai`, etc.) to serve the homepage's
- * canonical tag and title on initial HTTP fetch before JavaScript hydration.
- *
- * This script generates `dist/<route>/index.html` for every public VIZRA route
- * with route-specific `<title>`, `<meta name="description">`, `<meta name="robots" content="index, follow">`,
- * self-referencing `<link rel="canonical" href="https://vizra.vercel.app/<route>">`,
- * OpenGraph/Twitter tags, JSON-LD, and accessible pre-hydration `<main>` content.
+ * Generates `dist/<route>/index.html` for all 12 public indexable routes (with
+ * self-referencing canonicals and `index, follow`) and all 5 utility/private/diagnostic
+ * routes (with `noindex, nofollow`) so Vercel's static CDN serves accurate
+ * route-level metadata on initial HTTP fetch before JavaScript hydration.
  */
 function prerenderStaticRoutes() {
   const rootDir = process.cwd();
   const distDir = path.resolve(rootDir, 'dist');
   const distIndexPath = path.join(distDir, 'index.html');
 
-  // Ensure public/og-image.png exists and copy it to dist/og-image.png if needed
   const publicOgPath = ensurePublicOgImageExists(rootDir);
   if (fs.existsSync(distDir)) {
     const distOgPath = path.join(distDir, 'og-image.png');
@@ -40,7 +35,7 @@ function prerenderStaticRoutes() {
   }
 
   const baseHtml = fs.readFileSync(distIndexPath, 'utf-8');
-  const routesToPrerender = [...PUBLIC_INDEXABLE_ROUTES, '/seo-diagnostics'];
+  const routesToPrerender = [...PUBLIC_INDEXABLE_ROUTES, ...PRIVATE_OR_UTILITY_ROUTES];
 
   let generatedCount = 0;
   for (const route of routesToPrerender) {
@@ -61,7 +56,7 @@ function prerenderStaticRoutes() {
   }
 
   console.log(
-    `[Prerender] Generated route-specific static HTML with self-referencing canonicals for ${generatedCount} routes in dist/.`
+    `[Prerender] Generated route-specific static HTML for ${generatedCount} routes in dist/ (${PUBLIC_INDEXABLE_ROUTES.length} indexable + ${PRIVATE_OR_UTILITY_ROUTES.length} noindex utility/diagnostic).`
   );
 }
 

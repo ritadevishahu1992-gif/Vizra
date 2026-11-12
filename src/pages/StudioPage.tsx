@@ -11,7 +11,8 @@ export const StudioPage: React.FC = () => {
   return (
     <PageLayout
       title="Creative Studio & Roadmap — Vizra AI Creative Studio"
-      description="Inspect Vizra's four 60fps creative studio engines—Temporal Motion, Neural Direction, Procedural Shaders, and Kinetic Typography—plus upcoming R&D prototypes."
+      description="Inspect Vizra’s 60fps studio engines—Temporal Motion, Neural Direction, Procedural Shaders, and Kinetic Typography—plus 6 interactive R&D roadmap prototypes."
+      canonicalPath="/studio"
     >
       {/* Page Header */}
       <section className="pt-28 md:pt-36 pb-16 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-b border-white/[0.06]">

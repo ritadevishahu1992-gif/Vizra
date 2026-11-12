@@ -18,9 +18,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'Home', to: '/' },
       { label: 'Features Overview', to: '/features' },
       { label: 'Explore Showcase', to: '/explore' },
-      { label: 'Omnia 1.0 AI Studio', to: '/ai' },
-      { label: 'Conversation History', to: '/history' },
-      { label: 'Workspace Console', to: '/workspace' },
+      { label: 'Pricing & Plans', to: '/pricing' },
     ],
   },
   {
@@ -29,7 +27,6 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'AI Tools & Create Hub', to: '/tools' },
       { label: 'Creative Studio Engines', to: '/studio' },
       { label: 'Coming Soon Roadmap', to: '/studio?section=roadmap' },
-      { label: 'Pricing & Plans', to: '/pricing' },
     ],
   },
   {
@@ -37,7 +34,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     links: [
       { label: 'Documentation', to: '/docs' },
       { label: 'Developer API Reference', to: '/docs?section=api' },
-      { label: 'Application Settings', to: '/settings' },
+      { label: 'Security & Governance', to: '/docs?section=security' },
     ],
   },
   {

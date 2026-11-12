@@ -173,8 +173,9 @@ export const DocsPage: React.FC = () => {
 
   return (
     <PageLayout
-      title="Documentation & API Reference — Vizra AI Creative Studio"
-      description="Technical documentation for Vizra and Omnia 1.0: intent routing, 10-stage project workflows, REST API endpoints, and SSRF security governance."
+      title="Technical Documentation & API Reference — Vizra AI Creative Studio"
+      description="Official technical documentation for Vizra and Omnia 1.0 covering intent classification, model routing, 10-stage project workflows, REST APIs, and SSRF security."
+      canonicalPath="/docs"
     >
       {/* Page Header */}
       <section className="pt-28 md:pt-36 pb-12 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-b border-white/[0.06]">

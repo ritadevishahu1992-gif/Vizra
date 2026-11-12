@@ -20,24 +20,26 @@ export const REDIRECT_ALIASES: Record<string, string> = {
 
 export const PUBLIC_INDEXABLE_ROUTES = [
   '/',
-  '/ai',
   '/features',
   '/tools',
   '/studio',
   '/explore',
-  '/workspace',
   '/pricing',
-  '/docs',
   '/about',
   '/contact',
-  '/history',
-  '/settings',
+  '/docs',
   '/terms-and-conditions',
   '/privacy-policy',
   '/cookie-policy',
 ] as const;
 
-export const PRIVATE_OR_UTILITY_ROUTES: readonly string[] = [] as const;
+export const PRIVATE_OR_UTILITY_ROUTES = [
+  '/ai',
+  '/history',
+  '/settings',
+  '/workspace',
+  '/seo-diagnostics',
+] as const;
 
 export interface RoutePrehydrationContent {
   eyebrow: string;
@@ -418,7 +420,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
   },
   '/docs': {
     canonicalPath: '/docs',
-    title: 'Technical Documentation — Vizra AI Creative Studio',
+    title: 'Technical Documentation & API Reference — Vizra AI Creative Studio',
     description:
       'Official technical documentation for Vizra and Omnia 1.0 covering intent classification, model routing, 10-stage project workflows, REST APIs, and SSRF security.',
     isIndexable: true,
@@ -521,30 +523,21 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     },
   },
 
-  // Public Interactive Application & Studio Workspace Routes (index, follow)
+  // Utility, User-Specific & Private Diagnostic Routes (excluded from sitemap, noindex, nofollow)
   '/ai': {
     canonicalPath: '/ai',
     title: 'Omnia 1.0 AI Workspace — Vizra AI Creative Studio',
     description:
       'Interactive Omnia 1.0 multimodal workspace for conversational reasoning, grounded web research, code synthesis, Lyria 3 music, and 10-stage creative projects.',
-    isIndexable: true,
-    robots: 'index, follow',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
     ogType: 'website',
-    breadcrumbLabel: 'Omnia 1.0 AI Workspace',
-    jsonLd: [
-      SOFTWARE_APPLICATION_SCHEMA,
-      buildBreadcrumbSchema('Omnia 1.0 AI Workspace', '/ai'),
-    ],
+    jsonLd: [],
     prehydration: {
       eyebrow: 'OMNIA 1.0 LIVE WORKSPACE',
       h1: 'Omnia 1.0 AI Creative Workspace',
       lead: 'Interactive workspace for multimodal reasoning, grounded research, code generation, and 10-stage creative projects.',
-      sections: [
-        {
-          heading: 'Multimodal Reasoning & Creative Synthesis',
-          body: 'Combine conversational intelligence, grounded web citations, code synthesis, Lyria 3 music generation, and 10-stage structured creative workflows.',
-        },
-      ],
+      sections: [],
     },
   },
   '/history': {
@@ -552,21 +545,15 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     title: 'Conversation History — Vizra AI Creative Studio',
     description:
       'Review, search, export, and manage your saved Omnia 1.0 conversation threads and creative sessions.',
-    isIndexable: true,
-    robots: 'index, follow',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
     ogType: 'website',
-    breadcrumbLabel: 'Conversation History',
-    jsonLd: [buildBreadcrumbSchema('Conversation History', '/history')],
+    jsonLd: [],
     prehydration: {
       eyebrow: 'SESSION ARCHIVE',
       h1: 'Saved Conversations',
-      lead: 'Access your previous reasoning sessions, prompt blueprints, and code generations in Vizra AI Creative Studio.',
-      sections: [
-        {
-          heading: 'Workspace Memory & Export',
-          body: 'Search, rename, resume, and export your Omnia 1.0 conversation threads and multimodal sessions.',
-        },
-      ],
+      lead: 'Manage your saved Omnia 1.0 conversation threads.',
+      sections: [],
     },
   },
   '/settings': {
@@ -574,21 +561,15 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     title: 'Application Settings — Vizra AI Creative Studio',
     description:
       'Configure your Vizra studio theme, Omnia 1.0 response style, language preferences, local cache, and privacy controls.',
-    isIndexable: true,
-    robots: 'index, follow',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
     ogType: 'website',
-    breadcrumbLabel: 'Application Settings',
-    jsonLd: [buildBreadcrumbSchema('Application Settings', '/settings')],
+    jsonLd: [],
     prehydration: {
       eyebrow: 'STUDIO PREFERENCES',
       h1: 'Application Settings',
-      lead: 'Manage your global visual theme, account credentials, model response tone, and local memory.',
-      sections: [
-        {
-          heading: 'Visual Theme & AI Response Preferences',
-          body: 'Customize Obsidian Dark or Studio Light mode, conversation language, response proportionality, and local browser cache.',
-        },
-      ],
+      lead: 'Configure theme, response style, language preferences, and privacy controls.',
+      sections: [],
     },
   },
   '/workspace': {
@@ -596,37 +577,30 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     title: 'Workspace & Developer Console — Vizra AI Studio',
     description:
       'Manage your 10-stage creative projects, uploaded multimodal assets, D3 credit usage analytics, and developer API tokens.',
-    isIndexable: true,
-    robots: 'index, follow',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
     ogType: 'website',
-    breadcrumbLabel: 'Workspace Console',
-    jsonLd: [buildBreadcrumbSchema('Workspace Console', '/workspace')],
+    jsonLd: [],
     prehydration: {
       eyebrow: 'WORKSPACE & DEVELOPER CONSOLE',
       h1: 'Workspace & Developer Console',
-      lead: 'Unified dashboard for 10-stage creative projects, multimodal assets, D3 usage analytics, and developer API keys.',
-      sections: [
-        {
-          heading: 'Project Management & Telemetry',
-          body: 'Orchestrate multi-stage creative projects, inspect credit utilization, and manage workspace assets.',
-        },
-      ],
+      lead: 'Manage 10-stage creative projects, multimodal assets, and usage telemetry.',
+      sections: [],
     },
   },
   '/seo-diagnostics': {
     canonicalPath: '/seo-diagnostics',
-    title: 'Search & Crawler Diagnostic Console — Vizra Studio',
+    title: 'Search & Crawler Diagnostic Console — Vizra Admin',
     description:
-      'Technical SEO and crawler diagnostic console for verifying robots.txt, XML sitemaps, HTTP headers, and search engine accessibility.',
-    isIndexable: true,
-    robots: 'index, follow',
+      'Restricted administrator diagnostic console for verifying robots.txt, XML sitemaps, HTTP headers, and SSRF security.',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
     ogType: 'website',
-    breadcrumbLabel: 'SEO Diagnostics',
-    jsonLd: [buildBreadcrumbSchema('SEO Diagnostics', '/seo-diagnostics')],
+    jsonLd: [],
     prehydration: {
-      eyebrow: 'TECHNICAL SEO DIAGNOSTICS',
+      eyebrow: 'ADMINISTRATOR DIAGNOSTICS',
       h1: 'Search Indexing & Crawlability Verification',
-      lead: 'Technical SEO and crawler diagnostic console for verifying robots.txt, XML sitemaps, and search engine indexing readiness.',
+      lead: 'Restricted administrator console for technical SEO and crawler diagnostics.',
       sections: [],
     },
   },
