@@ -128,6 +128,18 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
 
   const currentConversation = CONVERSATION_PRESETS[activeConversationIndex];
 
+  // Universal keyboard activation helper for Enter and Space keys
+  const handleActivateKey = (
+    e: React.KeyboardEvent<HTMLElement>,
+    action?: () => void
+  ) => {
+    if (!action) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   // Handle interactive conversation preset selection with brief synthesis feedback
   const handleSelectConversationPreset = (index: number) => {
     if (index === activeConversationIndex && !isSynthesizing) return;
@@ -138,11 +150,31 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
     }, 320);
   };
 
+  const handleCycleConversationPreset = () => {
+    handleSelectConversationPreset(
+      (activeConversationIndex + 1) % CONVERSATION_PRESETS.length
+    );
+  };
+
   // Handle tool click
   const handleToolClick = (toolId: StudioToolId) => {
     setActiveTool(toolId);
     if (toolId === 'chat') {
       setShowChatBubbles((prev) => !prev);
+    }
+  };
+
+  // Timeline scrubber keyboard navigation (Enter/Space to toggle play, ArrowLeft/Right to scrub)
+  const handleTimelineKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsPlaying((prev) => !prev);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setProgress((prev) => Math.min(100, prev + 5));
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setProgress((prev) => Math.max(0, prev - 5));
     }
   };
 
@@ -330,6 +362,8 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
       {/* Main Interface Window Preview: Absolutely Positioned & Centered with Parallax */}
       <motion.div
         style={yTransform ? { y: yTransform } : undefined}
+        role="region"
+        aria-label="Omnia 1.0 Interactive Studio Preview"
         className={`absolute top-6 md:top-12 left-1/2 -translate-x-1/2 max-w-5xl w-[92%] rounded-2xl border bg-neutral-950/90 shadow-2xl backdrop-blur-xl overflow-hidden z-20 transition-colors duration-300 ${
           isDemoMode ? 'border-[#eb3b2d]/45' : 'border-neutral-800/80 hover:border-neutral-700/80'
         }`}
@@ -354,7 +388,11 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
           </div>
 
           {/* Center: Interactive Tool Navigation Tabs */}
-          <div className="hidden sm:flex items-center gap-1 bg-neutral-900/60 p-0.5 rounded-lg border border-neutral-800/60">
+          <div
+            role="tablist"
+            aria-label="Omnia workspace views"
+            className="hidden sm:flex items-center gap-1 bg-neutral-900/60 p-0.5 rounded-lg border border-neutral-800/60"
+          >
             {(
               [
                 { id: 'canvas', label: 'Canvas', icon: Compass },
@@ -369,8 +407,11 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 <button
                   key={tab.id}
                   type="button"
+                  role="tab"
+                  aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer ${
+                  onKeyDown={(e) => handleActivateKey(e, () => setActiveTab(tab.id))}
+                  className={`group flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                     isActive
                       ? 'bg-neutral-800 text-white shadow-sm'
                       : 'text-neutral-400 hover:text-white hover:bg-white/[0.03]'
@@ -396,7 +437,9 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
               <button
                 type="button"
                 onClick={onStopDemo}
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[11px] font-mono text-[#eb3b2d] hover:bg-[#eb3b2d]/25 transition-colors cursor-pointer"
+                onKeyDown={(e) => handleActivateKey(e, onStopDemo)}
+                aria-label="Exit Demo Tour"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[11px] font-mono text-[#eb3b2d] hover:bg-[#eb3b2d]/25 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
               >
                 <span>Demo Tour</span>
                 <X size={11} />
@@ -405,7 +448,8 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
             <button
               type="button"
               onClick={onOpenWorkspace}
-              className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 hover:bg-neutral-800/90 border border-neutral-800 hover:border-[#eb3b2d]/40 text-[11px] font-mono transition-all duration-150 cursor-pointer"
+              onKeyDown={(e) => handleActivateKey(e, onOpenWorkspace)}
+              className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 hover:bg-neutral-800/90 border border-neutral-800 hover:border-[#eb3b2d]/40 text-[11px] font-mono transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
               title="Open live Omnia 1.0 Studio"
             >
               <span className="text-neutral-300 group-hover:text-white transition-colors">
@@ -420,8 +464,9 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
             <button
               type="button"
               onClick={onOpenWorkspace}
-              className="text-neutral-400 hover:text-[#eb3b2d] transition-colors p-1 cursor-pointer"
-              aria-label="Open Workspace"
+              onKeyDown={(e) => handleActivateKey(e, onOpenWorkspace)}
+              className="text-neutral-400 hover:text-[#eb3b2d] transition-colors p-1 rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
+              aria-label="Open Full Omnia Workspace"
               title="Launch full Omnia workspace"
             >
               <Maximize2 size={13} />
@@ -438,19 +483,23 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 mb-2 block">
                   Creative Mode
                 </span>
-                <div className="space-y-1">
+                <div className="space-y-1" role="group" aria-label="Creative simulation modes">
                   {[
                     { id: 'ribbon', name: 'Procedural Ribbon', desc: 'Fluid 60fps vector physics' },
                     { id: 'typography', name: 'Kinetic Typography', desc: 'Realtime variable type' },
                     { id: 'particles', name: 'Spatial Vortex', desc: 'Neural particle matrix' },
                   ].map((p) => {
                     const isSelected = activePreset === p.id;
+                    const selectMode = () =>
+                      setActivePreset(p.id as 'ribbon' | 'typography' | 'particles');
                     return (
                       <button
                         key={p.id}
                         type="button"
-                        onClick={() => setActivePreset(p.id as 'ribbon' | 'typography' | 'particles')}
-                        className={`group w-full text-left px-2.5 py-2 rounded-lg transition-all duration-150 border cursor-pointer ${
+                        aria-pressed={isSelected}
+                        onClick={selectMode}
+                        onKeyDown={(e) => handleActivateKey(e, selectMode)}
+                        className={`group w-full text-left px-2.5 py-2 rounded-lg transition-all duration-150 border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                           isSelected
                             ? 'bg-white/[0.05] border-[#eb3b2d]/45 text-white'
                             : 'border-transparent text-neutral-400 hover:text-white hover:bg-white/[0.025] hover:border-neutral-800'
@@ -480,15 +529,18 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 mb-2 block">
                   Omnia Pipeline
                 </span>
-                <div className="space-y-1.5 font-mono text-[11px]">
+                <div className="space-y-1.5 font-mono text-[11px]" role="group" aria-label="Omnia pipeline stages">
                   {PIPELINE_STAGES.map((stage) => {
                     const isStageActive = activePipeline === stage.id;
+                    const selectStage = () => setActivePipeline(stage.id);
                     return (
                       <button
                         key={stage.id}
                         type="button"
-                        onClick={() => setActivePipeline(stage.id)}
-                        className={`group w-full text-left px-2.5 py-1.5 rounded-md border transition-all duration-150 cursor-pointer ${
+                        aria-pressed={isStageActive}
+                        onClick={selectStage}
+                        onKeyDown={(e) => handleActivateKey(e, selectStage)}
+                        className={`group w-full text-left px-2.5 py-1.5 rounded-md border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                           isStageActive
                             ? 'bg-neutral-900/90 border-[#eb3b2d]/35 text-white'
                             : 'bg-neutral-900/40 border-transparent hover:border-neutral-800 hover:bg-neutral-900/70 text-neutral-300'
@@ -582,10 +634,13 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                         transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
                         onMouseEnter={() => setHoveredTool(tool.id)}
                         onMouseLeave={() => setHoveredTool(null)}
+                        onFocus={() => setHoveredTool(tool.id)}
+                        onBlur={() => setHoveredTool(null)}
                         onClick={() => handleToolClick(tool.id)}
-                        aria-label={tool.label}
+                        onKeyDown={(e) => handleActivateKey(e, () => handleToolClick(tool.id))}
+                        aria-label={`${tool.label} (${tool.shortcut})`}
                         aria-pressed={isToolActive}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                           isToolActive
                             ? 'bg-[#eb3b2d]/15 text-[#eb3b2d] border border-[#eb3b2d]/45'
                             : 'text-neutral-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
@@ -594,7 +649,7 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                         <Icon size={14} />
                       </motion.button>
 
-                      {/* Minimalist Hover Tooltip */}
+                      {/* Minimalist Hover / Focus Tooltip */}
                       <AnimatePresence>
                         {isHovered && (
                           <motion.div
@@ -621,8 +676,9 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="hover:text-[#eb3b2d] transition-colors p-1 cursor-pointer"
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                  onKeyDown={(e) => handleActivateKey(e, () => setIsPlaying((prev) => !prev))}
+                  className="hover:text-[#eb3b2d] transition-colors p-1 rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
+                  aria-label={isPlaying ? 'Pause canvas simulation' : 'Play canvas simulation'}
                   title={isPlaying ? 'Pause canvas' : 'Resume canvas'}
                 >
                   {isPlaying ? <Pause size={12} /> : <Play size={12} />}
@@ -630,8 +686,9 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 <button
                   type="button"
                   onClick={() => setProgress(0)}
-                  className="hover:text-[#eb3b2d] transition-colors p-1 cursor-pointer"
-                  aria-label="Restart"
+                  onKeyDown={(e) => handleActivateKey(e, () => setProgress(0))}
+                  className="hover:text-[#eb3b2d] transition-colors p-1 rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
+                  aria-label="Restart timeline"
                   title="Reset timeline"
                 >
                   <RotateCcw size={12} />
@@ -648,28 +705,27 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                     transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                     className="absolute bottom-5 right-5 max-w-[290px] sm:max-w-[330px] w-full flex flex-col gap-2 z-20"
                   >
-                    {/* User Prompt Bubble */}
-                    <motion.div
+                    {/* User Prompt Bubble (Keyboard Accessible Button) */}
+                    <motion.button
+                      type="button"
                       whileHover={{ y: -1 }}
                       transition={{ duration: 0.15 }}
-                      onClick={() =>
-                        handleSelectConversationPreset(
-                          (activeConversationIndex + 1) % CONVERSATION_PRESETS.length
-                        )
-                      }
-                      title="Click to cycle studio instruction"
-                      className="group self-end max-w-[90%] rounded-2xl rounded-br-sm bg-neutral-900/90 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2 text-[11px] text-neutral-200 shadow-lg backdrop-blur-md cursor-pointer transition-colors"
+                      onClick={handleCycleConversationPreset}
+                      onKeyDown={(e) => handleActivateKey(e, handleCycleConversationPreset)}
+                      aria-label={`Director prompt: ${currentConversation.userMessage}. Press Enter or Space to cycle studio instruction.`}
+                      title="Click or press Enter/Space to cycle studio instruction"
+                      className="group self-end max-w-[90%] text-left rounded-2xl rounded-br-sm bg-neutral-900/90 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2 text-[11px] text-neutral-200 shadow-lg backdrop-blur-md cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
                     >
                       <div className="flex items-center justify-between gap-3 mb-0.5 text-[10px] text-neutral-500 font-mono">
                         <span>Director Prompt</span>
-                        <span className="group-hover:text-[#eb3b2d] transition-colors">
+                        <span className="group-hover:text-[#eb3b2d] group-focus-visible:text-[#eb3b2d] transition-colors">
                           Cycle ↻
                         </span>
                       </div>
                       <p className="leading-snug text-neutral-200">
                         &ldquo;{currentConversation.userMessage}&rdquo;
                       </p>
-                    </motion.div>
+                    </motion.button>
 
                     {/* Omnia 1.0 Assistant Response Bubble */}
                     <motion.div
@@ -682,7 +738,7 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                           <Sparkles size={11} className="text-[#eb3b2d]" />
                           <span className="text-white font-medium">Omnia 1.0</span>
                           <span className="text-neutral-600">·</span>
-                          <span className="text-neutral-400">
+                          <span className="text-neutral-400" aria-live="polite">
                             {isSynthesizing ? 'Synthesizing...' : currentConversation.latency}
                           </span>
                         </div>
@@ -693,15 +749,23 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                       </p>
 
                       {/* Interactive Micro-Chips to Adjust Live Shader State */}
-                      <div className="flex items-center gap-1.5 pt-1.5 border-t border-white/[0.06] overflow-x-auto no-scrollbar">
+                      <div
+                        role="group"
+                        aria-label="Shader preset adjustments"
+                        className="flex items-center gap-1.5 pt-1.5 border-t border-white/[0.06] overflow-x-auto no-scrollbar"
+                      >
                         {CONVERSATION_PRESETS.map((preset, idx) => {
                           const isCurrent = idx === activeConversationIndex;
                           return (
                             <button
                               key={preset.id}
                               type="button"
+                              aria-pressed={isCurrent}
                               onClick={() => handleSelectConversationPreset(idx)}
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer border ${
+                              onKeyDown={(e) =>
+                                handleActivateKey(e, () => handleSelectConversationPreset(idx))
+                              }
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                                 isCurrent
                                   ? 'bg-[#eb3b2d]/15 border-[#eb3b2d]/50 text-white'
                                   : 'bg-white/[0.03] border-white/[0.06] text-neutral-400 hover:text-white hover:border-[#eb3b2d]/35'
@@ -723,7 +787,8 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="p-1.5 rounded bg-neutral-900 hover:bg-neutral-800 hover:text-[#eb3b2d] text-white transition-colors cursor-pointer"
+                onKeyDown={(e) => handleActivateKey(e, () => setIsPlaying((prev) => !prev))}
+                className="p-1.5 rounded bg-neutral-900 hover:bg-neutral-800 hover:text-[#eb3b2d] text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
                 aria-label={isPlaying ? 'Pause preview' : 'Play preview'}
               >
                 {isPlaying ? <Pause size={12} /> : <Play size={12} />}
@@ -734,14 +799,21 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
                 {String(Math.floor((progress * 60) % 60)).padStart(2, '0')}
               </span>
 
-              {/* Progress Bar with Crimson Playhead */}
+              {/* Keyboard-Accessible Timeline Progress Slider */}
               <div
-                className="flex-1 h-1.5 bg-neutral-800 rounded-full relative cursor-pointer group"
+                role="slider"
+                tabIndex={0}
+                aria-label="Timeline playback position"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(progress)}
+                onKeyDown={handleTimelineKeyDown}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const clickX = e.clientX - rect.left;
                   setProgress(Math.max(0, Math.min(100, (clickX / rect.width) * 100)));
                 }}
+                className="flex-1 h-1.5 bg-neutral-800 rounded-full relative cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
               >
                 <div
                   className="h-full bg-white/40 group-hover:bg-white/60 rounded-full transition-all duration-75 relative"
@@ -760,13 +832,11 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
             <div className="p-3 border-t border-neutral-900 bg-black/80 flex items-center gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  handleSelectConversationPreset(
-                    (activeConversationIndex + 1) % CONVERSATION_PRESETS.length
-                  )
-                }
-                className="group flex-1 flex items-center justify-between gap-2 bg-neutral-900/70 hover:bg-neutral-900 border border-neutral-800 hover:border-[#eb3b2d]/40 rounded-lg px-3 py-2 text-xs text-left transition-all duration-150 cursor-pointer overflow-hidden"
-                title="Click to test another studio prompt"
+                onClick={handleCycleConversationPreset}
+                onKeyDown={(e) => handleActivateKey(e, handleCycleConversationPreset)}
+                aria-label={`Current studio prompt: ${currentConversation.userMessage}. Press Enter or Space to cycle prompt.`}
+                className="group flex-1 flex items-center justify-between gap-2 bg-neutral-900/70 hover:bg-neutral-900 border border-neutral-800 hover:border-[#eb3b2d]/40 rounded-lg px-3 py-2 text-xs text-left transition-all duration-150 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
+                title="Click or press Enter/Space to test another studio prompt"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Sparkles
@@ -784,7 +854,9 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
               <button
                 type="button"
                 onClick={onOpenWorkspace}
-                className="group px-4 py-2 rounded-lg bg-white text-black hover:bg-neutral-200 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                onKeyDown={(e) => handleActivateKey(e, onOpenWorkspace)}
+                aria-label="Synthesize prompt in Omnia 1.0 Studio"
+                className="group px-4 py-2 rounded-lg bg-white text-black hover:bg-neutral-200 text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
               >
                 <span>Synthesize</span>
                 <span className="text-[10px] text-neutral-600 group-hover:text-[#eb3b2d] font-mono transition-colors">

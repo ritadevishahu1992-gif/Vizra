@@ -26,6 +26,27 @@ export const LandingPage: React.FC = () => {
     navigate('/explore');
   };
 
+  // Ensure all links and interactive cards on the landing page also trigger on Space key in addition to Enter
+  const handleLinkSpaceKey = (
+    e: React.KeyboardEvent<HTMLAnchorElement>,
+    to: string
+  ) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      navigate(to);
+    }
+  };
+
+  const handleButtonKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    action: () => void
+  ) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   const platformDestinations = [
     {
       index: '01',
@@ -124,7 +145,8 @@ export const LandingPage: React.FC = () => {
 
           <Link
             to="/about"
-            className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white inline-flex items-center gap-1.5 transition-colors self-start md:self-auto"
+            onKeyDown={(e) => handleLinkSpaceKey(e, '/about')}
+            className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition-colors self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D]"
           >
             <span>Read the Vizra Philosophy</span>
             <ArrowRight size={14} className="text-[#EB3B2D]" />
@@ -139,7 +161,8 @@ export const LandingPage: React.FC = () => {
               <Link
                 key={card.to}
                 to={card.to}
-                className={`${card.span} group rounded-2xl bg-[#111111] border border-white/[0.08] hover:border-[#DC2626]/60 p-7 sm:p-8 flex flex-col justify-between transition-all`}
+                onKeyDown={(e) => handleLinkSpaceKey(e, card.to)}
+                className={`${card.span} group rounded-2xl bg-[#111111] border border-white/[0.08] hover:border-[#DC2626]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] p-7 sm:p-8 flex flex-col justify-between transition-all`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
@@ -149,12 +172,12 @@ export const LandingPage: React.FC = () => {
                         {card.eyebrow}
                       </span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-[#171717] border border-white/[0.08] text-neutral-300 group-hover:text-[#EB3B2D] group-hover:border-[#DC2626]/40 transition-colors">
+                    <div className="p-2.5 rounded-xl bg-[#171717] border border-white/[0.08] text-neutral-300 group-hover:text-[#EB3B2D] group-focus-visible:text-[#EB3B2D] group-hover:border-[#DC2626]/40 transition-colors">
                       <Icon size={18} />
                     </div>
                   </div>
 
-                  <h3 className="typo-card-title text-xl sm:text-2xl mb-2.5 group-hover:text-[#EB3B2D] transition-colors">
+                  <h3 className="typo-card-title text-xl sm:text-2xl mb-2.5 group-hover:text-[#EB3B2D] group-focus-visible:text-[#EB3B2D] transition-colors">
                     {card.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed max-w-xl">
@@ -166,7 +189,7 @@ export const LandingPage: React.FC = () => {
                   <span className="text-[11px] font-mono text-neutral-500 truncate">
                     {card.metrics}
                   </span>
-                  <span className="text-xs font-display font-semibold text-white group-hover:text-[#EB3B2D] inline-flex items-center gap-1.5 shrink-0 transition-colors">
+                  <span className="text-xs font-display font-semibold text-white group-hover:text-[#EB3B2D] group-focus-visible:text-[#EB3B2D] inline-flex items-center gap-1.5 shrink-0 transition-colors">
                     <span>{card.cta}</span>
                     <ArrowUpRight size={14} />
                   </span>
@@ -184,12 +207,13 @@ export const LandingPage: React.FC = () => {
               <Link
                 key={item.to}
                 to={item.to}
-                className="p-6 rounded-2xl bg-[#111111]/80 border border-white/[0.08] hover:border-white/[0.2] flex items-start justify-between gap-4 transition-colors group"
+                onKeyDown={(e) => handleLinkSpaceKey(e, item.to)}
+                className="p-6 rounded-2xl bg-[#111111]/80 border border-white/[0.08] hover:border-white/[0.2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] flex items-start justify-between gap-4 transition-colors group"
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <Icon size={15} className="text-[#EB3B2D]" />
-                    <h3 className="font-display text-base font-semibold text-white group-hover:text-[#EB3B2D] transition-colors">
+                    <h3 className="font-display text-base font-semibold text-white group-hover:text-[#EB3B2D] group-focus-visible:text-[#EB3B2D] transition-colors">
                       {item.title}
                     </h3>
                   </div>
@@ -199,7 +223,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <ArrowUpRight
                   size={15}
-                  className="text-neutral-500 group-hover:text-white shrink-0 mt-1"
+                  className="text-neutral-500 group-hover:text-white group-focus-visible:text-white shrink-0 mt-1"
                 />
               </Link>
             );
@@ -224,7 +248,8 @@ export const LandingPage: React.FC = () => {
             <button
               type="button"
               onClick={handleNavigateToAI}
-              className="px-7 py-3.5 rounded-xl bg-white text-black font-display font-semibold text-sm hover:bg-neutral-200 transition-colors inline-flex items-center gap-2 cursor-pointer"
+              onKeyDown={(e) => handleButtonKeyDown(e, handleNavigateToAI)}
+              className="px-7 py-3.5 rounded-xl bg-white text-black font-display font-semibold text-sm hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111111] transition-colors inline-flex items-center gap-2 cursor-pointer"
             >
               <Sparkles size={15} className="text-[#DC2626]" />
               <span>Launch Omnia 1.0</span>
@@ -232,7 +257,8 @@ export const LandingPage: React.FC = () => {
             </button>
             <Link
               to="/contact"
-              className="px-6 py-3.5 rounded-xl bg-[#171717] hover:bg-neutral-800 border border-white/[0.1] text-white font-display font-medium text-sm transition-colors inline-flex items-center gap-2"
+              onKeyDown={(e) => handleLinkSpaceKey(e, '/contact')}
+              className="px-6 py-3.5 rounded-xl bg-[#171717] hover:bg-neutral-800 border border-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111111] text-white font-display font-medium text-sm transition-colors inline-flex items-center gap-2"
             >
               <span>Contact & Early Access</span>
               <ArrowRight size={15} />
