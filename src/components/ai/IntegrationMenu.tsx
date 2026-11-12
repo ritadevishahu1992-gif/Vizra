@@ -25,6 +25,7 @@ import {
   Music,
 } from 'lucide-react';
 import { Attachment, Integration } from '../../types/ai';
+import { FileUpload } from '../ui/FileUpload';
 
 interface IntegrationMenuProps {
   isOpen: boolean;
@@ -59,7 +60,7 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
     const maxSizeBytes = 10 * 1024 * 1024; // 10MB limit
 
     if (file.size > maxSizeBytes) {
-      alert(`File "${file.name}" exceeds the 10MB limit. Please upload a smaller file.`);
+      setComingSoonNotice(`File "${file.name}" exceeds the 10MB limit.`);
       return;
     }
 
@@ -231,8 +232,19 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
           {/* SECTION 1: ATTACH */}
           <div>
             <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2 px-1 flex items-center justify-between">
-              <span>ATTACH</span>
+              <span>ATTACH & DRAG-AND-DROP</span>
               <span className="text-emerald-500 text-[9px]">READY</span>
+            </div>
+            <div className="mb-2.5">
+              <FileUpload
+                compact
+                title="Drop files directly into Omnia"
+                subtitle="Or click to browse images, PDFs, CSVs, and code (max 10MB)"
+                onAttachmentReady={(att) => {
+                  onAddAttachment(att);
+                  onClose();
+                }}
+              />
             </div>
             <div className="space-y-1">
               <button

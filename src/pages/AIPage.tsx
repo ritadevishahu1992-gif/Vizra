@@ -24,6 +24,7 @@ import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
 import { sendMessage } from '../services/aiService';
 import { logSafeInteractionEvent } from '../services/engageEventLogger';
+import { recordAICreditUsage } from '../components/ui/CreditUsageIndicator';
 import { useAuth } from '../context/AuthContext';
 import {
   getUserProjectsFromFirestore,
@@ -513,6 +514,7 @@ export const AIPage: React.FC = () => {
       model: currentModel,
       hasAttachments: attachments.length > 0,
     });
+    recordAICreditUsage(1);
 
     try {
       const result = await sendMessage({

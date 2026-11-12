@@ -2,6 +2,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile,
   signOut,
   FirebaseUser,
   auth,
@@ -13,10 +18,15 @@ interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
   error: string | null;
+  statusMessage: string | null;
   isLoginModalOpen: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
+  clearAuthMessages: () => void;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<boolean>;
+  signUpWithEmail: (name: string, email: string, password: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   signOutUser: () => Promise<void>;
 }
 
@@ -24,17 +34,46 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   error: null,
+  statusMessage: null,
   isLoginModalOpen: false,
   openLoginModal: () => {},
   closeLoginModal: () => {},
+  clearAuthMessages: () => {},
   signInWithGoogle: async () => {},
+  signInWithEmail: async () => false,
+  signUpWithEmail: async () => false,
+  resetPassword: async () => false,
   signOutUser: async () => {},
 });
+
+function formatFirebaseAuthError(err: any): string {
+  const code = err?.code || '';
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in popup was closed. Please try again.';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Network error during authentication. Check your internet connection.';
+  }
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+    return 'Invalid email or password. Please verify your credentials.';
+  }
+  if (code === 'auth/email-already-in-use') {
+    return 'An account with this email already exists. Try signing in instead.';
+  }
+  if (code === 'auth/weak-password') {
+    return 'Password is too weak. Please use at least 8 characters with numbers and symbols.';
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return 'Email/password sign-in is not enabled on this Firebase project. Please use Continue with Google.';
+  }
+  return err?.message || 'Authentication failed. Please try again.';
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -59,8 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  const openLoginModal = () => {
+  const clearAuthMessages = () => {
     setError(null);
+    setStatusMessage(null);
+  };
+
+  const openLoginModal = () => {
+    clearAuthMessages();
     setIsLoginModalOpen(true);
   };
 
@@ -68,9 +112,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoginModalOpen(false);
   };
 
+  const dispatchServerLoginNotification = async (firebaseUser: FirebaseUser) => {
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      fetch('/api/auth/login-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+      }).catch((notifyErr) => {
+        console.warn('[Notification] Non-blocking dispatch warning:', notifyErr);
+      });
+    } catch (tokenErr) {
+      console.warn('[Notification] Could not retrieve ID token for notification:', tokenErr);
+    }
+  };
+
   const signInWithGoogle = async () => {
     try {
-      setError(null);
+      clearAuthMessages();
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
         try {
@@ -83,41 +144,94 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (syncErr) {
           console.warn('Profile sync non-fatal warning:', syncErr);
         }
-
-        // Trigger server-verified dual login notification (User + Admin) asynchronously
-        try {
-          const idToken = await result.user.getIdToken();
-          fetch('/api/auth/login-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`,
-            },
-          }).catch((notifyErr) => {
-            console.warn('[Notification] Non-blocking dispatch warning:', notifyErr);
-          });
-        } catch (tokenErr) {
-          console.warn('[Notification] Could not retrieve ID token for notification:', tokenErr);
-        }
-
+        await dispatchServerLoginNotification(result.user);
         setIsLoginModalOpen(false);
       }
     } catch (err: any) {
       console.error('Google Sign-in failed:', err);
-      // Clean error presentation without internal stack traces
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('Sign-in cancelled. Please try again.');
-      } else if (err.code === 'auth/network-request-failed') {
-        setError('Network error during authentication. Check your internet connection.');
-      } else {
-        setError(err.message || 'Authentication failed. Please try again.');
+      setError(formatFirebaseAuthError(err));
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string): Promise<boolean> => {
+    try {
+      clearAuthMessages();
+      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+      if (result.user) {
+        try {
+          await syncUserProfile({
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+          });
+        } catch {
+          // Non-fatal
+        }
+        await dispatchServerLoginNotification(result.user);
+        setIsLoginModalOpen(false);
+        return true;
       }
+      return false;
+    } catch (err: any) {
+      setError(formatFirebaseAuthError(err));
+      return false;
+    }
+  };
+
+  const signUpWithEmail = async (
+    name: string,
+    email: string,
+    password: string
+  ): Promise<boolean> => {
+    try {
+      clearAuthMessages();
+      const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      if (result.user) {
+        if (name.trim()) {
+          await updateProfile(result.user, { displayName: name.trim() });
+        }
+        try {
+          await sendEmailVerification(result.user);
+          setStatusMessage('Verification email sent. Please check your inbox.');
+        } catch {
+          // Non-fatal if verification email is rate-limited
+        }
+        try {
+          await syncUserProfile({
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: name.trim() || result.user.displayName,
+            photoURL: result.user.photoURL,
+          });
+        } catch {
+          // Non-fatal
+        }
+        await dispatchServerLoginNotification(result.user);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      setError(formatFirebaseAuthError(err));
+      return false;
+    }
+  };
+
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      clearAuthMessages();
+      await sendPasswordResetEmail(auth, email.trim());
+      setStatusMessage(`Password reset instructions have been sent to ${email.trim()}.`);
+      return true;
+    } catch (err: any) {
+      setError(formatFirebaseAuthError(err));
+      return false;
     }
   };
 
   const signOutUser = async () => {
     try {
-      setError(null);
+      clearAuthMessages();
       await signOut(auth);
     } catch (err: any) {
       console.error('Sign-out failed:', err);
@@ -131,10 +245,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         loading,
         error,
+        statusMessage,
         isLoginModalOpen,
         openLoginModal,
         closeLoginModal,
+        clearAuthMessages,
         signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
+        resetPassword,
         signOutUser,
       }}
     >

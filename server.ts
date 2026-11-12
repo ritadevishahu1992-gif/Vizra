@@ -1909,6 +1909,263 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     });
   });
 
+  // ============================================================================
+  // CREDIT USAGE LEDGER & HISTORICAL MONTHLY CONSUMPTION API (/api/credits/usage)
+  // ============================================================================
+  const PLAN_CREDIT_CATALOG: Record<
+    'starter' | 'pro' | 'studio',
+    { name: string; limit: number }
+  > = {
+    starter: { name: 'Creator Free', limit: 60 },
+    pro: { name: 'Omnia Pro', limit: 240 },
+    studio: { name: 'VIZRA Studio', limit: 1000 },
+  };
+
+  const creditLedgerState: {
+    planId: 'starter' | 'pro' | 'studio';
+    used: number;
+    categories: {
+      reasoning: number;
+      grounding: number;
+      visuals: number;
+      audio: number;
+    };
+    monthlyHistory: Array<{
+      id: string;
+      month: string;
+      label: string;
+      reasoning: number;
+      grounding: number;
+      visuals: number;
+      audio: number;
+      totalUsed: number;
+      limit: number;
+    }>;
+    recentEvents: Array<{
+      id: string;
+      timestamp: number;
+      category: string;
+      delta: number;
+      balanceAfter: number;
+      description: string;
+    }>;
+  } = {
+    planId: 'starter',
+    used: 14,
+    categories: {
+      reasoning: 7,
+      grounding: 4,
+      visuals: 2,
+      audio: 1,
+    },
+    monthlyHistory: [
+      {
+        id: '2026-06',
+        month: 'Jun',
+        label: 'Jun 2026',
+        reasoning: 16,
+        grounding: 9,
+        visuals: 7,
+        audio: 3,
+        totalUsed: 35,
+        limit: 60,
+      },
+      {
+        id: '2026-07',
+        month: 'Jul',
+        label: 'Jul 2026',
+        reasoning: 21,
+        grounding: 12,
+        visuals: 9,
+        audio: 4,
+        totalUsed: 46,
+        limit: 60,
+      },
+      {
+        id: '2026-08',
+        month: 'Aug',
+        label: 'Aug 2026',
+        reasoning: 19,
+        grounding: 11,
+        visuals: 8,
+        audio: 3,
+        totalUsed: 41,
+        limit: 60,
+      },
+      {
+        id: '2026-09',
+        month: 'Sep',
+        label: 'Sep 2026',
+        reasoning: 24,
+        grounding: 14,
+        visuals: 11,
+        audio: 5,
+        totalUsed: 54,
+        limit: 60,
+      },
+      {
+        id: '2026-10',
+        month: 'Oct',
+        label: 'Oct 2026',
+        reasoning: 22,
+        grounding: 13,
+        visuals: 10,
+        audio: 4,
+        totalUsed: 49,
+        limit: 60,
+      },
+      {
+        id: '2026-11',
+        month: 'Nov',
+        label: 'Nov 2026',
+        reasoning: 7,
+        grounding: 4,
+        visuals: 2,
+        audio: 1,
+        totalUsed: 14,
+        limit: 60,
+      },
+    ],
+    recentEvents: [
+      {
+        id: 'evt-init-1',
+        timestamp: Date.now() - 1000 * 60 * 42,
+        category: 'reasoning',
+        delta: -1,
+        balanceAfter: 48,
+        description: 'Omnia 1.0 multi-step reasoning synthesis',
+      },
+      {
+        id: 'evt-init-2',
+        timestamp: Date.now() - 1000 * 60 * 18,
+        category: 'grounding',
+        delta: -1,
+        balanceAfter: 47,
+        description: 'Verified primary web citation retrieval',
+      },
+      {
+        id: 'evt-init-3',
+        timestamp: Date.now() - 1000 * 60 * 5,
+        category: 'visuals',
+        delta: -1,
+        balanceAfter: 46,
+        description: 'High-DPI procedural obsidian frame synthesis',
+      },
+    ],
+  };
+
+  function buildCreditUsagePayload(requestedPlan?: string) {
+    if (
+      requestedPlan === 'starter' ||
+      requestedPlan === 'pro' ||
+      requestedPlan === 'studio'
+    ) {
+      creditLedgerState.planId = requestedPlan;
+    }
+    const obs = getObservabilityMetrics();
+    const liveServerCalls = Number(obs?.totalRequests || 0);
+    const planMeta = PLAN_CREDIT_CATALOG[creditLedgerState.planId];
+    const limit = planMeta.limit;
+    const effectiveUsed = Math.min(
+      limit,
+      Math.max(creditLedgerState.used, 14 + Math.min(liveServerCalls, 25))
+    );
+    const remaining = Math.max(0, limit - effectiveUsed);
+
+    // Sync current month ('2026-11') with live category breakdown
+    const currentMonthIndex = creditLedgerState.monthlyHistory.length - 1;
+    if (currentMonthIndex >= 0) {
+      creditLedgerState.monthlyHistory[currentMonthIndex] = {
+        ...creditLedgerState.monthlyHistory[currentMonthIndex],
+        reasoning: creditLedgerState.categories.reasoning,
+        grounding: creditLedgerState.categories.grounding,
+        visuals: creditLedgerState.categories.visuals,
+        audio: creditLedgerState.categories.audio,
+        totalUsed: effectiveUsed,
+        limit,
+      };
+    }
+
+    return {
+      success: true,
+      balance: {
+        used: effectiveUsed,
+        limit,
+        remaining,
+        percentRemaining: Math.round((remaining / Math.max(limit, 1)) * 100),
+        percentUsed: Math.round((effectiveUsed / Math.max(limit, 1)) * 100),
+        planId: creditLedgerState.planId,
+        planName: planMeta.name,
+        updatedAt: Date.now(),
+      },
+      categories: creditLedgerState.categories,
+      monthlyHistory: creditLedgerState.monthlyHistory,
+      recentEvents: creditLedgerState.recentEvents.slice(0, 12),
+    };
+  }
+
+  app.get('/api/credits/usage', (req, res) => {
+    const planParam = typeof req.query.plan === 'string' ? req.query.plan : undefined;
+    res.json(buildCreditUsagePayload(planParam));
+  });
+
+  app.post('/api/credits/usage', (req, res) => {
+    const {
+      action = 'consume',
+      amount = 1,
+      category = 'reasoning',
+      planId,
+      description,
+    } = req.body || {};
+
+    if (planId === 'starter' || planId === 'pro' || planId === 'studio') {
+      creditLedgerState.planId = planId;
+    }
+
+    const planMeta = PLAN_CREDIT_CATALOG[creditLedgerState.planId];
+    const safeAmount = Math.max(1, Math.min(50, Math.round(Number(amount) || 1)));
+    const validCat: 'reasoning' | 'grounding' | 'visuals' | 'audio' =
+      category === 'grounding' || category === 'visuals' || category === 'audio'
+        ? category
+        : 'reasoning';
+
+    if (action === 'consume') {
+      creditLedgerState.used = Math.min(
+        planMeta.limit,
+        creditLedgerState.used + safeAmount
+      );
+      creditLedgerState.categories[validCat] += safeAmount;
+      const rem = Math.max(0, planMeta.limit - creditLedgerState.used);
+      creditLedgerState.recentEvents.unshift({
+        id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+        category: validCat,
+        delta: -safeAmount,
+        balanceAfter: rem,
+        description:
+          typeof description === 'string' && description.trim()
+            ? description.trim().slice(0, 100)
+            : `Omnia 1.0 ${validCat} generation (${safeAmount} credit${safeAmount > 1 ? 's' : ''})`,
+      });
+    } else if (action === 'refill') {
+      creditLedgerState.used = Math.max(0, creditLedgerState.used - safeAmount);
+      const rem = Math.max(0, planMeta.limit - creditLedgerState.used);
+      creditLedgerState.recentEvents.unshift({
+        id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+        category: 'refill',
+        delta: safeAmount,
+        balanceAfter: rem,
+        description:
+          typeof description === 'string' && description.trim()
+            ? description.trim().slice(0, 100)
+            : `Workspace credit allocation top-up (+${safeAmount} credits)`,
+      });
+    }
+
+    res.json(buildCreditUsagePayload());
+  });
+
   // Data Privacy, Storage, and Tenant Isolation Specification Endpoint
   app.get('/api/privacy/summary', (_req, res) => {
     res.json({

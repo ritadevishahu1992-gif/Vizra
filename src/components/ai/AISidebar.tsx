@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -13,10 +14,12 @@ import {
   ChevronDown,
   ChevronRight,
   Keyboard,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Conversation, Project } from '../../types/ai';
 import { VizraLogo } from '../VizraLogo';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
+import { CreditUsageIndicator } from '../ui/CreditUsageIndicator';
 
 interface AISidebarProps {
   conversations: Conversation[];
@@ -341,6 +344,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
       {/* Bottom of Sidebar */}
       <div className="p-3 border-t border-neutral-900 bg-black/40 shrink-0 space-y-2.5">
+        <CreditUsageIndicator variant="sidebar" />
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <VizraLogo size={18} />
@@ -353,6 +358,18 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             </div>
           </div>
         </div>
+
+        <Link
+          to="/workspace"
+          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-300 hover:text-white transition-colors"
+          title="Open Workspace & Developer Console"
+        >
+          <div className="flex items-center gap-1.5">
+            <LayoutDashboard size={12} className="text-[#eb3b2d]" />
+            <span>Workspace Console</span>
+          </div>
+          <span className="text-[9px] font-mono text-neutral-500">Dashboard →</span>
+        </Link>
 
         {onOpenShortcutsHelp && (
           <button
@@ -373,9 +390,70 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     </div>
   );
 
+  const collapsedRail = (
+    <div className="w-[60px] h-full bg-[#0a0a0a] border-r border-neutral-900 flex flex-col items-center justify-between py-3 select-none shrink-0 z-40">
+      <div className="flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={onNewChat}
+          className="w-9 h-9 rounded-xl bg-white text-black hover:bg-neutral-200 flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+          title="New chat"
+          aria-label="New chat"
+        >
+          <Plus size={16} />
+        </button>
+
+        {onNewProject && (
+          <button
+            type="button"
+            onClick={onNewProject}
+            className="w-9 h-9 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            title="New 10-Stage Project"
+            aria-label="New 10-Stage Project"
+          >
+            <Layers size={15} className="text-[#eb3b2d]" />
+          </button>
+        )}
+
+        <Link
+          to="/workspace"
+          className="w-9 h-9 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
+          title="Workspace & Developer Console"
+          aria-label="Workspace & Developer Console"
+        >
+          <LayoutDashboard size={15} />
+        </Link>
+      </div>
+
+      <div className="flex flex-col items-center gap-2.5">
+        <CreditUsageIndicator variant="rail" />
+        {onOpenShortcutsHelp && (
+          <button
+            type="button"
+            onClick={onOpenShortcutsHelp}
+            className="w-9 h-9 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            title={`Keyboard Shortcuts (${modKey}/)`}
+            aria-label="Keyboard Shortcuts"
+          >
+            <Keyboard size={14} />
+          </button>
+        )}
+        <VizraLogo size={18} />
+      </div>
+    </div>
+  );
+
   return (
     <>
-      {isOpenDesktop && <div className="hidden md:block h-full shrink-0 animate-in fade-in duration-150">{content}</div>}
+      {isOpenDesktop ? (
+        <div className="hidden md:block h-full shrink-0 animate-in fade-in duration-150">
+          {content}
+        </div>
+      ) : (
+        <div className="hidden md:block h-full shrink-0 animate-in fade-in duration-150">
+          {collapsedRail}
+        </div>
+      )}
 
       {isOpenMobile && (
         <div className="fixed inset-0 z-50 md:hidden flex">

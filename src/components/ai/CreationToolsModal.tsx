@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { Tooltip } from '../ui/Tooltip';
+import { ImageGenerationCard } from './ImageGenerationCard';
 
 interface CreationToolsModalProps {
   isOpen: boolean;
@@ -225,6 +226,12 @@ export const CreationToolsModal: React.FC<CreationToolsModalProps> = ({
                   {generatedImagePrompt}
                 </div>
               </div>
+
+              {/* Live AI Image Generation Result Preview Card */}
+              <ImageGenerationCard
+                prompt={generatedImagePrompt}
+                aspectRatio={imgAspect as '16:9' | '9:16' | '1:1' | '21:9'}
+              />
             </div>
           )}
 

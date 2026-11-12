@@ -3,6 +3,11 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -111,5 +116,14 @@ testFirestoreConnection().catch(() => {
   // Silent catch on boot
 });
 
-export { signInWithPopup, signOut, onAuthStateChanged };
+export {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile,
+  signOut,
+  onAuthStateChanged,
+};
 export type { FirebaseUser };

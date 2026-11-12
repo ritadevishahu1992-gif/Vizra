@@ -50,11 +50,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmn
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-7xl tracking-[-2px] font-medium leading-tight md:leading-[1.1] mb-4 text-white max-w-3xl"
+          className="typo-hero mb-5 max-w-3xl"
         >
           <span>An intelligent creative workspace.</span>
           <br />
-          <span className="text-neutral-400 text-3xl md:text-5xl">
+          <span className="text-neutral-400 font-normal text-2xl sm:text-4xl md:text-[2.75rem] leading-tight">
             Powered by{' '}
             <span className="font-instrument-serif italic font-normal text-white">
               Omnia 1.0.
@@ -67,9 +67,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmn
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-lg md:text-xl font-normal leading-relaxed text-neutral-300 mb-8 max-w-2xl mx-auto"
+          className="typo-body-lg mb-8 mx-auto"
         >
-          Think, create and build with one intelligent workspace.
+          Think, create, and build with one unified AI creative studio—moving seamlessly from raw intuition to production-ready work.
         </motion.p>
 
         {/* Both CTAs with Entrance Animation */}

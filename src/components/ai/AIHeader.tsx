@@ -8,6 +8,7 @@ import { OmniaModel } from '../../types/ai';
 import { UserMenu } from '../auth/UserMenu';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
 import { Tooltip } from '../ui/Tooltip';
+import { CreditUsageIndicator } from '../ui/CreditUsageIndicator';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -184,8 +185,10 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
         )}
       </div>
 
-      {/* Right: Actions (New Chat, Settings, Profile) */}
+      {/* Right: Actions (Credits, Command Palette, New Chat, Settings, Profile) */}
       <div className="flex items-center gap-1.5 md:gap-2">
+        <CreditUsageIndicator variant="header" />
+
         {onOpenCommandPalette && (
           <Tooltip
             label="Command Palette"

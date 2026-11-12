@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
 import { AIMode } from '../../types/ai';
+import { TextShimmer } from '../ui/TextShimmer';
 
 export interface OmniaResponseSkeletonProps {
   /** Active OMNIA capability mode to tailor skeleton layout geometry */
@@ -177,6 +178,9 @@ export const MessageListSkeleton: React.FC<MessageListSkeletonProps> = React.mem
                 className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d] animate-ping motion-reduce:animate-none"
                 aria-hidden="true"
               />
+              <TextShimmer className="text-[11px] font-mono ml-1" duration={1.8}>
+                Synthesizing grounded response…
+              </TextShimmer>
             </div>
             <OmniaResponseSkeleton mode={mode} />
           </div>
