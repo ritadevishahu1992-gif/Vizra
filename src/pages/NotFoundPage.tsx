@@ -37,6 +37,8 @@ export const NotFoundPage: React.FC = () => {
     <PageLayout
       title="404 Page Not Found — Vizra AI Creative Studio"
       description="The requested route could not be found on the Vizra AI Creative Studio platform."
+      canonicalPath={null}
+      noindex={true}
     >
       <section className="pt-32 md:pt-40 pb-24 px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto">
         <div className="p-8 sm:p-12 rounded-3xl bg-[#111111] border border-white/[0.08] space-y-8">

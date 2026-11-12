@@ -47,13 +47,15 @@ export const ExplorePage: React.FC = () => {
 
   return (
     <PageLayout
-      title="Explore & Creative Showcase — Vizra AI Creative Studio"
-      description="Enter the Vizra 3D Creative Universe Showcase. Explore curated AI visuals, inspect synthesis prompts, and launch directly in Omnia 1.0."
+      title="Explore 3D Creative Showcase — Vizra AI Creative Studio"
+      description="Enter the Vizra 3D Creative Universe Showcase. Explore curated AI visuals inside an interactive perspective tunnel, inspect prompts, and launch in Omnia 1.0."
+      canonicalPath="/explore"
     >
       {/* Section 01: 3D Perspective Tunnel Creative Showcase */}
       <div className="pt-16">
         <PerspectiveTunnelHero
           id="creative-showcase"
+          headingLevel="h1"
           onSelectCard={(item) => handleLaunchWithPrompt(item.prompt)}
         />
       </div>
@@ -63,9 +65,9 @@ export const ExplorePage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="max-w-2xl space-y-3">
             <div className="typo-eyebrow">Diverse Disciplines</div>
-            <h1 className="typo-section-title">
+            <h2 className="typo-section-title">
               Built for anyone with an idea.
-            </h1>
+            </h2>
             <p className="typo-body">
               Vizra scales from rapid conversational questions to full 10-stage creative production. Select any creator profile below to test a tailored prompt in Omnia 1.0.
             </p>
@@ -96,9 +98,9 @@ export const ExplorePage: React.FC = () => {
               className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] hover:border-[#DC2626]/60 transition-all flex flex-col justify-between group"
             >
               <div>
-                <h2 className="typo-card-title mb-2 group-hover:text-[#EB3B2D] transition-colors">
+                <h3 className="typo-card-title mb-2 group-hover:text-[#EB3B2D] transition-colors">
                   {profile.role}
-                </h2>
+                </h3>
                 <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-5">
                   {profile.desc}
                 </p>

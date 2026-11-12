@@ -44,6 +44,10 @@ import {
   saveUserProjectToFirestore,
 } from '../services/firestoreService';
 import { Project, Attachment } from '../types/ai';
+import {
+  resolveRouteSeoPayload,
+  applySeoToDocument,
+} from '../seo/routeMetadata';
 
 interface WorkspaceApiToken {
   id: string;
@@ -142,6 +146,11 @@ export const WorkspaceDashboardPage: React.FC = () => {
     setActiveSection(sec);
     setSearchParams({ tab: sec });
   };
+
+  // Sync route SEO metadata (noindex, nofollow)
+  useEffect(() => {
+    applySeoToDocument(resolveRouteSeoPayload('/workspace'));
+  }, []);
 
   // Load Projects from LocalStorage + Firestore
   useEffect(() => {

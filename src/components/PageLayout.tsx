@@ -3,10 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { LiquidGlassNavbar } from './ui/LiquidGlassNavbar';
+import {
+  resolveRouteSeoPayload,
+  applySeoToDocument,
+} from '../seo/routeMetadata';
 
 export interface PageLayoutProps {
   title: string;
   description: string;
+  canonicalPath?: string | null;
+  noindex?: boolean;
   children: React.ReactNode;
   className?: string;
   hideBottomNav?: boolean;
@@ -15,6 +21,8 @@ export interface PageLayoutProps {
 export const PageLayout: React.FC<PageLayoutProps> = ({
   title,
   description,
+  canonicalPath,
+  noindex,
   children,
   className = '',
   hideBottomNav = false,
@@ -22,30 +30,15 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Sync route-level SEO metadata and scroll position
+  // Sync route-level SEO metadata, canonical URL, robots directives, JSON-LD, and scroll position
   useEffect(() => {
-    document.title = title;
-
-    const setMeta = (selector: string, attr: 'content' | 'href', value: string) => {
-      const el = document.querySelector(selector);
-      if (el) {
-        el.setAttribute(attr, value);
-      }
-    };
-
-    setMeta('meta[name="description"]', 'content', description);
-    setMeta('meta[property="og:title"]', 'content', title);
-    setMeta('meta[property="og:description"]', 'content', description);
-    setMeta(
-      'meta[property="og:url"]',
-      'content',
-      `${window.location.origin}${location.pathname}`
-    );
-    setMeta(
-      'link[rel="canonical"]',
-      'href',
-      `${window.location.origin}${location.pathname}`
-    );
+    const seoPayload = resolveRouteSeoPayload(location.pathname, {
+      title,
+      description,
+      canonicalPath,
+      noindex,
+    });
+    applySeoToDocument(seoPayload);
 
     const params = new URLSearchParams(location.search);
     const targetSection = params.get('section') || params.get('tab');
@@ -60,7 +53,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     }
 
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
-  }, [title, description, location.pathname, location.search]);
+  }, [title, description, canonicalPath, noindex, location.pathname, location.search]);
 
   return (
     <div

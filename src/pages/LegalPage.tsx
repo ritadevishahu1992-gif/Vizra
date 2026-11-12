@@ -57,9 +57,10 @@ export const LegalPage: React.FC = () => {
 
   const pageMeta = {
     privacy: {
-      title: 'Privacy Policy — Vizra AI Creative Studio',
+      title: 'Privacy Policy & Data Protection — Vizra AI Studio',
       description:
-        'Privacy Policy detailing information collection, processing, retention, third-party processors, security controls, and user privacy rights for Vizra AI Creative Studio.',
+        'Privacy Policy detailing information collection, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
+      canonicalPath: '/privacy-policy',
       heading: 'Privacy Policy',
       eyebrow: 'Data Protection & Privacy Notice',
     },
@@ -67,20 +68,26 @@ export const LegalPage: React.FC = () => {
       title: 'Terms & Conditions — Vizra AI Creative Studio',
       description:
         'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, and liability limits.',
+      canonicalPath: '/terms-and-conditions',
       heading: 'Terms & Conditions',
       eyebrow: 'Platform Agreement & Rules of Use',
     },
     cookies: {
-      title: 'Cookie Policy — Vizra AI Creative Studio',
+      title: 'Cookie & Storage Policy — Vizra AI Creative Studio',
       description:
-        'Cookie and browser storage policy explaining strictly necessary, analytics, functional, and marketing technologies used in Vizra and how to withdraw or customize consent.',
+        'Cookie and browser storage policy explaining strictly necessary, analytics, functional, and marketing technologies used in Vizra and consent controls.',
+      canonicalPath: '/cookie-policy',
       heading: 'Cookie & Storage Policy',
       eyebrow: 'Consent & Browser Storage Governance',
     },
   }[activeDoc];
 
   return (
-    <PageLayout title={pageMeta.title} description={pageMeta.description}>
+    <PageLayout
+      title={pageMeta.title}
+      description={pageMeta.description}
+      canonicalPath={pageMeta.canonicalPath}
+    >
       {/* Page Header */}
       <section className="pt-28 md:pt-36 pb-12 px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto border-b border-white/[0.06]">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">

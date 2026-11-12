@@ -103,13 +103,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
       icon: LayoutDashboard,
       tag: 'Dashboard',
     },
-    {
-      label: 'Technical SEO & Crawler Audit',
-      desc: 'Administrator diagnostic suite for robots.txt, sitemaps, and SSRF security.',
-      href: '/seo-diagnostics',
-      icon: ShieldCheck,
-      tag: 'Protected',
-    },
   ];
 
   const primaryLinks = [

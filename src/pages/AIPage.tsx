@@ -22,6 +22,10 @@ import { EngageAdminModal } from '../components/ai/engage/EngageAdminModal';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { CitationItem } from '../types/rag';
 import { FolderGit2, X, ExternalLink } from 'lucide-react';
+import {
+  resolveRouteSeoPayload,
+  applySeoToDocument,
+} from '../seo/routeMetadata';
 import { sendMessage } from '../services/aiService';
 import { logSafeInteractionEvent } from '../services/engageEventLogger';
 import { recordAICreditUsage } from '../components/ui/CreditUsageIndicator';
@@ -212,6 +216,10 @@ export const AIPage: React.FC = () => {
       setCurrentMode(modes[index - 1]);
     }
   };
+
+  useEffect(() => {
+    applySeoToDocument(resolveRouteSeoPayload('/ai'));
+  }, []);
 
   const handleExportConversation = () => {
     const conv = conversations.find((c) => c.id === activeConversationId);
@@ -827,6 +835,9 @@ export const AIPage: React.FC = () => {
                 />
               ) : (
                 <div className="w-full max-w-3xl mx-auto py-4 space-y-4">
+                  <h1 className="sr-only">
+                    Omnia 1.0 AI Creative Workspace — {activeConversation?.title || 'Active Session'}
+                  </h1>
                   {messages.map((msg, index) => (
                     <ChatMessage
                       key={msg.id}

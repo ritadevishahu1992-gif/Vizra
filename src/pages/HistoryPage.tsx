@@ -150,7 +150,8 @@ export const HistoryPage: React.FC = () => {
   return (
     <PageLayout
       title="Conversation History — Vizra AI Creative Studio"
-      description="Inspect, search, rename, and manage your saved Omnia 1.0 conversation sessions and project memory."
+      description="Review, search, export, and manage your saved Omnia 1.0 conversation threads and creative sessions."
+      canonicalPath="/history"
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-6xl mx-auto">
         {/* Header Bar */}

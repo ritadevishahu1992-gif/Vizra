@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /live
 
 Sitemap: https://vizra.vercel.app/sitemap.xml

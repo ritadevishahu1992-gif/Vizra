@@ -48,6 +48,7 @@ export interface PerspectiveTunnelHeroProps {
   id?: string;
   eyebrow?: string;
   heading?: string;
+  headingLevel?: 'h1' | 'h2';
   supportingText?: string;
   scrollInstruction?: string;
   items?: TunnelShowcaseItem[];
@@ -257,7 +258,10 @@ const TunnelCardView: React.FC<TunnelCardViewProps> = ({
             <img
               src={item.src}
               alt={item.alt}
+              width={800}
+              height={600}
               loading="lazy"
+              decoding="async"
               onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
               className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
@@ -301,12 +305,14 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
   id = 'creative-showcase',
   eyebrow = 'VIZRA CREATIVE SHOWCASE',
   heading = 'ENTER THE CREATIVE UNIVERSE.',
+  headingLevel = 'h1',
   supportingText = 'Explore a universe of ideas, visuals and creative possibilities, brought to life with AI.',
   scrollInstruction = 'SCROLL TO EXPLORE',
   items = DEFAULT_TUNNEL_CARDS,
   onSelectCard,
   className = '',
 }) => {
+  const HeadingTag = headingLevel;
   const sectionRef = useRef<HTMLElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -574,9 +580,9 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
               </div>
 
               {/* Main Display Heading */}
-              <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.03em] leading-[1.02] text-white drop-shadow-[0_12px_36px_rgba(0,0,0,0.95)] mb-4">
+              <HeadingTag className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.03em] leading-[1.02] text-white drop-shadow-[0_12px_36px_rgba(0,0,0,0.95)] mb-4">
                 {heading}
-              </h2>
+              </HeadingTag>
 
               {/* Supporting Copy */}
               <p className="text-sm sm:text-base md:text-lg text-neutral-300 max-w-xl mx-auto font-normal leading-relaxed drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] mb-6">
@@ -615,9 +621,9 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626]" />
                 <span>{eyebrow}</span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-semibold tracking-tight text-white mb-4">
+              <HeadingTag className="text-3xl sm:text-5xl font-semibold tracking-tight text-white mb-4">
                 {heading}
-              </h2>
+              </HeadingTag>
               <p className="text-base text-neutral-300 max-w-xl mx-auto leading-relaxed">
                 {supportingText}
               </p>
@@ -634,7 +640,10 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
                       <img
                         src={item.src}
                         alt={item.alt}
+                        width={800}
+                        height={500}
                         loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/10 text-[10px] font-mono uppercase text-neutral-300">
@@ -735,6 +744,9 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
                 <img
                   src={activeCard.src}
                   alt={activeCard.alt}
+                  width={1200}
+                  height={675}
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-black/40" />

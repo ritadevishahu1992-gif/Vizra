@@ -24,8 +24,11 @@ import {
   Search,
 } from 'lucide-react';
 import { SeoAuditReport, RootCauseFinding, FixRecommendation } from '../types/seoDiagnostics';
-
 import { useAuth } from '../context/AuthContext';
+import {
+  resolveRouteSeoPayload,
+  applySeoToDocument,
+} from '../seo/routeMetadata';
 
 export const SeoDiagnosticPage: React.FC = () => {
   const { user, signInWithGoogle, signOutUser, openLoginModal } = useAuth();
@@ -105,6 +108,10 @@ export const SeoDiagnosticPage: React.FC = () => {
       setScanning(false);
     }
   };
+
+  useEffect(() => {
+    applySeoToDocument(resolveRouteSeoPayload('/seo-diagnostics'));
+  }, []);
 
   useEffect(() => {
     fetchAudit(false);

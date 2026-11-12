@@ -38,7 +38,6 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'Documentation', to: '/docs' },
       { label: 'Developer API Reference', to: '/docs?section=api' },
       { label: 'Application Settings', to: '/settings' },
-      { label: 'SEO & Crawler Audit', to: '/seo-diagnostics' },
     ],
   },
   {

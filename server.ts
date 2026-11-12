@@ -1,5 +1,6 @@
 
-  import express from 'express';
+import express from 'express';
+import fs from 'fs';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
@@ -33,6 +34,16 @@ import { processLoginNotifications } from './src/server/email/loginNotificationS
 import { setupVizraEngageRoutes } from './src/server/engage/engageRoutes';
 import { setupConsentRoutes } from './src/server/consent/consentService';
 import { getOrRunVizraSeoAudit } from './src/services/seoDiagnosticsService';
+import {
+  REDIRECT_ALIASES,
+  normalizePathname,
+  resolveRouteSeoPayload,
+  injectSeoIntoHtml,
+} from './src/seo/routeMetadata';
+import {
+  ensurePublicOgImageExists,
+  generateVizraOgImageBuffer,
+} from './src/server/seo/ogImageGenerator';
 
 dotenv.config();
 
@@ -2201,13 +2212,23 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     });
   });
 
+  // Ensure 1200x630 Open Graph preview image exists in public/og-image.png
+  let ogImageBufferCache: Buffer | null = null;
+  try {
+    ensurePublicOgImageExists(__dirname);
+    ogImageBufferCache = generateVizraOgImageBuffer();
+  } catch (ogErr) {
+    console.warn('[SEO] Could not write public/og-image.png, using in-memory buffer:', ogErr);
+    ogImageBufferCache = generateVizraOgImageBuffer();
+  }
+
   // Google Search Console HTML file verification endpoint (permanent)
   app.get('/googlef66bb3a90d865a89.html', (_req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.status(200).send('google-site-verification: googlef66bb3a90d865a89.html');
   });
 
-  // Explicit robots.txt & sitemap.xml handlers guaranteeing plain-text / XML MIME types
+  // Explicit robots.txt, sitemap.xml & og-image.png handlers guaranteeing exact MIME types
   app.get('/robots.txt', (_req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
@@ -2220,13 +2241,61 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     res.sendFile(path.resolve(__dirname, 'public', 'sitemap.xml'));
   });
 
+  app.get('/og-image.png', (_req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=604800');
+    const diskPath = path.resolve(__dirname, 'public', 'og-image.png');
+    if (fs.existsSync(diskPath)) {
+      res.sendFile(diskPath);
+    } else if (ogImageBufferCache) {
+      res.status(200).send(ogImageBufferCache);
+    } else {
+      res.status(404).end();
+    }
+  });
+
+  // Permanent HTTP 301 Redirects for Legacy & Short Alias Routes (preserving query parameters)
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      return next();
+    }
+    const cleanPath = normalizePathname(req.path);
+    const redirectTarget = REDIRECT_ALIASES[cleanPath];
+    if (redirectTarget) {
+      const qIndex = req.originalUrl.indexOf('?');
+      const querySuffix = qIndex !== -1 ? req.originalUrl.slice(qIndex) : '';
+      return res.redirect(301, `${redirectTarget}${querySuffix}`);
+    }
+    next();
+  });
+
+  function isSpaHtmlRouteRequest(req: express.Request): boolean {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return false;
+    const p = req.path || '/';
+    if (
+      p.startsWith('/api/') ||
+      p === '/live' ||
+      p.startsWith('/@') ||
+      p.startsWith('/src/') ||
+      p.startsWith('/node_modules/') ||
+      p.startsWith('/assets/')
+    ) {
+      return false;
+    }
+    const lastSegment = p.split('/').pop() || '';
+    if (lastSegment.includes('.')) {
+      return false;
+    }
+    return true;
+  }
+
   // Create native HTTP server so WebSockets can share port 3000
   const server = http.createServer(app);
   server.on('error', (err) => {
     console.error('[HTTP Server] Error:', err);
   });
 
-  // In development, mount Vite's middleware with HMR disabled to prevent WebSocket upgrade conflicts
+  // In development, mount Vite's middleware with route-aware initial HTML metadata injection
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: {
@@ -2234,14 +2303,44 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         hmr: false,
         watch: null,
       },
-      appType: 'spa',
+      appType: 'custom',
     });
+
+    app.use(async (req, res, next) => {
+      if (!isSpaHtmlRouteRequest(req)) {
+        return next();
+      }
+      try {
+        const seoPayload = resolveRouteSeoPayload(req.path);
+        const templatePath = path.resolve(__dirname, 'index.html');
+        const rawHtml = fs.readFileSync(templatePath, 'utf-8');
+        const viteHtml = await vite.transformIndexHtml(req.originalUrl, rawHtml);
+        const finalHtml = injectSeoIntoHtml(viteHtml, seoPayload);
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('X-Robots-Tag', seoPayload.xRobotsTag);
+        return res.status(seoPayload.httpStatus).send(finalHtml);
+      } catch (err) {
+        return next(err);
+      }
+    });
+
     app.use(vite.middlewares);
   } else {
-    // In production, serve built assets from dist
-    app.use(express.static(path.resolve(__dirname, 'dist')));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+    // In production, serve built static assets from dist and inject route-specific SEO metadata into index.html
+    app.use(express.static(path.resolve(__dirname, 'dist'), { index: false }));
+    app.get('*', (req, res) => {
+      const seoPayload = resolveRouteSeoPayload(req.path);
+      const distIndex = path.resolve(__dirname, 'dist', 'index.html');
+      const fallbackIndex = path.resolve(__dirname, 'index.html');
+      const rawHtml = fs.existsSync(distIndex)
+        ? fs.readFileSync(distIndex, 'utf-8')
+        : fs.readFileSync(fallbackIndex, 'utf-8');
+      const finalHtml = injectSeoIntoHtml(rawHtml, seoPayload);
+
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('X-Robots-Tag', seoPayload.xRobotsTag);
+      res.status(seoPayload.httpStatus).send(finalHtml);
     });
   }
 

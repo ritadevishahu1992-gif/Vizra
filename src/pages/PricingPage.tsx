@@ -76,7 +76,8 @@ export const PricingPage: React.FC = () => {
   return (
     <PageLayout
       title="Pricing & Compute Tiers — Vizra AI Creative Studio"
-      description="Compare Vizra's Creator Free, Omnia Pro, and VIZRA Studio & Team plans. Transparent compute quotas, grounded web citations, and 10-stage creative workspaces."
+      description="Compare Vizra’s Creator Free ($0), Omnia Pro ($19/mo), and VIZRA Studio ($64/mo) plans with transparent compute quotas and 10-stage creative workspaces."
+      canonicalPath="/pricing"
     >
       {/* Page Intro Banner */}
       <section className="pt-28 md:pt-36 pb-6 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto">
@@ -164,11 +165,15 @@ export const PricingPage: React.FC = () => {
                     }`}
                   />
                 </button>
-                {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-neutral-400 leading-relaxed border-t border-white/[0.05]">
-                    {faq.a}
-                  </div>
-                )}
+                <div
+                  className={
+                    isOpen
+                      ? 'px-6 pb-5 pt-1 text-xs sm:text-sm text-neutral-400 leading-relaxed border-t border-white/[0.05]'
+                      : 'hidden'
+                  }
+                >
+                  {faq.a}
+                </div>
               </div>
             );
           })}

@@ -55,8 +55,9 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <PageLayout
-      title="Application Settings & Preferences — Vizra AI Creative Studio"
-      description="Configure global dark mode and surface tension theme settings, AI response preferences, account authentication, and data privacy."
+      title="Application Settings — Vizra AI Creative Studio"
+      description="Configure your Vizra studio theme, Omnia 1.0 response style, language preferences, local cache, and privacy controls."
+      canonicalPath="/settings"
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-4xl mx-auto space-y-8">
         {/* Header Bar */}

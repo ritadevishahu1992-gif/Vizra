@@ -121,8 +121,9 @@ export const LandingPage: React.FC = () => {
 
   return (
     <PageLayout
-      title="Vizra — AI Creative Studio & Omnia 1.0"
-      description="A modern AI creative studio built to make AI-powered creation simpler for creators, animators, motion designers, developers, and beginners."
+      title="Vizra — AI Creative Studio & Omnia 1.0 Workspace"
+      description="A modern AI creative studio powered by Omnia 1.0. Generate, design, write, research, and build across 10-stage creative workflows in one unified workspace."
+      canonicalPath="/"
     >
       {/* Section 01: Hero with Parallax & Omnia Workspace Preview */}
       <HeroSection
