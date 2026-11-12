@@ -9,6 +9,7 @@ import { UserMenu } from '../auth/UserMenu';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
 import { Tooltip } from '../ui/Tooltip';
 import { CreditUsageIndicator } from '../ui/CreditUsageIndicator';
+import { LiquidGlassToggle } from '../ui/LiquidGlassToggle';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -261,6 +262,8 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             <Settings size={16} />
           </button>
         </Tooltip>
+
+        <LiquidGlassToggle size="sm" className="hidden lg:inline-flex" />
 
         <div className="ml-1">
           <UserMenu />

@@ -6,8 +6,23 @@
 @import "@fontsource/instrument-serif/400-italic.css";
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --muted-foreground: 0 0% 40%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 9%;
+    --border: 0 0% 88%;
+    --primary-vizra: 4 82% 55%;
+    --hero-subtitle: 0 0% 30%;
+    --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  html.dark {
     --background: 0 0% 4%;
     --foreground: 0 0% 100%;
     --muted-foreground: 0 0% 65%;
@@ -16,18 +31,23 @@
     --border: 0 0% 16%;
     --primary-vizra: 4 82% 55%;
     --hero-subtitle: 210 17% 95%;
-    --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   html {
-    color-scheme: dark;
     font-family: var(--font-sans);
-    background-color: #090909;
-    color: #ffffff;
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark {
+    background-color: #090909;
+    color: #ffffff;
+  }
+
+  html.light {
+    background-color: #fafafa;
+    color: #111111;
   }
 
   h1, h2, h3, .font-display {

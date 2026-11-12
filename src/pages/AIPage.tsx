@@ -279,8 +279,26 @@ export const AIPage: React.FC = () => {
     onSelectMode: handleSelectModeByIndex,
   });
 
-  // Check for initial prompt passed via explore/homepage and complete initial message hydration
+  // Check for initial prompt passed via explore/homepage, open requested conversation from History page, and load stored conversations
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem('omnia_conversations_v1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setConversations(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    const requestedConvId = sessionStorage.getItem('omnia_open_conversation_id');
+    if (requestedConvId) {
+      sessionStorage.removeItem('omnia_open_conversation_id');
+      setActiveConversationId(requestedConvId);
+    }
+
     const savedPrompt = sessionStorage.getItem('vizra_initial_prompt');
     if (savedPrompt) {
       sessionStorage.removeItem('vizra_initial_prompt');
@@ -299,6 +317,17 @@ export const AIPage: React.FC = () => {
       }
     };
   }, []);
+
+  // Save conversations to localStorage whenever updated
+  useEffect(() => {
+    if (conversations.length > 0) {
+      try {
+        localStorage.setItem('omnia_conversations_v1', JSON.stringify(conversations));
+      } catch {
+        // ignore
+      }
+    }
+  }, [conversations]);
 
   // Load stored projects on mount and sync with Firestore if authenticated
   useEffect(() => {

@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { LiquidGlassNavbar } from './ui/LiquidGlassNavbar';
 
 export interface PageLayoutProps {
   title: string;
   description: string;
   children: React.ReactNode;
   className?: string;
+  hideBottomNav?: boolean;
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -15,6 +17,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   description,
   children,
   className = '',
+  hideBottomNav = false,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,11 +64,12 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
 
   return (
     <div
-      className={`min-h-screen bg-[#090909] text-white font-inter selection:bg-[#eb3b2d] selection:text-white relative overflow-x-clip flex flex-col justify-between ${className}`}
+      className={`min-h-screen bg-neutral-950 dark:bg-[#090909] bg-neutral-50 text-neutral-900 dark:text-white font-inter selection:bg-[#eb3b2d] selection:text-white relative overflow-x-clip flex flex-col justify-between ${className}`}
     >
       <Navbar onLaunchOmnia={() => navigate('/ai')} />
-      <main className="flex-1 relative z-10">{children}</main>
+      <main className="flex-1 relative z-10 pb-16">{children}</main>
       <Footer />
+      {!hideBottomNav && <LiquidGlassNavbar />}
     </div>
   );
 };

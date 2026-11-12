@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
 import { NotificationCenterTrigger } from './ui/Toast';
+import { LiquidGlassToggle } from './ui/LiquidGlassToggle';
 
 export interface NavbarProps {
   onLaunchOmnia?: () => void;
@@ -261,8 +262,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
           </div>
         </div>
 
-        {/* Right Zone: Notifications, User Menu, Primary CTA & Mobile Toggle */}
+        {/* Right Zone: Theme Toggle, Notifications, User Menu, Primary CTA & Mobile Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
+          <LiquidGlassToggle size="sm" className="hidden sm:inline-flex" />
           <NotificationCenterTrigger />
           <UserMenu />
 

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import {
   CookieConsent,
@@ -22,6 +23,8 @@ import { DocsPage } from './pages/DocsPage';
 import { LegalPage } from './pages/LegalPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AIPage } from './pages/AIPage';
+import { HistoryPage } from './pages/HistoryPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { SeoDiagnosticPage } from './pages/SeoDiagnosticPage';
 import { WorkspaceDashboardPage } from './pages/WorkspaceDashboardPage';
 
@@ -33,8 +36,9 @@ export default function App() {
   const allowAnalytics = cookieConsent ? cookieConsent.analytics : false;
 
   return (
-    <AuthProvider>
-      <ToastProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
         <BrowserRouter>
           <Routes>
             {/* Public Multi-Page Website Routes */}
@@ -53,6 +57,8 @@ export default function App() {
 
             {/* Core Studio Application & Diagnostic Consoles */}
             <Route path="/ai" element={<AIPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/workspace" element={<WorkspaceDashboardPage />} />
             <Route path="/dashboard" element={<WorkspaceDashboardPage />} />
             <Route path="/seo-diagnostics" element={<SeoDiagnosticPage />} />
@@ -72,5 +78,6 @@ export default function App() {
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }

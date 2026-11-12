@@ -17,6 +17,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'Features Overview', to: '/features' },
       { label: 'Explore Showcase', to: '/explore' },
       { label: 'Omnia 1.0 AI Studio', to: '/ai' },
+      { label: 'Conversation History', to: '/history' },
       { label: 'Workspace Console', to: '/workspace' },
     ],
   },
@@ -34,7 +35,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     links: [
       { label: 'Documentation', to: '/docs' },
       { label: 'Developer API Reference', to: '/docs?section=api' },
-      { label: 'Project Context Guide', to: '/docs?section=workflows' },
+      { label: 'Application Settings', to: '/settings' },
       { label: 'SEO & Crawler Audit', to: '/seo-diagnostics' },
     ],
   },
