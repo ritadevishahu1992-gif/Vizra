@@ -298,6 +298,26 @@ export function ensurePublicOgImageExists(rootDir: string): string {
     fs.mkdirSync(publicDir, { recursive: true });
   }
   const targetPath = path.join(publicDir, 'og-image.png');
+  if (fs.existsSync(targetPath)) {
+    try {
+      const existing = fs.readFileSync(targetPath);
+      const isPng =
+        existing.length > 24 &&
+        existing[0] === 0x89 &&
+        existing[1] === 0x50 &&
+        existing[2] === 0x4e &&
+        existing[3] === 0x47;
+      if (isPng) {
+        const w = existing.readUInt32BE(16);
+        const h = existing.readUInt32BE(20);
+        if (w === WIDTH && h === HEIGHT) {
+          return targetPath;
+        }
+      }
+    } catch {
+      // Fall through to regenerate if unreadable
+    }
+  }
   const pngBuffer = generateVizraOgImageBuffer();
   fs.writeFileSync(targetPath, pngBuffer);
   return targetPath;

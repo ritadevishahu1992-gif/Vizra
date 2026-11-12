@@ -67,25 +67,26 @@ export interface RouteSeoPayload {
   httpStatus: 200 | 301 | 404;
   redirectTo?: string;
   isIndexable: boolean;
+  includeSocialPreview: boolean;
   robots: 'index, follow' | 'noindex, nofollow';
   xRobotsTag: 'index, follow' | 'noindex, nofollow';
   title: string;
   description: string;
-  ogTitle: string;
-  ogDescription: string;
-  ogType: 'website' | 'article';
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogType: 'website' | 'article' | null;
   ogUrl: string | null;
-  ogImage: string;
-  ogImageWidth: string;
-  ogImageHeight: string;
-  ogImageAlt: string;
-  ogSiteName: string;
-  ogLocale: string;
-  twitterCard: 'summary_large_image';
-  twitterTitle: string;
-  twitterDescription: string;
-  twitterImage: string;
-  twitterImageAlt: string;
+  ogImage: string | null;
+  ogImageWidth: string | null;
+  ogImageHeight: string | null;
+  ogImageAlt: string | null;
+  ogSiteName: string | null;
+  ogLocale: string | null;
+  twitterCard: 'summary_large_image' | null;
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+  twitterImage: string | null;
+  twitterImageAlt: string | null;
   jsonLd: Record<string, unknown>[];
   prehydration: RoutePrehydrationContent;
 }
@@ -654,7 +655,7 @@ export function resolveRouteSeoPayload(
   const matchedDef = ROUTE_DEFINITIONS[effectivePath];
 
   if (!matchedDef) {
-    // Unknown 404 Route — must never receive a self-referencing or public canonical
+    // Unknown 404 Route — must never receive a self-referencing canonical or misleading homepage social preview
     const title = overrides?.title || NOT_FOUND_DEFINITION.title;
     const description =
       overrides?.description || NOT_FOUND_DEFINITION.description;
@@ -665,25 +666,26 @@ export function resolveRouteSeoPayload(
       canonicalUrl: null,
       httpStatus: 404,
       isIndexable: false,
+      includeSocialPreview: false,
       robots: 'noindex, nofollow',
       xRobotsTag: 'noindex, nofollow',
       title,
       description,
-      ogTitle: title,
-      ogDescription: description,
-      ogType: 'website',
+      ogTitle: null,
+      ogDescription: null,
+      ogType: null,
       ogUrl: null,
-      ogImage: DEFAULT_OG_IMAGE,
-      ogImageWidth: OG_IMAGE_WIDTH,
-      ogImageHeight: OG_IMAGE_HEIGHT,
-      ogImageAlt: OG_IMAGE_ALT,
-      ogSiteName: SITE_NAME,
-      ogLocale: 'en_US',
-      twitterCard: 'summary_large_image',
-      twitterTitle: title,
-      twitterDescription: description,
-      twitterImage: DEFAULT_OG_IMAGE,
-      twitterImageAlt: OG_IMAGE_ALT,
+      ogImage: null,
+      ogImageWidth: null,
+      ogImageHeight: null,
+      ogImageAlt: null,
+      ogSiteName: null,
+      ogLocale: null,
+      twitterCard: null,
+      twitterTitle: null,
+      twitterDescription: null,
+      twitterImage: null,
+      twitterImageAlt: null,
       jsonLd: [],
       prehydration: NOT_FOUND_DEFINITION.prehydration,
     };
@@ -707,6 +709,9 @@ export function resolveRouteSeoPayload(
       ? `${SITE_ORIGIN}${resolvedCanonicalPath === '/' ? '/' : resolvedCanonicalPath}`
       : null;
 
+  // Exclude private, utility, diagnostic, and non-indexable routes from public social preview cards
+  const includeSocialPreview = isIndexable && canonicalUrl !== null;
+
   return {
     requestedPath: normalizedPath,
     canonicalPath: resolvedCanonicalPath,
@@ -714,25 +719,26 @@ export function resolveRouteSeoPayload(
     httpStatus: redirectTarget ? 301 : 200,
     redirectTo: redirectTarget,
     isIndexable,
+    includeSocialPreview,
     robots,
     xRobotsTag: robots,
     title,
     description,
-    ogTitle: title,
-    ogDescription: description,
-    ogType: matchedDef.ogType,
-    ogUrl: canonicalUrl,
-    ogImage: DEFAULT_OG_IMAGE,
-    ogImageWidth: OG_IMAGE_WIDTH,
-    ogImageHeight: OG_IMAGE_HEIGHT,
-    ogImageAlt: OG_IMAGE_ALT,
-    ogSiteName: SITE_NAME,
-    ogLocale: 'en_US',
-    twitterCard: 'summary_large_image',
-    twitterTitle: title,
-    twitterDescription: description,
-    twitterImage: DEFAULT_OG_IMAGE,
-    twitterImageAlt: OG_IMAGE_ALT,
+    ogTitle: includeSocialPreview ? title : null,
+    ogDescription: includeSocialPreview ? description : null,
+    ogType: includeSocialPreview ? matchedDef.ogType : null,
+    ogUrl: includeSocialPreview ? canonicalUrl : null,
+    ogImage: includeSocialPreview ? DEFAULT_OG_IMAGE : null,
+    ogImageWidth: includeSocialPreview ? OG_IMAGE_WIDTH : null,
+    ogImageHeight: includeSocialPreview ? OG_IMAGE_HEIGHT : null,
+    ogImageAlt: includeSocialPreview ? OG_IMAGE_ALT : null,
+    ogSiteName: includeSocialPreview ? SITE_NAME : null,
+    ogLocale: includeSocialPreview ? 'en_US' : null,
+    twitterCard: includeSocialPreview ? 'summary_large_image' : null,
+    twitterTitle: includeSocialPreview ? title : null,
+    twitterDescription: includeSocialPreview ? description : null,
+    twitterImage: includeSocialPreview ? DEFAULT_OG_IMAGE : null,
+    twitterImageAlt: includeSocialPreview ? OG_IMAGE_ALT : null,
     jsonLd: isIndexable ? matchedDef.jsonLd : [],
     prehydration: matchedDef.prehydration,
   };
@@ -777,7 +783,7 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
   upsertMeta('name', 'robots', payload.robots);
   upsertMeta('name', 'googlebot', payload.robots);
 
-  // Open Graph tags
+  // Open Graph tags (automatically removed if payload is a private/utility or 404 route)
   upsertMeta('property', 'og:title', payload.ogTitle);
   upsertMeta('property', 'og:description', payload.ogDescription);
   upsertMeta('property', 'og:type', payload.ogType);
@@ -789,7 +795,7 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
   upsertMeta('property', 'og:site_name', payload.ogSiteName);
   upsertMeta('property', 'og:locale', payload.ogLocale);
 
-  // Twitter / X Card tags
+  // Twitter / X Card tags (automatically removed if payload is a private/utility or 404 route)
   upsertMeta('name', 'twitter:card', payload.twitterCard);
   upsertMeta('name', 'twitter:title', payload.twitterTitle);
   upsertMeta('name', 'twitter:description', payload.twitterDescription);
@@ -869,20 +875,44 @@ export function injectSeoIntoHtml(
   const safeTitle = escapeHtmlText(payload.title);
   const safeDesc = escapeHtmlAttr(payload.description);
   const safeRobots = escapeHtmlAttr(payload.robots);
-  const safeOgTitle = escapeHtmlAttr(payload.ogTitle);
-  const safeOgDesc = escapeHtmlAttr(payload.ogDescription);
-  const safeOgType = escapeHtmlAttr(payload.ogType);
-  const safeOgImage = escapeHtmlAttr(payload.ogImage);
-  const safeOgImageAlt = escapeHtmlAttr(payload.ogImageAlt);
-  const safeSiteName = escapeHtmlAttr(payload.ogSiteName);
 
   const canonicalTag = payload.canonicalUrl
     ? `\n    <link rel="canonical" href="${escapeHtmlAttr(payload.canonicalUrl)}" />`
     : '';
 
-  const ogUrlTag = payload.ogUrl
-    ? `\n    <meta property="og:url" content="${escapeHtmlAttr(payload.ogUrl)}" />`
-    : '';
+  const socialTagsBlock =
+    payload.includeSocialPreview &&
+    payload.ogTitle &&
+    payload.ogDescription &&
+    payload.ogType &&
+    payload.ogUrl &&
+    payload.ogImage &&
+    payload.ogImageWidth &&
+    payload.ogImageHeight &&
+    payload.ogImageAlt &&
+    payload.ogSiteName &&
+    payload.ogLocale &&
+    payload.twitterCard &&
+    payload.twitterTitle &&
+    payload.twitterDescription &&
+    payload.twitterImage &&
+    payload.twitterImageAlt
+      ? `\n    <meta property="og:title" content="${escapeHtmlAttr(payload.ogTitle)}" />
+    <meta property="og:description" content="${escapeHtmlAttr(payload.ogDescription)}" />
+    <meta property="og:type" content="${escapeHtmlAttr(payload.ogType)}" />
+    <meta property="og:url" content="${escapeHtmlAttr(payload.ogUrl)}" />
+    <meta property="og:image" content="${escapeHtmlAttr(payload.ogImage)}" />
+    <meta property="og:image:width" content="${escapeHtmlAttr(payload.ogImageWidth)}" />
+    <meta property="og:image:height" content="${escapeHtmlAttr(payload.ogImageHeight)}" />
+    <meta property="og:image:alt" content="${escapeHtmlAttr(payload.ogImageAlt)}" />
+    <meta property="og:site_name" content="${escapeHtmlAttr(payload.ogSiteName)}" />
+    <meta property="og:locale" content="${escapeHtmlAttr(payload.ogLocale)}" />
+    <meta name="twitter:card" content="${escapeHtmlAttr(payload.twitterCard)}" />
+    <meta name="twitter:title" content="${escapeHtmlAttr(payload.twitterTitle)}" />
+    <meta name="twitter:description" content="${escapeHtmlAttr(payload.twitterDescription)}" />
+    <meta name="twitter:image" content="${escapeHtmlAttr(payload.twitterImage)}" />
+    <meta name="twitter:image:alt" content="${escapeHtmlAttr(payload.twitterImageAlt)}" />`
+      : '';
 
   const jsonLdTag =
     payload.jsonLd && payload.jsonLd.length > 0
@@ -895,21 +925,7 @@ export function injectSeoIntoHtml(
     <title>${safeTitle}</title>
     <meta name="description" content="${safeDesc}" />
     <meta name="robots" content="${safeRobots}" />
-    <meta name="googlebot" content="${safeRobots}" />${canonicalTag}
-    <meta property="og:title" content="${safeOgTitle}" />
-    <meta property="og:description" content="${safeOgDesc}" />
-    <meta property="og:type" content="${safeOgType}" />${ogUrlTag}
-    <meta property="og:image" content="${safeOgImage}" />
-    <meta property="og:image:width" content="${payload.ogImageWidth}" />
-    <meta property="og:image:height" content="${payload.ogImageHeight}" />
-    <meta property="og:image:alt" content="${safeOgImageAlt}" />
-    <meta property="og:site_name" content="${safeSiteName}" />
-    <meta property="og:locale" content="${payload.ogLocale}" />
-    <meta name="twitter:card" content="${payload.twitterCard}" />
-    <meta name="twitter:title" content="${safeOgTitle}" />
-    <meta name="twitter:description" content="${safeOgDesc}" />
-    <meta name="twitter:image" content="${safeOgImage}" />
-    <meta name="twitter:image:alt" content="${safeOgImageAlt}" />${jsonLdTag}
+    <meta name="googlebot" content="${safeRobots}" />${canonicalTag}${socialTagsBlock}${jsonLdTag}
     <!-- VIZRA_SEO_HEAD_END -->`;
 
   const markerPattern =

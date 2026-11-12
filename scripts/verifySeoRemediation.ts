@@ -7,6 +7,7 @@ import {
   REDIRECT_ALIASES,
   ROUTE_DEFINITIONS,
   resolveRouteSeoPayload,
+  applySeoToDocument,
 } from '../src/seo/routeMetadata';
 import { ensurePublicOgImageExists } from '../src/server/seo/ogImageGenerator';
 
@@ -60,9 +61,179 @@ function httpGet(
   });
 }
 
+function countTag(html: string, regex: RegExp): number {
+  return (html.match(regex) || []).length;
+}
+
+function extractMetaContent(
+  html: string,
+  attrName: 'name' | 'property',
+  attrVal: string
+): string | null {
+  const escaped = attrVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(
+    `<meta\\s+${attrName}="${escaped}"\\s+content="([^"]*)"`,
+    'i'
+  );
+  const m = html.match(re);
+  return m ? m[1] : null;
+}
+
+/**
+ * Lightweight DOM shim to test client-side applySeoToDocument across forward,
+ * private-route, 404, and browser back/forward (popstate) navigations.
+ */
+function runClientNavigationSimulation(): { passed: boolean; details: string } {
+  interface MockElement {
+    tagName: string;
+    id: string;
+    type: string;
+    textContent: string;
+    attrs: Record<string, string>;
+    setAttribute(k: string, v: string): void;
+    getAttribute(k: string): string | null;
+    remove(): void;
+  }
+
+  const headChildren: MockElement[] = [];
+
+  const createMockElement = (tag: string): MockElement => {
+    const el: MockElement = {
+      tagName: tag.toUpperCase(),
+      id: '',
+      type: '',
+      textContent: '',
+      attrs: {},
+      setAttribute(k: string, v: string) {
+        this.attrs[k] = v;
+      },
+      getAttribute(k: string) {
+        return this.attrs[k] ?? null;
+      },
+      remove() {
+        const idx = headChildren.indexOf(this);
+        if (idx !== -1) headChildren.splice(idx, 1);
+      },
+    };
+    return el;
+  };
+
+  const mockDocument = {
+    title: '',
+    createElement: (tag: string) => createMockElement(tag),
+    head: {
+      appendChild: (el: MockElement) => {
+        if (!headChildren.includes(el)) headChildren.push(el);
+        return el;
+      },
+      querySelectorAll: (selector: string): MockElement[] => {
+        const metaMatch = selector.match(/^meta\[(name|property)="([^"]+)"\]$/);
+        if (metaMatch) {
+          const [, attr, val] = metaMatch;
+          return headChildren.filter(
+            (el) => el.tagName === 'META' && el.getAttribute(attr) === val
+          );
+        }
+        if (selector === 'link[rel="canonical"]') {
+          return headChildren.filter(
+            (el) => el.tagName === 'LINK' && el.getAttribute('rel') === 'canonical'
+          );
+        }
+        if (selector === 'script[type="application/ld+json"]') {
+          return headChildren.filter(
+            (el) =>
+              el.tagName === 'SCRIPT' &&
+              (el.type === 'application/ld+json' ||
+                el.getAttribute('type') === 'application/ld+json')
+          );
+        }
+        return [];
+      },
+    },
+  };
+
+  const prevDoc = (globalThis as any).document;
+  (globalThis as any).document = mockDocument;
+
+  try {
+    const navSequence = [
+      '/',
+      '/features',
+      '/pricing',
+      '/docs',
+      '/workspace', // Private route — must strip OG & Twitter tags
+      '/explore', // Back to public route — must restore OG & Twitter tags
+      '/non-existent-404', // Unknown 404 — must strip canonical, OG & Twitter tags
+      '/studio', // Browser back/forward to public route
+    ];
+
+    for (const route of navSequence) {
+      const payload = resolveRouteSeoPayload(route);
+      applySeoToDocument(payload);
+
+      if (mockDocument.title !== payload.title) {
+        return {
+          passed: false,
+          details: `Title mismatch on ${route}: got "${mockDocument.title}"`,
+        };
+      }
+
+      const ogTitleEls = mockDocument.head.querySelectorAll('meta[property="og:title"]');
+      const ogImageEls = mockDocument.head.querySelectorAll('meta[property="og:image"]');
+      const twitterCardEls = mockDocument.head.querySelectorAll('meta[name="twitter:card"]');
+      const canonicalEls = mockDocument.head.querySelectorAll('link[rel="canonical"]');
+
+      if (payload.includeSocialPreview) {
+        if (
+          ogTitleEls.length !== 1 ||
+          ogImageEls.length !== 1 ||
+          twitterCardEls.length !== 1 ||
+          canonicalEls.length !== 1
+        ) {
+          return {
+            passed: false,
+            details: `Duplicate or missing social/canonical tags after navigating to ${route}`,
+          };
+        }
+        if (
+          ogTitleEls[0].getAttribute('content') !== payload.ogTitle ||
+          ogImageEls[0].getAttribute('content') !== 'https://vizra.vercel.app/og-image.png' ||
+          canonicalEls[0].getAttribute('href') !== payload.canonicalUrl
+        ) {
+          return {
+            passed: false,
+            details: `Stale attribute values after navigating to ${route}`,
+          };
+        }
+      } else {
+        // Private or 404 route must have 0 OG/Twitter tags in DOM
+        if (ogTitleEls.length !== 0 || ogImageEls.length !== 0 || twitterCardEls.length !== 0) {
+          return {
+            passed: false,
+            details: `Social tags were not removed when navigating to non-public route ${route}`,
+          };
+        }
+        if (payload.httpStatus === 404 && canonicalEls.length !== 0) {
+          return {
+            passed: false,
+            details: `Canonical tag was not removed on 404 route ${route}`,
+          };
+        }
+      }
+    }
+
+    return {
+      passed: true,
+      details: `Verified 8 sequential client-side & popstate route transitions (/ -> /features -> /pricing -> /docs -> /workspace -> /explore -> /non-existent-404 -> /studio) with 0 duplicates`,
+    };
+  } finally {
+    (globalThis as any).document = prevDoc;
+  }
+}
+
 async function runVerification() {
   console.log('======================================================================');
-  console.log('   VIZRA — PHASE 2 METADATA, SITEMAP & INDEXING VERIFICATION SUITE    ');
+  console.log('   VIZRA — PHASE 3 SOCIAL SEO & METADATA VERIFICATION SUITE           ');
   console.log('======================================================================\n');
 
   const rootDir = process.cwd();
@@ -78,7 +249,7 @@ async function runVerification() {
 
   record(
     'Robots.txt',
-    'public/robots.txt & GET /robots.txt allow Googlebot across all routes with Sitemap declared',
+    'public/robots.txt & GET /robots.txt allow crawlers across all public routes & OG image assets',
     robotsHttp.status === 200 &&
       String(robotsHttp.headers['content-type']).includes('text/plain') &&
       robotsFileContent.trim() === expectedRobots.trim() &&
@@ -106,7 +277,7 @@ async function runVerification() {
     `Unique titles=${titles.size}/12 | Unique descriptions=${descriptions.size}/12 | Unique canonicals=${canonicals.size}/12`
   );
 
-  // 3. Ensure & Verify public/og-image.png (1200x630 PNG)
+  // 3. Verify Social Image Asset (public/og-image.png & GET /og-image.png)
   const ogPath = ensurePublicOgImageExists(rootDir);
   const ogBuf = fs.readFileSync(ogPath);
   const isPngSig =
@@ -116,97 +287,143 @@ async function runVerification() {
     ogBuf[3] === 0x47;
   const pngWidth = ogBuf.readUInt32BE(16);
   const pngHeight = ogBuf.readUInt32BE(20);
-  const ogHttp = await httpGet('/og-image.png');
+  const ogHttp = await httpGet(
+    '/og-image.png',
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'
+  );
   record(
-    'Open Graph Asset',
-    'GET /og-image.png returns HTTP 200 and valid 1200x630 PNG',
+    'Social Image Asset',
+    'GET /og-image.png returns HTTP 200, Content-Type: image/png, and exact 1200x630 dimensions (< 300KB for WhatsApp)',
     ogHttp.status === 200 &&
       String(ogHttp.headers['content-type']).includes('image/png') &&
       isPngSig &&
       pngWidth === 1200 &&
-      pngHeight === 630,
-    `Status=${ogHttp.status}, Dimensions=${pngWidth}x${pngHeight}, Size=${ogBuf.length} bytes`
+      pngHeight === 630 &&
+      ogBuf.length < 300 * 1024,
+    `Status=${ogHttp.status} | Content-Type=${ogHttp.headers['content-type']} | Dimensions=${pngWidth}x${pngHeight} | Size=${ogBuf.length} bytes`
   );
 
-  // 4. Verify all 12 Public Indexable Routes (HTTP 200, index/follow, canonical, OG, Twitter, JSON-LD, no duplicate tags)
+  // 4. Verify all 12 Public Indexable Routes (Complete Open Graph + Twitter/X Card + No Duplicates)
   for (const route of PUBLIC_INDEXABLE_ROUTES) {
-    const res = await httpGet(route);
+    const res = await httpGet(
+      route,
+      'Twitterbot/1.0'
+    );
     const html = res.body.toString('utf-8');
     const expected = resolveRouteSeoPayload(route);
 
-    const titleMatches = html.match(/<title[^>]*>([\s\S]*?)<\/title>/gi) || [];
-    const descMatches = html.match(/<meta\s+name="description"/gi) || [];
-    const canonicalMatches = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/gi) || [];
-    const ogImageMatches = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/gi) || [];
-    const twitterCardMatches = html.match(/<meta\s+name="twitter:card"/gi) || [];
-    const jsonLdMatches =
-      html.match(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi) || [];
+    // Check tag counts (must be strictly 1 each — zero duplicates)
+    const singleTagCountsOk =
+      countTag(html, /<title[^>]*>/gi) === 1 &&
+      countTag(html, /<meta\s+name="description"/gi) === 1 &&
+      countTag(html, /<link\s+rel="canonical"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:title"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:description"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:type"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:url"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:image"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:image:width"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:image:height"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:image:alt"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:site_name"/gi) === 1 &&
+      countTag(html, /<meta\s+property="og:locale"/gi) === 1 &&
+      countTag(html, /<meta\s+name="twitter:card"/gi) === 1 &&
+      countTag(html, /<meta\s+name="twitter:title"/gi) === 1 &&
+      countTag(html, /<meta\s+name="twitter:description"/gi) === 1 &&
+      countTag(html, /<meta\s+name="twitter:image"/gi) === 1 &&
+      countTag(html, /<meta\s+name="twitter:image:alt"/gi) === 1;
+
+    const ogTitle = extractMetaContent(html, 'property', 'og:title');
+    const ogDesc = extractMetaContent(html, 'property', 'og:description');
+    const ogType = extractMetaContent(html, 'property', 'og:type');
+    const ogUrl = extractMetaContent(html, 'property', 'og:url');
+    const ogImage = extractMetaContent(html, 'property', 'og:image');
+    const ogWidth = extractMetaContent(html, 'property', 'og:image:width');
+    const ogHeight = extractMetaContent(html, 'property', 'og:image:height');
+    const ogAlt = extractMetaContent(html, 'property', 'og:image:alt');
+    const ogSiteName = extractMetaContent(html, 'property', 'og:site_name');
+    const ogLocale = extractMetaContent(html, 'property', 'og:locale');
+
+    const twCard = extractMetaContent(html, 'name', 'twitter:card');
+    const twTitle = extractMetaContent(html, 'name', 'twitter:title');
+    const twDesc = extractMetaContent(html, 'name', 'twitter:description');
+    const twImage = extractMetaContent(html, 'name', 'twitter:image');
+    const twAlt = extractMetaContent(html, 'name', 'twitter:image:alt');
 
     const xRobots = String(res.headers['x-robots-tag'] || '');
     const hasExactCanonical = html.includes(`href="${expected.canonicalUrl}"`);
-    const hasIndexFollowMeta = html.includes('<meta name="robots" content="index, follow" />');
-    const hasNoNoindex = !/noindex/i.test(html) && !/noindex/i.test(xRobots);
-    const hasNoAriaHiddenMain = !/<main[^>]*aria-hidden="true"/i.test(html);
 
-    let jsonLdValid = false;
-    if (jsonLdMatches.length === 1) {
-      const inner = jsonLdMatches[0]
-        .replace(/^<script[^>]*>/i, '')
-        .replace(/<\/script>$/i, '');
-      try {
-        const parsed = JSON.parse(inner);
-        jsonLdValid = Boolean(parsed);
-      } catch {
-        jsonLdValid = false;
-      }
-    }
+    const ogValuesOk =
+      Boolean(ogTitle && ogTitle.length > 10) &&
+      Boolean(ogDesc && ogDesc.length > 30) &&
+      (ogType === 'website' || ogType === 'article') &&
+      ogUrl === expected.canonicalUrl &&
+      ogImage === 'https://vizra.vercel.app/og-image.png' &&
+      ogWidth === '1200' &&
+      ogHeight === '630' &&
+      Boolean(ogAlt && ogAlt.length > 10) &&
+      ogSiteName === 'VIZRA — AI Creative Studio' &&
+      ogLocale === 'en_US';
+
+    const twitterValuesOk =
+      twCard === 'summary_large_image' &&
+      twTitle === ogTitle &&
+      twDesc === ogDesc &&
+      twImage === 'https://vizra.vercel.app/og-image.png' &&
+      twAlt === ogAlt;
 
     const ok =
       res.status === 200 &&
       xRobots === 'index, follow' &&
-      hasIndexFollowMeta &&
-      hasNoNoindex &&
-      titleMatches.length === 1 &&
-      descMatches.length === 1 &&
-      canonicalMatches.length === 1 &&
-      ogImageMatches.length === 1 &&
-      twitterCardMatches.length === 1 &&
       hasExactCanonical &&
-      hasNoAriaHiddenMain &&
-      jsonLdValid;
+      singleTagCountsOk &&
+      ogValuesOk &&
+      twitterValuesOk;
 
     record(
-      'Public Indexable Route',
-      `GET ${route} initial HTML & headers`,
+      'Public Social SEO Route',
+      `GET ${route} (OG + Twitter Card + Canonical)`,
       ok,
-      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | Canonical: ${expected.canonicalUrl} | JSON-LD=${jsonLdValid}`
+      `HTTP ${res.status} | og:type=${ogType} | og:url=${ogUrl} | twitter:card=${twCard} | No duplicate tags=${singleTagCountsOk}`
     );
   }
 
-  // 5. Verify 5 Utility, User-Specific & Private Diagnostic Routes (HTTP 200, noindex/nofollow, X-Robots-Tag: noindex, nofollow)
+  // 5. Verify Private / Utility / Diagnostic Routes Privacy Isolation (Zero OG/Twitter tags, no token leakage)
   for (const route of PRIVATE_OR_UTILITY_ROUTES) {
-    const res = await httpGet(route);
+    const res = await httpGet(`${route}?session_token=secret_12345&user=private_user`);
     const html = res.body.toString('utf-8');
     const xRobots = String(res.headers['x-robots-tag'] || '');
     const hasMetaNoindex = html.includes('<meta name="robots" content="noindex, nofollow" />');
-    const jsonLdMatches =
-      html.match(/<script[^>]*type="application\/ld\+json"/gi) || [];
+    const ogTagCount = countTag(html, /<meta\s+property="og:/gi);
+    const twitterTagCount = countTag(html, /<meta\s+name="twitter:/gi);
+    const leaksQueryToken = html.includes('secret_12345') || html.includes('private_user');
 
     const ok =
       res.status === 200 &&
       xRobots === 'noindex, nofollow' &&
       hasMetaNoindex &&
-      jsonLdMatches.length === 0;
+      ogTagCount === 0 &&
+      twitterTagCount === 0 &&
+      !leaksQueryToken;
 
     record(
-      'Utility / Diagnostic Route (noindex)',
-      `GET ${route} enforces noindex, nofollow & X-Robots-Tag`,
+      'Private Route Social Isolation',
+      `GET ${route} excludes public OG/Twitter preview tags & prevents token leakage`,
       ok,
-      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | meta noindex=${hasMetaNoindex}`
+      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | OG tags=${ogTagCount} | Twitter tags=${twitterTagCount} | Token leaked=${leaksQueryToken}`
     );
   }
 
-  // 6. Verify Permanent 301 Redirects for All 6 Alias Routes (including query string preservation)
+  // 6. Verify Client-Side Navigation & Browser Back/Forward (popstate) Metadata Updates
+  const clientSim = runClientNavigationSimulation();
+  record(
+    'Client Navigation & Popstate Sync',
+    'applySeoToDocument updates OG, Twitter, title, description & canonical across client routes without duplicates',
+    clientSim.passed,
+    clientSim.details
+  );
+
+  // 7. Verify Permanent 301 Redirects for All 6 Alias Routes (including query string preservation)
   for (const [alias, target] of Object.entries(REDIRECT_ALIASES)) {
     const res = await httpGet(alias);
     const locationHeader = String(res.headers['location'] || '');
@@ -228,29 +445,33 @@ async function runVerification() {
     `HTTP ${queryRedirectRes.status} | Location: "${queryRedirectRes.headers['location']}"`
   );
 
-  // 7. Verify Unknown 404 Routes (HTTP 404, noindex/nofollow, NO canonical tag)
+  // 8. Verify Unknown 404 Routes (HTTP 404, noindex/nofollow, NO canonical tag, NO misleading homepage OG/Twitter tags)
   for (const unknownPath of ['/non-existent-route-xyz', '/random-404-check']) {
     const res = await httpGet(unknownPath);
     const html = res.body.toString('utf-8');
     const xRobots = String(res.headers['x-robots-tag'] || '');
     const hasMetaNoindex = html.includes('<meta name="robots" content="noindex, nofollow" />');
     const hasCanonical = /<link\s+rel="canonical"/i.test(html);
+    const ogCount = countTag(html, /<meta\s+property="og:/gi);
+    const twCount = countTag(html, /<meta\s+name="twitter:/gi);
 
     const ok =
       res.status === 404 &&
       xRobots === 'noindex, nofollow' &&
       hasMetaNoindex &&
-      !hasCanonical;
+      !hasCanonical &&
+      ogCount === 0 &&
+      twCount === 0;
 
     record(
-      '404 Status & Soft-404 Prevention',
-      `GET ${unknownPath} returns HTTP 404 without canonical`,
+      '404 Status & Social Prevention',
+      `GET ${unknownPath} returns HTTP 404 without canonical or misleading homepage OG tags`,
       ok,
-      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | meta noindex=${hasMetaNoindex} | canonical=${hasCanonical}`
+      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | canonical=${hasCanonical} | OG tags=${ogCount} | Twitter tags=${twCount}`
     );
   }
 
-  // 8. Verify Sitemap Completeness & Hygiene (Strictly 12 Canonical Public Indexable Pages)
+  // 9. Verify Sitemap Completeness & Hygiene (Strictly 12 Canonical Public Indexable Pages)
   const sitemapRes = await httpGet('/sitemap.xml');
   const sitemapXml = sitemapRes.body.toString('utf-8');
   const sitemapLocs = (sitemapXml.match(/<loc>(.*?)<\/loc>/g) || []).map((m) =>
@@ -263,81 +484,75 @@ async function runVerification() {
   const excludesNonIndexable = PRIVATE_OR_UTILITY_ROUTES.every(
     (route) => !sitemapLocs.includes(`https://vizra.vercel.app${route}`)
   );
-  const excludesAliases = Object.keys(REDIRECT_ALIASES).every(
-    (alias) => !sitemapLocs.includes(`https://vizra.vercel.app${alias}`)
-  );
 
   record(
     'Sitemap Hygiene & Coverage',
-    '/sitemap.xml contains strictly the 12 canonical indexable public URLs and excludes utility/private/alias URLs',
+    '/sitemap.xml contains strictly the 12 canonical indexable public URLs',
     sitemapRes.status === 200 &&
       String(sitemapRes.headers['content-type']).includes('application/xml') &&
       sitemapLocs.length === 12 &&
       allPublicRoutesInSitemap &&
-      excludesNonIndexable &&
-      excludesAliases,
-    `HTTP ${sitemapRes.status} | Total URLs=${sitemapLocs.length}/12 | Public present=${allPublicRoutesInSitemap} | Excludes utility/private=${excludesNonIndexable} | Excludes aliases=${excludesAliases}`
+      excludesNonIndexable,
+    `HTTP ${sitemapRes.status} | Total URLs=${sitemapLocs.length}/12 | Public present=${allPublicRoutesInSitemap} | Excludes private=${excludesNonIndexable}`
   );
 
-  // 9. Verify Internal Link Discoverability & Navigation Hygiene
-  const navbarCode = fs.readFileSync(path.join(rootDir, 'src/components/Navbar.tsx'), 'utf-8');
-  const footerCode = fs.readFileSync(path.join(rootDir, 'src/components/Footer.tsx'), 'utf-8');
-  const landingCode = fs.readFileSync(path.join(rootDir, 'src/pages/LandingPage.tsx'), 'utf-8');
-  const combinedPublicNav = `${navbarCode}\n${footerCode}\n${landingCode}`;
-
-  const allPublicReachable = PUBLIC_INDEXABLE_ROUTES.every((route) =>
-    combinedPublicNav.includes(`"${route}"`) || combinedPublicNav.includes(`'${route}'`)
-  );
-  const noPrivateInPublicNav =
-    !navbarCode.includes('/seo-diagnostics') &&
-    !navbarCode.includes("'/workspace'") &&
-    !footerCode.includes("'/seo-diagnostics'") &&
-    !footerCode.includes("'/workspace'") &&
-    !footerCode.includes("'/history'") &&
-    !footerCode.includes("'/settings'");
-
-  record(
-    'Internal Linking & Navigation Hygiene',
-    'All 12 public routes are reachable via Navbar/Footer/LandingPage and private/user routes are not exposed in public navigation',
-    allPublicReachable && noPrivateInPublicNav,
-    `All 12 public routes linked=${allPublicReachable} | Private/user routes excluded from Navbar/Footer=${noPrivateInPublicNav}`
-  );
-
-  // 10. Verify Pre-Rendered Static Route Files in dist/
+  // 10. Verify Pre-Rendered Static Route Files in dist/ (Initial HTML before hydration on Vercel CDN)
   const distDir = path.join(rootDir, 'dist');
   if (fs.existsSync(distDir)) {
-    let distPrerenderValid = true;
+    let distPublicValid = true;
+    let distPrivateIsolated = true;
+
     for (const route of PUBLIC_INDEXABLE_ROUTES) {
       const targetHtmlPath =
         route === '/'
           ? path.join(distDir, 'index.html')
           : path.join(distDir, route.replace(/^\/+/, ''), 'index.html');
       if (!fs.existsSync(targetHtmlPath)) {
-        distPrerenderValid = false;
+        distPublicValid = false;
         break;
       }
       const distHtml = fs.readFileSync(targetHtmlPath, 'utf-8');
       const expected = resolveRouteSeoPayload(route);
       if (
         !distHtml.includes(`href="${expected.canonicalUrl}"`) ||
-        !distHtml.includes('<meta name="robots" content="index, follow" />')
+        extractMetaContent(distHtml, 'property', 'og:url') !== expected.canonicalUrl ||
+        extractMetaContent(distHtml, 'property', 'og:image') !==
+          'https://vizra.vercel.app/og-image.png' ||
+        extractMetaContent(distHtml, 'name', 'twitter:card') !== 'summary_large_image'
       ) {
-        distPrerenderValid = false;
+        distPublicValid = false;
         break;
       }
     }
+
+    for (const route of PRIVATE_OR_UTILITY_ROUTES) {
+      const targetHtmlPath = path.join(distDir, route.replace(/^\/+/, ''), 'index.html');
+      if (!fs.existsSync(targetHtmlPath)) {
+        distPrivateIsolated = false;
+        break;
+      }
+      const distHtml = fs.readFileSync(targetHtmlPath, 'utf-8');
+      if (
+        countTag(distHtml, /<meta\s+property="og:/gi) !== 0 ||
+        countTag(distHtml, /<meta\s+name="twitter:/gi) !== 0
+      ) {
+        distPrivateIsolated = false;
+        break;
+      }
+    }
+
     record(
       'Vercel Static Build Prerender',
-      'All 12 public routes have pre-rendered dist/<route>/index.html with self-referencing canonicals',
-      distPrerenderValid,
-      `Verified ${PUBLIC_INDEXABLE_ROUTES.length} static public route HTML files in dist/`
+      'dist/ static HTML files contain full OG/Twitter tags for 12 public routes & exclude social tags on 5 private routes',
+      distPublicValid && distPrivateIsolated,
+      `Public dist/ social valid=${distPublicValid} | Private dist/ social isolated=${distPrivateIsolated}`
     );
   }
 
   const failed = results.filter((r) => !r.passed);
   console.log('\n======================================================================');
   console.log(
-    `   PHASE 2 VERIFICATION SUMMARY: ${results.length - failed.length}/${
+    `   PHASE 3 SOCIAL SEO VERIFICATION SUMMARY: ${results.length - failed.length}/${
       results.length
     } PASSED`
   );

@@ -61,6 +61,15 @@ const RouteMetadataSync: React.FC = () => {
   useEffect(() => {
     applySeoToDocument(resolveRouteSeoPayload(location.pathname));
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      applySeoToDocument(resolveRouteSeoPayload(window.location.pathname));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   return null;
 };
 
