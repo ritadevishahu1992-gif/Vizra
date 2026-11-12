@@ -1,16 +1,30 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { LiquidGlassPill } from './LiquidGlassPill';
-import { PrimaryCTA } from './PrimaryCTA';
+import { HeroCTA } from './HeroCTA';
 import { OmniaPreview } from './OmniaPreview';
+import { HeroBackground } from './HeroBackground';
 
 interface HeroSectionProps {
   onExplore: () => void;
   onLaunchOmnia?: () => void;
+  /** Optional looping video URL to replace/augment the procedural abstract hero background */
+  backgroundVideoSrc?: string;
+  /** Optional WebM video URL for multi-format video delivery */
+  backgroundVideoWebmSrc?: string;
+  /** Optional poster image URL when using a background video asset */
+  backgroundPosterSrc?: string;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmnia }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  onExplore,
+  onLaunchOmnia,
+  backgroundVideoSrc,
+  backgroundVideoWebmSrc,
+  backgroundPosterSrc,
+}) => {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Parallax scroll effects matching exact prompt specifications
   const { scrollYProgress } = useScroll({
@@ -25,12 +39,40 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmn
   // Omnia interface visual: y: [0, -250]
   const interfaceY = useTransform(scrollYProgress, [0, 1], [0, -250]);
 
+  const handleStartCreating = () => {
+    if (onLaunchOmnia) {
+      onLaunchOmnia();
+    } else {
+      onExplore();
+    }
+  };
+
+  const handleWatchDemo = () => {
+    setIsDemoMode((prev) => {
+      const next = !prev;
+      if (next) {
+        const previewEl = document.getElementById('omnia-preview');
+        if (previewEl) {
+          previewEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      return next;
+    });
+  };
+
   return (
     <section
       id="hero"
       ref={sectionRef}
-      className="relative min-h-screen w-full overflow-hidden bg-black pt-28 md:pt-32 flex flex-col items-center justify-start selection:bg-[#eb3b2d] selection:text-white"
+      className="relative min-h-screen w-full overflow-hidden bg-[#050505] pt-28 md:pt-32 flex flex-col items-center justify-start selection:bg-[#eb3b2d] selection:text-white"
     >
+      {/* Dynamic Looping Abstract Background (supports drop-in video replacement) */}
+      <HeroBackground
+        videoSrc={backgroundVideoSrc}
+        videoWebmSrc={backgroundVideoWebmSrc}
+        posterSrc={backgroundPosterSrc}
+      />
+
       {/* Hero Content: Centered Column */}
       <motion.div
         style={{ y: textY, opacity: textOpacity }}
@@ -72,41 +114,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmn
           Think, create, and build with one unified AI creative studio—moving seamlessly from raw intuition to production-ready work.
         </motion.p>
 
-        {/* Both CTAs with Entrance Animation */}
+        {/* Liquid Glass Call-to-Action Component: 'Start Creating' + 'Watch Demo' */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-2 z-20"
+          className="mb-2 z-20"
         >
-          {/* Primary CTA: Try Omnia -> /ai */}
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onLaunchOmnia}
-            className="group relative inline-flex items-center justify-center gap-2.5 bg-white text-black rounded-full px-8 py-3.5 text-base font-semibold shadow-xl hover:bg-neutral-100 transition-colors cursor-pointer select-none"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d]" />
-            <span>Try Omnia</span>
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-black/10 group-hover:bg-[#eb3b2d] group-hover:text-white transition-colors duration-200">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </span>
-          </motion.button>
-
-          {/* Secondary CTA: Explore Vizra -> /explore */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onExplore}
-            className="inline-flex items-center justify-center gap-2 bg-neutral-900/90 border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 rounded-full px-7 py-3.5 text-base font-medium transition-colors cursor-pointer select-none"
-          >
-            <span>Explore Vizra</span>
-            <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </motion.button>
+          <HeroCTA
+            onStartCreating={handleStartCreating}
+            onWatchDemo={handleWatchDemo}
+            isDemoActive={isDemoMode}
+          />
         </motion.div>
       </motion.div>
 
@@ -115,9 +134,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onLaunchOmn
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full relative mt-6 md:mt-10"
+        className="w-full relative mt-6 md:mt-10 z-10"
       >
-        <OmniaPreview yTransform={interfaceY} onOpenWorkspace={onLaunchOmnia || onExplore} />
+        <OmniaPreview
+          yTransform={interfaceY}
+          onOpenWorkspace={handleStartCreating}
+          isDemoMode={isDemoMode}
+          onStopDemo={() => setIsDemoMode(false)}
+        />
       </motion.div>
     </section>
   );
