@@ -14,7 +14,7 @@ export interface MathEvaluationResult {
 /**
  * Deterministic Shunting-Yard arithmetic expression evaluator.
  * Evaluates numbers, +, -, *, /, ^ (or **), unary +/-, and parentheses ()
- * without using eval() or new Function().
+ * using pure token-based parsing with zero dynamic code generation.
  */
 function evaluateArithmeticTokens(expr: string): number | null {
   const normalized = expr.replace(/\*\*/g, '^').replace(/\s+/g, '');
@@ -215,8 +215,10 @@ export function evaluateSafeMath(query: string): MathEvaluationResult {
     };
   }
 
-  // 3. Power: "X ^ Y" or "X to the power of Y"
-  const powMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:\^|\*\*\s*|to\s+the\s+power\s+of)\s*(\d+(?:\.\d+)?)/i);
+  // 3. Power: standalone "X ^ Y" or "X to the power of Y"
+  const powMatch = text.match(
+    /^(?:what\s+is\s+|calculate\s+|evaluate\s+|compute\s+)?(\d+(?:\.\d+)?)\s*(?:\^|\*\*\s*|to\s+the\s+power\s+of)\s*(\d+(?:\.\d+)?)[?=.\s]*$/i
+  );
   if (powMatch) {
     const base = parseFloat(powMatch[1]);
     const exp = parseFloat(powMatch[2]);
