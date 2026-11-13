@@ -42,6 +42,7 @@ import {
 import {
   getUserProjectsFromFirestore,
   saveUserProjectToFirestore,
+  deleteUserProjectFromFirestore,
 } from '../services/firestoreService';
 import { Project, Attachment } from '../types/ai';
 import {
@@ -152,10 +153,22 @@ export const WorkspaceDashboardPage: React.FC = () => {
     applySeoToDocument(resolveRouteSeoPayload('/workspace'));
   }, []);
 
-  // Load Projects from LocalStorage + Firestore
+  // Load Projects & Assets from LocalStorage + Firestore on user change
   useEffect(() => {
     const local = getAllProjects();
     setProjects(local);
+
+    try {
+      const rawAssets = localStorage.getItem(ASSETS_STORAGE_KEY);
+      if (rawAssets) {
+        const parsed = JSON.parse(rawAssets);
+        setAssets(Array.isArray(parsed) ? parsed : []);
+      } else {
+        setAssets([]);
+      }
+    } catch {
+      setAssets([]);
+    }
 
     if (user) {
       getUserProjectsFromFirestore(user.uid)
@@ -305,11 +318,18 @@ export const WorkspaceDashboardPage: React.FC = () => {
 
   const handleConfirmDeleteProject = () => {
     if (!deleteTargetProject) return;
-    deleteProject(deleteTargetProject.id);
+    const targetId = deleteTargetProject.id;
+    const targetTitle = deleteTargetProject.title;
+    deleteProject(targetId);
     setProjects(getAllProjects());
+    if (user) {
+      deleteUserProjectFromFirestore(user.uid, targetId).catch(() => {
+        // Non-fatal
+      });
+    }
     toast({
       title: 'Project Deleted',
-      description: `"${deleteTargetProject.title}" was removed from your workspace.`,
+      description: `"${targetTitle}" was removed from your workspace.`,
       type: 'warning',
     });
     setDeleteTargetProject(null);
@@ -335,8 +355,12 @@ export const WorkspaceDashboardPage: React.FC = () => {
   const handleCreateApiToken = (e: React.FormEvent) => {
     e.preventDefault();
     const label = newTokenLabel.trim() || 'Workspace Integration Key';
-    const randomHex = Array.from({ length: 24 })
-      .map(() => Math.floor(Math.random() * 16).toString(16))
+    const bytes = new Uint8Array(16);
+    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+      window.crypto.getRandomValues(bytes);
+    }
+    const randomHex = Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
     const fullSecret = `vz_live_${randomHex}`;
     const newEntry: WorkspaceApiToken = {

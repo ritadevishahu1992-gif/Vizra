@@ -69,6 +69,7 @@ export interface VerifiedAuthEvent {
   valid: boolean;
   uid?: string;
   email?: string;
+  emailVerified?: boolean;
   authTime?: number;
   tokenIssuedAt?: number;
   tokenExpiresAt?: number;
@@ -107,9 +108,12 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
     const projectId = getFirebaseProjectId();
     const nowSec = Math.floor(Date.now() / 1000);
 
-    // 1. Check expiration
+    // 1. Check expiration and issued-at time
     if (typeof payload.exp !== 'number' || payload.exp < nowSec - 60) {
       return { valid: false, error: 'Token has expired' };
+    }
+    if (typeof payload.iat === 'number' && payload.iat > nowSec + 300) {
+      return { valid: false, error: 'Token issued-at time (iat) is in the future' };
     }
 
     // 2. Check audience
@@ -123,12 +127,17 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       return { valid: false, error: `Issuer mismatch: expected ${expectedIssuer}, got ${payload.iss}` };
     }
 
-    // 4. Check subject
-    if (!payload.sub || typeof payload.sub !== 'string') {
-      return { valid: false, error: 'Token missing subject (UID) claim' };
+    // 4. Check subject (UID) format and length
+    if (
+      !payload.sub ||
+      typeof payload.sub !== 'string' ||
+      payload.sub.length > 128 ||
+      !/^[a-zA-Z0-9_-]+$/.test(payload.sub)
+    ) {
+      return { valid: false, error: 'Token missing or invalid subject (UID) claim' };
     }
 
-    // 5. Signature verification
+    // 5. Cryptographic signature verification against Google public keys
     const googleKeys = await getGooglePublicKeys();
     const cert = header.kid ? googleKeys[header.kid] : null;
 
@@ -142,10 +151,17 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
         return { valid: false, error: 'Cryptographic signature verification failed' };
       }
     } else {
-      // In offline development or sandbox test runner without live Google cert access,
-      // verify that signature is well-formed buffer and headers are intact.
-      if (process.env.NODE_ENV === 'production' && Object.keys(googleKeys).length > 0) {
-        return { valid: false, error: `Public key kid '${header.kid}' not recognized by Google cert authority` };
+      // If Google public certificates are loaded, any unknown or missing kid is a forged token and must be rejected in ALL environments.
+      if (Object.keys(googleKeys).length > 0 || process.env.NODE_ENV === 'production') {
+        return {
+          valid: false,
+          error: `Public key kid '${header.kid || 'none'}' not recognized by Google certificate authority`,
+        };
+      }
+      // Offline sandbox fallback only when Google cert endpoint is unreachable in air-gapped test runners
+      const signatureBuf = Buffer.from(parts[2], 'base64url');
+      if (signatureBuf.length < 32) {
+        return { valid: false, error: 'Cryptographic signature verification failed (malformed signature)' };
       }
     }
 
@@ -154,7 +170,8 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
     return {
       valid: true,
       uid: payload.sub,
-      email: payload.email,
+      email: typeof payload.email === 'string' ? payload.email : undefined,
+      emailVerified: payload.email_verified !== false,
       authTime: payload.auth_time || payload.iat || nowSec,
       tokenIssuedAt: payload.iat,
       tokenExpiresAt: payload.exp,

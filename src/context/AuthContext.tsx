@@ -69,6 +69,34 @@ function formatFirebaseAuthError(err: any): string {
   return err?.message || 'Authentication failed. Please try again.';
 }
 
+const ACTIVE_USER_UID_STORAGE_KEY = 'vizra_active_user_uid_v1';
+const USER_SCOPED_LOCAL_KEYS = [
+  'omnia_conversations_v1',
+  'omnia_active_conv_id',
+  'omnia_draft_prompt',
+  'vizra_omnia_projects_v1',
+  'vizra_omnia_active_project_id_v1',
+  'vizra_omnia_personal_memories_v1',
+  'vizra_workspace_uploaded_assets_v1',
+  'vizra_workspace_client_tokens_v1',
+];
+
+export function purgeUserSessionStorage(): void {
+  try {
+    for (const key of USER_SCOPED_LOCAL_KEYS) {
+      localStorage.removeItem(key);
+    }
+    localStorage.removeItem(ACTIVE_USER_UID_STORAGE_KEY);
+  } catch {
+    // Ignore storage access errors
+  }
+  try {
+    sessionStorage.removeItem('vizra_admin_key');
+  } catch {
+    // Ignore sessionStorage access errors
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -78,6 +106,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser: FirebaseUser | null) => {
+      // Cross-user browser storage isolation: if a different user signs in on a shared browser,
+      // purge the previous user's local workspace cache before initializing the new session.
+      try {
+        const previousUid = localStorage.getItem(ACTIVE_USER_UID_STORAGE_KEY);
+        if (currentUser) {
+          if (previousUid && previousUid !== currentUser.uid) {
+            purgeUserSessionStorage();
+          }
+          localStorage.setItem(ACTIVE_USER_UID_STORAGE_KEY, currentUser.uid);
+        } else if (previousUid) {
+          purgeUserSessionStorage();
+        }
+      } catch {
+        // Ignore localStorage access errors
+      }
+
       setUser(currentUser);
       setLoading(false);
 
@@ -232,6 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOutUser = async () => {
     try {
       clearAuthMessages();
+      purgeUserSessionStorage();
       await signOut(auth);
     } catch (err: any) {
       console.error('Sign-out failed:', err);

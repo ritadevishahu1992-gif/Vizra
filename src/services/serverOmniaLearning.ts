@@ -22,6 +22,8 @@ import {
   adminAuthMiddleware,
   cronAuthMiddleware,
   adminRateLimiter,
+  generalApiRateLimiter,
+  safeCompare,
 } from '../server/security';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -589,11 +591,15 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   });
 
   // 5. REASONING EVALUATION SANDBOX
-  app.post('/api/omnia/reason', (req, res) => {
+  app.post('/api/omnia/reason', generalApiRateLimiter.getMiddleware(), (req, res) => {
     loadStoredData();
     const { prompt } = req.body || {};
     if (!prompt || typeof prompt !== 'string') {
       res.status(400).json({ error: 'Prompt string is required' });
+      return;
+    }
+    if (prompt.length > 25000) {
+      res.status(400).json({ error: 'Prompt exceeds maximum length of 25,000 characters' });
       return;
     }
 
@@ -813,12 +819,20 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   });
 
   // 9. USER FEEDBACK PIPELINE
-  app.post('/api/omnia/feedback', (req, res) => {
+  app.post('/api/omnia/feedback', generalApiRateLimiter.getMiddleware(), (req, res) => {
     loadStoredData();
-    const { question, answer, retrievedSources, userFeedback, correction } = req.body;
+    const { question, answer, retrievedSources, userFeedback, correction } = req.body || {};
 
-    if (!question || !userFeedback) {
+    if (!question || typeof question !== 'string' || !userFeedback) {
       res.status(400).json({ error: 'question and userFeedback are required' });
+      return;
+    }
+    if (
+      question.length > 10000 ||
+      (typeof answer === 'string' && answer.length > 25000) ||
+      (typeof correction === 'string' && correction.length > 10000)
+    ) {
+      res.status(400).json({ error: 'Feedback payload exceeds maximum allowed character length' });
       return;
     }
 
@@ -827,16 +841,16 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
 
     const item: UserFeedbackItem = {
       id,
-      question,
-      answer: answer || '',
-      retrievedSources,
+      question: question.slice(0, 10000),
+      answer: typeof answer === 'string' ? answer.slice(0, 25000) : '',
+      retrievedSources: Array.isArray(retrievedSources) ? retrievedSources.slice(0, 25) : undefined,
       userFeedback,
-      correction,
+      correction: typeof correction === 'string' ? correction.slice(0, 10000) : undefined,
       timestamp: now,
       status: correction ? 'PENDING_REVIEW' : 'APPROVED',
     };
 
-    if (correction && correction.trim().length > 10) {
+    if (typeof correction === 'string' && correction.trim().length > 10) {
       const sourceId = `src_corr_${Date.now()}`;
       const candidate: LearningSource = {
         sourceId,
@@ -853,7 +867,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
         tokenCount: Math.ceil(correction.length / 4),
         tier: 'global',
         accessLevel: 'public',
-        validationNotes: [`Awaiting review for prompt: "${question}"`],
+        validationNotes: [`Awaiting review for prompt: "${question.slice(0, 200)}"`],
       };
 
       sourcesMap.set(sourceId, candidate);
@@ -870,6 +884,9 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     }
 
     feedbackList.unshift(item);
+    if (feedbackList.length > 500) {
+      feedbackList = feedbackList.slice(0, 500);
+    }
     persistStore();
 
     res.json({ success: true, item });
@@ -883,12 +900,15 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   // 10. 24/7 SCHEDULED SYNCHRONIZATION (VERCEL CRON)
   const handleCronSync = async (req: express.Request, res: express.Response) => {
     loadStoredData();
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization || '';
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      res.status(401).json({ error: 'Unauthorized: Invalid cron secret' });
-      return;
+    if (cronSecret && cronSecret !== 'your_vercel_cron_secret') {
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+      if (!token || !safeCompare(token, cronSecret)) {
+        res.status(401).json({ error: 'Unauthorized: Invalid cron secret' });
+        return;
+      }
     }
 
     const startedAt = new Date().toISOString();

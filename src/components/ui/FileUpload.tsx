@@ -80,6 +80,58 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const recordId =
       existingId || `upload-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const maxBytes = maxSizeMB * 1024 * 1024;
+    const lowerName = file.name.toLowerCase().trim();
+    const dotIdx = lowerName.lastIndexOf('.');
+    const ext = dotIdx !== -1 ? lowerName.slice(dotIdx) : '';
+    const blockedExtensions = new Set([
+      '.svg',
+      '.svgz',
+      '.html',
+      '.htm',
+      '.xhtml',
+      '.exe',
+      '.dll',
+      '.bat',
+      '.cmd',
+      '.sh',
+      '.ps1',
+      '.php',
+      '.jsp',
+      '.msi',
+      '.jar',
+    ]);
+    const blockedMimes = new Set([
+      'image/svg+xml',
+      'text/html',
+      'application/xhtml+xml',
+      'application/x-msdownload',
+      'application/x-sh',
+    ]);
+
+    if (
+      blockedExtensions.has(ext) ||
+      blockedMimes.has((file.type || '').toLowerCase()) ||
+      file.name.includes('..') ||
+      file.name.includes('/') ||
+      file.name.includes('\\')
+    ) {
+      const blockedRecord: UploadedFileRecord = {
+        id: recordId,
+        file,
+        name: file.name,
+        sizeLabel: formatSize(file.size),
+        mimeType: file.type || 'application/octet-stream',
+        progress: 0,
+        status: 'error',
+        errorMessage: `Restricted file type (${ext || file.type || 'executable/script'}). Active script & executable uploads are blocked.`,
+      };
+      setRecords((prev) =>
+        existingId
+          ? prev.map((r) => (r.id === existingId ? blockedRecord : r))
+          : [blockedRecord, ...prev]
+      );
+      return;
+    }
 
     if (file.size > maxBytes) {
       const failedRecord: UploadedFileRecord = {

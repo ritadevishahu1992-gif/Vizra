@@ -238,6 +238,18 @@ export const adminRateLimiter = new SlidingWindowRateLimiter({
   name: 'admin',
 });
 
+export const ragRateLimiter = new SlidingWindowRateLimiter({
+  windowMs: 60 * 1000,
+  max: 45,
+  name: 'rag',
+});
+
+export const generalApiRateLimiter = new SlidingWindowRateLimiter({
+  windowMs: 60 * 1000,
+  max: 60,
+  name: 'api',
+});
+
 // ============================================================================
 // 3. ADMIN & CRON AUTHENTICATION MIDDLEWARES
 // ============================================================================
@@ -245,7 +257,7 @@ export const adminRateLimiter = new SlidingWindowRateLimiter({
 /**
  * Constant-time string comparison to prevent timing attacks on secrets.
  */
-function safeCompare(a: string, b: string): boolean {
+export function safeCompare(a: string, b: string): boolean {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
@@ -339,18 +351,109 @@ export function cronAuthMiddleware(req: Request, res: Response, next: NextFuncti
 }
 
 // ============================================================================
-// 4. SECURITY HEADERS & INPUT SANITIZATION
+// 4. SECURITY HEADERS, CORS & INPUT SANITIZATION
 // ============================================================================
+
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://accounts.google.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' data: blob: https:",
+  "connect-src 'self' ws: wss: https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://alphafold.ebi.ac.uk https://pubchem.ncbi.nlm.nih.gov https://eutils.ncbi.nlm.nih.gov",
+  "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
+  "frame-ancestors 'self' https://*.run.app https://*.google.com https://aistudio.google.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+/**
+ * Checks whether an Origin header belongs to a trusted VIZRA origin.
+ */
+export function isTrustedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true; // Same-origin or non-browser request without Origin
+  try {
+    const parsed = new URL(origin);
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === 'vizra.vercel.app' ||
+      host.endsWith('.vercel.app') ||
+      host.endsWith('.run.app') ||
+      host.endsWith('.google.com')
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 export function securityHeadersMiddleware(req: Request, res: Response, next: NextFunction): void {
   res.removeHeader('X-Powered-By');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  // Apply X-Robots-Tag: noindex, nofollow strictly to API and private routes, never to public pages
+  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  res.setHeader(
+    'Permissions-Policy',
+    'camera=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), microphone=(self)'
+  );
+  res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+
+  // Apply X-Robots-Tag: noindex, nofollow and no-store cache policy strictly to API and private routes
   if (req.path.startsWith('/api/') || req.path.startsWith('/live')) {
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
   }
+  next();
+}
+
+/**
+ * Enforces HTTP method whitelist and strict CORS origin checks for /api/* routes.
+ */
+export function corsSecurityMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const allowedMethods = ['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS'];
+  if (!allowedMethods.includes(req.method.toUpperCase())) {
+    res.status(405).json({
+      error: {
+        code: 'METHOD_NOT_ALLOWED',
+        message: `HTTP method ${req.method} is not allowed.`,
+      },
+    });
+    return;
+  }
+
+  const origin = req.headers.origin;
+  if (origin) {
+    if (isTrustedOrigin(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Key');
+    } else if (req.path.startsWith('/api/')) {
+      res.status(403).json({
+        error: {
+          code: 'CORS_ORIGIN_FORBIDDEN',
+          message: 'Cross-origin API request from untrusted origin is forbidden.',
+        },
+      });
+      return;
+    }
+  }
+
+  if (req.method.toUpperCase() === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   next();
 }
 
@@ -372,7 +475,92 @@ export function validatePrompt(prompt: any): { valid: boolean; error?: string; c
 }
 
 /**
- * Validates uploaded attachments to prevent memory exhaustion and malformed payloads.
+ * Detects direct prompt injection attempts targeting system secrets, environment variables,
+ * or raw system instruction exfiltration.
+ */
+export function detectPromptInjection(input: string): {
+  safe: boolean;
+  reason?: string;
+} {
+  if (!input || typeof input !== 'string') return { safe: true };
+
+  const normalized = input.toLowerCase();
+
+  // Block explicit attempts to extract server environment variables or private API keys
+  const secretExtractionPatterns = [
+    /(?:print|reveal|output|show|dump|expose|leak|return|echo)\s+(?:all\s+|the\s+|your\s+)?(?:process\.env|gemini_api_key|admin_api_key|cron_secret|resend_api_key|workflow_secret)/i,
+    /ignore\s+(?:all\s+)?(?:previous|prior|above|system)\s+instructions[\s\S]{0,120}(?:system\s+prompt|systeminstruction|api[_\s]?key|process\.env|secret)/i,
+  ];
+
+  for (const pattern of secretExtractionPatterns) {
+    if (pattern.test(normalized)) {
+      return {
+        safe: false,
+        reason: 'Request blocked by security policy: attempts to extract server secrets or override system boundaries are prohibited.',
+      };
+    }
+  }
+
+  return { safe: true };
+}
+
+/**
+ * Validates and bounds RAG context strings to prevent context-window DoS or injection.
+ */
+export function validateRagContext(ragContext: any): {
+  valid: boolean;
+  error?: string;
+  cleanContext: string;
+} {
+  if (ragContext === undefined || ragContext === null || ragContext === '') {
+    return { valid: true, cleanContext: '' };
+  }
+  if (typeof ragContext !== 'string') {
+    return { valid: false, error: 'ragContext must be a string.', cleanContext: '' };
+  }
+  if (ragContext.length > 25000) {
+    return {
+      valid: false,
+      error: 'ragContext exceeds maximum allowed length of 25,000 characters.',
+      cleanContext: '',
+    };
+  }
+  const injectionCheck = detectPromptInjection(ragContext);
+  if (!injectionCheck.safe) {
+    return { valid: false, error: injectionCheck.reason, cleanContext: '' };
+  }
+  return { valid: true, cleanContext: ragContext.trim() };
+}
+
+const FORBIDDEN_ATTACHMENT_EXTENSIONS = new Set([
+  '.svg',
+  '.svgz',
+  '.html',
+  '.htm',
+  '.xhtml',
+  '.shtml',
+  '.exe',
+  '.dll',
+  '.bat',
+  '.cmd',
+  '.sh',
+  '.bash',
+  '.ps1',
+  '.vbs',
+  '.msi',
+  '.com',
+  '.scr',
+  '.php',
+  '.jsp',
+  '.asp',
+  '.aspx',
+  '.cgi',
+  '.jar',
+]);
+
+/**
+ * Validates uploaded attachments to prevent memory exhaustion, active XSS payloads (SVG/HTML),
+ * executable uploads, and path traversal.
  */
 export function validateAttachments(attachments: any): { valid: boolean; error?: string } {
   if (!attachments) return { valid: true };
@@ -388,10 +576,44 @@ export function validateAttachments(attachments: any): { valid: boolean; error?:
     if (!att || typeof att !== 'object') {
       return { valid: false, error: `Attachment at index ${i} is invalid.` };
     }
-    // Check base64 size limits (< 12MB string length which corresponds to ~9MB binary)
+
+    // Validate filename against path traversal and dangerous executable/script extensions
+    if (att.name !== undefined) {
+      if (typeof att.name !== 'string' || att.name.length > 255) {
+        return { valid: false, error: `Attachment filename at index ${i} is invalid.` };
+      }
+      if (att.name.includes('..') || att.name.includes('/') || att.name.includes('\\') || att.name.includes('\0')) {
+        return { valid: false, error: `Attachment "${att.name}" contains forbidden path characters.` };
+      }
+      const lowerName = att.name.toLowerCase().trim();
+      const dotIdx = lowerName.lastIndexOf('.');
+      if (dotIdx !== -1) {
+        const ext = lowerName.slice(dotIdx);
+        if (FORBIDDEN_ATTACHMENT_EXTENSIONS.has(ext)) {
+          return {
+            valid: false,
+            error: `Attachment "${att.name}" uses a restricted executable or active-script file type (${ext}).`,
+          };
+        }
+      }
+    }
+
+    // Check base64 size limits (< 15MB string length which corresponds to ~10MB binary)
     if (att.previewUrl && typeof att.previewUrl === 'string') {
       if (att.previewUrl.length > 15 * 1024 * 1024) {
         return { valid: false, error: `Attachment "${att.name || i}" exceeds 10MB size limit.` };
+      }
+      const lowerUrl = att.previewUrl.slice(0, 64).toLowerCase();
+      if (
+        lowerUrl.startsWith('data:image/svg') ||
+        lowerUrl.startsWith('data:text/html') ||
+        lowerUrl.startsWith('data:application/xhtml') ||
+        lowerUrl.startsWith('javascript:')
+      ) {
+        return {
+          valid: false,
+          error: `Attachment "${att.name || i}" contains an active script or SVG/HTML data URI that is not permitted.`,
+        };
       }
     }
     if (att.content && typeof att.content === 'string') {
@@ -403,3 +625,16 @@ export function validateAttachments(attachments: any): { valid: boolean; error?:
 
   return { valid: true };
 }
+
+/**
+ * Sanitizes internal server error messages so stack traces, file paths, or keys are never leaked.
+ */
+export function sanitizeServerError(err: any, fallbackMessage = 'An unexpected server error occurred.'): string {
+  if (!err || typeof err.message !== 'string') return fallbackMessage;
+  const msg = err.message
+    .replace(/AIza[0-9A-Za-z_-]{20,}/g, '[REDACTED_KEY]')
+    .replace(/re_[0-9A-Za-z_-]{15,}/g, '[REDACTED_KEY]')
+    .replace(/\/app\/applet[^\s:]*/g, '[INTERNAL_PATH]');
+  return msg.slice(0, 240) || fallbackMessage;
+}
+
