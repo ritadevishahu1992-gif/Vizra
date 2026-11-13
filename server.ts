@@ -15,6 +15,8 @@ import {
 import {
   securityHeadersMiddleware,
   corsSecurityMiddleware,
+  publicApiRateLimiter,
+  authBruteForceRateLimiter,
   chatRateLimiter,
   scienceRateLimiter,
   musicRateLimiter,
@@ -105,6 +107,9 @@ async function startServer() {
   const app = express();
   const port = parseInt(process.env.PORT || '3000', 10);
 
+  // Trust first-hop reverse proxy (Vercel / Cloud Run) for accurate client IP rate limiting
+  app.set('trust proxy', 1);
+
   // Body parser with 15MB limit for multimodal attachments
   app.use(express.json({ limit: '15mb' }));
 
@@ -112,6 +117,10 @@ async function startServer() {
   app.use(securityHeadersMiddleware);
   app.use(corsSecurityMiddleware);
   app.use(observabilityMiddleware);
+
+  // Express-rate-limit protection for public-facing API routes & auth brute-force defense
+  app.use('/api', publicApiRateLimiter);
+  app.use(['/api/auth', '/api/seo-diagnostics'], authBruteForceRateLimiter);
 
   // Server-side Gemini initialization
   let ai: GoogleGenAI | null = null;

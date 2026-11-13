@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import rateLimit from 'express-rate-limit';
 import dns from 'dns';
 import crypto from 'crypto';
 
@@ -248,6 +249,48 @@ export const generalApiRateLimiter = new SlidingWindowRateLimiter({
   windowMs: 60 * 1000,
   max: 60,
   name: 'api',
+});
+
+/**
+ * Global express-rate-limit middleware protecting all public-facing /api/* routes
+ * against automated abuse, scraping, and volumetric request floods.
+ */
+export const publicApiRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  limit: 120, // 120 requests per minute per IP across /api/*
+  standardHeaders: 'draft-7',
+  legacyHeaders: true,
+  validate: false,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many API requests from this IP address. Please wait a moment and try again.',
+        retryAfterSeconds: 60,
+      },
+    });
+  },
+});
+
+/**
+ * Strict express-rate-limit middleware protecting authentication and administrative
+ * endpoints (/api/auth/*, /api/seo-diagnostics/*) against credential and passkey brute-force attempts.
+ */
+export const authBruteForceRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minute window
+  limit: 30, // 30 attempts per 15 minutes per IP
+  standardHeaders: 'draft-7',
+  legacyHeaders: true,
+  validate: false,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      error: {
+        code: 'AUTH_BRUTE_FORCE_BLOCKED',
+        message: 'Too many authentication attempts from this IP address. Please try again in 15 minutes.',
+        retryAfterSeconds: 900,
+      },
+    });
+  },
 });
 
 // ============================================================================

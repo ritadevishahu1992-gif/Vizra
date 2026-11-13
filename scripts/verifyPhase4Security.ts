@@ -583,6 +583,21 @@ async function main() {
   );
 
   // ---------------------------------------------------------------------------
+  // 13. EXPRESS-RATE-LIMIT MIDDLEWARE VERIFICATION
+  // ---------------------------------------------------------------------------
+  const hasExpressRateLimitHeaders =
+    Boolean(apiHealthRes.headers['ratelimit-limit'] || apiHealthRes.headers['ratelimit-policy']) &&
+    Boolean(apiHealthRes.headers['x-ratelimit-limit']);
+  recordTest(
+    'SEC-27',
+    '10. Rate Limiting (express-rate-limit)',
+    'express-rate-limit middleware protects /api/* routes and emits standard RateLimit and X-RateLimit headers',
+    'ratelimit-limit/policy and x-ratelimit-limit headers present',
+    `ratelimit-limit=${apiHealthRes.headers['ratelimit-limit']}, x-ratelimit-limit=${apiHealthRes.headers['x-ratelimit-limit']}`,
+    hasExpressRateLimitHeaders
+  );
+
+  // ---------------------------------------------------------------------------
   // SUMMARY
   // ---------------------------------------------------------------------------
   const passedCount = results.filter((r) => r.passed).length;
