@@ -11,8 +11,18 @@ import {
   FirebaseUser,
   auth,
   googleProvider,
+  ensureAuthPersistence,
 } from '../lib/firebase';
 import { syncUserProfile } from '../services/firestoreService';
+
+export interface PersistedAuthSessionSnapshot {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  emailVerified: boolean;
+  restoredFromStorageAt: number;
+}
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -70,6 +80,7 @@ function formatFirebaseAuthError(err: any): string {
 }
 
 const ACTIVE_USER_UID_STORAGE_KEY = 'vizra_active_user_uid_v1';
+const PERSISTED_AUTH_SESSION_STORAGE_KEY = 'vizra_persisted_auth_session_v1';
 const USER_SCOPED_LOCAL_KEYS = [
   'omnia_conversations_v1',
   'omnia_active_conv_id',
@@ -81,12 +92,67 @@ const USER_SCOPED_LOCAL_KEYS = [
   'vizra_workspace_client_tokens_v1',
 ];
 
+function savePersistedAuthSessionSnapshot(firebaseUser: FirebaseUser): void {
+  try {
+    const snapshot: PersistedAuthSessionSnapshot = {
+      uid: firebaseUser.uid,
+      email: firebaseUser.email || null,
+      displayName: firebaseUser.displayName || null,
+      photoURL: firebaseUser.photoURL || null,
+      emailVerified: Boolean(firebaseUser.emailVerified),
+      restoredFromStorageAt: Date.now(),
+    };
+    localStorage.setItem(PERSISTED_AUTH_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+    localStorage.setItem(ACTIVE_USER_UID_STORAGE_KEY, firebaseUser.uid);
+  } catch {
+    // Ignore localStorage quota or private-browsing errors
+  }
+}
+
+function loadPersistedAuthSessionSnapshot(): FirebaseUser | null {
+  try {
+    if (auth.currentUser) {
+      return auth.currentUser;
+    }
+    const raw = localStorage.getItem(PERSISTED_AUTH_SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PersistedAuthSessionSnapshot>;
+    if (!parsed || typeof parsed.uid !== 'string' || !parsed.uid.trim()) {
+      return null;
+    }
+    // Create a compatible hydrated user proxy until Firebase IndexedDB finishes restoring the full User instance
+    const hydratedProxy = {
+      uid: parsed.uid,
+      email: parsed.email ?? null,
+      displayName: parsed.displayName ?? null,
+      photoURL: parsed.photoURL ?? null,
+      emailVerified: Boolean(parsed.emailVerified),
+      isAnonymous: false,
+      providerData: [],
+      getIdToken: async (forceRefresh?: boolean) => {
+        if (auth.currentUser) {
+          return auth.currentUser.getIdToken(forceRefresh);
+        }
+        if (typeof (auth as any).authStateReady === 'function') {
+          await (auth as any).authStateReady();
+        }
+        const restoredUser = auth.currentUser as FirebaseUser | null;
+        return restoredUser ? restoredUser.getIdToken(forceRefresh) : '';
+      },
+    } as unknown as FirebaseUser;
+    return hydratedProxy;
+  } catch {
+    return null;
+  }
+}
+
 export function purgeUserSessionStorage(): void {
   try {
     for (const key of USER_SCOPED_LOCAL_KEYS) {
       localStorage.removeItem(key);
     }
     localStorage.removeItem(ACTIVE_USER_UID_STORAGE_KEY);
+    localStorage.removeItem(PERSISTED_AUTH_SESSION_STORAGE_KEY);
   } catch {
     // Ignore storage access errors
   }
@@ -98,48 +164,77 @@ export function purgeUserSessionStorage(): void {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  // Hydrate initial user state synchronously from localStorage / auth.currentUser so page refreshes stay logged in
+  const [user, setUser] = useState<FirebaseUser | null>(() => loadPersistedAuthSessionSnapshot());
+  const [loading, setLoading] = useState<boolean>(() => loadPersistedAuthSessionSnapshot() === null);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser: FirebaseUser | null) => {
-      // Cross-user browser storage isolation: if a different user signs in on a shared browser,
-      // purge the previous user's local workspace cache before initializing the new session.
-      try {
-        const previousUid = localStorage.getItem(ACTIVE_USER_UID_STORAGE_KEY);
-        if (currentUser) {
-          if (previousUid && previousUid !== currentUser.uid) {
+    let isMounted = true;
+    let unsubscribe: (() => void) | null = null;
+
+    const initializeSessionRestoration = async () => {
+      // 1. Ensure IndexedDB or localStorage persistence is configured on Firebase Auth
+      await ensureAuthPersistence();
+
+      // 2. Wait for Firebase Auth IndexedDB / localStorage state restoration to complete before subscribing
+      if (typeof (auth as any).authStateReady === 'function') {
+        try {
+          await (auth as any).authStateReady();
+        } catch {
+          // Proceed to onAuthStateChanged listener
+        }
+      }
+
+      if (!isMounted) return;
+
+      unsubscribe = onAuthStateChanged(auth, async (currentUser: FirebaseUser | null) => {
+        if (!isMounted) return;
+
+        // Cross-user browser storage isolation: if a different user signs in on a shared browser,
+        // purge the previous user's local workspace cache before initializing the new session.
+        try {
+          const previousUid = localStorage.getItem(ACTIVE_USER_UID_STORAGE_KEY);
+          if (currentUser) {
+            if (previousUid && previousUid !== currentUser.uid) {
+              purgeUserSessionStorage();
+            }
+            savePersistedAuthSessionSnapshot(currentUser);
+          } else if (previousUid) {
             purgeUserSessionStorage();
           }
-          localStorage.setItem(ACTIVE_USER_UID_STORAGE_KEY, currentUser.uid);
-        } else if (previousUid) {
-          purgeUserSessionStorage();
+        } catch {
+          // Ignore localStorage access errors
         }
-      } catch {
-        // Ignore localStorage access errors
-      }
 
-      setUser(currentUser);
-      setLoading(false);
+        setUser(currentUser);
+        setLoading(false);
 
-      if (currentUser) {
-        try {
-          await syncUserProfile({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName,
-            photoURL: currentUser.photoURL,
-          });
-        } catch (err) {
-          console.error('Failed to sync user profile to Firestore:', err);
+        if (currentUser) {
+          try {
+            await syncUserProfile({
+              uid: currentUser.uid,
+              email: currentUser.email,
+              displayName: currentUser.displayName,
+              photoURL: currentUser.photoURL,
+            });
+          } catch (err) {
+            console.error('Failed to sync user profile to Firestore:', err);
+          }
         }
-      }
-    });
+      });
+    };
 
-    return () => unsubscribe();
+    initializeSessionRestoration();
+
+    return () => {
+      isMounted = false;
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const clearAuthMessages = () => {
@@ -176,8 +271,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       clearAuthMessages();
+      await ensureAuthPersistence();
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
+        savePersistedAuthSessionSnapshot(result.user);
+        setUser(result.user);
         try {
           await syncUserProfile({
             uid: result.user.uid,
@@ -200,8 +298,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithEmail = async (email: string, password: string): Promise<boolean> => {
     try {
       clearAuthMessages();
+      await ensureAuthPersistence();
       const result = await signInWithEmailAndPassword(auth, email.trim(), password);
       if (result.user) {
+        savePersistedAuthSessionSnapshot(result.user);
+        setUser(result.user);
         try {
           await syncUserProfile({
             uid: result.user.uid,
@@ -230,11 +331,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<boolean> => {
     try {
       clearAuthMessages();
+      await ensureAuthPersistence();
       const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
       if (result.user) {
         if (name.trim()) {
           await updateProfile(result.user, { displayName: name.trim() });
         }
+        savePersistedAuthSessionSnapshot(result.user);
+        setUser(result.user);
         try {
           await sendEmailVerification(result.user);
           setStatusMessage('Verification email sent. Please check your inbox.');
@@ -277,6 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       clearAuthMessages();
       purgeUserSessionStorage();
+      setUser(null);
       await signOut(auth);
     } catch (err: any) {
       console.error('Sign-out failed:', err);

@@ -1,6 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
+  setPersistence,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
@@ -32,12 +35,32 @@ export const db: Firestore = initializeFirestore(
   firebaseConfig.firestoreDatabaseId
 );
 
-// Initialize Firebase Authentication
+// Initialize Firebase Authentication with persistent IndexedDB / localStorage session storage
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account',
 });
+
+let persistencePromise: Promise<void> | null = null;
+
+/**
+ * Ensures Firebase Auth persists sessions across page refreshes using IndexedDB
+ * first, with automatic fallback to browser localStorage.
+ */
+export function ensureAuthPersistence(): Promise<void> {
+  if (!persistencePromise) {
+    persistencePromise = setPersistence(auth, indexedDBLocalPersistence).catch(() =>
+      setPersistence(auth, browserLocalPersistence).catch((err) => {
+        console.warn('[Firebase Auth] Persistence fallback warning:', err);
+      })
+    );
+  }
+  return persistencePromise;
+}
+
+// Kick off persistence configuration immediately on module load
+ensureAuthPersistence();
 
 // Operation Types for error diagnosis
 export enum OperationType {
