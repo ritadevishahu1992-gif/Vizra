@@ -28,9 +28,68 @@ export interface ImageGenerationCardProps {
  * procedural high-DPI obsidian/crimson raymarched canvas synthesis (or external imageUrl),
  * Regenerate action, and PNG Save/Download action.
  */
+function embedPngProvenanceTextChunk(pngDataUrl: string, keyword: string, textValue: string): string {
+  try {
+    const prefix = 'data:image/png;base64,';
+    if (!pngDataUrl.startsWith(prefix)) return pngDataUrl;
+    const rawBase64 = pngDataUrl.slice(prefix.length);
+    const binaryStr = atob(rawBase64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    // Verify PNG signature and locate IEND chunk (last 12 bytes)
+    if (bytes.length < 33 || bytes[0] !== 0x89 || bytes[1] !== 0x50) {
+      return pngDataUrl;
+    }
+    const iendOffset = bytes.length - 12;
+    const encoder = new TextEncoder();
+    const keyBytes = encoder.encode(keyword);
+    const valBytes = encoder.encode(textValue);
+    const chunkData = new Uint8Array(keyBytes.length + 1 + valBytes.length);
+    chunkData.set(keyBytes, 0);
+    chunkData[keyBytes.length] = 0;
+    chunkData.set(valBytes, keyBytes.length + 1);
+
+    const chunkType = encoder.encode('tEXt');
+    // Compute CRC32 over type + data
+    let crc = 0xffffffff;
+    const crcInput = new Uint8Array(4 + chunkData.length);
+    crcInput.set(chunkType, 0);
+    crcInput.set(chunkData, 4);
+    for (let i = 0; i < crcInput.length; i++) {
+      crc ^= crcInput[i];
+      for (let j = 0; j < 8; j++) {
+        crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+      }
+    }
+    crc = (crc ^ 0xffffffff) >>> 0;
+
+    const fullChunk = new Uint8Array(12 + chunkData.length);
+    const dv = new DataView(fullChunk.buffer);
+    dv.setUint32(0, chunkData.length, false);
+    fullChunk.set(chunkType, 4);
+    fullChunk.set(chunkData, 8);
+    dv.setUint32(8 + chunkData.length, crc, false);
+
+    const out = new Uint8Array(bytes.length + fullChunk.length);
+    out.set(bytes.subarray(0, iendOffset), 0);
+    out.set(fullChunk, iendOffset);
+    out.set(bytes.subarray(iendOffset), iendOffset + fullChunk.length);
+
+    let outBin = '';
+    for (let i = 0; i < out.length; i++) {
+      outBin += String.fromCharCode(out[i]);
+    }
+    return prefix + btoa(outBin);
+  } catch {
+    return pngDataUrl;
+  }
+}
+
 export const ImageGenerationCard: React.FC<ImageGenerationCardProps> = ({
   prompt,
-  modelName = 'Omnia 1.0 · Diffusion & Procedural Synthesizer',
+  modelName = 'Omnia 1.0 · Procedural Canvas Preview',
   aspectRatio = '16:9',
   imageUrl,
   initialStatus = 'completed',
@@ -152,7 +211,16 @@ export const ImageGenerationCard: React.FC<ImageGenerationCardProps> = ({
       );
 
       try {
-        setDataUrl(canvas.toDataURL('image/png'));
+        const rawPng = canvas.toDataURL('image/png');
+        const provenanceJson = JSON.stringify({
+          generator: 'Vizra Omnia 1.0 Procedural Canvas',
+          syntheticContent: true,
+          standard: 'EU-AI-Act-Art-50-Metadata',
+          seed: currentSeed,
+          aspectRatio,
+          createdAt: new Date().toISOString(),
+        });
+        setDataUrl(embedPngProvenanceTextChunk(rawPng, 'AI-Provenance', provenanceJson));
       } catch {
         // Ignore security taint if external image
       }

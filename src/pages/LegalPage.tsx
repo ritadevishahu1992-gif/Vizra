@@ -246,25 +246,27 @@ export const LegalPage: React.FC = () => {
                   <strong>Consent Records:</strong> An anonymous random identifier (`consentId`), selected consent categories (`necessary`, `analytics`, `functional`, `marketing`), timestamp, policy version (`{CURRENT_POLICY_VERSION}`), and action (`ACCEPT_ALL`, `REJECT_OPTIONAL`, `CUSTOMIZE`, or `WITHDRAW`). We never record raw IP addresses, passwords, or device fingerprints in consent logs.
                 </li>
                 <li>
+                  <strong>Security Login Notifications:</strong> Upon verified account sign-in, VIZRA dispatches a security alert email containing a truncated/masked IP address (`/24` IPv4 or `/48` IPv6) and summarized browser/OS string. Idempotency hashes are retained for 7 days to prevent duplicate alerts.
+                </li>
+                <li>
                   <strong>Operational &amp; Security Telemetry:</strong> Ephemeral request rate-limiting counters, SSRF defense logs, and cookieless aggregate pageview metrics via Vercel Web Analytics.
                 </li>
               </ul>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">2. Why Information Is Collected</h2>
+              <h2 className="typo-card-title">2. Why Information Is Collected &amp; Legal Bases</h2>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                <li>To execute AI text, code, visual, and research requests within the Omnia 1.0 studio.</li>
-                <li>To authenticate your account and isolate your saved projects and conversation histories.</li>
-                <li>To protect infrastructure against Server-Side Request Forgery (SSRF), automated abuse, and unauthorized access.</li>
-                <li>To maintain an auditable record of your cookie and privacy preferences.</li>
+                <li><strong>Contractual Necessity (GDPR Art. 6(1)(b)):</strong> To execute AI text, code, visual, audio, and research requests within the Omnia 1.0 studio and synchronize your authenticated workspace projects.</li>
+                <li><strong>Legitimate Interests &amp; Security (GDPR Art. 6(1)(f)):</strong> To protect infrastructure against Server-Side Request Forgery (SSRF), prompt injection, automated abuse, and unauthorized account access.</li>
+                <li><strong>Explicit Consent (GDPR Art. 6(1)(a) / DPDP Sec. 6):</strong> For optional analytics/functional/marketing browser storage categories, which remain disabled by default until you opt in.</li>
               </ul>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">3. How Information Is Processed</h2>
+              <h2 className="typo-card-title">3. How Information Is Processed &amp; AI Governance</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                AI prompts and attachments are transmitted over HTTPS to VIZRA&apos;s server-side proxy routes (`/api/*`) and forwarded to the Google Gemini API (`@google/genai`) for inference. Server-side API keys are isolated from client bundles. General knowledge queries are strictly isolated from your private workspace project files. VIZRA does not sell personal information to third parties or data brokers.
+                AI prompts and attachments are transmitted over HTTPS to VIZRA&apos;s server-side proxy routes (`/api/*`) and forwarded to the Google Gemini API (`@google/genai`) for inference. Server-side API keys are isolated from client bundles. Personal memory items are scoped per user UID and scrubbed for email/phone/key patterns before prompt assembly. User-submitted knowledge corrections (`POST /api/omnia/feedback`) are scrubbed of PII and stored as private pending candidates requiring administrator review. VIZRA does not sell personal information to third parties or data brokers.
               </p>
             </div>
 
@@ -272,10 +274,13 @@ export const LegalPage: React.FC = () => {
               <h2 className="typo-card-title">4. Data Storage &amp; Retention</h2>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 <li>
-                  <strong>Browser Local Storage:</strong> Anonymous conversations (`omnia_conversations_v1`), theme settings (`vizra_theme_mode_v1`), user memories (`vizra_user_memories`), and consent state (`vizra_cookie_consent_v1`) remain in your browser until you clear them or withdraw consent.
+                  <strong>Browser Local Storage:</strong> Anonymous conversations (`omnia_conversations_v1`), theme settings (`vizra_theme_mode_v1`), UID-scoped user memories (`vizra_omnia_personal_memories_v1_*`), and consent state (`vizra_cookie_consent_v1`) remain in your browser until you clear them or withdraw consent.
                 </li>
                 <li>
                   <strong>Cloud Firestore:</strong> Authenticated user profiles, projects, and chat histories are stored in Google Cloud Firestore under strict owner-only security rules (`request.auth.uid == userId`) until deleted by the user.
+                </li>
+                <li>
+                  <strong>Server Stores:</strong> Per-tenant credit ledgers (`data/credit_ledger_store.json`), login alert idempotency records (7-day TTL in `data/login_idempotency_store.json`), and support/safety submissions (`data/submissions_store.json`) are retained on the server and purged upon a verified `DELETE /api/account/data` request.
                 </li>
                 <li>
                   <strong>Consent Audit Trail:</strong> Anonymous consent events (`evt_cns_*`) are retained in the server consent store (`data/consent_store.json`) and, if configured by the site operator, exported to a designated Google Sheets audit log.
@@ -284,13 +289,19 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">5. Third-Party Service Providers</h2>
+              <h2 className="typo-card-title">5. Third-Party Service Providers &amp; Subprocessors</h2>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 <li>
-                  <strong>Google Cloud &amp; Firebase:</strong> Authentication (`Firebase Auth`) and NoSQL document persistence (`Cloud Firestore`).
+                  <strong>Google Cloud &amp; Firebase (Google LLC):</strong> Identity authentication (`Firebase Auth`) and owner-isolated NoSQL document persistence (`Cloud Firestore`).
                 </li>
                 <li>
-                  <strong>Google Gemini API:</strong> Multimodal AI inference, embeddings, and live Google Search grounding.
+                  <strong>Google Gemini API &amp; Lyria (`@google/genai`, Google LLC):</strong> Multimodal AI text, code, vision, speech, audio synthesis, embeddings, and live Google Search grounding.
+                </li>
+                <li>
+                  <strong>Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`):</strong> Web font stylesheet and font binary delivery for studio typography.
+                </li>
+                <li>
+                  <strong>EMBL-EBI AlphaFold DB &amp; NCBI (PubChem / PubMed):</strong> Queried via server proxy only when you explicitly invoke the Omnia Science Hub.
                 </li>
                 <li>
                   <strong>Vercel Inc.:</strong> Application hosting, edge routing, cookieless Web Analytics (`@vercel/analytics`), and optional Speed Insights (`@vercel/speed-insights`, loaded only when Analytics consent is enabled).
@@ -299,7 +310,7 @@ export const LegalPage: React.FC = () => {
                   <strong>Google Sheets API (Optional):</strong> When configured by the operator, receives anonymous consent audit rows (`consentId`, timestamp, boolean category flags, and policy version) containing zero PII.
                 </li>
                 <li>
-                  <strong>Resend (Optional):</strong> When configured via `RESEND_API_KEY`, dispatches security login notification emails.
+                  <strong>Transactional SMTP / Nodemailer (Optional):</strong> When configured via `EMAIL_USER` / `SMTP_HOST`, dispatches masked security login notification emails.
                 </li>
               </ul>
             </div>
@@ -307,42 +318,42 @@ export const LegalPage: React.FC = () => {
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
               <h2 className="typo-card-title">6. Security Measures</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                VIZRA enforces Attribute-Based Access Control (ABAC) in `firestore.rules` with default-deny catch-all rules, strict schema validation, and owner UID verification. Server routes enforce sliding-window rate limits, input length caps (50,000 characters max), attachment size limits (15MB max), and SSRF network filters blocking loopback (`127.0.0.1`, `::1`), cloud metadata (`169.254.169.254`), and private RFC1918 subnets.
+                VIZRA enforces Attribute-Based Access Control (ABAC) in `firestore.rules` with default-deny catch-all rules, strict schema validation, and owner UID verification. Server routes enforce sliding-window rate limits, input length caps (50,000 characters max), attachment size limits (15MB max), prompt-injection and sensitive-output filters, and SSRF network filters blocking loopback (`127.0.0.1`, `::1`), cloud metadata (`169.254.169.254`), and private RFC1918 subnets.
               </p>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">7. User Privacy Rights &amp; Data Deletion Requests</h2>
+              <h2 className="typo-card-title">7. User Privacy Rights &amp; Self-Service Account Erasure</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                Depending on your jurisdiction, you may have the right to access, correct, export, or delete your personal data, restrict or object to processing, and withdraw consent at any time:
+                Depending on your jurisdiction (including GDPR Arts. 15–22, CCPA/CPRA, and India DPDP Act Secs. 11–14), you have the right to access, correct, export, or erase your personal data, restrict or object to processing, and withdraw consent at any time:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 <li>
-                  <strong>Self-Service Deletion &amp; Export:</strong> You can export conversations as JSON or delete individual/all threads immediately on the <Link to="/history" className="text-white underline hover:text-[#EB3B2D]">History</Link> and <Link to="/settings" className="text-white underline hover:text-[#EB3B2D]">Settings</Link> pages.
+                  <strong>Automated Account &amp; Data Erasure (`DELETE /api/account/data`):</strong> You can immediately purge your server-side credit ledger, contact records, and local storage using the <em>Delete Account &amp; Data</em> button on the <Link to="/settings" className="text-white underline hover:text-[#EB3B2D]">Settings</Link> page.
+                </li>
+                <li>
+                  <strong>Self-Service Export &amp; Thread Deletion:</strong> Export conversations and memories as JSON or delete individual/all threads on the <Link to="/history" className="text-white underline hover:text-[#EB3B2D]">History</Link> and <Link to="/settings" className="text-white underline hover:text-[#EB3B2D]">Settings</Link> pages.
                 </li>
                 <li>
                   <strong>Consent Withdrawal:</strong> Use the <em>Manage Cookie Preferences</em> or <em>Withdraw Optional Consent</em> controls on this page or in the site footer at any time.
-                </li>
-                <li>
-                  <strong>Account &amp; Cloud Data Deletion Requests:</strong> Submit a formal deletion or correction request via our <Link to="/contact" className="text-white underline hover:text-[#EB3B2D]">Contact &amp; Privacy Requests</Link> page.
                 </li>
               </ul>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">8. Applicable Legal Framework &amp; Operator Configuration Notice</h2>
+              <h2 className="typo-card-title">8. Applicable Legal Framework &amp; Operator Identity</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 These privacy controls are engineered to support transparency, data minimization, and opt-in consent principles aligned with the EU/UK General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA/CPRA), and India&apos;s Digital Personal Data Protection Act (DPDP Act). Publication of these technical pages does not by itself constitute a legal certification.
               </p>
               <div className="p-4 rounded-xl bg-[#090909] border border-amber-500/30 text-xs text-neutral-300 space-y-1.5 font-mono">
                 <div className="flex items-center gap-2 text-amber-400 font-semibold">
                   <AlertCircle size={14} />
-                  <span>Operator Configuration Requirement (Business Details)</span>
+                  <span>Data Controller &amp; Grievance Officer Identity</span>
                 </div>
                 <p className="text-neutral-400 leading-relaxed">
-                  • Legal Entity Name: [Configuration Required: Insert Registered Company / Operator Name]<br />
-                  • Registered Office Address: [Configuration Required: Insert Official Postal Address]<br />
-                  • Privacy &amp; Grievance Officer Contact: [Configuration Required: Insert Designated DPO / Grievance Email]
+                  • Legal Entity Name: {(import.meta as any).env?.VITE_LEGAL_ENTITY_NAME || '[External Configuration Required: Set VITE_LEGAL_ENTITY_NAME]'}<br />
+                  • Registered Office Address: {(import.meta as any).env?.VITE_LEGAL_REGISTERED_ADDRESS || '[External Configuration Required: Set VITE_LEGAL_REGISTERED_ADDRESS]'}<br />
+                  • Privacy / DPO / Grievance Contact: {(import.meta as any).env?.VITE_DPO_EMAIL || '[External Configuration Required: Set VITE_DPO_EMAIL]'}
                 </p>
               </div>
             </div>
@@ -362,11 +373,19 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">2. User Responsibilities &amp; Account Rules</h2>
+              <h2 className="typo-card-title">2. Age Eligibility (18+ Active Policy), Regional Consent &amp; Child Safety Controls</h2>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                <li>
+                  <strong>Minimum Age Requirement (Active Policy):</strong> VIZRA currently operates strictly as an <strong>18+ adult creative studio</strong> (`STRICT_18_PLUS`). Teen onboarding remains dormant (`OPTION_2_ACTIVE = false`) and unrestricted passive access (`Option 5`) is permanently rejected.
+                </li>
+                <li>
+                  <strong>Jurisdictional Verifiable Parental Consent Readiness (Option 3):</strong> Different jurisdictions mandate distinct statutory digital consent ages—including under 13 in the United States (COPPA), 13–16 across EU member states (GDPR Art. 8), under 13 with under-18 design protections in the UK (UK AADC), and under 18 verifiable parental consent in India (DPDP Act 2023 Sec. 9). VIZRA does not store raw minor birthdates or unhashed guardian emails; any live parental consent workflow remains blocked (`HTTP 424`) until an accredited external verification vendor and legal counsel approval are configured. Recorded consent states can be withdrawn or purged via `DELETE /api/account/data`.
+                </li>
+                <li>
+                  <strong>Age-Appropriate Feature Restrictions (Option 4):</strong> Server middleware enforces minor-safe restrictions preventing under-18 flagged sessions from accessing Live Voice (`/live`), external workspace OAuth connectors, unrestricted audio synthesis, paid plan upgrades, or sponsored/affiliate VIZRA Engage placements, alongside strict `BLOCK_LOW_AND_ABOVE` safety thresholds.
+                </li>
                 <li>You are responsible for maintaining the confidentiality of your authentication credentials and all activities that occur under your session.</li>
-                <li>You must ensure that any text, images, documents, or URLs you submit to VIZRA do not violate third-party intellectual property, privacy, or confidentiality rights.</li>
-                <li>You must not use VIZRA to generate unlawful, defamatory, deceptive, or malicious content, or to conduct unauthorized network scanning, SSRF probing, or automated scraping.</li>
+                <li>You must not use VIZRA to generate CSAM/CSAE, self-harm encouragement, CBRN/cyberattack material, unlawful defamation, or non-consensual synthetic media.</li>
               </ul>
             </div>
 
@@ -378,10 +397,16 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">4. Intellectual Property</h2>
+              <h2 className="typo-card-title">4. Intellectual Property, AI Copyrightability &amp; DMCA Notice</h2>
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 <li>
-                  <strong>User Content:</strong> Subject to applicable law and third-party model terms, you retain ownership of the original prompts and input materials you submit, and VIZRA assigns to you any rights it may hold in the outputs generated specifically from your prompts.
+                  <strong>User Content &amp; AI Outputs:</strong> Subject to applicable law and third-party model terms, you retain ownership of your original human-authored inputs, and VIZRA assigns to you any rights it may hold in outputs generated from your prompts.
+                </li>
+                <li>
+                  <strong>AI Copyrightability Disclosure (USCO Guidance):</strong> Under U.S. Copyright Office (USCO) and international copyright standards, purely AI-generated material lacking sufficient human creative authorship or arrangement may not qualify for statutory copyright registration. Users seeking copyright protection are responsible for documenting their human creative selection, modification, and arrangement.
+                </li>
+                <li>
+                  <strong>DMCA / Copyright Takedown Procedure (17 U.S.C. § 512):</strong> If you believe content hosted on VIZRA infringes your copyright, submit a written notice via our <Link to="/contact" className="text-white underline hover:text-[#EB3B2D]">Contact</Link> page identifying: (a) the copyrighted work, (b) the exact URL of the allegedly infringing material, (c) your contact details, (d) a good-faith belief statement, and (e) a statement under penalty of perjury that you are authorized to act on behalf of the owner.
                 </li>
                 <li>
                   <strong>Platform IP:</strong> The VIZRA brand, UI components, procedural shaders, server architecture, and Omnia 1.0 orchestration logic remain the proprietary intellectual property of VIZRA and its licensors.
@@ -390,9 +415,9 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">5. AI-Generated Content Limitations</h2>
+              <h2 className="typo-card-title">5. AI-Generated Content Limitations &amp; Provenance</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                AI synthesis is probabilistic and may produce inaccurate, incomplete, or outdated statements despite web search grounding and deterministic verification checks. Outputs do not constitute professional legal, medical, financial, or security advice. You are solely responsible for human review, testing, and verification of any generated text, citations, or code prior to deployment or publication.
+                AI synthesis is probabilistic and may produce inaccurate, incomplete, or outdated statements despite web search grounding and deterministic verification checks. Outputs do not constitute professional legal, medical, clinical, financial, or security advice. Exported visual PNGs and audio streams include machine-readable AI provenance metadata aligned with EU AI Act Article 50(2).
               </p>
             </div>
 
@@ -421,9 +446,9 @@ export const LegalPage: React.FC = () => {
                   <span>Operator Configuration Requirement (Legal Entity &amp; Jurisdiction)</span>
                 </div>
                 <p className="text-neutral-400 leading-relaxed">
-                  • Operating Entity: [Configuration Required: Insert Registered Legal Entity]<br />
-                  • Governing Law &amp; Jurisdiction: [Configuration Required: Insert Applicable State / Country Law]<br />
-                  • Official Legal Notice Address: [Configuration Required: Insert Legal Notice Email &amp; Postal Address]
+                  • Operating Entity: {(import.meta as any).env?.VITE_LEGAL_ENTITY_NAME || '[External Configuration Required: Set VITE_LEGAL_ENTITY_NAME]'}<br />
+                  • Governing Law &amp; Jurisdiction: {(import.meta as any).env?.VITE_GOVERNING_LAW || '[External Configuration Required: Set VITE_GOVERNING_LAW]'}<br />
+                  • Official Legal Notice Address: {(import.meta as any).env?.VITE_LEGAL_REGISTERED_ADDRESS || '[External Configuration Required: Set VITE_LEGAL_REGISTERED_ADDRESS]'}
                 </p>
               </div>
             </div>

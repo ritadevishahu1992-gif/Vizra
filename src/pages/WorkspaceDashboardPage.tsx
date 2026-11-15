@@ -124,16 +124,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
     } catch {
       // Ignore
     }
-    return [
-      {
-        id: 'tok-default-1',
-        label: 'Omnia Studio Client SDK',
-        prefix: 'vz_live_98f2...4a1c',
-        scope: 'write:projects',
-        createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
-        lastUsedAt: Date.now() - 1000 * 60 * 14,
-      },
-    ];
+    return [];
   });
   const [newTokenLabel, setNewTokenLabel] = useState('');
   const [newTokenScope, setNewTokenScope] =

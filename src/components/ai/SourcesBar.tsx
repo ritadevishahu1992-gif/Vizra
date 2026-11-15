@@ -439,7 +439,7 @@ export const SourcesBar: React.FC<SourcesBarProps> = ({
                 <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[10px] font-mono text-neutral-500">
                   <span>Retrieved: {new Date(selectedSource.retrievedAt).toLocaleTimeString()}</span>
                   <span>Priority: {selectedSource.priorityCategory || 'standard'}</span>
-                  <span>Status: Zero Hallucination Guarantee</span>
+                  <span>Status: Grounded Source Verification</span>
                 </div>
               </div>
             </motion.div>

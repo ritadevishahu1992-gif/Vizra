@@ -27,7 +27,10 @@ import {
 import {
   getIntegrations,
   updateIntegrationStatus,
+  fetchServerIntegrations,
+  disconnectServerIntegration,
 } from '../../services/integrationService';
+import { auth } from '../../lib/firebase';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -61,6 +64,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setMemories(getPersonalMemories());
       setMemoryActive(isMemoryEnabled());
       setIntegrations(getIntegrations());
+      (async () => {
+        try {
+          const token = auth?.currentUser ? await auth.currentUser.getIdToken() : null;
+          const live = await fetchServerIntegrations(token);
+          setIntegrations(live);
+        } catch {
+          // Keep synchronous defaults
+        }
+      })();
     }
   }, [isOpen]);
 
@@ -90,9 +102,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setMemories([]);
   };
 
-  const handleDisconnect = (id: string) => {
-    const updated = updateIntegrationStatus(id, 'connect');
-    setIntegrations(updated);
+  const handleDisconnect = async (id: string) => {
+    if (id === 'local_files') {
+      const updated = updateIntegrationStatus(id, 'connect');
+      setIntegrations(updated);
+      return;
+    }
+    try {
+      const token = auth?.currentUser ? await auth.currentUser.getIdToken() : null;
+      const res = await disconnectServerIntegration(id, token);
+      if (res.ok) {
+        const refreshed = await fetchServerIntegrations(token);
+        setIntegrations(refreshed);
+      }
+    } catch {
+      // Ignore network failure
+    }
   };
 
   const handleExportData = () => {
@@ -412,7 +437,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </button>
                       ) : (
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-950 border border-neutral-850 text-neutral-500">
-                          {item.status === 'coming_soon' ? 'Coming Soon' : 'Not Connected'}
+                          {item.status === 'coming_soon' ? 'External OAuth Required' : 'Ready to Connect'}
                         </span>
                       )}
                     </div>
@@ -428,10 +453,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-2">
                 <div className="flex items-center gap-2 text-neutral-200 font-semibold">
                   <Shield size={14} className="text-[#eb3b2d]" />
-                  <span>Omnia Zero-Retention Policy</span>
+                  <span>Omnia Proxy &amp; Workspace Data Governance</span>
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Your creative prompts, attachments, and project outlines are processed in real-time. Vizra does not sell your creative assets or train public foundational models on private workspaces.
+                  Prompts and attachments are routed through VIZRA&apos;s server proxy to Google Gemini API for inference. VIZRA does not sell your creative assets. Saved conversations, personal memories (scoped to your user ID), and optional cloud projects remain under your control and can be exported or erased at any time.
                 </p>
               </div>
 

@@ -72,7 +72,7 @@ export async function runLoginNotificationTests() {
     });
 
     const hasUserEmail = dispatches.some((d) => d.to === 'creator@vizra.studio');
-    const hasAdminEmail = dispatches.some((d) => d.to.includes('admin') || d.to === (process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL || 'ritadevishahu1992@gmail.com'));
+    const hasAdminEmail = dispatches.some((d) => d.to.includes('admin') || d.to === (process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL || 'security-admin@vizra.ai'));
     const isSingleEvent = !record.isDuplicate && record.eventId.startsWith('viz_sec_');
 
     return dispatches.length === 2 && hasUserEmail && hasAdminEmail && isSingleEvent;
@@ -133,7 +133,7 @@ export async function runLoginNotificationTests() {
 
     // Check that admin dispatch went strictly to the configured admin email, not attacker
     const adminDispatch = dispatches.find((d) => d.subject.includes('[VIZRA Security Alert]'));
-    const serverConfiguredAdmin = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL || 'ritadevishahu1992@gmail.com';
+    const serverConfiguredAdmin = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL || 'security-admin@vizra.ai';
 
     return adminDispatch !== undefined && adminDispatch.to === serverConfiguredAdmin;
   });

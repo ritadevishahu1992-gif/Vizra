@@ -303,32 +303,47 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
           {/* SECTION 2: CONNECT */}
           <div>
             <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2 px-1 flex items-center justify-between">
-              <span>CONNECT</span>
-              <span className="text-neutral-500 text-[9px]">COMING SOON</span>
+              <span>CONNECT WORKSPACES (OAUTH 2.0)</span>
+              <span className="text-neutral-500 text-[9px]">EXTERNAL APPROVAL REQUIRED</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { name: 'Google Drive', icon: HardDrive },
-                { name: 'Google Docs', icon: FileText },
-                { name: 'Google Sheets', icon: FileSpreadsheet },
-                { name: 'GitHub', icon: Github },
-                { name: 'Figma', icon: Figma },
-                { name: 'Canva', icon: Palette },
-                { name: 'Notion', icon: FileCheck },
-                { name: 'Dropbox', icon: HardDrive },
-                { name: 'YouTube', icon: Youtube },
+                { id: 'google_drive', name: 'Google Drive', icon: HardDrive, scope: 'https://www.googleapis.com/auth/drive.readonly', category: 'productivity' as const },
+                { id: 'google_docs', name: 'Google Docs', icon: FileText, scope: 'https://www.googleapis.com/auth/documents.readonly', category: 'productivity' as const },
+                { id: 'google_sheets', name: 'Google Sheets', icon: FileSpreadsheet, scope: 'https://www.googleapis.com/auth/spreadsheets.readonly', category: 'productivity' as const },
+                { id: 'github', name: 'GitHub', icon: Github, scope: 'read:user public_repo', category: 'development' as const },
+                { id: 'figma', name: 'Figma', icon: Figma, scope: 'file_read', category: 'development' as const },
+                { id: 'canva', name: 'Canva', icon: Palette, scope: 'design:meta:read', category: 'creator' as const },
+                { id: 'notion', name: 'Notion', icon: FileCheck, scope: 'read_content', category: 'productivity' as const },
+                { id: 'youtube', name: 'YouTube', icon: Youtube, scope: 'https://www.googleapis.com/auth/youtube.readonly', category: 'creator' as const },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
                   <button
-                    key={item.name}
+                    key={item.id}
                     type="button"
-                    onClick={() => showComingSoon(item.name)}
+                    onClick={() => {
+                      if (onRequestConnectIntegration) {
+                        onRequestConnectIntegration({
+                          id: item.id,
+                          name: item.name,
+                          category: item.category,
+                          icon: item.id,
+                          description: `Connect ${item.name} via server-side OAuth 2.0`,
+                          status: 'coming_soon',
+                          scopeRequired: item.scope,
+                          configured: false,
+                        });
+                        onClose();
+                      } else {
+                        showComingSoon(item.name);
+                      }
+                    }}
                     className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all text-center group cursor-pointer"
                   >
                     <Icon size={16} className="text-neutral-400 group-hover:text-white mx-auto mb-1" />
                     <div className="text-[11px] font-medium text-neutral-300 truncate">{item.name}</div>
-                    <span className="text-[9px] font-mono text-[#eb3b2d] block mt-0.5">Coming Soon</span>
+                    <span className="text-[9px] font-mono text-amber-400/90 block mt-0.5">OAuth Pending</span>
                   </button>
                 );
               })}

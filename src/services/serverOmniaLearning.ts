@@ -23,8 +23,54 @@ import {
   cronAuthMiddleware,
   adminRateLimiter,
   generalApiRateLimiter,
+  feedbackRateLimiter,
+  detectPromptInjection,
+  derivePrivacySessionHash,
   safeCompare,
 } from '../server/security';
+import { verifyFirebaseIdToken } from '../server/authVerification';
+
+const ALLOWED_FEEDBACK_TYPES = new Set(['HELPFUL', 'NOT_HELPFUL', 'CORRECTION', 'REPORT']);
+
+function sanitizeRetrievedSources(rawSources: any): Array<{ title: string; url?: string; score?: number }> | undefined {
+  if (!Array.isArray(rawSources)) return undefined;
+  const clean: Array<{ title: string; url?: string; score?: number }> = [];
+  for (const item of rawSources.slice(0, 25)) {
+    if (!item || typeof item !== 'object') continue;
+    const rawTitle = typeof item.title === 'string' ? scrubFeedbackPii(item.title.trim()).slice(0, 200) : '';
+    if (!rawTitle) continue;
+    let safeUrl: string | undefined;
+    if (typeof item.url === 'string' && item.url.trim()) {
+      try {
+        const parsed = new URL(item.url.trim());
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          safeUrl = parsed.toString().slice(0, 500);
+        }
+      } catch {
+        // Omit malformed or unsafe non-HTTP(S) URLs
+      }
+    }
+    const safeScore =
+      typeof item.score === 'number' && Number.isFinite(item.score)
+        ? Math.max(0, Math.min(100, item.score))
+        : undefined;
+    clean.push({
+      title: rawTitle,
+      ...(safeUrl ? { url: safeUrl } : {}),
+      ...(safeScore !== undefined ? { score: safeScore } : {}),
+    });
+  }
+  return clean.length > 0 ? clean : undefined;
+}
+
+function scrubFeedbackPii(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
+    .replace(/\b(?:\+?\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, '[REDACTED_PHONE]')
+    .replace(/AIza[0-9A-Za-z_-]{20,}/g, '[REDACTED_KEY]')
+    .replace(/re_[0-9A-Za-z_-]{15,}/g, '[REDACTED_KEY]');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -194,32 +240,32 @@ Lead AI Infrastructure Engineer Specification.
       extractedRulesCount: 3,
     },
     {
-      sourceId: 'src_smart_dispenser_specs',
-      title: 'Smart Medicine Dispenser Hardware Specifications',
+      sourceId: 'src_camera_rig_specs',
+      title: 'Cinema Camera Motion Control Rig Specifications',
       sourceType: 'document',
-      contentHash: computeStringHash('ESP32 microcontroller dual stepper NEMA 17 14 partitioned medication pods 1200ms optical window'),
+      contentHash: computeStringHash('6-axis cinema camera rig dual NEMA-23 stepper 1200ms optical home-switch window'),
       version: 1,
       createdAt: '2026-09-20T10:00:00Z',
       updatedAt: '2026-09-20T10:00:00Z',
       status: 'CONFLICTED',
       trustLevel: 'trusted_partner',
-      rawContent: `# Smart Medicine Dispenser Hardware Specifications
-- Optical IR drop sensor timeout: 1200ms drop window through chute before NEMA-17 motor reverse.
-- Carousel: 14 partitioned pods with micro-servo lock.
-- Conflicting report with Clinical Compliance protocol (800ms threshold).`,
+      rawContent: `# Cinema Camera Motion Control Rig Specifications
+- Optical IR home-switch sensor timeout: 1200ms carriage deceleration window before stepper reversal.
+- Turntable: 14 indexed keyframes with micro-servo lock.
+- Competing specification with High-Speed VFX Motion Control Protocol v2 (800ms sync threshold).`,
       chunkCount: 2,
       tokenCount: 130,
       tier: 'project',
       accessLevel: 'private',
-      projectId: 'proj_med_dispenser',
+      projectId: 'proj_camera_rig',
       validationScore: 84,
-      validationNotes: ['Hardware bench validation passed; factual conflict noted.'],
+      validationNotes: ['Studio bench validation passed; timing parameter conflict noted.'],
       extractedConceptsCount: 1,
       extractedRulesCount: 2,
       conflictDetails: {
-        conflictingSourceId: 'src_clinical_safety_protocol',
-        conflictingTopic: 'Medicine Dispenser Transit Timing',
-        reason: 'Hardware spec requests 1200ms transit window; Clinical protocol specifies 800ms tamper limit.',
+        conflictingSourceId: 'src_vfx_sync_protocol',
+        conflictingTopic: 'Camera Rig Optical Home-Switch Timing',
+        reason: 'Standard studio rig spec uses 1200ms inertia window; High-Speed VFX protocol specifies 800ms sync limit.',
         detectedAt: '2026-09-24T10:30:00Z',
       },
     },
@@ -234,21 +280,21 @@ Lead AI Infrastructure Engineer Specification.
       topic: 'Omnia Identity & Role',
       concept: 'Omnia Intelligence Layer of Vizra',
       level: 6,
-      simpleExplanation: 'Omnia is the built-in intelligence of Vizra — created by Vizrma to help creators think, create, understand, and build.',
+      simpleExplanation: 'Omnia is the built-in intelligence of Vizra — created by Vizra to help creators think, create, understand, and build.',
       technicalExplanation: 'Omnia serves as the foundational conversational reasoning and multi-stage continuous learning layer embedded within the Vizra creative studio ecosystem.',
       practicalMeaning: 'VIZRA is the creative platform/studio environment; OMNIA is the intelligence layer inside that environment.',
       example: 'When asked "Who are you?", Omnia responds: "I’m Omnia, the intelligence behind Vizra — built to help creators think, create, understand, and build."',
       whenToUse: ['Every user interaction explaining Vizra, Omnia, or assistance capabilities'],
       whenNotToUse: ['Never describe Omnia as a generic standalone chatbot or third-party product'],
-      commonMistakes: ['Confusing the underlying model provider with the creator of Omnia (Omnia was created by Vizrma)'],
-      relatedConcepts: ['Vizra Creative Studio', 'Vizrma Creator', 'Continuous Learning Architecture'],
+      commonMistakes: ['Confusing the underlying model provider with the creator of Omnia (Omnia was created by Vizra)'],
+      relatedConcepts: ['Vizra Creative Studio', 'Continuous Learning Architecture'],
       facts: [
         'Name: OMNIA',
         'Home platform: VIZRA',
-        'Created by: Vizrma',
+        'Created by: Vizra',
         'Role: Intelligence layer and creative assistant of Vizra',
       ],
-      rawKnowledge: 'Omnia was created by Vizrma as the intelligence layer of Vizra. Vizra is the creative AI platform, while Omnia is its intelligence layer.',
+      rawKnowledge: 'Omnia was created by Vizra as the intelligence layer of Vizra. Vizra is the creative AI platform, while Omnia is its intelligence layer.',
       sourceId: 'src_vizra_core_principles',
       sourceType: 'documentation',
       confidence: 1.0,
@@ -256,7 +302,7 @@ Lead AI Infrastructure Engineer Specification.
       version: 1,
       createdAt: '2026-09-01T00:00:00Z',
       updatedAt: '2026-09-01T00:00:00Z',
-      tags: ['identity', 'omnia', 'vizra', 'vizrma'],
+      tags: ['identity', 'omnia', 'vizra'],
     },
     {
       id: 'c_vizra_design_constitution',
@@ -307,28 +353,28 @@ Lead AI Infrastructure Engineer Specification.
       tags: ['rag', 'retrieval', 'hybrid', 'architecture'],
     },
     {
-      id: 'c_dispenser_transit_timing',
-      topic: 'Medical Dispenser Hardware Timing',
-      concept: 'Optical IR Drop Window',
+      id: 'c_camera_rig_timing',
+      topic: 'Cinema Camera Rig Motion Timing',
+      concept: 'Optical Home-Switch Window',
       level: 3,
-      simpleExplanation: 'The medicine dispenser checks if a pill fell through the chute within a specific time before reversing the motor.',
-      technicalExplanation: 'Optical IR drop sensor window configured to detect pill occlusion during chute transit before triggering stepper retry sequence.',
-      practicalMeaning: 'Hardware timing controls jam detection and prevents double-dispensing.',
-      example: 'Pill drops past IR beam in 400ms -> motor proceeds to next slot.',
-      whenToUse: ['Calibrating dispense cycles and jam recovery'],
-      whenNotToUse: ['When carousel shutter lock is open'],
-      commonMistakes: ['Ignoring clinical safety regulations regarding aperture exposure latency'],
-      relatedConcepts: ['NEMA-17 Stepper', 'Jam Detection', 'IR Break Beam'],
-      facts: ['Hardware spec timeout: 1200ms', 'Clinical protocol limit: 800ms', 'Carousel pods: 14'],
-      rawKnowledge: 'Smart Medicine Dispenser Hardware Specifications',
-      sourceId: 'src_smart_dispenser_specs',
+      simpleExplanation: 'The studio camera rig verifies carriage optical home-switch arrival within a specific window before reversing the stepper.',
+      technicalExplanation: 'Optical IR home-switch window configured to detect carriage arrival during rail transit before triggering stepper retry sequence.',
+      practicalMeaning: 'Motion control timing prevents carriage overrun on multi-pass VFX shots.',
+      example: 'Carriage passes optical home beam in 400ms -> rig proceeds to next keyframe.',
+      whenToUse: ['Calibrating motion control camera passes and home recovery'],
+      whenNotToUse: ['When lens carriage lock is manually disengaged'],
+      commonMistakes: ['Ignoring payload inertia differences between standard and anamorphic lenses'],
+      relatedConcepts: ['Stepper Control', 'Optical Home Switch', 'Motion Control Keyframes'],
+      facts: ['Standard inertia timeout: 1200ms', 'High-speed VFX sync limit: 800ms', 'Indexed keyframes: 14'],
+      rawKnowledge: 'Cinema Camera Motion Control Rig Specifications',
+      sourceId: 'src_camera_rig_specs',
       sourceType: 'document',
       confidence: 0.88,
       status: 'CONFLICTED',
       version: 1,
       createdAt: '2026-09-20T10:00:00Z',
       updatedAt: '2026-09-20T10:00:00Z',
-      tags: ['hardware', 'dispenser', 'timing'],
+      tags: ['hardware', 'camera_rig', 'timing'],
     },
   ];
 
@@ -342,7 +388,7 @@ Lead AI Infrastructure Engineer Specification.
       name: 'Omnia Creator Attribution Mandate',
       logicType: 'RULE',
       condition: 'IF asked "Who created you?", "Who made you?", "Who is your creator?", or "Who built Omnia?"',
-      action: 'THEN state canonical response: "Omnia was created by Vizrma as the intelligence layer of Vizra."',
+      action: 'THEN state canonical response: "Omnia was created by Vizra as the intelligent operating layer of Vizra."',
       sourceId: 'src_vizra_core_principles',
       status: 'APPROVED',
       confidence: 1.0,
@@ -381,7 +427,7 @@ Lead AI Infrastructure Engineer Specification.
     {
       id: 'rule_zero_hallucination',
       topic: 'Omnia AI Architecture',
-      name: 'Zero Hallucination Citation Mandate',
+      name: 'Grounded Citation Mandate',
       logicType: 'CONSTRAINT',
       condition: 'IF making factual assertions regarding verified technical architecture',
       action: 'THEN cite verified source ID and excerpt; if ungrounded, state uncertainty',
@@ -394,18 +440,18 @@ Lead AI Infrastructure Engineer Specification.
       updatedAt: '2026-09-15T12:00:00Z',
     },
     {
-      id: 'rule_dispenser_jam_sequence',
-      topic: 'Medical Dispenser Hardware Timing',
-      name: 'Dispenser Jam Reversal Sequence',
+      id: 'rule_camera_rig_recovery_sequence',
+      topic: 'Cinema Camera Rig Motion Timing',
+      name: 'Camera Carriage Home Recovery Sequence',
       logicType: 'PROCEDURE',
-      condition: 'IF optical IR sensor does not detect pill drop within configured timeout',
-      action: 'THEN execute 3-step reverse oscillation protocol',
+      condition: 'IF optical IR home sensor does not detect carriage arrival within configured timeout',
+      action: 'THEN execute 3-step reverse deceleration protocol',
       steps: [
-        { step: 1, title: 'Stop Carousel', action: 'Immediately halt forward stepper pulse' },
-        { step: 2, title: 'Reverse Oscillation', action: 'Pulse stepper 15 degrees backward for 200ms' },
-        { step: 3, title: 'Re-attempt Drop', action: 'Step forward to target pod position and verify IR beam' },
+        { step: 1, title: 'Halt Carriage', action: 'Immediately halt forward stepper pulse' },
+        { step: 2, title: 'Reverse Micro-Step', action: 'Pulse stepper 15 degrees backward for 200ms' },
+        { step: 3, title: 'Re-index Home', action: 'Step forward to home keyframe and verify optical sensor' },
       ],
-      sourceId: 'src_smart_dispenser_specs',
+      sourceId: 'src_camera_rig_specs',
       status: 'APPROVED',
       confidence: 0.94,
       version: 1,
@@ -440,11 +486,11 @@ Lead AI Infrastructure Engineer Specification.
     },
     {
       id: 'rel_3',
-      fromConcept: 'Optical IR Drop Window',
+      fromConcept: 'Optical Home-Switch Window',
       relationType: 'conflicts_with',
-      toConcept: 'Clinical Compliance Safety Directive',
-      description: '1200ms hardware transit window clashes with 800ms tamper limit',
-      sourceId: 'src_smart_dispenser_specs',
+      toConcept: 'High-Speed VFX Sync Protocol',
+      description: '1200ms inertia allowance clashes with 800ms high-speed VFX sync limit',
+      sourceId: 'src_camera_rig_specs',
       confidence: 0.9,
       createdAt: '2026-09-20T10:00:00Z',
     },
@@ -453,17 +499,17 @@ Lead AI Infrastructure Engineer Specification.
   conflictsList = [
     {
       id: 'conflict_srv_1',
-      sourceAId: 'src_smart_dispenser_specs',
-      sourceBId: 'src_clinical_safety_protocol',
-      sourceATitle: 'Smart Medicine Dispenser Hardware Specs',
-      sourceBTitle: 'Clinical Compliance Safety Directive v2',
-      topic: 'Medicine Dispenser Transit Timing',
-      statementA: 'Optical IR drop sensor timeout is configured at 1200ms to allow gravity transit before triggering retry reversal.',
-      statementB: 'Clinical safety protocol requires pill transit timeout not to exceed 800ms to prevent user tampering while carousel aperture is exposed.',
+      sourceAId: 'src_camera_rig_specs',
+      sourceBId: 'src_vfx_sync_protocol',
+      sourceATitle: 'Cinema Camera Motion Control Rig Specs',
+      sourceBTitle: 'High-Speed VFX Sync Protocol v2',
+      topic: 'Camera Rig Optical Home-Switch Timing',
+      statementA: 'Optical IR home-switch timeout is configured at 1200ms to accommodate anamorphic lens carriage inertia.',
+      statementB: 'High-speed VFX sync protocol requires optical home-switch timeout not to exceed 800ms for rapid multi-pass synchronization.',
       detectedAt: '2026-09-24T10:30:00Z',
       resolutionRule: 'MANUAL_REVIEW',
       status: 'UNRESOLVED',
-      resolutionNotes: 'Hardware bench specifies 1200ms; Clinical directive limits to 800ms.',
+      resolutionNotes: 'Standard rig spec specifies 1200ms; High-Speed VFX protocol limits to 800ms.',
     },
   ];
 
@@ -600,6 +646,17 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     }
     if (prompt.length > 25000) {
       res.status(400).json({ error: 'Prompt exceeds maximum length of 25,000 characters' });
+      return;
+    }
+
+    const injCheck = detectPromptInjection(prompt);
+    if (!injCheck.safe) {
+      res.status(400).json({
+        error: {
+          code: 'PROMPT_POLICY_VIOLATION',
+          message: injCheck.reason,
+        },
+      });
       return;
     }
 
@@ -818,13 +875,27 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     }
   });
 
-  // 9. USER FEEDBACK PIPELINE
-  app.post('/api/omnia/feedback', generalApiRateLimiter.getMiddleware(), (req, res) => {
+  // 9. USER FEEDBACK PIPELINE (Validated enums, sanitized sources, PII-scrubbed, hashed attribution, admin-protected reads & moderation)
+  app.post('/api/omnia/feedback', feedbackRateLimiter.getMiddleware(), async (req, res) => {
     loadStoredData();
     const { question, answer, retrievedSources, userFeedback, correction } = req.body || {};
 
-    if (!question || typeof question !== 'string' || !userFeedback) {
-      res.status(400).json({ error: 'question and userFeedback are required' });
+    if (!question || typeof question !== 'string' || !question.trim() || !userFeedback) {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_FEEDBACK_PAYLOAD',
+          message: 'question and userFeedback are required.',
+        },
+      });
+      return;
+    }
+    if (typeof userFeedback !== 'string' || !ALLOWED_FEEDBACK_TYPES.has(userFeedback)) {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_FEEDBACK_TYPE',
+          message: 'userFeedback must be one of HELPFUL, NOT_HELPFUL, CORRECTION, or REPORT.',
+        },
+      });
       return;
     }
     if (
@@ -832,42 +903,107 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       (typeof answer === 'string' && answer.length > 25000) ||
       (typeof correction === 'string' && correction.length > 10000)
     ) {
-      res.status(400).json({ error: 'Feedback payload exceeds maximum allowed character length' });
+      res.status(400).json({
+        error: {
+          code: 'FEEDBACK_LENGTH_EXCEEDED',
+          message: 'Feedback payload exceeds maximum allowed character length.',
+        },
+      });
       return;
     }
 
+    if (typeof correction === 'string' && correction.trim()) {
+      const correctionCheck = detectPromptInjection(correction);
+      if (!correctionCheck.safe) {
+        res.status(400).json({
+          error: {
+            code: 'PROMPT_POLICY_VIOLATION',
+            message: correctionCheck.reason,
+          },
+        });
+        return;
+      }
+    }
+
+    // Derive privacy-preserving attribution hash (never store raw UID, email, or IP)
+    let attributionSeed = `ip:${req.socket.remoteAddress || 'local'}`;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7).trim();
+      const verified = await verifyFirebaseIdToken(token);
+      if (!verified.valid || !verified.uid) {
+        res.status(401).json({
+          error: {
+            code: 'INVALID_AUTH_TOKEN',
+            message: 'Provided authentication token is invalid or expired.',
+          },
+        });
+        return;
+      }
+      attributionSeed = `uid:${verified.uid}`;
+    } else if (
+      typeof req.headers['x-vizra-client-id'] === 'string' &&
+      /^[a-zA-Z0-9_-]{4,64}$/.test(req.headers['x-vizra-client-id'].trim())
+    ) {
+      attributionSeed = `client:${req.headers['x-vizra-client-id'].trim()}`;
+    }
+
+    const submittedByHash = derivePrivacySessionHash(attributionSeed);
     const id = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const now = new Date().toISOString();
+    const cleanQuestion = scrubFeedbackPii(question.trim().slice(0, 10000));
+    const cleanAnswer = typeof answer === 'string' ? scrubFeedbackPii(answer.slice(0, 25000)) : '';
+    const cleanCorrection =
+      typeof correction === 'string' && correction.trim()
+        ? scrubFeedbackPii(correction.trim().slice(0, 10000))
+        : undefined;
+    const safeSources = sanitizeRetrievedSources(retrievedSources);
+
+    // Prevent rapid duplicate identical submissions from flooding queue
+    const thirtySecondsAgo = Date.now() - 30_000;
+    const duplicateRecent = feedbackList.find(
+      (f) =>
+        f.submittedByHash === submittedByHash &&
+        f.userFeedback === userFeedback &&
+        f.question === cleanQuestion &&
+        f.correction === cleanCorrection &&
+        new Date(f.timestamp).getTime() > thirtySecondsAgo
+    );
+    if (duplicateRecent) {
+      res.status(200).json({ success: true, duplicate: true, item: duplicateRecent });
+      return;
+    }
 
     const item: UserFeedbackItem = {
       id,
-      question: question.slice(0, 10000),
-      answer: typeof answer === 'string' ? answer.slice(0, 25000) : '',
-      retrievedSources: Array.isArray(retrievedSources) ? retrievedSources.slice(0, 25) : undefined,
-      userFeedback,
-      correction: typeof correction === 'string' ? correction.slice(0, 10000) : undefined,
+      question: cleanQuestion,
+      answer: cleanAnswer,
+      retrievedSources: safeSources,
+      userFeedback: userFeedback as UserFeedbackItem['userFeedback'],
+      correction: cleanCorrection,
       timestamp: now,
-      status: correction ? 'PENDING_REVIEW' : 'APPROVED',
+      status: cleanCorrection ? 'PENDING_REVIEW' : 'APPROVED',
+      submittedByHash,
     };
 
-    if (typeof correction === 'string' && correction.trim().length > 10) {
+    if (typeof cleanCorrection === 'string' && cleanCorrection.trim().length > 10) {
       const sourceId = `src_corr_${Date.now()}`;
       const candidate: LearningSource = {
         sourceId,
-        title: `Correction on: "${question.slice(0, 36)}..."`,
+        title: `Correction on: "${cleanQuestion.slice(0, 36)}..."`,
         sourceType: 'correction',
-        contentHash: computeStringHash(correction),
+        contentHash: computeStringHash(cleanCorrection),
         version: 1,
         createdAt: now,
         updatedAt: now,
         status: 'PENDING',
         trustLevel: 'user_correction',
-        rawContent: correction.trim(),
+        rawContent: cleanCorrection.trim(),
         chunkCount: 1,
-        tokenCount: Math.ceil(correction.length / 4),
-        tier: 'global',
-        accessLevel: 'public',
-        validationNotes: [`Awaiting review for prompt: "${question.slice(0, 200)}"`],
+        tokenCount: Math.ceil(cleanCorrection.length / 4),
+        tier: 'project',
+        accessLevel: 'private',
+        validationNotes: [`Awaiting admin review for prompt: "${cleanQuestion.slice(0, 200)}"`],
       };
 
       sourcesMap.set(sourceId, candidate);
@@ -878,7 +1014,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
         timestamp: now,
         level: 'info',
         stage: 'QUEUED',
-        message: `User correction queued for validation: "${question.slice(0, 30)}..."`,
+        message: `User correction queued for admin review: "${cleanQuestion.slice(0, 30)}..."`,
         sourceId,
       });
     }
@@ -892,9 +1028,63 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     res.json({ success: true, item });
   });
 
-  app.get('/api/omnia/feedback', (_req, res) => {
+  app.get('/api/omnia/feedback', adminRateLimiter.getMiddleware(), adminAuthMiddleware, (req, res) => {
     loadStoredData();
-    res.json({ feedback: feedbackList.slice(0, 50) });
+    const { status } = req.query;
+    let items = feedbackList;
+    if (typeof status === 'string' && ['PENDING_REVIEW', 'APPROVED', 'REJECTED'].includes(status)) {
+      items = items.filter((f) => f.status === status);
+    }
+    res.json({ feedback: items.slice(0, 100), total: items.length });
+  });
+
+  app.patch('/api/omnia/feedback/:id', adminRateLimiter.getMiddleware(), adminAuthMiddleware, (req, res) => {
+    loadStoredData();
+    const { status } = req.body || {};
+    if (status !== 'PENDING_REVIEW' && status !== 'APPROVED' && status !== 'REJECTED') {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_STATUS',
+          message: 'Status must be PENDING_REVIEW, APPROVED, or REJECTED.',
+        },
+      });
+      return;
+    }
+
+    const target = feedbackList.find((f) => f.id === req.params.id);
+    if (!target) {
+      res.status(404).json({
+        error: {
+          code: 'FEEDBACK_NOT_FOUND',
+          message: 'Feedback item not found.',
+        },
+      });
+      return;
+    }
+
+    target.status = status;
+    target.reviewedAt = new Date().toISOString();
+    target.reviewedBy = (req as any).adminActor || 'admin';
+
+    if (target.sourceCreatedId && sourcesMap.has(target.sourceCreatedId)) {
+      const linked = sourcesMap.get(target.sourceCreatedId)!;
+      linked.status =
+        status === 'APPROVED' ? 'APPROVED' : status === 'REJECTED' ? 'REJECTED' : 'PENDING';
+      linked.updatedAt = target.reviewedAt;
+      sourcesMap.set(target.sourceCreatedId, linked);
+    }
+
+    logsList.unshift({
+      id: `log_fb_${Date.now()}`,
+      timestamp: target.reviewedAt,
+      level: 'info',
+      stage: 'VALIDATING',
+      message: `Admin (${target.reviewedBy}) marked feedback ${target.id} as ${status}.`,
+      sourceId: target.sourceCreatedId,
+    });
+
+    persistStore();
+    res.json({ success: true, item: target });
   });
 
   // 10. 24/7 SCHEDULED SYNCHRONIZATION (VERCEL CRON)

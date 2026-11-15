@@ -119,6 +119,14 @@ export const ScienceHubModal: React.FC<ScienceHubModalProps> = ({ isOpen, onClos
             })}
           </div>
 
+          {/* Non-Medical / Non-Clinical Research Disclaimer Banner */}
+          <div className="px-6 py-2 bg-amber-950/30 border-b border-amber-800/30 text-[11px] text-amber-200/90 font-mono flex items-center justify-between gap-2">
+            <span>
+              Educational &amp; Scientific Research Reference Only — Not Medical, Diagnostic, or Clinical Treatment Advice.
+            </span>
+            <span className="uppercase text-[10px] text-amber-400 shrink-0">Non-Clinical</span>
+          </div>
+
           {/* Body Content */}
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* Search Input Bar */}

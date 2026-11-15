@@ -5,6 +5,7 @@ import {
   validateExternalUrlForSSRF,
 } from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
+import { resolveRequestAgePolicyContext } from '../compliance/ageAssurance';
 import {
   getEngageConfig,
   updateEngageConfig,
@@ -103,9 +104,15 @@ export async function engageAdminAuthMiddleware(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  const adminEmail = (
-    process.env.VIZRA_ADMIN_NOTIFY_EMAIL || 'ritadevishahu1992@gmail.com'
-  ).toLowerCase();
+  const allowedAdminEmails = (
+    process.env.ADMIN_ALLOWLIST_EMAILS ||
+    process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL ||
+    process.env.VIZRA_ADMIN_NOTIFY_EMAIL ||
+    ''
+  )
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
   const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
 
   const xAdminKey =
@@ -153,7 +160,7 @@ export async function engageAdminAuthMiddleware(
       return;
     }
 
-    if (verified.email.toLowerCase() !== adminEmail) {
+    if (allowedAdminEmails.length === 0 || !allowedAdminEmails.includes(verified.email.toLowerCase())) {
       res.status(403).json({
         error: {
           code: 'FORBIDDEN_ENGAGE_ROLE',
@@ -180,7 +187,7 @@ export async function engageAdminAuthMiddleware(
   }
 
   // Studio development preview fallback
-  (req as any).engageActor = adminEmail;
+  (req as any).engageActor = allowedAdminEmails[0] || 'studio-preview-admin@vizra.local';
   next();
 }
 
@@ -188,7 +195,7 @@ export function setupVizraEngageRoutes(app: Express): void {
   // ==========================================================================
   // PUBLIC: HYBRID CONTENT SELECTION (Zero private conversation inspection)
   // ==========================================================================
-  const handleSelect = (req: Request, res: Response) => {
+  const handleSelect = async (req: Request, res: Response) => {
     try {
       const rawMode = (req.query.mode || req.body?.mode || 'quick') as string;
       const mode: AIMode = VALID_MODES.has(rawMode as AIMode)
@@ -207,12 +214,15 @@ export function setupVizraEngageRoutes(app: Express): void {
             .slice(0, 25)
         : [];
 
+      const ageCtx = await resolveRequestAgePolicyContext(req);
       const limit = Number(req.query.limit || req.body?.limit || 5);
       const selection = selectEngageInventory({
         mode,
         sessionHash,
         excludeIds,
         limit: Number.isFinite(limit) ? limit : 5,
+        minorSafeMode: ageCtx.requiresMinorSafeDirectives,
+        minorBlocked: ageCtx.isMinorBlocked,
       });
 
       res.json({

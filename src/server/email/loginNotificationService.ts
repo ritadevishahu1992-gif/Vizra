@@ -12,6 +12,8 @@
  */
 
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import {
   renderUserLoginEmailHtml,
   renderUserLoginEmailText,
@@ -23,6 +25,7 @@ import {
   getDefaultSenderEmail,
   getAdminNotificationEmail,
 } from '../../lib/email';
+import { maskIpAddress } from '../security';
 
 export interface LoginNotificationRequest {
   uid: string;
@@ -53,8 +56,46 @@ export interface NotificationEventRecord {
   isDuplicate: boolean;
 }
 
-// In-memory idempotency cache (keyed by uid_authTime) with 24-hour TTL
+// Durable + in-memory idempotency cache (keyed by uid_authTime) with 24-hour TTL
 const idempotencyStore = new Map<string, NotificationEventRecord>();
+const IDEMPOTENCY_FILE = path.resolve('data/login_idempotency_store.json');
+
+function loadDurableIdempotency(): void {
+  try {
+    if (fs.existsSync(IDEMPOTENCY_FILE)) {
+      const raw = JSON.parse(fs.readFileSync(IDEMPOTENCY_FILE, 'utf8'));
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      if (raw && typeof raw === 'object') {
+        for (const [k, v] of Object.entries(raw)) {
+          const rec = v as NotificationEventRecord;
+          if (rec && new Date(rec.timestamp).getTime() >= cutoff) {
+            idempotencyStore.set(k, rec);
+          }
+        }
+      }
+    }
+  } catch {
+    // Non-fatal in read-only environments
+  }
+}
+
+function saveDurableIdempotency(): void {
+  try {
+    const dir = path.dirname(IDEMPOTENCY_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const serialized: Record<string, NotificationEventRecord> = {};
+    for (const [k, v] of idempotencyStore.entries()) {
+      serialized[k] = v;
+    }
+    fs.writeFileSync(IDEMPOTENCY_FILE, JSON.stringify(serialized, null, 2), 'utf8');
+  } catch {
+    // Non-fatal in read-only serverless fs
+  }
+}
+
+loadDurableIdempotency();
 
 // Testing override hook for unit/integration tests
 export type EmailDispatchHook = (payload: {
@@ -73,6 +114,13 @@ export function setMockEmailDispatcher(hook: EmailDispatchHook | null): void {
 
 export function clearIdempotencyStoreForTesting(): void {
   idempotencyStore.clear();
+  try {
+    if (fs.existsSync(IDEMPOTENCY_FILE)) {
+      fs.unlinkSync(IDEMPOTENCY_FILE);
+    }
+  } catch {
+    // ignore
+  }
 }
 
 /**
@@ -148,7 +196,9 @@ async function dispatchEmailWithRetries(
 export async function processLoginNotifications(
   request: LoginNotificationRequest
 ): Promise<NotificationEventRecord> {
-  const { uid, email, authTime, ipAddress, userAgent, deviceSummary } = request;
+  const { uid, email, authTime, ipAddress, deviceSummary } = request;
+  const maskedIp = maskIpAddress(ipAddress);
+  const minimizedUserAgent = deviceSummary || 'Verified Web Client';
 
   // 1. Build persistent idempotency key based on user UID and cryptographic auth_time
   const idempotencyKey = `auth_${uid}_${authTime}`;
@@ -167,21 +217,21 @@ export async function processLoginNotifications(
   const loginTime = dateObj.toUTCString();
   const timezone = 'UTC';
 
-  const appBaseUrl = process.env.APP_URL || 'https://ais-dev-7z3s5yefvrkweoqfe2a3dd-152962723123.asia-southeast1.run.app';
-  const securityUrl = `${appBaseUrl}/ai`; // Existing trusted HTTPS destination
-  const adminDashboardUrl = `${appBaseUrl}/api/metrics`; // Existing authenticated server telemetry destination
+  const appBaseUrl = process.env.APP_URL || 'https://vizra.vercel.app';
+  const securityUrl = `${appBaseUrl}/settings`;
+  const adminDashboardUrl = `${appBaseUrl}/api/metrics`;
 
   const senderEmail = getDefaultSenderEmail();
   // System administrator recipient is strictly server-configured and cannot be modified by user
   const adminEmail = getAdminNotificationEmail();
 
-  // 2. Render templates
+  // 2. Render templates with masked IP and minimized client summary (GDPR data minimization)
   const userHtml = renderUserLoginEmailHtml({
     email,
     loginTime,
     timezone,
-    ipAddress,
-    userAgent,
+    ipAddress: maskedIp,
+    userAgent: minimizedUserAgent,
     deviceSummary,
     securityUrl,
     correlationId,
@@ -191,8 +241,8 @@ export async function processLoginNotifications(
     email,
     loginTime,
     timezone,
-    ipAddress,
-    userAgent,
+    ipAddress: maskedIp,
+    userAgent: minimizedUserAgent,
     deviceSummary,
     securityUrl,
     correlationId,
@@ -230,51 +280,63 @@ export async function processLoginNotifications(
     };
   }
 
-  // 4. Independent Dispatch: Email B to Administrator
-  // Independent tracking: Even if user email failed or had an issue, admin notification still proceeds
-  const adminHtml = renderAdminLoginEmailHtml({
-    userEmail: email,
-    userId: uid,
-    loginTime,
-    timezone,
-    ipAddress,
-    userAgent,
-    deviceSummary,
-    correlationId,
-    authProvider: 'Google OAuth 2.0 (Firebase)',
-    adminDashboardUrl,
-    deliveryStatus: `User Delivery: ${userDeliveryResult.status.toUpperCase()}`,
-  });
+  // 4. Independent Dispatch: Email B to Administrator (only if VIZRA_ADMIN_NOTIFICATION_EMAIL is configured or mock dispatcher is active)
+  const effectiveAdminRecipient = adminEmail || (mockEmailDispatcher ? 'security-admin@vizra.ai' : '');
+  let adminDeliveryResult: DeliveryResult;
 
-  const adminText = renderAdminLoginEmailText({
-    userEmail: email,
-    userId: uid,
-    loginTime,
-    timezone,
-    ipAddress,
-    userAgent,
-    deviceSummary,
-    correlationId,
-    authProvider: 'Google OAuth 2.0 (Firebase)',
-    adminDashboardUrl,
-    deliveryStatus: `User Delivery: ${userDeliveryResult.status.toUpperCase()}`,
-  });
+  if (effectiveAdminRecipient && effectiveAdminRecipient.includes('@')) {
+    const anonymizedUid = uid.length > 8 ? `${uid.slice(0, 4)}...${uid.slice(-4)}` : uid;
+    const adminHtml = renderAdminLoginEmailHtml({
+      userEmail: email,
+      userId: anonymizedUid,
+      loginTime,
+      timezone,
+      ipAddress: maskedIp,
+      userAgent: minimizedUserAgent,
+      deviceSummary,
+      correlationId,
+      authProvider: 'Google OAuth 2.0 (Firebase)',
+      adminDashboardUrl,
+      deliveryStatus: `User Delivery: ${userDeliveryResult.status.toUpperCase()}`,
+    });
 
-  const resB = await dispatchEmailWithRetries({
-    from: senderEmail,
-    to: adminEmail,
-    subject: `[VIZRA Security Alert] User Login: ${email}`,
-    html: adminHtml,
-    text: adminText,
-  });
+    const adminText = renderAdminLoginEmailText({
+      userEmail: email,
+      userId: anonymizedUid,
+      loginTime,
+      timezone,
+      ipAddress: maskedIp,
+      userAgent: minimizedUserAgent,
+      deviceSummary,
+      correlationId,
+      authProvider: 'Google OAuth 2.0 (Firebase)',
+      adminDashboardUrl,
+      deliveryStatus: `User Delivery: ${userDeliveryResult.status.toUpperCase()}`,
+    });
 
-  const adminDeliveryResult: DeliveryResult = {
-    recipient: adminEmail,
-    status: resB.status,
-    messageId: resB.messageId,
-    error: resB.error,
-    attempts: resB.attempts,
-  };
+    const resB = await dispatchEmailWithRetries({
+      from: senderEmail,
+      to: effectiveAdminRecipient,
+      subject: `[VIZRA Security Alert] Authenticated Session (${correlationId})`,
+      html: adminHtml,
+      text: adminText,
+    });
+
+    adminDeliveryResult = {
+      recipient: effectiveAdminRecipient,
+      status: resB.status,
+      messageId: resB.messageId,
+      error: resB.error,
+      attempts: resB.attempts,
+    };
+  } else {
+    adminDeliveryResult = {
+      recipient: 'unconfigured',
+      status: 'skipped',
+      error: 'VIZRA_ADMIN_NOTIFICATION_EMAIL not configured',
+      attempts: 0,
+    };
+  }
 
   const record: NotificationEventRecord = {
     eventId: correlationId,
@@ -288,7 +350,7 @@ export async function processLoginNotifications(
     isDuplicate: false,
   };
 
-  // Cache in idempotency store
+  // Cache in idempotency store & persist durably
   idempotencyStore.set(idempotencyKey, record);
 
   // Bound store size to prevent unbounded memory growth
@@ -296,6 +358,7 @@ export async function processLoginNotifications(
     const oldestKey = idempotencyStore.keys().next().value;
     if (oldestKey) idempotencyStore.delete(oldestKey);
   }
+  saveDurableIdempotency();
 
   return record;
 }

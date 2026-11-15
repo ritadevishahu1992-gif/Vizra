@@ -96,11 +96,15 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
     textareaRef.current?.focus();
   };
 
+  const [speechNotice, setSpeechNotice] = useState<string | null>(null);
+
   const toggleMic = () => {
     if (isListening) {
       setIsListening(false);
       return;
     }
+
+    setSpeechNotice(null);
 
     // Use Web Speech API if supported in browser
     const SpeechRecognition =
@@ -128,6 +132,7 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
 
         recognition.onerror = () => {
           setIsListening(false);
+          setSpeechNotice('Microphone permission denied or speech recognition unavailable in this browser.');
         };
 
         recognition.onend = () => {
@@ -137,20 +142,14 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
         recognition.start();
         return;
       } catch {
-        // Fallback below
+        // Fall through to honest unavailable notice
       }
     }
 
-    // Natural voice prompt simulation fallback if browser mic access is restricted
-    setIsListening(true);
-    setTimeout(() => {
-      setText((prev) =>
-        prev
-          ? `${prev} animate obsidian ribbons with fluid refraction`
-          : 'I want to make a 30-second cinematic video about black holes with 60fps kinetic motion.'
-      );
-      setIsListening(false);
-    }, 2200);
+    setSpeechNotice(
+      'Browser SpeechRecognition API is not supported in this browser environment. Please type your prompt or use Live Voice Mode.'
+    );
+    setTimeout(() => setSpeechNotice(null), 5000);
   };
 
   const canSend = text.trim().length > 0 || attachments.length > 0;
@@ -175,6 +174,18 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
           <div className="px-4 py-1.5 bg-[#eb3b2d]/10 border-b border-[#eb3b2d]/30 text-xs text-[#eb3b2d] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#eb3b2d] animate-ping" />
             <span>Listening to voice prompt in {currentMode.toUpperCase()} mode...</span>
+          </div>
+        )}
+        {speechNotice && (
+          <div className="px-4 py-1.5 bg-amber-950/50 border-b border-amber-800/40 text-xs text-amber-300 flex items-center justify-between gap-2">
+            <span>{speechNotice}</span>
+            <button
+              type="button"
+              onClick={() => setSpeechNotice(null)}
+              className="text-amber-400 hover:text-white font-mono text-[10px] cursor-pointer"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 

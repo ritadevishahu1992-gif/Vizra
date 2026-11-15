@@ -95,7 +95,7 @@ async function runVizraEngageTests() {
     'Newly submitted pending_review content is withheld until administrator approval'
   );
 
-  setEngageContentApproval(draftItem.id, 'approved', 'ritadevishahu1992@gmail.com');
+  setEngageContentApproval(draftItem.id, 'approved', 'security-admin@vizra.ai');
   const afterApproval = selectEngageInventory({ mode: 'quick', sessionHash: 'test-sess-3', limit: 10 });
   assert(
     afterApproval.items.some((i) => i.id === draftItem.id),

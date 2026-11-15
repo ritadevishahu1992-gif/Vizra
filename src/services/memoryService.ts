@@ -1,7 +1,43 @@
 import { PersonalMemoryItem, ProjectMemory } from '../types/ai';
 
-const PERSONAL_MEMORY_KEY = 'vizra_omnia_personal_memories_v1';
+const PERSONAL_MEMORY_KEY_PREFIX = 'vizra_omnia_personal_memories_v1';
 const MEMORY_ENABLED_KEY = 'vizra_omnia_memory_enabled_v1';
+const ACTIVE_SESSION_STORAGE_KEY = 'vizra_active_auth_session_v1';
+const PERSISTED_SESSION_STORAGE_KEY = 'vizra_persisted_auth_session_v1';
+const ACTIVE_UID_STORAGE_KEY = 'vizra_active_user_uid_v1';
+
+function resolveScopedMemoryKey(explicitUid?: string): string {
+  if (explicitUid && explicitUid.trim()) {
+    return `${PERSONAL_MEMORY_KEY_PREFIX}_${explicitUid.trim()}`;
+  }
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const directUid = localStorage.getItem(ACTIVE_UID_STORAGE_KEY);
+      if (directUid && directUid.trim()) {
+        return `${PERSONAL_MEMORY_KEY_PREFIX}_${directUid.trim()}`;
+      }
+      for (const sessionKey of [ACTIVE_SESSION_STORAGE_KEY, PERSISTED_SESSION_STORAGE_KEY]) {
+        const rawSession = localStorage.getItem(sessionKey);
+        if (rawSession) {
+          const parsed = JSON.parse(rawSession);
+          const candidateUid = parsed?.uid || parsed?.user?.uid;
+          if (candidateUid && typeof candidateUid === 'string') {
+            return `${PERSONAL_MEMORY_KEY_PREFIX}_${candidateUid}`;
+          }
+        }
+      }
+    }
+  } catch {}
+  return `${PERSONAL_MEMORY_KEY_PREFIX}_anon`;
+}
+
+export function scrubMemoryPii(text: string): string {
+  return text
+    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
+    .replace(/\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[REDACTED_PHONE]')
+    .replace(/\b(?:AIza[0-9A-Za-z_-]{35}|sk-[a-zA-Z0-9]{20,})\b/g, '[REDACTED_KEY]')
+    .trim();
+}
 
 const defaultPersonalMemories: PersonalMemoryItem[] = [
   {
@@ -45,11 +81,12 @@ function safeStorageSet(key: string, value: string): void {
   inMemoryStorage.set(key, value);
 }
 
-export function getPersonalMemories(): PersonalMemoryItem[] {
+export function getPersonalMemories(uid?: string): PersonalMemoryItem[] {
   try {
-    const raw = safeStorageGet(PERSONAL_MEMORY_KEY);
+    const key = resolveScopedMemoryKey(uid);
+    const raw = safeStorageGet(key);
     if (!raw) {
-      safeStorageSet(PERSONAL_MEMORY_KEY, JSON.stringify(defaultPersonalMemories));
+      safeStorageSet(key, JSON.stringify(defaultPersonalMemories));
       return defaultPersonalMemories;
     }
     return JSON.parse(raw);
@@ -58,35 +95,40 @@ export function getPersonalMemories(): PersonalMemoryItem[] {
   }
 }
 
-export function savePersonalMemories(memories: PersonalMemoryItem[]): void {
+export function savePersonalMemories(memories: PersonalMemoryItem[], uid?: string): void {
   try {
-    safeStorageSet(PERSONAL_MEMORY_KEY, JSON.stringify(memories));
+    const key = resolveScopedMemoryKey(uid);
+    const sanitized = memories.map((m) => ({
+      ...m,
+      content: scrubMemoryPii(m.content),
+    }));
+    safeStorageSet(key, JSON.stringify(sanitized));
   } catch (err) {
     console.error('Failed to save memories', err);
   }
 }
 
-export function addPersonalMemory(category: PersonalMemoryItem['category'], content: string): PersonalMemoryItem {
-  const memories = getPersonalMemories();
+export function addPersonalMemory(category: PersonalMemoryItem['category'], content: string, uid?: string): PersonalMemoryItem {
+  const memories = getPersonalMemories(uid);
   const newMemory: PersonalMemoryItem = {
     id: `mem-${Date.now()}`,
     category,
-    content: content.trim(),
+    content: scrubMemoryPii(content),
     createdAt: Date.now(),
   };
   const updated = [newMemory, ...memories];
-  savePersonalMemories(updated);
+  savePersonalMemories(updated, uid);
   return newMemory;
 }
 
-export function deletePersonalMemory(id: string): void {
-  const memories = getPersonalMemories();
+export function deletePersonalMemory(id: string, uid?: string): void {
+  const memories = getPersonalMemories(uid);
   const updated = memories.filter((m) => m.id !== id);
-  savePersonalMemories(updated);
+  savePersonalMemories(updated, uid);
 }
 
-export function clearAllPersonalMemories(): void {
-  savePersonalMemories([]);
+export function clearAllPersonalMemories(uid?: string): void {
+  savePersonalMemories([], uid);
 }
 
 export function isMemoryEnabled(): boolean {

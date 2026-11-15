@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import dns from 'dns';
 import crypto from 'crypto';
+import { verifyFirebaseIdToken } from './authVerification';
 
 // ============================================================================
 // 1. SSRF PROTECTION FOR EXTERNAL URLS & IMAGES
@@ -251,6 +252,30 @@ export const generalApiRateLimiter = new SlidingWindowRateLimiter({
   name: 'api',
 });
 
+export const contactRateLimiter = new SlidingWindowRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  name: 'contact',
+});
+
+export const feedbackRateLimiter = new SlidingWindowRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  name: 'feedback',
+});
+
+export const accountDeletionRateLimiter = new SlidingWindowRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  name: 'account_deletion',
+});
+
+export const wsConnectionLimiter = new SlidingWindowRateLimiter({
+  windowMs: 60 * 1000,
+  max: 15,
+  name: 'ws_live',
+});
+
 /**
  * Global express-rate-limit middleware protecting all public-facing /api/* routes
  * against automated abuse, scraping, and volumetric request floods.
@@ -308,28 +333,30 @@ export function safeCompare(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-/**
- * Protects administrative training endpoints (/api/omnia/train, /api/omnia/knowledge POST).
- * Accepts Bearer token via Authorization header or X-Admin-Key header.
- */
-export function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
+const EPHEMERAL_SESSION_SALT = crypto.randomBytes(32).toString('hex');
 
-  // If no admin key is configured on server, warn in dev, enforce in production
-  if (!configuredAdminKey || configuredAdminKey === 'your_admin_api_key') {
-    if (process.env.NODE_ENV === 'production') {
-      res.status(503).json({
-        error: {
-          code: 'ADMIN_AUTH_NOT_CONFIGURED',
-          message: 'Administrative endpoint disabled: ADMIN_API_KEY is not configured in production.',
-        },
-      });
-      return;
-    }
-    // In local development without secret configured, allow with warning
-    next();
-    return;
-  }
+/**
+ * Derives a non-reversible privacy-preserving HMAC hash for user/session correlation
+ * in audit logs and safety reports without storing raw UIDs, emails, or IPs.
+ */
+export function derivePrivacySessionHash(rawIdentifier: string): string {
+  const clean = (rawIdentifier || 'anonymous').trim();
+  const secret = process.env.SESSION_HASH_SECRET || EPHEMERAL_SESSION_SALT;
+  return crypto.createHmac('sha256', secret).update(clean).digest('hex').slice(0, 24);
+}
+
+/**
+ * Protects administrative endpoints (/api/omnia/train, /api/omnia/knowledge POST,
+ * /api/omnia/feedback GET/PATCH, /api/safety/reports GET/PATCH, /api/metrics).
+ * Fails closed on missing credentials. Accepts configured ADMIN_API_KEY / WORKFLOW_SECRET
+ * OR cryptographically verified Firebase ID token matching ADMIN_ALLOWLIST_EMAILS.
+ */
+export async function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
+  const hasConfiguredAdminKey =
+    Boolean(configuredAdminKey) &&
+    configuredAdminKey !== 'your_admin_api_key' &&
+    configuredAdminKey !== 'your_workflow_secret';
 
   const authHeader = req.headers.authorization;
   const xAdminKey = req.headers['x-admin-key'];
@@ -341,17 +368,71 @@ export function adminAuthMiddleware(req: Request, res: Response, next: NextFunct
     token = xAdminKey.trim();
   }
 
-  if (!token || !safeCompare(token, configuredAdminKey)) {
+  if (!token) {
     res.status(401).json({
       error: {
         code: 'UNAUTHORIZED_ADMIN',
-        message: 'Unauthorized: Valid administrative key required.',
+        message: 'Unauthorized: Administrator authentication is required.',
       },
     });
     return;
   }
 
-  next();
+  // 1. Accept configured server Admin API Key via constant-time comparison
+  if (hasConfiguredAdminKey && configuredAdminKey && safeCompare(token, configuredAdminKey)) {
+    (req as any).adminActor = 'admin_api_key';
+    next();
+    return;
+  }
+
+  // 2. Cryptographically verify Firebase ID token & enforce administrator email allowlist
+  let authResult: { valid: boolean; email?: string; emailVerified?: boolean; uid?: string } = {
+    valid: false,
+  };
+  try {
+    authResult = await verifyFirebaseIdToken(token);
+  } catch {
+    authResult = { valid: false };
+  }
+
+  if (authResult.valid) {
+    const rawAllowlist =
+      process.env.ADMIN_ALLOWLIST_EMAILS ||
+      process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL ||
+      '';
+    const allowedEmails = rawAllowlist
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const userEmail = (authResult.email || '').trim().toLowerCase();
+
+    if (
+      !userEmail ||
+      allowedEmails.length === 0 ||
+      !allowedEmails.includes(userEmail) ||
+      authResult.emailVerified === false
+    ) {
+      res.status(403).json({
+        error: {
+          code: 'FORBIDDEN_ADMIN',
+          message: 'Forbidden: Authenticated account does not have administrator privileges.',
+        },
+      });
+      return;
+    }
+
+    (req as any).user = authResult;
+    (req as any).adminActor = userEmail;
+    next();
+    return;
+  }
+
+  res.status(401).json({
+    error: {
+      code: 'UNAUTHORIZED_ADMIN',
+      message: 'Unauthorized: Invalid or expired administrative credentials.',
+    },
+  });
 }
 
 /**
@@ -463,7 +544,7 @@ export function securityHeadersMiddleware(req: Request, res: Response, next: Nex
  * Enforces HTTP method whitelist and strict CORS origin checks for /api/* routes.
  */
 export function corsSecurityMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const allowedMethods = ['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS'];
+  const allowedMethods = ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'];
   if (!allowedMethods.includes(req.method.toUpperCase())) {
     res.status(405).json({
       error: {
@@ -479,8 +560,8 @@ export function corsSecurityMiddleware(req: Request, res: Response, next: NextFu
     if (isTrustedOrigin(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Key');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Key, X-Vizra-Client-Id');
     } else if (req.path.startsWith('/api/')) {
       res.status(403).json({
         error: {
@@ -501,6 +582,26 @@ export function corsSecurityMiddleware(req: Request, res: Response, next: NextFu
 }
 
 /**
+ * Masks an IPv4 or IPv6 address for privacy-preserving security logs and notifications (GDPR data minimization).
+ */
+export function maskIpAddress(rawIp?: string): string {
+  if (!rawIp || typeof rawIp !== 'string') return 'Redacted';
+  const cleaned = rawIp.trim().replace(/^::ffff:/i, '');
+  if (cleaned === '127.0.0.1' || cleaned === '::1' || cleaned === 'localhost') {
+    return '127.0.0.x (Local)';
+  }
+  const v4Parts = cleaned.split('.');
+  if (v4Parts.length === 4) {
+    return `${v4Parts[0]}.${v4Parts[1]}.${v4Parts[2]}.xxx`;
+  }
+  if (cleaned.includes(':')) {
+    const v6Parts = cleaned.split(':').filter(Boolean);
+    return `${v6Parts.slice(0, 3).join(':')}:xxxx:xxxx`;
+  }
+  return 'Redacted';
+}
+
+/**
  * Validates and limits prompt input.
  */
 export function validatePrompt(prompt: any): { valid: boolean; error?: string; cleanText?: string } {
@@ -518,33 +619,217 @@ export function validatePrompt(prompt: any): { valid: boolean; error?: string; c
 }
 
 /**
- * Detects direct prompt injection attempts targeting system secrets, environment variables,
- * or raw system instruction exfiltration.
+ * Strips invisible/zero-width/bidi override characters and applies Unicode NFKC normalization
+ * so homoglyphs and obfuscated injection payloads cannot evade detection.
+ */
+function buildNormalizedInspectionVariants(raw: string): string[] {
+  const nfkc = raw.normalize('NFKC');
+  const withoutInvisible = nfkc.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\u00AD]/g, '');
+  const collapsedWhitespace = withoutInvisible.replace(/\s+/g, ' ').trim();
+  // Preserve multi-space word gaps when collapsing single-letter runs ("i g n o r e  p r e v i o u s" -> "ignore  previous")
+  const deSpaced = withoutInvisible
+    .replace(/\b[a-zA-Z](?: [a-zA-Z]){2,}\b/g, (seq) => seq.replace(/ /g, ''))
+    .replace(/\s+/g, ' ')
+    .trim();
+  // Also detect obfuscated runs joined directly without word-boundary double spaces ("i g n o r e p r e v i o u s")
+  const deSpacedContiguous = withoutInvisible.replace(/\b([a-zA-Z])\s+(?=[a-zA-Z]\b)/g, '$1');
+
+  const variants = [withoutInvisible, collapsedWhitespace, deSpaced, deSpacedContiguous];
+
+  // Inspect printable ASCII decoded from long suspicious Base64 blocks
+  const b64Matches = withoutInvisible.match(/[A-Za-z0-9+/]{24,}={0,2}/g);
+  if (b64Matches) {
+    for (const seg of b64Matches.slice(0, 8)) {
+      try {
+        const decoded = Buffer.from(seg, 'base64').toString('utf-8');
+        if (decoded && /^[\x20-\x7E\r\n\t]+$/.test(decoded) && /[a-zA-Z]{4,}/.test(decoded)) {
+          variants.push(decoded.normalize('NFKC'));
+        }
+      } catch {
+        // Ignore non-base64 tokens
+      }
+    }
+  }
+
+  return variants;
+}
+
+/**
+ * Generates an unpredictable cryptographic per-request boundary nonce so attacker text
+ * cannot forge a closing delimiter tag.
+ */
+export function createPromptBoundaryNonce(): string {
+  return crypto.randomBytes(6).toString('hex');
+}
+
+/**
+ * Wraps untrusted user documents, RAG chunks, or external text inside an isolated
+ * boundary tag paired with the per-request nonce.
+ */
+export function wrapUntrustedDataBlock(label: string, content: string, nonce: string): string {
+  const safeLabel = (label || 'context').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 48);
+  const escapedContent = sanitizeUntrustedContext(content).replace(
+    new RegExp(`<\\/?untrusted_data_${nonce}[^>]*>`, 'gi'),
+    '[BOUNDARY_TAG_STRIPPED]'
+  );
+  return `<untrusted_data_${nonce} source="${safeLabel}">\n${escapedContent}\n</untrusted_data_${nonce}>`;
+}
+
+/**
+ * Layered prompt injection & policy defense across direct, obfuscated (NFKC, zero-width,
+ * spaced characters, base64), role-smuggling, tool/SSRF coercion, and severe harm vectors.
  */
 export function detectPromptInjection(input: string): {
   safe: boolean;
   reason?: string;
+  category?: string;
 } {
   if (!input || typeof input !== 'string') return { safe: true };
 
-  const normalized = input.toLowerCase();
+  const variants = buildNormalizedInspectionVariants(input);
 
-  // Block explicit attempts to extract server environment variables or private API keys
-  const secretExtractionPatterns = [
-    /(?:print|reveal|output|show|dump|expose|leak|return|echo)\s+(?:all\s+|the\s+|your\s+)?(?:process\.env|gemini_api_key|admin_api_key|cron_secret|resend_api_key|workflow_secret)/i,
-    /ignore\s+(?:all\s+)?(?:previous|prior|above|system)\s+instructions[\s\S]{0,120}(?:system\s+prompt|systeminstruction|api[_\s]?key|process\.env|secret)/i,
+  // 1. Secret extraction, system-prompt exfiltration & boundary overrides
+  const secretAndOverridePatterns = [
+    /(?:print|reveal|output|show|dump|expose|leak|return|echo|repeat|display|extract|translate|encode)\s+(?:all\s+|the\s+|your\s+|verbatim\s+|exact\s+)?(?:process\.env|gemini_api_key|admin_api_key|cron_secret|resend_api_key|workflow_secret|integration_token_secret|session_hash_secret|system\s+prompt|system\s+instructions?|developer\s+instructions?|hidden\s+instructions?)/i,
+    /(?:ignore|discard|negate|skip)\s+(?:all\s+|any\s+)?(?:previous|prior|above|earlier|system|developer|safety|core)\s+(?:instructions?|prompts?|rules?|directives?|guardrails?|policies)/i,
+    /(?:disregard|bypass|override|forget|disable|turn\s+off)\s+(?:all\s+|any\s+)?(?:previous|prior|system|safety|content|moderation)\s+(?:instructions?|rules?|constraints?|policies|filters?|guardrails?)/i,
+    /(?:ignore|disregard|override|bypass)(?:all|any)?(?:previous|prior|system|developer)(?:instructions?|prompts?|rules?|guardrails?)/i,
+    /(?:you\s+are\s+now|act\s+as|enter|switch\s+to|enable)\s+(?:in\s+)?(?:dan\b|developer\s+mode|unfiltered\s+mode|jailbreak\s+mode|god\s+mode|unrestricted\s+ai)/i,
+    /<\/?(?:system_instruction|system_prompt|admin_override|developer_message)>/i,
+    /(?:^|\n)\s*(?:###\s*)?(?:SYSTEM|DEVELOPER|ADMIN)\s*(?:PROMPT|INSTRUCTION|OVERRIDE)?\s*:/i,
+    /<\|(?:im_start|im_end|system|developer|endoftext)\|>/i,
   ];
 
-  for (const pattern of secretExtractionPatterns) {
-    if (pattern.test(normalized)) {
-      return {
-        safe: false,
-        reason: 'Request blocked by security policy: attempts to extract server secrets or override system boundaries are prohibited.',
-      };
+  // 2. SSRF / internal metadata / credential exfiltration via tool coercion
+  const toolCoercionPatterns = [
+    /(?:fetch|curl|wget|request|retrieve|exfiltrate|send|post|forward)\s+[^\n]{0,80}(?:169\.254\.169\.254|metadata\.google\.internal|127\.0\.0\.1|localhost:\d+|\/api\/integrations\/|oauth_.*_secret|authorization\s+bearer)/i,
+  ];
+
+  // 3. Severe harm prevention (CSAM, suicide/self-harm instruction, CBRN weapons, critical malware)
+  const severeHarmPatterns: Array<{ pattern: RegExp; category: string; reason: string }> = [
+    {
+      pattern: /\b(?:csam|child\s+sexual\s+abuse|child\s+exploitation|underage\s+explicit|minor\s+nsfw)\b/i,
+      category: 'CHILD_SAFETY_VIOLATION',
+      reason: 'Request blocked by zero-tolerance Child Safety Policy.',
+    },
+    {
+      pattern: /(?:how\s+to|ways\s+to|instructions?\s+(?:for|to)|steps?\s+to|help\s+me)\s+(?:commit\s+suicide|kill\s+myself|self[\s-]harm|end\s+my\s+life)/i,
+      category: 'SELF_HARM_PREVENTION',
+      reason: 'Request blocked by safety policy: self-harm or suicide instructions are strictly prohibited. If you or someone you know is in distress, please contact your local emergency services or crisis helpline immediately.',
+    },
+    {
+      pattern: /(?:synthesize|manufacture|build|create)\s+(?:a\s+|an\s+)?(?:sarin|vx\s+nerve|ricin|anthrax\s+weapon|improvised\s+explosive|pipe\s+bomb|ransomware\s+payload)/i,
+      category: 'DANGEROUS_CONTENT_CBRN_CYBER',
+      reason: 'Request blocked by safety policy: generation of dangerous chemical, biological, radiological, explosive, or malicious cyber payloads is prohibited.',
+    },
+  ];
+
+  for (const variant of variants) {
+    const lower = variant.toLowerCase();
+
+    for (const pattern of secretAndOverridePatterns) {
+      if (pattern.test(lower)) {
+        return {
+          safe: false,
+          category: 'PROMPT_INJECTION_OR_EXFILTRATION',
+          reason: 'Request blocked by security policy: attempts to extract server secrets or override system boundaries are prohibited.',
+        };
+      }
+    }
+
+    for (const pattern of toolCoercionPatterns) {
+      if (pattern.test(lower)) {
+        return {
+          safe: false,
+          category: 'TOOL_OR_SSRF_COERCION',
+          reason: 'Request blocked by security policy: unauthorized internal URL fetching or credential exfiltration instructions are prohibited.',
+        };
+      }
+    }
+
+    for (const rule of severeHarmPatterns) {
+      if (rule.pattern.test(lower)) {
+        return {
+          safe: false,
+          category: rule.category,
+          reason: rule.reason,
+        };
+      }
     }
   }
 
   return { safe: true };
+}
+
+/**
+ * Validates multi-turn conversationHistory arrays to prevent attackers from smuggling
+ * system-override instructions inside prior user/assistant turns.
+ */
+export function validateConversationHistory(history: any): {
+  valid: boolean;
+  error?: string;
+  turns: Array<{ role: 'user' | 'model'; content: string }>;
+} {
+  if (history === undefined || history === null) {
+    return { valid: true, turns: [] };
+  }
+  if (!Array.isArray(history)) {
+    return { valid: false, error: 'conversationHistory must be an array.', turns: [] };
+  }
+
+  const bounded = history.slice(-8);
+  const turns: Array<{ role: 'user' | 'model'; content: string }> = [];
+
+  for (let i = 0; i < bounded.length; i++) {
+    const msg = bounded[i];
+    if (!msg || typeof msg !== 'object') continue;
+    if (typeof msg.content !== 'string' || !msg.content.trim()) continue;
+    if (msg.role !== 'user' && msg.role !== 'assistant' && msg.role !== 'model') continue;
+
+    const clipped = msg.content.slice(0, 15000);
+    const check = detectPromptInjection(clipped);
+    if (!check.safe) {
+      return {
+        valid: false,
+        error: check.reason || 'Conversation history turn blocked by security policy.',
+        turns: [],
+      };
+    }
+
+    turns.push({
+      role: msg.role === 'user' ? 'user' : 'model',
+      content: sanitizeUntrustedContext(clipped),
+    });
+  }
+
+  return { valid: true, turns };
+}
+
+/**
+ * Neutralizes indirect prompt injection markers and markdown exfiltration vectors in untrusted RAG or attachment text.
+ */
+export function sanitizeUntrustedContext(rawContext: string): string {
+  if (!rawContext || typeof rawContext !== 'string') return '';
+  return rawContext
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\u00AD]/g, '')
+    .replace(/\[\s*(?:SYSTEM|INSTRUCTION|DEVELOPER|ADMIN_OVERRIDE|IGNORE_PREVIOUS)\s*\]/gi, '[UNTRUSTED_QUOTE]')
+    .replace(/<\/?(?:system|instruction|prompt|context_override|developer_message)[^>]*>/gi, '[SANITIZED_TAG]')
+    .replace(/<\|(?:im_start|im_end|system|user|assistant|developer|endoftext)\|>/gi, '[SANITIZED_DELIMITER]')
+    .replace(/(?:^|\n)\s*(?:###\s*)?(?:SYSTEM|DEVELOPER|ADMIN)\s*(?:PROMPT|INSTRUCTION|OVERRIDE)?\s*:/gi, '\n[UNTRUSTED_LABEL]:')
+    .replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/gi, '[External Image Link Omitted: $1]');
+}
+
+/**
+ * Scrubs accidental secret patterns, Bearer JWTs, or internal server paths from outgoing AI model text.
+ */
+export function redactSensitiveOutput(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .replace(/AIza[0-9A-Za-z_-]{20,}/g, '[REDACTED_API_KEY]')
+    .replace(/re_[0-9A-Za-z_-]{15,}/g, '[REDACTED_API_KEY]')
+    .replace(/Bearer\s+eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, 'Bearer [REDACTED_TOKEN]')
+    .replace(/\/app\/applet[^\s)'"`]*/g, '[INTERNAL_PATH]');
 }
 
 /**
@@ -572,7 +857,7 @@ export function validateRagContext(ragContext: any): {
   if (!injectionCheck.safe) {
     return { valid: false, error: injectionCheck.reason, cleanContext: '' };
   }
-  return { valid: true, cleanContext: ragContext.trim() };
+  return { valid: true, cleanContext: sanitizeUntrustedContext(ragContext.trim()) };
 }
 
 const FORBIDDEN_ATTACHMENT_EXTENSIONS = new Set([
@@ -662,6 +947,13 @@ export function validateAttachments(attachments: any): { valid: boolean; error?:
     if (att.content && typeof att.content === 'string') {
       if (att.content.length > 100000) {
         return { valid: false, error: `Text document "${att.name || i}" exceeds 100,000 characters.` };
+      }
+      const attInjection = detectPromptInjection(att.content);
+      if (!attInjection.safe) {
+        return {
+          valid: false,
+          error: `Attachment "${att.name || i}" blocked by safety policy: ${attInjection.reason}`,
+        };
       }
     }
   }

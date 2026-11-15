@@ -59,18 +59,20 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     ],
   },
   {
-    title: 'Social Media',
+    title: 'Ecosystem',
     links: [
-      { label: 'GitHub', href: 'https://github.com' },
-      { label: 'X (Twitter)', href: 'https://x.com' },
-      { label: 'LinkedIn', href: 'https://www.linkedin.com' },
-      { label: 'YouTube', href: 'https://www.youtube.com' },
+      { label: 'Omnia AI Workspace', to: '/ai' },
+      { label: 'Studio Showcase', to: '/explore' },
+      { label: 'System Status & Docs', to: '/docs' },
+      { label: 'Studio Inquiries', to: '/contact' },
     ],
   },
 ];
 
 export const Footer: React.FC = () => {
   const location = useLocation();
+  const legalEntityDisplay =
+    (import.meta as any).env?.VITE_LEGAL_ENTITY_NAME || 'VIZRA AI Creative Studio';
 
   return (
     <footer className="w-full border-t border-white/[0.08] bg-[#090909] text-neutral-400 pt-16 pb-12 px-6 sm:px-10 lg:px-16 select-none">
@@ -167,7 +169,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright & Persistent Privacy/Cookie Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex flex-wrap items-center gap-3">
-            <span>&copy; {new Date().getFullYear()} Vizra Technologies Inc. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} {legalEntityDisplay}. All rights reserved.</span>
             <span aria-hidden="true">·</span>
             <Link to="/terms-and-conditions" className="hover:text-neutral-300 transition-colors">
               Terms &amp; Conditions

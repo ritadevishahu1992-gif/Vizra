@@ -13,10 +13,13 @@ export interface EngageSelectionRequest {
   sessionHash?: string;
   excludeIds?: string[];
   limit?: number;
+  minorSafeMode?: boolean;
+  minorBlocked?: boolean;
 }
 
 export interface EngageSelectionResult {
   enabled: boolean;
+  minorSafeFiltered?: boolean;
   config: Pick<
     EngageGlobalConfig,
     | 'enabled'
@@ -65,10 +68,14 @@ export function selectEngageInventory(req: EngageSelectionRequest): EngageSelect
     respectReducedMotion: config.respectReducedMotion,
   };
 
-  if (!config.enabled) {
+  if (!config.enabled || req.minorBlocked) {
     return {
       enabled: false,
-      config: publicConfig,
+      minorSafeFiltered: Boolean(req.minorBlocked || req.minorSafeMode),
+      config: {
+        ...publicConfig,
+        enabled: !req.minorBlocked && config.enabled,
+      },
       items: [],
     };
   }
@@ -102,6 +109,20 @@ export function selectEngageInventory(req: EngageSelectionRequest): EngageSelect
   for (const item of allContent) {
     if (excludeSet.has(item.id)) continue;
     if (!isContentScheduleEligible(item, nowMs)) continue;
+
+    // Option 4 Child Safety: strip all commercial, sponsored, or affiliate items for minors
+    if (req.minorSafeMode) {
+      const isCommercialItem =
+        item.type === 'sponsored_card' ||
+        item.type === 'affiliate_card' ||
+        item.type === 'partner_placeholder' ||
+        item.sponsorshipLabel === 'Sponsored' ||
+        item.sponsorshipLabel === 'Affiliate' ||
+        item.sponsorshipLabel === 'Partner' ||
+        Boolean(item.campaignId) ||
+        Boolean(item.partnerId);
+      if (isCommercialItem) continue;
+    }
 
     // Check global type toggles
     if (item.type === 'sponsored_card' && !config.sponsoredEnabled) continue;

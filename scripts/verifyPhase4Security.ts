@@ -167,7 +167,7 @@ async function main() {
     { alg: 'RS256', kid: 'forged_attacker_key_id_999' },
     {
       sub: 'admin_spoof',
-      email: 'ritadevishahu1992@gmail.com',
+      email: 'spoofed-admin@example.com',
       email_verified: true,
       aud: 'nice-dolphin-n7c1c',
       iss: 'https://securetoken.google.com/nice-dolphin-n7c1c',

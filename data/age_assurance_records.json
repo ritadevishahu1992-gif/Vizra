@@ -1,0 +1,92 @@
+[
+  {
+    "recordId": "age_mwgeis56",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:48:14.586Z"
+  },
+  {
+    "recordId": "age_mwgeis54",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:48:14.584Z"
+  },
+  {
+    "recordId": "age_mwgeis52",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:48:14.582Z"
+  },
+  {
+    "recordId": "age_mwgei9rj",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:47:50.767Z"
+  },
+  {
+    "recordId": "age_mwgei9rh",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:47:50.765Z"
+  },
+  {
+    "recordId": "age_mwgei9re",
+    "subjectHash": "c405a8bd45926011d8c29822",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:47:50.762Z"
+  },
+  {
+    "recordId": "age_mwgegz60",
+    "subjectHash": "8d745bd7275342003b8fa83f",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:46:50.376Z"
+  },
+  {
+    "recordId": "age_mwgegz5x",
+    "subjectHash": "8d745bd7275342003b8fa83f",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:46:50.373Z"
+  },
+  {
+    "recordId": "age_mwgegz5v",
+    "subjectHash": "8d745bd7275342003b8fa83f",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "recordedAt": "2026-11-14T12:46:50.371Z"
+  }
+]

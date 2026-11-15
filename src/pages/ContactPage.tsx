@@ -44,17 +44,26 @@ export const ContactPage: React.FC = () => {
     setSubmitting(true);
 
     try {
-      await fetch('/api/early-access', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: fullName.trim(),
           email: email.trim(),
-          role: `Inquiry:${inquiryType} (${fullName.trim()})`,
-          useCase: `${organization ? `[${organization}] ` : ''}${message.trim()}`,
+          topic: inquiryType,
+          message: `${organization ? `[Organization: ${organization.trim()}] ` : ''}${message.trim()}`,
         }),
       });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        setError(errData?.error?.message || 'Unable to submit inquiry right now. Please check your inputs and try again.');
+        setSubmitting(false);
+        return;
+      }
     } catch {
-      // Non-fatal fallback
+      setError('Network error while submitting inquiry. Please try again.');
+      setSubmitting(false);
+      return;
     }
 
     setSubmitting(false);
@@ -307,17 +316,17 @@ export const ContactPage: React.FC = () => {
                 </Link>
 
                 <Link
-                  to="/seo-diagnostics"
+                  to="/privacy-policy"
                   className="p-3.5 rounded-xl bg-[#090909] border border-white/[0.06] hover:border-white/[0.18] flex items-center justify-between transition-colors group"
                 >
                   <div className="flex items-center gap-3">
                     <ShieldCheck size={16} className="text-[#EB3B2D]" />
                     <div>
                       <div className="text-xs font-display font-semibold text-white group-hover:text-[#EB3B2D] transition-colors">
-                        Technical SEO & Crawler Audit
+                        Privacy &amp; Data Protection Governance
                       </div>
                       <div className="text-[11px] text-neutral-400">
-                        Private administrator diagnostic suite
+                        Subprocessors, data retention &amp; erasure rights
                       </div>
                     </div>
                   </div>

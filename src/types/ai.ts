@@ -178,6 +178,10 @@ export interface Integration {
   status: 'connected' | 'connect' | 'coming_soon';
   scopeRequired?: string;
   connectedAt?: string;
+  configured?: boolean;
+  requiredEnvVars?: string[];
+  scopes?: string[];
+  isGoogleWorkspace1P?: boolean;
 }
 
 export interface UserPreferences {

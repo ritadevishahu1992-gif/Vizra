@@ -35,6 +35,41 @@ export const SettingsPage: React.FC = () => {
 
   const [savedNotice, setSavedNotice] = useState(false);
   const [clearedNotice, setClearedNotice] = useState(false);
+  const [deleteReceipt, setDeleteReceipt] = useState<string | null>(null);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [agePolicyOverview, setAgePolicyOverview] = useState<{
+    activePolicy: string;
+    minimumActiveAge: number;
+    option2Active: boolean;
+    option3VendorConfigured: boolean;
+    option4EnforcedEndpoints: number;
+    option5Rejected: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/compliance/age-assurance/policy')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        setAgePolicyOverview({
+          activePolicy: data.activePolicy || 'STRICT_18_PLUS',
+          minimumActiveAge: Number(data.minimumActiveAge || 18),
+          option2Active: Boolean(data.option2Preparatory?.active),
+          option3VendorConfigured: Boolean(data.option3ParentalConsent?.parentalVendorConfigured),
+          option4EnforcedEndpoints: Array.isArray(data.option4FeatureRestrictions?.enforcedEndpoints)
+            ? data.option4FeatureRestrictions.enforcedEndpoints.length
+            : 0,
+          option5Rejected: Boolean(data.option5?.rejected),
+        });
+      })
+      .catch(() => {
+        // Non-blocking
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSavePreferences = () => {
     localStorage.setItem('vizra_pref_language', language);
@@ -45,11 +80,54 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleClearLocalData = () => {
-    if (window.confirm('Clear all locally cached conversation history and draft prompts?')) {
-      localStorage.removeItem('omnia_conversations_v1');
-      localStorage.removeItem('omnia_draft_prompt');
-      setClearedNotice(true);
-      setTimeout(() => setClearedNotice(false), 2400);
+    localStorage.removeItem('omnia_conversations_v1');
+    localStorage.removeItem('omnia_draft_prompt');
+    localStorage.removeItem('vizra_omnia_personal_memories_v1');
+    localStorage.removeItem('vizra_omnia_personal_memories_v1_anon');
+    if (user?.uid) {
+      localStorage.removeItem(`vizra_omnia_personal_memories_v1_${user.uid}`);
+    }
+    setClearedNotice(true);
+    setTimeout(() => setClearedNotice(false), 2400);
+  };
+
+  const handleDeleteAccountAndData = async () => {
+    setIsDeletingAccount(true);
+    setDeleteReceipt(null);
+    try {
+      const headers: Record<string, string> = {};
+      if (user && typeof (user as any).getIdToken === 'function') {
+        const idToken = await (user as any).getIdToken();
+        headers['Authorization'] = `Bearer ${idToken}`;
+      } else {
+        const clientId = localStorage.getItem('vizra_client_tenant_id_v1') || 'anon_client_purge';
+        headers['X-Vizra-Client-Id'] = clientId;
+      }
+
+      const res = await fetch('/api/account/data', {
+        method: 'DELETE',
+        headers,
+      });
+
+      const data = await res.json().catch(() => null);
+      handleClearLocalData();
+      localStorage.removeItem('vizra_workspace_uploaded_assets_v1');
+      localStorage.removeItem('vizra_workspace_client_tokens_v1');
+
+      if (user) {
+        await signOutUser();
+      }
+
+      setDeleteReceipt(
+        data?.receiptId
+          ? `Erasure complete (Receipt: ${data.receiptId})`
+          : 'Local & server workspace data purged.'
+      );
+    } catch {
+      handleClearLocalData();
+      setDeleteReceipt('Local workspace data purged.');
+    } finally {
+      setIsDeletingAccount(false);
     }
   };
 
@@ -215,14 +293,14 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 4: Privacy & Cache Management */}
+        {/* Section 4: Privacy, Cache & Account Data Erasure */}
         <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-4">
           <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
             <Shield size={18} className="text-[#eb3b2d]" />
-            <span>Privacy & Storage Controls</span>
+            <span>Privacy, Storage &amp; Data Erasure Controls</span>
           </h2>
           <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600">
-            Vizra processes all AI requests through server-side proxies with zero telemetry leakage and client-isolated storage.
+            Vizra routes AI requests through server-side proxies with user-scoped storage and zero third-party advertising trackers. Review our Privacy Policy for subprocessor retention details.
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
@@ -231,7 +309,7 @@ export const SettingsPage: React.FC = () => {
                 Clear Local Browser Cache
               </span>
               <span className="text-[11px] text-neutral-400">
-                Removes saved conversation threads and drafts from this device.
+                Removes saved conversation threads, memories, and drafts from this browser.
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -241,11 +319,78 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleClearLocalData}
-                className="px-3.5 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 text-red-300 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5"
               >
                 <Trash2 size={13} />
-                <span>Clear Cache</span>
+                <span>Clear Local Cache</span>
               </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-white/10 dark:border-white/10 border-neutral-200">
+            <div>
+              <span className="text-xs font-medium text-red-400 block">
+                Delete Account &amp; Server Data (GDPR Art. 17 / DPDP Erasure)
+              </span>
+              <span className="text-[11px] text-neutral-400">
+                Purges server-side credit ledgers, contact/early-access records, and local workspace storage.
+              </span>
+              {deleteReceipt && (
+                <span className="block text-[11px] font-mono text-emerald-400 mt-1">
+                  {deleteReceipt}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={isDeletingAccount}
+              onClick={handleDeleteAccountAndData}
+              className="px-3.5 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 text-red-300 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+            >
+              <Trash2 size={13} />
+              <span>{isDeletingAccount ? 'Purging Data…' : 'Delete Account & Data'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 5: Child Online Safety & Age Assurance Governance */}
+        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+                <Lock size={18} className="text-[#eb3b2d]" />
+                <span>Child Online Safety &amp; Age Assurance Policy</span>
+              </h2>
+              <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+                Live platform policy posture and server-enforced minor protection boundaries.
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-lg bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[11px] font-mono text-[#eb3b2d] shrink-0">
+              {agePolicyOverview?.activePolicy || 'STRICT_18_PLUS'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-white/10 space-y-1">
+              <div className="text-[11px] font-mono text-neutral-400 uppercase">Option 3 • Parental Consent</div>
+              <div className="font-medium text-white">
+                {agePolicyOverview?.option3VendorConfigured
+                  ? 'External VPC Vendor Configured'
+                  : 'Blocked Pending External VPC Vendor & Counsel Sign-Off'}
+              </div>
+              <div className="text-[11px] text-neutral-500">
+                Jurisdiction thresholds (US 13, EU 13–16, UK 13/AADC 18, IN 18), fail-closed 424 guard, consent withdrawal, and Delete Account cascade active.
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-white/10 space-y-1">
+              <div className="text-[11px] font-mono text-neutral-400 uppercase">Option 4 • Feature Safeguards</div>
+              <div className="font-medium text-white">
+                Server-Enforced ({agePolicyOverview?.option4EnforcedEndpoints ?? 8} Protected Routes)
+              </div>
+              <div className="text-[11px] text-neutral-500">
+                Blocks under-18 Voice Live, OAuth connectors, unrestricted music, commercial Engage placements, and paid upgrades. Option 2 Teen access stays dormant; Option 5 stays rejected.
+              </div>
             </div>
           </div>
         </div>

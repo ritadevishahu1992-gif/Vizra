@@ -18,11 +18,10 @@ import {
 import { VizraLogo } from '../VizraLogo';
 import { useAuth } from '../../context/AuthContext';
 
-export type AuthTabMode = 'signin' | 'signup' | 'forgot' | 'otp';
+export type AuthTabMode = 'signin' | 'signup' | 'forgot';
 
 /**
- * 01 · Authentication (Split-Screen Auth Modal + 6-Digit OTP Input + Password Strength)
- * Adapted from 21st.dev `auth-forms-signin-signup` and `input-otp` patterns.
+ * 01 · Authentication (Split-Screen Auth Modal + Password Strength + Active 18+ Eligibility Gate)
  * Connected directly to VIZRA's Firebase Authentication context.
  */
 export const LoginModal: React.FC = () => {
@@ -44,13 +43,9 @@ export const LoginModal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [ageAndTermsConfirmed, setAgeAndTermsConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localValidationError, setLocalValidationError] = useState<string | null>(null);
-
-  // 6-digit OTP state with paste and keyboard navigation
-  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const passwordMetrics = useMemo(() => {
     const hasLength = password.length >= 8;
@@ -84,7 +79,7 @@ export const LoginModal: React.FC = () => {
     setLocalValidationError(null);
 
     const trimmedEmail = email.trim();
-    if (mode !== 'otp' && (!trimmedEmail || !trimmedEmail.includes('@'))) {
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
       setLocalValidationError('Please enter a valid email address.');
       return;
     }
@@ -109,12 +104,15 @@ export const LoginModal: React.FC = () => {
         setLocalValidationError('Password must be at least 8 characters long.');
         return;
       }
-      setIsSubmitting(true);
-      const ok = await signUpWithEmail(name, trimmedEmail, password);
-      setIsSubmitting(false);
-      if (ok) {
-        setMode('otp');
+      if (!ageAndTermsConfirmed) {
+        setLocalValidationError(
+          'You must confirm that you are at least 18 years old (or meet the minimum legal age of digital consent in your jurisdiction) and agree to the Terms & Privacy Policy.'
+        );
+        return;
       }
+      setIsSubmitting(true);
+      await signUpWithEmail(name, trimmedEmail, password);
+      setIsSubmitting(false);
       return;
     }
 
@@ -124,60 +122,6 @@ export const LoginModal: React.FC = () => {
       setIsSubmitting(false);
       return;
     }
-
-    if (mode === 'otp') {
-      const code = otpDigits.join('');
-      if (code.length < 6) {
-        setLocalValidationError('Please enter all 6 verification digits.');
-        return;
-      }
-      setIsSubmitting(true);
-      window.setTimeout(() => {
-        setIsSubmitting(false);
-        setOtpVerified(true);
-      }, 450);
-    }
-  };
-
-  const handleOtpChange = (index: number, rawVal: string) => {
-    const digit = rawVal.replace(/\D/g, '').slice(-1);
-    const next = [...otpDigits];
-    next[index] = digit;
-    setOtpDigits(next);
-    setLocalValidationError(null);
-
-    if (digit && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData('text')
-      .replace(/\D/g, '')
-      .slice(0, 6);
-    if (!pasted) return;
-    const next = [...otpDigits];
-    for (let i = 0; i < 6; i++) {
-      next[i] = pasted[i] || '';
-    }
-    setOtpDigits(next);
-    const focusIndex = Math.min(pasted.length, 5);
-    otpInputRefs.current[focusIndex]?.focus();
   };
 
   const activeError = localValidationError || error;
@@ -299,17 +243,14 @@ export const LoginModal: React.FC = () => {
                 {mode === 'signin' && 'Sign in to VIZRA Workspace'}
                 {mode === 'signup' && 'Create your VIZRA Studio account'}
                 {mode === 'forgot' && 'Reset your studio password'}
-                {mode === 'otp' && 'Verify security code (OTP)'}
               </h2>
               <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
                 {mode === 'signin' &&
-                  'Use Google Single Sign-On or your workspace email credentials.'}
+                  'Use Google Single Sign-On or your workspace email credentials (18+ active platform policy).'}
                 {mode === 'signup' &&
                   'Provision an encrypted creator workspace with persistent Omnia memory.'}
                 {mode === 'forgot' &&
                   'Enter your account email and we will dispatch a password reset link.'}
-                {mode === 'otp' &&
-                  'Enter or paste the 6-digit verification code sent to your email address.'}
               </p>
             </div>
 
@@ -406,31 +347,29 @@ export const LoginModal: React.FC = () => {
                 </div>
               )}
 
-              {mode !== 'otp' && (
-                <div>
-                  <label
-                    htmlFor="vizra-auth-email"
-                    className="block text-[11px] font-medium text-neutral-300 mb-1"
-                  >
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <Mail
-                      size={14}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
-                    />
-                    <input
-                      id="vizra-auth-email"
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="creator@vizra.ai"
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#111111] border border-white/[0.08] focus:border-[#DC2626] focus:outline-none text-xs text-white placeholder-neutral-500 transition-colors"
-                    />
-                  </div>
+              <div>
+                <label
+                  htmlFor="vizra-auth-email"
+                  className="block text-[11px] font-medium text-neutral-300 mb-1"
+                >
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail
+                    size={14}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                  />
+                  <input
+                    id="vizra-auth-email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="creator@vizra.ai"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-[#111111] border border-white/[0.08] focus:border-[#DC2626] focus:outline-none text-xs text-white placeholder-neutral-500 transition-colors"
+                  />
                 </div>
-              )}
+              </div>
 
               {(mode === 'signin' || mode === 'signup') && (
                 <div>
@@ -515,39 +454,22 @@ export const LoginModal: React.FC = () => {
                 </div>
               )}
 
-              {/* 6-Digit OTP Input Mode */}
-              {mode === 'otp' && (
-                <div className="space-y-3 py-1">
-                  <label className="block text-[11px] font-medium text-neutral-300">
-                    6-Digit Verification Code
-                  </label>
-                  <div className="flex items-center justify-between gap-2">
-                    {otpDigits.map((digit, idx) => (
-                      <input
-                        key={idx}
-                        ref={(el) => {
-                          otpInputRefs.current[idx] = el;
-                        }}
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete={idx === 0 ? 'one-time-code' : 'off'}
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) => handleOtpChange(idx, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                        onPaste={handleOtpPaste}
-                        aria-label={`Verification digit ${idx + 1}`}
-                        className="w-11 h-12 rounded-xl bg-[#111111] border border-white/[0.12] focus:border-[#DC2626] focus:outline-none text-center font-mono text-base font-bold text-white transition-colors"
-                      />
-                    ))}
-                  </div>
-                  {otpVerified && (
-                    <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-xs text-emerald-300 flex items-center gap-2">
-                      <CheckCircle2 size={14} className="text-emerald-400" />
-                      <span>Security code verified. Your studio session is active.</span>
-                    </div>
-                  )}
-                </div>
+              {/* Mandatory 18+ Age & Terms Confirmation on Sign Up */}
+              {mode === 'signup' && (
+                <label className="flex items-start gap-2.5 p-3 rounded-xl bg-[#111111] border border-white/[0.08] cursor-pointer text-[11px] text-neutral-300 leading-relaxed">
+                  <input
+                    type="checkbox"
+                    checked={ageAndTermsConfirmed}
+                    onChange={(e) => {
+                      setAgeAndTermsConfirmed(e.target.checked);
+                      setLocalValidationError(null);
+                    }}
+                    className="mt-0.5 accent-[#DC2626] rounded cursor-pointer"
+                  />
+                  <span>
+                    I confirm that I am at least <strong>18 years of age</strong> (or have verifiable parental/guardian authorization where required by law) and agree to VIZRA&apos;s Terms &amp; Conditions and Privacy Policy.
+                  </span>
+                </label>
               )}
 
               <div className="pt-1 flex items-center justify-between gap-2">
@@ -563,32 +485,17 @@ export const LoginModal: React.FC = () => {
                       ? 'Sign In with Email'
                       : mode === 'signup'
                       ? 'Create Studio Account'
-                      : mode === 'forgot'
-                      ? 'Send Reset Instructions'
-                      : 'Verify 6-Digit Code'}
+                      : 'Send Reset Instructions'}
                   </span>
                   <ArrowRight size={14} />
                 </button>
               </div>
-
-              {mode === 'signin' && (
-                <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => switchMode('otp')}
-                    className="inline-flex items-center gap-1 text-[11px] font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <KeyRound size={11} className="text-[#EB3B2D]" />
-                    <span>Have a 6-digit verification code?</span>
-                  </button>
-                </div>
-              )}
             </form>
           </div>
 
           {/* Footer Note */}
           <div className="pt-3 border-t border-white/[0.06] text-center text-[11px] text-neutral-500 font-sans">
-            By authenticating into VIZRA, you agree to our Terms of Service & Privacy Governance.
+            Minimum age 18+ required to access VIZRA Workspace under active platform policy. By authenticating, you agree to our Terms of Service &amp; Privacy Governance.
           </div>
         </div>
       </div>

@@ -277,7 +277,7 @@ export class RAGVectorStore {
    * 1. Global Knowledge (Vizra Brand & Principles)
    * 2. Vizra Knowledge (Platform Docs & 8 Creative Engines)
    * 3. Omnia Knowledge (Omnia 1.0 Architecture & RAG Specification v1.0)
-   * 4. Project Knowledge (Sample Projects: Smart Medicine Dispenser & Black Hole Film)
+   * 4. Project Knowledge (Sample Projects: Cinema Camera Motion Control Rig & Black Hole Film)
    */
   public seedDefaultKnowledgeCorpus(): void {
     this.documents.clear();
@@ -382,34 +382,34 @@ Top-K chunks are packed within a 2048-token context budget with source attributi
       projectId: 'proj_omnia_core',
     });
 
-    // 4. Project Knowledge: Smart Medicine Dispenser
+    // 4. Project Knowledge: Cinema Camera Motion Control Rig
     this.ingestDocumentRaw({
-      id: 'doc_proj_medicine_dispenser',
-      title: 'Smart Medicine Dispenser — Technical Specs & Architecture',
-      fileName: 'smart_medicine_dispenser_specs.md',
-      content: `# Smart Medicine Dispenser — Technical Specs & Architecture
-Project ID: proj_med_dispenser | Confidential Project Knowledge
+      id: 'doc_proj_camera_motion_rig',
+      title: 'Cinema Camera Motion Control Rig — Technical Specs & Architecture',
+      fileName: 'cinema_camera_rig_specs.md',
+      content: `# Cinema Camera Motion Control Rig — Technical Specs & Architecture
+Project ID: proj_camera_rig | Confidential Project Knowledge
 
 ## Section 1: System Hardware Architecture
-The Smart Medicine Dispenser combines an ESP32 microcontroller with dual stepper motors (NEMA 17) driving a rotary carousel with 14 partitioned medication pods.
+The Cinema Camera Motion Control Rig combines an ESP32 microcontroller with dual stepper motors (NEMA 17) driving a linear carbon-fiber dolly track with 14 precision keyframe stops.
 Key hardware elements:
-- Optical IR break-beam sensor to verify pill drop descent into the collection cup.
-- 0.96-inch OLED I2C display for dosage instructions and countdown timer.
-- Capacitive touch confirm button to log dosage compliance.
-- Piezo buzzer for audible reminder alarm sequences.
+- Optical IR break-beam sensor to verify camera carriage arrival at each keyframe stop.
+- 0.96-inch OLED I2C display for frame rate, shutter angle, and timecode readout.
+- Capacitive touch trigger button to log SMPTE timecode markers.
+- Piezo cue tone generator for acoustic slate synchronization.
 
-## Section 2: Firmware & Dispensing Logic
-- Dispense Schedule: Timed via onboard RTC (DS3231) with battery backup.
-- Jam Detection: If the optical beam does not register pill transit within 1200ms of motor rotation, motor reverses 15 degrees, re-attempts once, and triggers an error state if blocked.
-- WiFi Telemetry: Transmits timestamped logs to the caregiver companion portal via MQTT over TLS.
+## Section 2: Firmware & Motion Control Logic
+- Keyframe Schedule: Timed via onboard RTC (DS3231) with battery backup and genlock sync.
+- Stall Detection: If the optical beam does not register carriage transit within 1200ms of motor rotation, motor reverses 15 degrees, re-attempts once, and triggers a stall state if obstructed.
+- WiFi Telemetry: Transmits timestamped frame logs to the director monitor workstation via MQTT over TLS.
 
-## Section 3: Safety & Fail-Safe Enclosures
-Child-resistant mechanical lock activated via micro-servo latch. In the event of power loss, the carousel remains mechanically locked in the current pod position.`,
+## Section 3: Mechanical Safety & Interlocks
+Precision carriage lock activated via micro-servo latch. In the event of power loss, the camera carriage remains mechanically locked in the current keyframe position.`,
       tier: 'project',
       sourceType: 'project_file',
       accessLevel: 'private',
       workspaceId: 'ws_user_workspace',
-      projectId: 'proj_med_dispenser',
+      projectId: 'proj_camera_rig',
     });
 
     // 5. Project Knowledge: Black Hole Film
@@ -640,7 +640,7 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
       if (doc.tier === 'project') {
         const queryLower = trimmedQuery.toLowerCase();
         const matchesQueryProject =
-          (doc.project_id === 'proj_med_dispenser' && /(dispenser|medicine|esp32|nema|medication|pill)/i.test(queryLower)) ||
+          (doc.project_id === 'proj_camera_rig' && /(camera|dolly|rig|esp32|nema|keyframe|motion control)/i.test(queryLower)) ||
           (doc.project_id === 'proj_singularity' && /(singularity|kerr|film|cinematic|black hole film)/i.test(queryLower)) ||
           (doc.title && queryLower.includes(doc.title.toLowerCase()));
 

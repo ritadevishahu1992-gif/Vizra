@@ -18,6 +18,7 @@ import {
   RefreshCw,
   AlertCircle,
   ExternalLink,
+  ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { auth } from '../../../lib/firebase';
@@ -47,7 +48,23 @@ type AdminTab =
   | 'approvals'
   | 'scheduling'
   | 'analytics'
+  | 'safety'
   | 'config';
+
+interface AdminSafetyReport {
+  id: string;
+  messageId: string;
+  category?: string;
+  reason: string;
+  details: string;
+  modelId: string;
+  status: 'open' | 'under_review' | 'resolved' | 'dismissed';
+  sessionHash?: string;
+  reviewerNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdAt: string;
+}
 
 const ALL_MODES: AIMode[] = [
   'quick',
@@ -77,6 +94,8 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
   const [partners, setPartners] = useState<EngagePartner[]>([]);
   const [analytics, setAnalytics] = useState<EngageAnalyticsSummary | null>(null);
   const [auditLog, setAuditLog] = useState<EngageAuditLogEntry[]>([]);
+  const [safetyReports, setSafetyReports] = useState<AdminSafetyReport[]>([]);
+  const [safetyNotesDraft, setSafetyNotesDraft] = useState<Record<string, string>>({});
 
   // Content Editor Form State
   const [editingContentId, setEditingContentId] = useState<string | null>(null);
@@ -157,6 +176,18 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
       setPartners(data.partners || []);
       setAnalytics(data.analytics || null);
       setAuditLog(data.auditLog || []);
+
+      try {
+        const safetyRes = await fetch('/api/safety/reports', { headers });
+        if (safetyRes.ok) {
+          const safetyData = await safetyRes.json();
+          if (Array.isArray(safetyData.reports)) {
+            setSafetyReports(safetyData.reports);
+          }
+        }
+      } catch {
+        // Non-fatal if safety reports endpoint unavailable
+      }
     } catch (err: any) {
       setStatusMessage({
         type: 'error',
@@ -457,7 +488,42 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
     }
   };
 
+  const handleUpdateSafetyReportStatus = async (
+    reportId: string,
+    status: AdminSafetyReport['status']
+  ) => {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/safety/reports/${encodeURIComponent(reportId)}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          status,
+          reviewerNotes: safetyNotesDraft[reportId] || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setStatusMessage({
+          type: 'error',
+          text: data.error?.message || 'Unable to update safety report status.',
+        });
+        return;
+      }
+      setSafetyReports((prev) =>
+        prev.map((r) => (r.id === reportId ? data.report : r))
+      );
+      setStatusMessage({
+        type: 'success',
+        text: `Updated safety report ${reportId} to "${status}".`,
+      });
+    } catch (err: any) {
+      setStatusMessage({ type: 'error', text: err.message });
+    }
+  };
+
   const pendingQueue = content.filter((c) => c.approvalStatus === 'pending_review');
+  const openSafetyCount = safetyReports.filter((r) => r.status === 'open').length;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
@@ -542,6 +608,11 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
               },
               { id: 'scheduling', label: 'Scheduling', icon: Calendar },
               { id: 'analytics', label: 'Analytics & CTR', icon: Activity },
+              {
+                id: 'safety',
+                label: `Safety Reports (${openSafetyCount})`,
+                icon: ShieldAlert,
+              },
               { id: 'config', label: 'Global Config', icon: Settings },
             ].map((item) => {
               const Icon = item.icon;
@@ -568,7 +639,7 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
                 Operator Session
               </div>
               <div className="text-[11px] font-mono text-neutral-300 truncate">
-                {user?.email || 'ritadevishahu1992@gmail.com'}
+                {user?.email || 'Authenticated Admin'}
               </div>
               <div className="flex items-center gap-1 text-[10px] text-emerald-400">
                 <ShieldCheck size={11} />
@@ -1435,7 +1506,123 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
               </div>
             )}
 
-            {/* TAB 8: GLOBAL CONFIG & AUDIT LOG */}
+            {/* TAB 8: TRUST & SAFETY REPORTS */}
+            {activeTab === 'safety' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-white">
+                    AI Trust &amp; Safety Incident Queue
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    Review PII-scrubbed user safety reports submitted from Omnia chat responses and update moderation triage status.
+                  </p>
+                </div>
+
+                {safetyReports.length === 0 ? (
+                  <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800 text-xs text-neutral-400 text-center">
+                    No safety incident reports recorded.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {safetyReports.map((report) => (
+                      <div
+                        key={report.id}
+                        className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-mono text-white font-semibold">
+                              {report.id}
+                            </span>
+                            {report.category && (
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-300">
+                                {report.category}
+                              </span>
+                            )}
+                            <span
+                              className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                                report.status === 'resolved'
+                                  ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/50'
+                                  : report.status === 'dismissed'
+                                  ? 'text-neutral-400 bg-neutral-900 border-neutral-800'
+                                  : report.status === 'under_review'
+                                  ? 'text-sky-300 bg-sky-950/40 border-sky-800/50'
+                                  : 'text-amber-300 bg-amber-950/40 border-amber-800/50'
+                              }`}
+                            >
+                              {report.status}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-mono text-neutral-500">
+                            {new Date(report.createdAt).toLocaleString()} • {report.modelId}
+                          </span>
+                        </div>
+
+                        <div className="text-xs font-semibold text-neutral-200">
+                          {report.reason}
+                        </div>
+                        <p className="text-xs text-neutral-400 bg-black/50 p-2.5 rounded-lg border border-neutral-900 whitespace-pre-wrap">
+                          {report.details || 'No additional excerpt provided.'}
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                          <input
+                            type="text"
+                            value={safetyNotesDraft[report.id] ?? report.reviewerNotes ?? ''}
+                            onChange={(e) =>
+                              setSafetyNotesDraft((prev) => ({
+                                ...prev,
+                                [report.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Optional moderation reviewer notes..."
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white"
+                          />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUpdateSafetyReportStatus(report.id, 'under_review')
+                              }
+                              className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[11px] text-sky-300 cursor-pointer"
+                            >
+                              Under Review
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUpdateSafetyReportStatus(report.id, 'resolved')
+                              }
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700/60 text-[11px] text-emerald-300 cursor-pointer"
+                            >
+                              Resolve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUpdateSafetyReportStatus(report.id, 'dismissed')
+                              }
+                              className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[11px] text-neutral-400 cursor-pointer"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+
+                        {report.reviewedBy && (
+                          <div className="text-[10px] font-mono text-neutral-500">
+                            Reviewed by {report.reviewedBy}
+                            {report.reviewedAt ? ` at ${new Date(report.reviewedAt).toLocaleString()}` : ''}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 9: GLOBAL CONFIG & AUDIT LOG */}
             {activeTab === 'config' && config && (
               <div className="space-y-6">
                 <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-4">

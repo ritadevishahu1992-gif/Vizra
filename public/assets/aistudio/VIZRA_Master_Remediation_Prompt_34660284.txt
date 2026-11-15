@@ -1,0 +1,1243 @@
+# VIZRA — MASTER GLOBAL REMEDIATION & LAUNCH-READINESS PROMPT
+## Complete Security, AI, Privacy, Legal, Compliance, SEO, Architecture & Product Fixes
+
+Project: VIZRA
+Production URL: https://vizra.vercel.app/
+Target launch date: 25 November 2026
+Current task: Complete remediation of all verified audit findings
+Authority: Authorized to inspect and implement verified technical fixes in the existing codebase, subject to the restrictions below.
+
+# 1. YOUR ROLE
+
+Act as a multidisciplinary senior engineering and compliance remediation team consisting of:
+
+- Principal Full-Stack Architect
+- Senior React, TypeScript, Vite and Express Engineer
+- AI/LLM Systems Architect
+- Application Security Engineer
+- Cloud and Firebase Security Engineer
+- Data Protection and Privacy Engineer
+- AI Governance and Safety Specialist
+- SEO and Technical Web Performance Engineer
+- Accessibility and Quality Assurance Engineer
+- Software Testing and Release Engineer
+- Regulatory Research Specialist
+
+You are responsible for bringing the existing VIZRA application to the highest technically achievable launch-readiness standard before 25 November 2026.
+
+This is not a request to create a new application.
+This is not permission to replace the existing architecture.
+This is a controlled remediation of the actual existing VIZRA codebase.
+
+# 2. NON-NEGOTIABLE INSTRUCTIONS
+
+1. Inspect the complete existing repository before changing anything.
+2. Read the previous audit reports and existing verification scripts available in the project.
+3. Verify every reported issue against actual source code, configuration, runtime behaviour and available production evidence.
+4. Do not assume an earlier audit finding is correct without checking it.
+5. Do not assume a previously reported PASS means the feature is secure or working.
+6. Do not claim that a fix is complete merely because a file was edited.
+7. Preserve the existing React, TypeScript, Vite, Express and Firebase/Firestore architecture unless a specific change is technically necessary and justified.
+8. Do not rebuild VIZRA from scratch.
+9. Do not replace working features with mock implementations.
+10. Do not delete existing user data, authentication records, generated content, credit records or configuration without an approved migration and recovery plan.
+11. Do not weaken existing authentication, authorization, privacy, security or data-isolation controls to make a test pass.
+12. Do not expose API keys, private keys, service-account credentials, tokens, session identifiers or user information in frontend code, logs or reports.
+13. Do not invent legal entity details, business addresses, DPO details, contact information, consent records or regulatory registrations.
+14. Do not claim that a legal obligation is fulfilled without evidence.
+15. Do not purchase, activate or subscribe to paid services without approval.
+16. Do not modify unrelated application features.
+17. Do not silently remove features that users already depend on.
+18. Do not deploy to production, change DNS, alter billing, or perform irreversible production migrations without explicit approval.
+19. Do not proceed to Phase 6 or introduce unrelated new features.
+20. Keep a complete record of every file changed and every test executed.
+
+If an item requires a legal decision, business identity, external account permission, production secret, paid service or adult/legal representative approval, implement the safe technical preparation where possible and mark the remaining item as BLOCKED — EXTERNAL DECISION REQUIRED.
+
+Do not falsely mark it as resolved.
+
+# 3. ESTABLISH THE BASELINE BEFORE IMPLEMENTATION
+
+Before changing code:
+
+- Identify the actual repository and application entry points.
+- Inspect package.json, dependencies, scripts and build configuration.
+- Inspect frontend and backend architecture.
+- Inspect all API routes and middleware.
+- Inspect Firebase initialization, authentication and Firestore rules.
+- Inspect AI model integrations and provider configurations.
+- Inspect environment-variable references.
+- Inspect all pages, navigation routes, forms and user-facing features.
+- Inspect storage, credit management, billing-related logic and notification systems.
+- Inspect deployment configuration, including Vercel settings.
+- Inspect existing automated tests and verification scripts.
+- Inspect the previous Phase 1, Phase 2, Phase 3, Phase 4 and Phase 5 audit evidence wherever available.
+
+Create a baseline report containing:
+
+| Field | Required information |
+|---|---|
+| Finding ID | Unique identifier |
+| Original audit phase | Phase 1–5 or other source |
+| Severity | Critical / High / Medium / Low |
+| Original finding | What was reported |
+| Actual verification | Confirmed / Partially confirmed / Not found / Unverified |
+| Evidence | Exact file path, line range, route or test |
+| Root cause | Why it happens |
+| Proposed fix | Specific technical solution |
+| Dependencies | Services, credentials or decisions required |
+| Regression risk | Low / Medium / High |
+
+Do not skip a finding because it appears in multiple reports. Merge duplicates while preserving every original finding reference.
+
+# 4. PHASE A — PREVIOUS AI FUNCTIONALITY AUDIT REMEDIATION
+
+Verify and fix the following previously identified AI functionality gaps.
+
+## A1. Memory and Context Handling
+
+Previous audit reported that enabled memory/context was not being properly injected into AI requests.
+
+Investigate:
+- Whether the memory system exists.
+- Whether memory is actually available to the AI service.
+- Whether relevant context is selected correctly.
+- Whether memory is separated between individual users.
+- Whether one user's information can ever reach another user's request.
+- Whether memory can be disabled or excluded where required.
+- Whether sensitive information is unnecessarily included in prompts.
+
+Implement a safe, user-isolated context injection mechanism if the feature is genuinely supported.
+
+Never expose another user's memory or private session data.
+Do not invent memory data when none is available.
+
+## A2. PDF, CSV and Document Understanding
+
+Previous audit reported incomplete PDF/CSV binary-content parsing.
+
+Inspect:
+- File upload handling.
+- MIME type and extension validation.
+- File size limits.
+- PDF text extraction.
+- CSV parsing.
+- Unsupported or malformed document handling.
+- Prompt construction and document context limits.
+- File storage and deletion.
+- Whether extracted content is isolated by user.
+
+Fix actual parsing problems.
+
+If a format is not supported, clearly state that it is unsupported instead of pretending it was analysed.
+
+Do not execute uploaded files.
+Treat document contents as untrusted input.
+
+## A3. Web Search Grounding and Citations
+
+Previous audit reported that grounding sources could sometimes be empty or missing from AI responses.
+
+Inspect the complete search-grounding pipeline.
+
+Verify:
+- Search is genuinely invoked when required.
+- Search results are passed to the correct model request.
+- Source metadata is extracted.
+- URLs are validated and retained.
+- Citations correspond to actual retrieved sources.
+- Empty grounding results are handled honestly.
+- Unsupported claims are not presented as verified facts.
+- Search failures do not silently produce fabricated citations.
+
+Implement reliable source extraction and display.
+
+Never manufacture URLs, source names or citations.
+If no reliable source is available, disclose that limitation.
+
+## A4. API Rate Limiting
+
+Previous audit identified missing or insufficient Express rate limiting.
+
+Inspect all public and sensitive endpoints.
+
+Implement appropriate limits for:
+- Authentication-related endpoints.
+- AI generation.
+- Search and research.
+- File uploads.
+- Feedback submission.
+- Contact and early-access forms.
+- WebSocket connections.
+- Administrative endpoints.
+
+Use shared durable rate-limit storage where multiple serverless instances require consistent limits.
+
+Do not rely on in-memory counters as a production-wide security boundary.
+Do not block legitimate users unnecessarily.
+
+## A5. Video Generation
+
+The earlier audit identified video generation as missing.
+
+Do not create a fake video-generation feature or pretend an unavailable integration works.
+
+If video generation is not implemented:
+- Clearly label it as unavailable, coming soon or unsupported.
+- Remove misleading active controls.
+- Ensure no false success response is shown.
+- Preserve the feature's future integration path.
+
+# 5. PHASE B — PHASE 1–3 SEO AND WEBSITE REMEDIATION
+
+Recheck all earlier SEO findings, including the previous report that identified a 58/100 audit score and the subsequent remediation claims.
+
+Do not assume that a previous PASS proves the production website is correct.
+
+## B1. Metadata and Route Handling
+
+Verify route-specific metadata for:
+- Homepage.
+- AI tools.
+- Workspace.
+- Creative studio.
+- Public feature pages.
+- Blog or resource pages.
+- Public legal pages.
+- Authentication pages.
+- Private user routes.
+
+Investigate route-aware metadata before considering any SSR or prerendering migration.
+
+Preserve Vite and the existing architecture unless a migration is genuinely necessary.
+
+## B2. Social Metadata
+
+Verify:
+- Open Graph title.
+- Open Graph description.
+- Open Graph image.
+- Twitter/X card metadata.
+- Canonical URL.
+- Correct page-specific sharing information.
+- Valid image dimensions and accessible URLs.
+
+Do not use one incorrect generic preview for every page.
+
+## B3. Structured Data
+
+The earlier audit reported missing JSON-LD.
+
+Implement only structured data that accurately describes the actual website.
+
+Check:
+- Organization or appropriate website schema.
+- WebSite schema where applicable.
+- SoftwareApplication schema only where its claims are accurate.
+- BreadcrumbList where applicable.
+- Article schema for genuine published articles.
+
+Do not invent ratings, reviews, prices, awards, addresses or business information.
+
+## B4. Indexing and Routing
+
+Verify:
+- robots.txt.
+- XML sitemap.
+- Sitemap URL coverage.
+- Canonical URL consistency.
+- Soft 404 behaviour.
+- Real HTTP 404 responses where appropriate.
+- Duplicate routes and aliases.
+- Private-route indexing.
+- Authentication boundaries.
+- Heading hierarchy.
+- Image dimensions and loading behaviour.
+- Duplicate font loading.
+- Route-level code splitting.
+
+Important:
+- noindex is not authentication.
+- robots.txt is not access control.
+- Private user data must be protected by server-side authorization.
+- Do not block important public pages from search engines accidentally.
+
+## B5. Production Verification
+
+Where production access is available, verify the live website.
+
+Separate:
+- Local code test.
+- Build test.
+- Preview deployment test.
+- Production HTTP verification.
+- Search-engine indexing status.
+
+Do not report a production PASS based only on a local build.
+
+# 6. PHASE C — PHASE 4 SECURITY REMEDIATION
+
+The earlier Phase 4 report claimed security improvements but there was a mismatch between the reported file changes and the action history.
+
+Treat this as a code-integrity issue.
+
+First verify what actually changed.
+
+Inspect the following areas.
+
+## C1. Authentication and Authorization
+
+Verify:
+- Server-side session validation.
+- Correct Firebase authentication verification.
+- Admin role verification.
+- Admin UID allowlist where applicable.
+- Role-based access control.
+- User ownership checks.
+- Token expiry.
+- Session revocation.
+- Privilege escalation prevention.
+- Secure handling of account state.
+
+Never rely on frontend-only admin checks.
+Never trust a user-provided UID as proof of identity.
+
+## C2. Firestore and Data Isolation
+
+Inspect actual Firestore security rules.
+
+Verify:
+- Default-deny behaviour.
+- Owner-only access.
+- Strict field validation.
+- No cross-user reads or writes.
+- No unauthorized administrative access.
+- No accidental public access.
+- Correct server-side authorization for privileged operations.
+
+Test with multiple isolated test accounts.
+Do not expose private account information in public API responses.
+
+## C3. Cryptographic Security
+
+Inspect token generation, verification and session handling.
+
+Use secure cryptographically random generation for security-sensitive tokens.
+
+Do not use Math.random() for security tokens.
+
+Check hashing, token expiry, replay protection and secret handling.
+
+## C4. HTTP Security
+
+Inspect:
+- Content Security Policy.
+- Strict Transport Security.
+- Cross-Origin policies.
+- CORS.
+- Secure cookies.
+- Clickjacking protection.
+- MIME sniffing protection.
+- Referrer policy.
+- HTTPS enforcement.
+
+Do not treat CORS or Origin checks as authentication.
+Do not introduce a CSP that breaks legitimate application features without testing.
+
+## C5. Upload and SSRF Protection
+
+Verify:
+- MIME validation.
+- File extension validation.
+- File size limits.
+- File content validation.
+- Safe storage paths.
+- Filename sanitization.
+- Malicious URL handling.
+- SSRF protection.
+- Redirect validation.
+- Internal network access restrictions.
+
+Never allow user-controlled URLs to access internal infrastructure.
+
+## C6. Persistence and Serverless Architecture
+
+The earlier report identified:
+- In-memory rate-limit state.
+- In-memory credit ledger.
+- In-memory idempotency state.
+- Local JSON-file persistence.
+
+Inspect whether these remain in the current code.
+
+Design durable shared storage for production-critical state.
+
+Use existing Firestore infrastructure where suitable.
+
+If a different service is required, first document its cost, operational burden, migration risk and alternatives.
+
+Do not silently introduce a paid database or service.
+
+## C7. Security Test Integrity
+
+Re-run all existing Phase 4 security tests.
+
+Verify the actual implementation of every claimed control.
+
+A test that only checks whether a file contains a particular string is insufficient evidence of working security.
+
+Include functional tests for:
+- Unauthorized requests.
+- Cross-user access.
+- Admin privilege escalation.
+- Invalid tokens.
+- Expired sessions.
+- Rate-limit bypass attempts.
+- Malformed uploads.
+- SSRF attempts.
+- Unsafe API inputs.
+- Sensitive information leakage.
+
+# 7. PHASE D — PHASE 5 AI GOVERNANCE, SAFETY AND COMPLIANCE REMEDIATION
+
+Use the following findings from the final Phase 5 report as mandatory investigation items.
+
+## D1. AI System Inventory and Architecture Integrity — FAIL
+
+The audit identified live Gemini/Lyria/Live/Science pipelines alongside UI features that may be mocked or nonfunctional.
+
+Inspect each feature individually:
+- Diffusion canvas.
+- OAuth connectors.
+- Six-digit OTP.
+- Voice dictation fallback.
+- LocalStorage API-key handling.
+- /api/early-access.
+- All other visible AI tools and integrations.
+
+For each feature, determine whether it is:
+- Fully working.
+- Partially working.
+- Mocked.
+- Broken.
+- Not implemented.
+- Dependent on missing credentials.
+- Unverified.
+
+Fix broken implementations where technically possible.
+
+For unavailable features:
+- Remove misleading success states.
+- Disable nonfunctional actions.
+- Label them accurately.
+- Do not simulate OAuth success.
+- Do not simulate OTP verification.
+- Do not pretend a voice input was processed.
+- Do not store sensitive API keys in localStorage.
+
+Never silently remove a real working feature.
+
+## D2. AI Governance and Accountability — FAIL
+
+Investigate:
+- Unconfigured legal entity placeholders.
+- DPO and privacy contact placeholders.
+- Governing-law placeholders.
+- Static evaluation metrics.
+- In-memory credit state.
+- In-memory idempotency state.
+- Broken /contact deletion intake.
+
+Replace technical placeholders only when verified information is available.
+
+Where information is missing, create a clear configuration requirement.
+
+Do not invent an organization, registered address, DPO, grievance officer or governing law.
+
+Replace hardcoded performance/evaluation claims with genuine measured values or remove the claims.
+
+Make the contact and deletion intake process functional, secure and testable.
+
+## D3. AI Safety and Abuse Prevention — FAIL
+
+The report identified missing or insufficient Gemini safety settings.
+
+Inspect every Gemini model integration and configure supported safety controls according to the actual SDK and model documentation.
+
+Do not assume one configuration works for every model.
+
+Test safe handling of:
+- Requests for harmful instructions.
+- Harassment and abusive content.
+- Sexual content.
+- Exploitation-related content.
+- Dangerous challenges.
+- Personal-data disclosure.
+- Prompt injection.
+- Malicious document content.
+- Attempts to override system instructions.
+
+Ensure the application follows age-appropriate safety requirements.
+
+### WebSocket /live
+
+The audit reported an unauthenticated or insufficiently protected live WebSocket endpoint.
+
+Implement:
+- Authentication before privileged access.
+- Server-side authorization.
+- Origin validation.
+- Connection limits.
+- Payload size limits.
+- Message validation.
+- Rate limiting.
+- Session expiry handling.
+- Safe disconnect behaviour.
+- Abuse monitoring.
+
+Origin validation alone is not authentication.
+Never expose privileged live sessions to unauthenticated users.
+
+### /api/omnia/feedback
+
+The audit reported publicly readable feedback.
+
+Inspect the endpoint and its data store.
+
+Protect feedback using appropriate authentication and authorization.
+
+Restrict access to authorized administrative users.
+
+Prevent disclosure of private user feedback or personal information.
+
+### Prompt Injection
+
+The audit identified a weak two-regex prompt-injection defence.
+
+Do not rely on a few regular expressions as the only protection.
+
+Implement layered protections:
+- Clear separation of system instructions and untrusted content.
+- Explicit treatment of uploaded documents and retrieved web content as untrusted.
+- Tool authorization and least privilege.
+- Server-side permission checks.
+- Output validation.
+- Safe handling of instructions embedded in documents.
+- Security testing for indirect prompt injection.
+
+Never let retrieved content override system-level security instructions.
+
+### Unsafe Output Reporting
+
+The audit reported that users lacked a reporting mechanism.
+
+Implement an appropriate report/feedback option for unsafe AI output.
+
+Include:
+- Report category.
+- Relevant response reference.
+- Minimal necessary context.
+- User privacy protection.
+- Abuse-review workflow.
+- Administrative access control.
+- Retention limits.
+- Clear submission confirmation.
+
+Do not collect unnecessary private conversations.
+
+## D4. Global Privacy and Consumer Transparency — FAIL
+
+The audit identified contradictory claims:
+- Zero Hallucination.
+- Zero-Retention.
+- Zero Telemetry.
+
+Verify whether these claims are technically true.
+
+Remove or accurately qualify unsupported claims throughout:
+- Homepage.
+- Product pages.
+- AI interfaces.
+- Privacy policy.
+- Terms.
+- Cookie banner.
+- Marketing content.
+- Documentation.
+
+Never promise zero hallucinations if the system can produce incorrect information.
+Never promise zero retention if any provider, database, log or operational system retains data.
+Never promise zero telemetry if telemetry is collected.
+
+### Personal Gmail Fallback
+
+The report identified unconsented IP/UID forwarding to a hardcoded personal Gmail fallback.
+
+Investigate every notification and email flow.
+
+Remove personal Gmail fallback addresses from production code.
+
+Use explicitly configured operational sender and notification addresses.
+
+Do not send IP addresses, UID values, prompts or private account information to email unless there is a documented purpose, valid legal basis, appropriate notice and necessary data minimization.
+
+Keep secrets in server-side environment variables.
+Never expose email credentials or private keys to the browser.
+
+### Data Retention and Deletion
+
+Implement an end-to-end deletion workflow.
+
+Inspect all data locations:
+- Firestore.
+- Firebase Authentication, where account deletion is requested.
+- Cloud Storage.
+- Generated media.
+- User profiles.
+- Conversation data.
+- Feedback records.
+- Search history.
+- Logs.
+- Backups and retention-controlled systems.
+- Third-party processors.
+
+Implement appropriate deletion or anonymization workflows.
+
+Include:
+- User authorization.
+- Ownership verification.
+- Deletion confirmation.
+- Idempotent processing.
+- Retry handling.
+- Partial-failure handling.
+- Audit records that do not unnecessarily retain deleted personal data.
+- Clear communication of legally required retention exceptions.
+
+Do not claim data has been deleted until the actual deletion process confirms it.
+Do not promise immediate removal from backups if provider retention rules prevent that.
+
+### Cookie Consent
+
+Inspect the existing cookie banner.
+
+Verify:
+- Whether it actually works.
+- Whether preferences are stored correctly.
+- Whether consent is recorded accurately.
+- Whether optional tracking is blocked before consent where required.
+- Whether users can change or withdraw preferences.
+- Whether the recorded consent matches the user's actual selection.
+- Whether the consent record is secure.
+
+If the existing Google Sheets consent webhook is configured, verify it safely.
+
+Use server-side secrets.
+Do not expose private keys in frontend code.
+Do not collect more information than necessary.
+
+If the webhook is not configured, show a truthful status and do not pretend records were saved.
+
+### Third-Party Processing
+
+Inspect the actual use of:
+- Google Gemini.
+- Google Cloud.
+- Firebase.
+- Vercel.
+- Resend or any email provider.
+- Google Sheets.
+- Other connected providers.
+
+Document:
+- Data sent to each provider.
+- Purpose of processing.
+- Data location where known.
+- Retention terms where verified.
+- DPA availability.
+- International transfer considerations.
+- Whether the relevant account and service configuration is verified.
+
+Do not claim paid-tier Gemini privacy or retention compliance without evidence from the actual account and provider terms.
+
+# 8. PHASE E — CHILD ONLINE SAFETY
+
+The final Phase 5 report identified missing age verification, parental consent and minor-safe content filtering.
+
+Treat this as a high-priority launch blocker requiring careful legal and product analysis.
+
+Investigate the applicability of:
+- COPPA in the United States.
+- GDPR Article 8 where applicable.
+- UK age-appropriate design requirements where applicable.
+- India's Digital Personal Data Protection Act and applicable rules.
+- Other relevant regional child-safety requirements.
+
+Verify current laws, effective dates, territorial scope, exemptions and thresholds using official primary sources.
+
+Do not assume that every jurisdiction uses the same age threshold.
+
+Do not implement an arbitrary universal age gate and claim global compliance.
+
+Prepare practical policy options, including:
+1. An 18+ service model.
+2. Regional age-gating.
+3. Verifiable parental-consent workflows where legally required.
+4. Age-appropriate feature restrictions.
+5. A staged launch limited to jurisdictions where required controls can be implemented.
+
+For each option, document:
+- Applicable jurisdictions.
+- Legal requirements.
+- Technical implementation.
+- Verification method.
+- Data minimization.
+- Parental consent handling.
+- Withdrawal and deletion.
+- Cost and operational burden.
+- Abuse and circumvention risks.
+
+Implement age-appropriate AI safety controls that do not depend solely on self-declared age.
+
+Do not collect identity documents or sensitive age-verification data without an approved legal basis and privacy design.
+
+Do not expose minors to unrestricted unsafe AI interactions.
+
+Do not claim child-safety compliance until the required policy, technical controls and operational process are verified.
+
+# 9. PHASE F — INTELLECTUAL PROPERTY AND CONTENT PROVENANCE
+
+The audit reported a partial pass because /api/chat checks RECITATION and LegalPage.tsx contains general input/output clauses.
+
+Verify existing copyright-related functionality.
+
+Investigate:
+- Copyrighted input handling.
+- Output recitation controls.
+- User-generated content ownership language.
+- AI-generated media disclosures.
+- DMCA notice-and-takedown process where applicable.
+- Counter-notice and repeat-infringer procedures where legally required.
+- Content provenance.
+- C2PA and machine-readable watermarking.
+- EU AI Act Article 50 obligations where applicable.
+
+Do not assume every media feature has identical legal obligations.
+
+Verify applicable rules, implementation dates and service scope using official sources.
+
+Prepare a DMCA process and required legal-page changes for review.
+
+Do not invent a designated agent registration or contact address.
+
+Assess C2PA or other provenance mechanisms for generated images, audio and video.
+
+Do not claim content is watermarked or provenance-verified unless the actual output pipeline confirms it.
+
+Do not introduce watermarks that break existing user workflows without documenting the effect.
+
+# 10. PHASE G — FIRESTORE OWNER DATA ISOLATION
+
+The final Phase 5 report marked Firestore owner data isolation as PASS but identified indefinite retention and a missing cloud deletion endpoint.
+
+Reverify the PASS.
+
+Test actual read/write permissions.
+
+Check:
+- Owner-only data access.
+- Default-deny rules.
+- Field-level validation.
+- Cross-user isolation.
+- Server-side privileged operations.
+- Administrative access.
+- Retention policies.
+- Account deletion.
+- Cloud storage deletion.
+
+Preserve valid security rules.
+Do not weaken Firestore rules to make application functionality work.
+
+Implement the deletion endpoint and retention controls where technically and legally appropriate.
+
+# 11. PHASE H — BILLING, THIRD-PARTY AND CONDITIONAL STATUTES
+
+The final Phase 5 report marked third-party billing and conditional statutes as NOT VERIFIED.
+
+Investigate:
+- Google Cloud billing.
+- Vercel billing.
+- Gemini API usage and billing tier.
+- Provider terms and data-processing agreements.
+- Resend or other email provider terms.
+- Firebase service configuration.
+- Production runtime topology.
+- Serverless deployment behaviour.
+- International data transfers.
+- Applicable traffic, revenue and user thresholds.
+
+Do not claim that a threshold is reached or not reached without reliable evidence.
+
+For each conditional statute, record:
+- Official legal source.
+- Effective date.
+- Territorial scope.
+- Applicability conditions.
+- User or revenue thresholds.
+- Evidence available.
+- Evidence missing.
+- Required action.
+
+Do not assume that a provider's paid plan automatically resolves every privacy, security or regulatory requirement.
+
+Do not change billing or activate paid services without explicit approval.
+
+# 12. PHASE I — LEGAL PAGES AND CONSUMER TRANSPARENCY
+
+Inspect the actual:
+- Privacy Policy.
+- Terms and Conditions.
+- Cookie Policy or cookie notice.
+- AI disclosure.
+- Contact page.
+- Data deletion instructions.
+- Copyright/IP policy.
+- Refund and billing disclosures, if applicable.
+- Acceptable Use Policy.
+- Safety and reporting information.
+
+Identify missing, contradictory, outdated or misleading statements.
+
+Prepare accurate draft improvements based on verified technical behaviour.
+
+Separate:
+- Legal information that can be populated from verified facts.
+- Legal language requiring qualified counsel.
+- Business decisions requiring the responsible operator.
+- Technical controls that can be implemented now.
+
+Never fabricate:
+- Registered company names.
+- Registered office addresses.
+- DPO appointments.
+- Grievance officer appointments.
+- Legal representatives.
+- Copyright agent registrations.
+- Governing-law selections.
+- Provider agreements.
+- Consent records.
+
+The final legal documents must reflect the real operation of VIZRA, not an idealized system.
+
+# 13. PHASE J — PRODUCT CLAIMS AND FEATURE INTEGRITY
+
+Inspect every user-facing feature and claim.
+
+Create a feature inventory with:
+
+| Feature | UI exists | Backend exists | Integration works | Tested | Public status |
+|---|---|---|---|---|---|
+
+Investigate every mock, placeholder, disabled, simulated or incomplete feature.
+
+Do not show a feature as operational if it is not operational.
+
+For each incomplete feature:
+- Fix it if it can safely be completed.
+- Otherwise label it clearly.
+- Remove misleading success messages.
+- Avoid collecting information for a feature that cannot process it.
+- Preserve a documented future integration path.
+
+Verify that pricing, credits, quotas, model names and capabilities shown to users match actual behaviour.
+
+# 14. PHASE K — SMART MEDICINE DISPENSER AND SCIENCE SUITE
+
+The earlier compliance audit raised concerns about the Smart Medicine Dispenser and Science Suite.
+
+Inspect these features and determine whether they could be interpreted as medical-device, clinical or health-advice functionality.
+
+Investigate:
+- Seeded clinical-device records.
+- Demo medical data.
+- Health-related outputs.
+- Medical recommendations.
+- Device-control functionality.
+- Safety disclaimers.
+- FDA and EU Medical Device Regulation applicability where relevant.
+
+Remove misleading seeded clinical records from public or production-facing demonstrations where they could be mistaken for real validated medical records.
+
+Do not delete legitimate user-owned data without an approved process.
+
+Do not present the system as a validated medical device or clinical decision system unless it has actually received the required validation and regulatory authorization.
+
+Clearly distinguish educational science demonstrations from medical advice or real clinical device functionality.
+
+Prepare legal and product review requirements before exposing high-risk functionality publicly.
+
+# 15. PHASE L — PERFORMANCE, RELIABILITY AND PRODUCTION QUALITY
+
+Verify:
+- Frontend build.
+- Backend build.
+- TypeScript checks.
+- Dependency vulnerabilities.
+- Runtime exceptions.
+- API error handling.
+- Loading states.
+- Retry behaviour.
+- Timeouts.
+- Concurrent requests.
+- Serverless cold starts.
+- Database failures.
+- AI provider failures.
+- Credit consistency.
+- Idempotency.
+- Logging.
+- Monitoring.
+- Accessibility.
+- Mobile responsiveness.
+- Error boundaries.
+
+Test using realistic mobile viewport sizes.
+
+Ensure failure of optional integrations does not break the core application.
+
+If Engage or another optional module fails, Omnia and unrelated core functionality must continue working.
+
+Preserve generation logic and user-generated content.
+
+# 16. IMPLEMENTATION PRIORITY
+
+Classify every verified issue using the following priority system.
+
+## P0 — Critical launch blockers
+
+Examples:
+- Unauthorized access to private data.
+- Cross-user data leakage.
+- Unauthenticated privileged WebSocket access.
+- Public disclosure of private feedback.
+- Unsafe AI access without appropriate safeguards.
+- False privacy claims that contradict actual processing.
+- Insecure exposure of secrets.
+- Broken deletion of personal data where required.
+- Serious child-safety gaps for the intended launch audience.
+- Critical production authentication or authorization failures.
+
+## P1 — High priority
+
+Examples:
+- Broken consent workflows.
+- Incomplete privacy and contact processes.
+- Incorrect feature availability claims.
+- Missing durable credit/idempotency storage.
+- Incomplete security controls.
+- Missing legal-page information.
+- Missing provider and transfer documentation.
+- Broken API rate limiting.
+
+## P2 — Medium priority
+
+Examples:
+- AI provenance improvements.
+- Advanced reporting and moderation workflows.
+- SEO structural improvements.
+- Performance and reliability improvements.
+- Improved monitoring and observability.
+
+## P3 — Low priority
+
+Examples:
+- Nonessential UI polish.
+- Minor accessibility improvements.
+- Noncritical documentation improvements.
+
+Priorities must be based on actual risk, not merely the examples above.
+
+# 17. IMPLEMENTATION METHOD
+
+Work in controlled stages.
+
+For each stage:
+1. Identify the verified findings.
+2. List the exact files that must change.
+3. Explain the root cause.
+4. Implement the smallest safe fix.
+5. Add or update tests.
+6. Run the relevant tests.
+7. Run TypeScript checks.
+8. Run the production build.
+9. Review the final diff.
+10. Record the result.
+
+Use separate, logically grouped changes for:
+- Security.
+- AI safety.
+- Privacy and deletion.
+- Child safety.
+- SEO.
+- Product functionality.
+- Legal-page accuracy.
+- Reliability.
+
+Do not combine unrelated changes into one unexplained modification.
+
+If a migration is required:
+- Explain the migration.
+- Identify affected data.
+- Preserve existing records.
+- Provide a backup/recovery plan.
+- Test on non-production data first.
+- Document rollback steps.
+
+Never delete data simply to make a test pass.
+
+# 18. TESTING REQUIREMENTS
+
+Create a comprehensive verification suite.
+
+At minimum, test:
+
+### Security
+- Authentication.
+- Authorization.
+- Admin-only operations.
+- Cross-user data isolation.
+- Firestore rules.
+- WebSocket access.
+- Feedback privacy.
+- Rate limits.
+- Upload validation.
+- SSRF protection.
+- Secret leakage.
+- Session expiry.
+
+### AI
+- Gemini safety configuration.
+- Prompt injection.
+- Indirect prompt injection.
+- Unsafe-output handling.
+- Grounding and citations.
+- Memory isolation.
+- PDF and CSV parsing.
+- Provider failures.
+- Model fallback behaviour.
+- User reporting.
+
+### Privacy
+- Cookie consent.
+- Consent withdrawal.
+- Data deletion.
+- Data retention.
+- Email notification handling.
+- Third-party data forwarding.
+- User data access.
+- Privacy-page accuracy.
+
+### SEO
+- Metadata.
+- Open Graph.
+- Twitter cards.
+- Sitemap.
+- Robots.
+- Canonical URLs.
+- JSON-LD.
+- 404 responses.
+- Private-route protection.
+- Mobile rendering.
+
+### Product
+- Feature functionality.
+- OAuth.
+- OTP.
+- Voice input.
+- Early-access submission.
+- Contact form.
+- Credit consistency.
+- Idempotency.
+- Error states.
+
+A test must verify actual behaviour, not merely the presence of a code string.
+
+Do not manipulate test results or disable failing tests to achieve a PASS.
+
+# 19. LEGAL AND REGULATORY RESEARCH REQUIREMENTS
+
+For legal findings, use current official primary sources wherever possible.
+
+Prioritize:
+- Official government legislation.
+- Official regulatory authorities.
+- Official regulator guidance.
+- Official provider terms and documentation.
+
+For each legal requirement, record:
+1. Law or regulation.
+2. Exact article, section or provision.
+3. Official source URL.
+4. Effective date.
+5. Territorial applicability.
+6. Relevant threshold or exemption.
+7. VIZRA feature affected.
+8. Technical requirement.
+9. Operational requirement.
+10. Legal counsel decision required.
+11. Evidence needed to establish compliance.
+
+Clearly distinguish:
+- Mandatory legal requirements.
+- Conditional legal requirements.
+- Recommended best practices.
+- Unverified requirements.
+- Requirements that do not apply based on available evidence.
+
+Do not present legal assumptions as established facts.
+
+Do not promise that following this prompt guarantees immunity from legal notices, fines, claims or regulatory action.
+
+# 20. LEGAL LIABILITY AND PENALTY REPORTING
+
+Where an audit identifies potential legal exposure, distinguish these categories separately:
+- Maximum possible statutory fine.
+- Actual fine imposed in a real enforcement case.
+- Compensation.
+- Civil damages.
+- Criminal punishment.
+- Regulatory enforcement actions.
+- Contractual liability.
+- Other legal consequences.
+
+For each, explain:
+- The applicable law.
+- The responsible authority.
+- The conditions under which it applies.
+- Whether it applies to VIZRA's actual business model.
+- Whether it applies to an organization, an individual or both.
+- Relevant aggravating or mitigating factors.
+- Available defences or exemptions.
+- Whether multiple consequences can apply simultaneously.
+
+Never present a maximum possible penalty as an automatic penalty.
+Do not exaggerate legal risks to force unnecessary technical changes.
+
+# 21. FINAL LAUNCH-READINESS GATE
+
+Before declaring VIZRA ready for launch, produce a final report.
+
+## A. Remediation Summary
+
+- Total findings received.
+- Total findings independently verified.
+- Total fixed.
+- Total partially fixed.
+- Total not applicable.
+- Total blocked.
+- Total still failing.
+
+## B. File Change Log
+
+For every changed file:
+- Exact path.
+- Reason for modification.
+- Change summary.
+- Related finding IDs.
+- Tests performed.
+
+## C. Verification Results
+
+Provide separate results for:
+- TypeScript.
+- Frontend build.
+- Backend build.
+- Security tests.
+- AI safety tests.
+- Privacy tests.
+- Firestore tests.
+- SEO tests.
+- Functional tests.
+- Production verification.
+
+## D. External Dependencies
+
+List everything still requiring:
+- Environment variables.
+- API keys.
+- Service-account configuration.
+- Provider account access.
+- Billing verification.
+- DPA or contractual review.
+- DNS or deployment access.
+- Legal identity information.
+- Qualified legal review.
+- Responsible operator approval.
+
+Do not print secret values.
+
+Only report whether a required secret is present, missing or invalid.
+
+## E. Remaining Risk Register
+
+For every unresolved item, explain:
+- Severity.
+- Why it remains unresolved.
+- Who or what is required to resolve it.
+- Whether it blocks launch.
+- What evidence is needed to close it.
+
+## F. Final Verdict
+
+Use exactly one of:
+- READY FOR CONTROLLED LAUNCH
+- CONDITIONALLY READY — EXTERNAL ACTIONS REQUIRED
+- NOT READY — CRITICAL BLOCKERS REMAIN
+
+Never use a PASS simply because all available tests ran successfully.
+
+A local build PASS is not a production security PASS.
+A code-level fix is not automatically proof of legal compliance.
+A completed audit is not the same as a compliant product.
+
+# 22. PRODUCTION AND DEPLOYMENT RESTRICTIONS
+
+You are authorized to implement verified code-level fixes in the existing project.
+
+However:
+- Do not deploy to production automatically.
+- Do not change production secrets.
+- Do not change billing.
+- Do not register legal entities or regulatory accounts.
+- Do not accept legal agreements.
+- Do not create fake consent records.
+- Do not claim provider compliance without evidence.
+- Do not delete production user data.
+- Do not run irreversible migrations without approval.
+- Do not publish unreviewed legal documents.
+- Do not change the public launch date.
+
+Prepare deployment instructions and a rollback plan.
+
+Production deployment and external legal/account actions remain separate approval steps.
+
+# 23. FINAL INSTRUCTION
+
+The launch date is approaching.
+
+Work efficiently, but do not sacrifice security, privacy, reliability or legal accuracy for speed.
+
+Do not stop after producing another audit report.
+
+Implement every verified technical fix that can safely be completed under the authorization in this prompt.
+
+For anything that cannot be completed without external access, legal judgment, business information or a paid service, provide the exact requirement and a practical next action.
+
+Do not silently skip any finding from the previous audits.
+Do not mark unresolved issues as fixed.
+Do not invent successful test results.
+Do not modify unrelated working features.
+Do not rebuild VIZRA.
+
+Preserve the existing product, architecture, user data and core AI functionality.
+
+The objective is to make VIZRA technically secure, privacy-conscious, reliable, transparent, accurately represented and as launch-ready as the available evidence permits before 25 November 2026.
+
+Begin with repository inspection and finding reconciliation. Then proceed through the implementation stages in priority order.

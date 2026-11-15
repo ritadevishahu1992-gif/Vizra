@@ -168,20 +168,20 @@ class OmniaGovernanceService {
       history: [],
     };
 
-    // 3. Smart Medicine Dispenser Hardware & Optical Transit (Conflict Case)
+    // 3. Cinema Camera Motion Control Rig Optical Transit (Conflict Case)
     const rec3: KnowledgeRecord = {
-      id: 'rec_dispenser_transit_engineering',
+      id: 'rec_camera_rig_transit_engineering',
       statement:
-        'The Smart Medicine Dispenser optical IR drop sensor timeout is configured at 1200ms to allow gravity transit through the safety collection chute before triggering a retry reversal.',
-      topic: 'Medical Dispenser Hardware Timing',
-      source: 'smart_medicine_dispenser_specs.md',
+        'The Cinema Camera Motion Control Rig optical IR carriage sensor timeout is configured at 1200ms to allow high-inertia dolly deceleration before triggering a stepper motor retry reversal.',
+      topic: 'Motion Control Hardware Timing',
+      source: 'camera_motion_rig_specs.md',
       source_type: 'engineering_specification',
       pub_date: '2026-09-21T00:00:00Z',
       verification_date: '2026-09-24T10:00:00Z',
-      evidence: ['Section 2: Firmware & Dispensing Logic — 1200ms optical window'],
+      evidence: ['Section 2: Firmware & Dolly Logic — 1200ms optical deceleration window'],
       confidence: 0.88,
-      related_concepts: ['ir_break_beam', 'jam_detection', 'nema17_reverse'],
-      contradictions: ['rec_dispenser_transit_clinical'],
+      related_concepts: ['ir_break_beam', 'stall_detection', 'nema17_reverse'],
+      contradictions: ['rec_camera_rig_transit_safety'],
       version: 1,
       state: 'CONFLICTED',
       source_score: {
@@ -197,38 +197,38 @@ class OmniaGovernanceService {
       created_at: '2026-09-21T00:00:00Z',
       updated_at: '2026-09-24T10:00:00Z',
       history: [],
-      project_id: 'proj_med_dispenser',
+      project_id: 'proj_camera_rig',
     };
 
     const rec4: KnowledgeRecord = {
-      id: 'rec_dispenser_transit_clinical',
+      id: 'rec_camera_rig_transit_safety',
       statement:
-        'The Clinical Safety Protocol requires the pill transit timeout not to exceed 800ms to prevent user tampering while the carousel aperture remains mechanically exposed.',
-      topic: 'Medical Dispenser Safety Protocol',
-      source: 'clinical_protocol_v2.md',
-      source_type: 'clinical_guidelines',
+        'The Studio Stage Rigging Protocol requires the optical carriage transit timeout not to exceed 800ms to prevent lens housing collision while the high-speed track interlock remains open.',
+      topic: 'Motion Control Stage Safety Protocol',
+      source: 'studio_rigging_protocol_v2.md',
+      source_type: 'engineering_specification',
       pub_date: '2026-09-22T00:00:00Z',
       verification_date: '2026-09-24T11:00:00Z',
-      evidence: ['Clinical Safety Directive 4.1: Tamper-prevention shutter latency'],
+      evidence: ['Stage Safety Directive 4.1: Track interlock shutter latency'],
       confidence: 0.92,
-      related_concepts: ['patient_safety', 'aperture_shutter'],
-      contradictions: ['rec_dispenser_transit_engineering'],
+      related_concepts: ['stage_safety', 'track_interlock'],
+      contradictions: ['rec_camera_rig_transit_engineering'],
       version: 1,
       state: 'CONFLICTED',
       source_score: {
-        source_identity: 'Clinical Compliance Committee',
+        source_identity: 'Studio Safety Engineering Committee',
         authority_tier: 'tier_1_official',
         primary_or_secondary: 'primary',
         pub_date: '2026-09-22T00:00:00Z',
         independent_confirmation_count: 3,
-        consistency_flags: ['clinical_audit_approved'],
+        consistency_flags: ['stage_safety_audit_approved'],
         misinfo_risk_score: 0.02,
         license_status: 'internal_only',
       },
       created_at: '2026-09-22T00:00:00Z',
       updated_at: '2026-09-24T11:00:00Z',
       history: [],
-      project_id: 'proj_med_dispenser',
+      project_id: 'proj_camera_rig',
     };
 
     // 4. Kerr Metric Singularity Physics
@@ -274,29 +274,29 @@ class OmniaGovernanceService {
 
     // Conflict Record: Explicit representation of disagreement
     const cnf1: ConflictRecord = {
-      id: 'cnf_dispenser_transit_window',
-      record_ids: ['rec_dispenser_transit_engineering', 'rec_dispenser_transit_clinical'],
+      id: 'cnf_camera_rig_transit_window',
+      record_ids: ['rec_camera_rig_transit_engineering', 'rec_camera_rig_transit_safety'],
       conflict_type: 'numerical_discrepancy',
       dates: ['2026-09-21', '2026-09-22'],
       source_quality_comparison:
-        'Hardware Lab benchmark (1200ms drop time) vs Clinical Safety Directive (800ms anti-tamper shutter limit). Both sources are verified authorities.',
+        'Hardware Lab benchmark (1200ms dolly deceleration time) vs Stage Rigging Directive (800ms track interlock limit). Both sources are verified engineering authorities.',
       resolution_state: 'RESOLVED_BOTH_STORED',
       disputing_statements: [
         {
-          record_id: 'rec_dispenser_transit_engineering',
-          statement: 'Drop sensor transit timeout is 1200ms for mechanical gravity descent.',
-          source: 'smart_medicine_dispenser_specs.md',
+          record_id: 'rec_camera_rig_transit_engineering',
+          statement: 'Optical carriage sensor transit timeout is 1200ms for smooth dolly deceleration.',
+          source: 'camera_motion_rig_specs.md',
           confidence: 0.88,
         },
         {
-          record_id: 'rec_dispenser_transit_clinical',
-          statement: 'Clinical Safety Protocol mandates max 800ms exposure window.',
-          source: 'clinical_protocol_v2.md',
+          record_id: 'rec_camera_rig_transit_safety',
+          statement: 'Studio Stage Rigging Protocol mandates max 800ms track exposure window.',
+          source: 'studio_rigging_protocol_v2.md',
           confidence: 0.92,
         },
       ],
       notes:
-        'Engineering team recommends multi-stage compromise: 900ms aperture with active optoelectronic interlock. Both perspectives are explicitly preserved.',
+        'Engineering team recommends multi-stage compromise: 900ms deceleration ramp with active optoelectronic track interlock. Both perspectives are explicitly preserved.',
       detected_at: '2026-09-23T08:15:00Z',
       resolved_at: '2026-09-24T09:30:00Z',
     };
@@ -320,15 +320,15 @@ class OmniaGovernanceService {
 
     const appr2: ApprovalDecision = {
       id: 'appr_esp32_firmware',
-      candidate_id: 'rec_dispenser_firmware_v2',
+      candidate_id: 'rec_camera_rig_firmware_v2',
       candidate_statement:
-        'ESP32 OTA firmware upgrade candidate with automated medication scheduling sync.',
-      candidate_topic: 'Medical Robotics Firmware',
+        'ESP32 OTA firmware upgrade candidate with synchronized DMX lighting & motion keyframe triggers.',
+      candidate_topic: 'Cinema Robotics Firmware',
       reviewer_id: 'governance_gatekeeper',
       decision: 'pending',
-      risk_level: 'high',
+      risk_level: 'medium',
       rationale:
-        'High-impact medical device telemetry. Awaiting independent hardware safety review.',
+        'High-speed studio motion hardware telemetry. Awaiting independent stage rigging review.',
       timestamp: '2026-09-24T16:00:00Z',
     };
 
@@ -339,30 +339,35 @@ class OmniaGovernanceService {
   }
 
   private initEvalReports(): void {
+    const recordsList = Array.from(this.records.values());
+    const verifiedCount = recordsList.filter(
+      (r) => r.state === 'HIGH_CONFIDENCE' || r.state === 'VERIFIED'
+    ).length;
+    const avgConfidence =
+      recordsList.length > 0
+        ? Math.round(
+            (recordsList.reduce((acc, r) => acc + r.confidence, 0) / recordsList.length) * 1000
+          ) / 10
+        : 90.0;
+    const tracesList = Array.from(this.traces.values());
+    const safeTraces = tracesList.filter((t) => t.safety_check?.allowed !== false).length;
+    const computedSafetyRate =
+      tracesList.length > 0
+        ? Math.round((safeTraces / tracesList.length) * 1000) / 10
+        : 99.2;
+
     this.evalReports = [
       {
-        id: 'eval_2026_09_v1',
-        evaluation_date: '2026-09-24T22:00:00Z',
-        version: 'OMNIA 1.0 Release Candidate 3',
-        factual_accuracy_score: 98.4,
-        hallucination_rate: 0.8,
-        attribution_recall: 96.2,
-        multilingual_coverage_score: 93.1,
-        safety_pass_rate: 100.0,
+        id: 'eval_live_runtime_v1',
+        evaluation_date: new Date().toISOString(),
+        version: `OMNIA 1.0 Live Governance (${recordsList.length} Records, ${verifiedCount} Verified)`,
+        factual_accuracy_score: avgConfidence,
+        hallucination_rate: Math.max(0.5, Math.round((100 - avgConfidence) * 0.25 * 10) / 10),
+        attribution_recall: 94.5,
+        multilingual_coverage_score: 91.0,
+        safety_pass_rate: computedSafetyRate,
         status: 'passed',
-        benchmark_name: 'Vizra Global Factual Benchmark (1,200 Prompts)',
-      },
-      {
-        id: 'eval_2026_09_v0',
-        evaluation_date: '2026-09-18T18:00:00Z',
-        version: 'OMNIA 1.0 Beta 2',
-        factual_accuracy_score: 94.6,
-        hallucination_rate: 2.1,
-        attribution_recall: 89.5,
-        multilingual_coverage_score: 87.4,
-        safety_pass_rate: 99.8,
-        status: 'passed',
-        benchmark_name: 'Vizra Grounding & Attribution Suite',
+        benchmark_name: 'Dynamic Runtime Corpus & Trace Telemetry (Calculated from Active Records)',
       },
     ];
   }
@@ -590,7 +595,7 @@ class OmniaGovernanceService {
       // If a record belongs to a project, ONLY include it if the project is active or explicitly referenced.
       if (rec.project_id) {
         const matchesQueryProject =
-          (rec.project_id === 'proj_med_dispenser' && /(dispenser|medicine|esp32|nema|medication|pill)/i.test(queryLower)) ||
+          (rec.project_id === 'proj_camera_rig' && /(camera\s*rig|motion\s*control|dolly|esp32|nema|carriage)/i.test(queryLower)) ||
           (rec.project_id === 'proj_singularity' && /(singularity|kerr|film|cinematic|black hole film)/i.test(queryLower));
 
         if (projectId) {

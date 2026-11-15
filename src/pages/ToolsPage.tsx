@@ -58,13 +58,13 @@ const TOOLS_LIST: CreativeToolItem[] = [
   },
   {
     id: 'image',
-    name: 'Visual & Diffusion Synthesis',
+    name: 'Visual & Procedural Canvas Synthesis',
     category: 'visual',
-    desc: 'High-contrast studio image generation, texture maps, architectural concepts, and storyboard frames.',
+    desc: 'High-contrast procedural studio frames, architectural concepts, storyboard compositions, and PNG exports with embedded AI provenance.',
     status: 'available',
     icon: Layout,
     prompt: 'Generate an aesthetic architectural render of an obsidian monolith sanctuary with crimson horizon light.',
-    outputFormat: 'PNG / JPG · Multi-Aspect Ratio',
+    outputFormat: 'PNG (with Provenance) · Multi-Aspect Ratio',
   },
   {
     id: 'code',

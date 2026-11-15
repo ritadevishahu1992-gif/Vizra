@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Volume2, X, PhoneCall, Radio, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Mic, MicOff, Volume2, X, AlertCircle, Lock, LogIn } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
+import { useAuth } from '../../context/AuthContext';
+import { auth } from '../../lib/firebase';
 
 interface VoiceLiveModalProps {
   isOpen: boolean;
@@ -8,31 +10,20 @@ interface VoiceLiveModalProps {
 }
 
 export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose }) => {
+  const { user, openLoginModal } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isAuthRequired, setIsAuthRequired] = useState(false);
   const [statusText, setStatusText] = useState('Initializing Live Session...');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+
   const wsRef = useRef<WebSocket | null>(null);
   const inputAudioCtxRef = useRef<AudioContext | null>(null);
   const outputAudioCtxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      cleanupAudio();
-      return;
-    }
-
-    startLiveSession();
-
-    return () => {
-      cleanupAudio();
-    };
-  }, [isOpen]);
-
-  const cleanupAudio = () => {
+  const cleanupAudio = useCallback(() => {
     if (processorRef.current) {
       processorRef.current.disconnect();
       processorRef.current = null;
@@ -55,14 +46,50 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
     }
     setIsConnected(false);
     setIsSpeaking(false);
-  };
+  }, []);
 
-  const startLiveSession = async () => {
+  const startLiveSession = useCallback(async () => {
+    cleanupAudio();
     setErrorMessage(null);
-    setStatusText('Requesting microphone permissions...');
+    setIsAuthRequired(false);
+
+    const currentUser = auth?.currentUser;
+    if (!user || !currentUser) {
+      setIsAuthRequired(true);
+      setStatusText('Sign in required for Live Voice');
+      setErrorMessage(
+        'Omnia Live Voice requires an authenticated VIZRA account so sessions are authorized and rate-protected.'
+      );
+      return;
+    }
+
+    setStatusText('Requesting authorized Live Voice ticket...');
 
     try {
-      // 1. Request microphone access
+      const idToken = await currentUser.getIdToken();
+      const ticketRes = await fetch('/api/live/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      const ticketData = await ticketRes.json().catch(() => ({}));
+
+      if (!ticketRes.ok || !ticketData?.ticket) {
+        if (ticketRes.status === 401) {
+          setIsAuthRequired(true);
+        }
+        setStatusText('Live Voice authorization rejected');
+        setErrorMessage(
+          ticketData?.error?.message ||
+            'Unable to issue an authorized Live Voice session ticket. Please retry or sign in again.'
+        );
+        return;
+      }
+
+      // 1. Request microphone access after server ticket authorization succeeds
+      setStatusText('Requesting microphone permissions...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -81,9 +108,9 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
         sampleRate: 24000,
       });
 
-      // 3. Connect WebSocket to /live on server
+      // 3. Connect WebSocket to /live with single-use authorized ticket
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/live`;
+      const wsUrl = `${protocol}//${window.location.host}/live?ticket=${encodeURIComponent(ticketData.ticket)}`;
       setStatusText('Connecting to gemini-3.8-live...');
 
       const ws = new WebSocket(wsUrl);
@@ -104,7 +131,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
               const channelData = e.inputBuffer.getChannelData(0);
               const pcm16 = floatTo16BitPCM(channelData);
               const base64 = arrayBufferToBase64(pcm16);
-              ws.send(JSON.stringify({ audio: base64 }));
+              ws.send(JSON.stringify({ audio: base64, mimeType: 'audio/pcm;rate=16000' }));
             }
           };
 
@@ -140,17 +167,37 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
         setStatusText('Live connection unavailable');
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         setIsConnected(false);
+        if (event.code === 1008 || event.code === 4401) {
+          setStatusText('Session closed by safety/auth policy');
+          if (event.reason) {
+            setErrorMessage(event.reason);
+          }
+        }
       };
     } catch (err: any) {
       console.warn('Microphone or Live API error:', err);
       setErrorMessage(
-        err.message || 'Microphone access denied. Please grant microphone permission to use voice conversation.'
+        err.message ||
+          'Microphone access denied. Please grant microphone permission to use voice conversation.'
       );
-      setStatusText('Microphone permission required');
+      setStatusText('Microphone permission or session setup failed');
     }
-  };
+  }, [cleanupAudio, user]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      cleanupAudio();
+      return;
+    }
+
+    startLiveSession();
+
+    return () => {
+      cleanupAudio();
+    };
+  }, [isOpen, startLiveSession, cleanupAudio]);
 
   function floatTo16BitPCM(input: Float32Array): ArrayBuffer {
     const buffer = new ArrayBuffer(input.length * 2);
@@ -238,12 +285,11 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
           Omnia Live Voice
         </h2>
         <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 mb-6">
-          Model: gemini-3.8-live (Live API)
+          Model: gemini-3.8-live (Authenticated Session)
         </span>
 
         {/* Kinetic Orb Animation */}
         <div className="relative w-36 h-36 flex items-center justify-center my-4">
-          {/* Pulsing Rings */}
           <div
             className={`absolute inset-0 rounded-full border border-[#eb3b2d]/30 transition-all duration-300 ${
               isSpeaking || isConnected ? 'scale-110 animate-ping opacity-25' : 'opacity-10'
@@ -254,8 +300,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
               isSpeaking ? 'scale-105 animate-pulse' : ''
             }`}
           />
-          
-          {/* Core Orb */}
+
           <div
             className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
               isSpeaking
@@ -265,7 +310,9 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
                 : 'bg-neutral-950 border border-neutral-800 text-neutral-500'
             }`}
           >
-            {isSpeaking ? (
+            {isAuthRequired ? (
+              <Lock size={30} className="text-amber-400" />
+            ) : isSpeaking ? (
               <Volume2 size={36} className="text-white animate-bounce" />
             ) : isConnected ? (
               <Mic size={36} className="text-[#eb3b2d] animate-pulse" />
@@ -279,11 +326,13 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
         <div className="mt-4 mb-2">
           <p className="text-sm font-medium text-white">{statusText}</p>
           <p className="text-xs text-neutral-400 mt-1">
-            {isConnected
+            {isAuthRequired
+              ? 'Sign in with Google or your VIZRA email account to authorize real-time voice audio.'
+              : isConnected
               ? isSpeaking
                 ? 'Omnia is speaking...'
                 : 'Listening to your voice in real time... Speak naturally.'
-              : 'Connecting WebSocket session to Gemini Live API.'}
+              : 'Authorizing authenticated WebSocket session to Gemini Live API.'}
           </p>
         </div>
 
@@ -305,7 +354,16 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
             <span>End Session</span>
           </button>
 
-          {!isConnected && (
+          {isAuthRequired ? (
+            <button
+              type="button"
+              onClick={() => openLoginModal()}
+              className="flex-1 py-3 px-4 rounded-2xl bg-[#eb3b2d] text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <LogIn size={14} />
+              <span>Sign In</span>
+            </button>
+          ) : !isConnected ? (
             <button
               type="button"
               onClick={startLiveSession}
@@ -313,7 +371,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
             >
               Reconnect
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

@@ -353,11 +353,11 @@ export const FeaturesPage: React.FC = () => {
                 <span className="text-[11px] font-mono text-[#EB3B2D] uppercase">
                   Active Workspace Project
                 </span>
-                <h3 className="typo-card-title">Smart Medicine Dispenser</h3>
+                <h3 className="typo-card-title">Cinema Camera Motion Control Rig</h3>
               </div>
             </div>
             <div className="flex items-center gap-3 text-xs text-neutral-400">
-              <span>Engineering & IoT</span>
+              <span>Cinematography & Robotics</span>
               <span aria-hidden="true">·</span>
               <Link
                 to="/workspace"
@@ -400,7 +400,7 @@ export const FeaturesPage: React.FC = () => {
             <div className="flex items-start gap-2 text-neutral-300 pt-2.5 border-t border-white/[0.06]">
               <span className="font-semibold text-[#EB3B2D] shrink-0">Omnia:</span>
               <span className="leading-relaxed">
-                “Synthesizing the 6-slide architecture presentation for the <strong>Smart Medicine Dispenser</strong> using your uploaded microcontroller pinout PDF, dosage schedule CSV, and companion mobile app notes…”
+                “Synthesizing the 6-slide architecture presentation for the <strong>Cinema Camera Motion Control Rig</strong> using your uploaded microcontroller pinout PDF, keyframe motion CSV, and studio monitor notes…”
               </span>
             </div>
           </div>

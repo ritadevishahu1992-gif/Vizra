@@ -219,6 +219,9 @@ export interface UserFeedbackItem {
   timestamp: string;
   status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
   sourceCreatedId?: string;
+  submittedByHash?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
 }
 
 export interface OmniaConflictItem {

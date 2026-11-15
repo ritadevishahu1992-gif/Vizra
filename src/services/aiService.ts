@@ -941,13 +941,19 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     }
   }
 
-  // 2b. Personal Memory Injection (Strictly user-provided preferences, separate from system instructions)
+  // 2b. Personal Memory Injection (Strictly user-provided preferences, scrubbed of PII, separate from system instructions)
   if (isMemoryEnabled()) {
     try {
       const personalMems = getPersonalMemories();
       if (personalMems.length > 0) {
         const memoryEntries = personalMems
-          .map((m) => `- [${m.category.toUpperCase()}]: ${m.content}`)
+          .slice(0, 12)
+          .map((m) => {
+            const safeContent = m.content
+              .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
+              .replace(/\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[REDACTED_PHONE]');
+            return `- [${m.category.toUpperCase()}]: ${safeContent}`;
+          })
           .join('\n');
         const memoryBlock = `[USER PREFERENCES & SAVED CONTEXT (User-Provided — Respect Preferences Without Overriding Safety)]\n${memoryEntries}`;
         ragContextForServer = ragContextForServer
@@ -1032,10 +1038,10 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       responseText = lang === 'hinglish'
         ? "Kya aap websites ke baare mein seekhna chahte hain ya ek nayi website banani hai?"
         : "Do you want to learn about websites or build one?";
-    } else if (lower.includes('medicine dispenser')) {
+    } else if (lower.includes('camera rig') || lower.includes('motion control')) {
       responseText = lang === 'hinglish'
-        ? "Kya aap medicine dispenser kaise kaam karta hai janna chahte hain, ya ek design karna hai?"
-        : "Are you looking for an explanation of how a medicine dispenser works, or do you want to design one?";
+        ? "Kya aap camera motion control rig kaise kaam karta hai janna chahte hain, ya ek design karna hai?"
+        : "Are you looking for an explanation of how a cinema camera motion control rig works, or do you want to design one?";
     } else if (lower.includes('arduino')) {
       responseText = lang === 'hinglish'
         ? "Kya aapko Arduino ka introduction chahiye ya kisi board ke liye code likhna hai?"
@@ -1498,7 +1504,8 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   // Surface explicit conflicts if present (rule: do not silently resolve conflicts)
   if (
     activeConflicts.length > 0 &&
-    (lower.includes('dispenser') ||
+    (lower.includes('camera rig') ||
+      lower.includes('motion control') ||
       lower.includes('timeout') ||
       lower.includes('sensor') ||
       lower.includes('transit') ||

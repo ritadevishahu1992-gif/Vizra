@@ -61,7 +61,15 @@ export function getDefaultSenderEmail(): string {
  * Safely retrieves the administrator security notification email from server-side environment variables.
  */
 export function getAdminNotificationEmail(): string {
-  return process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL?.trim() || 'ritadevishahu1992@gmail.com';
+  const configured = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL?.trim() || '';
+  if (configured && configured.includes('@')) {
+    return configured;
+  }
+  const allowlistFirst = (process.env.ADMIN_ALLOWLIST_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim())
+    .find((e) => e.includes('@'));
+  return allowlistFirst || '';
 }
 
 /**
