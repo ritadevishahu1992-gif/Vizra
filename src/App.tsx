@@ -16,6 +16,7 @@ import {
   CookiePreferences,
   getSavedCookieConsent,
 } from './components/ui/CookieConsent';
+import { AppErrorBoundary } from './components/ui/AppErrorBoundary';
 import { LoginModal } from './components/auth/LoginModal';
 import {
   resolveRouteSeoPayload,
@@ -105,8 +106,9 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <RouteMetadataSync />
-            <Suspense fallback={<RouteLoadingFallback />}>
-              <Routes>
+            <AppErrorBoundary>
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <Routes>
                 {/* Public Multi-Page Website Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/features" element={<FeaturesPage />} />
@@ -153,8 +155,9 @@ export default function App() {
 
                 {/* Dedicated 404 Handler for Invalid Routes */}
                 <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </Suspense>
+                </Routes>
+              </Suspense>
+            </AppErrorBoundary>
             <LoginModal />
             <CookieConsent onConsentChange={setCookieConsent} />
 

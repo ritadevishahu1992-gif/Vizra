@@ -41,6 +41,7 @@ import {
   createProjectFromPrompt,
   deleteProject,
 } from '../services/projectService';
+import { createInitialConversations } from '../services/conversationSeeds';
 import { updateIntegrationStatus } from '../services/integrationService';
 import {
   Message,
@@ -54,60 +55,9 @@ import {
   ProjectWorkflowStage,
 } from '../types/ai';
 
-const initialConversations: Conversation[] = [
-  {
-    id: 'conv-1',
-    title: 'Welcome to Omnia',
-    createdAt: Date.now() - 1000 * 60 * 60 * 2,
-    updatedAt: Date.now() - 1000 * 60 * 60 * 2,
-    group: 'today',
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Hi Omnia, what can you help me with?',
-        timestamp: '10:14 AM',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: `Hey! I can answer questions across science, history, coding, and general knowledge, explain complex concepts, write code, research topics, or help you build creative projects whenever you're ready. What are you working on today?`,
-        timestamp: '10:14 AM',
-        isDemo: true,
-        mode: 'quick',
-        canCreateProject: false,
-      },
-    ],
-  },
-  {
-    id: 'conv-2',
-    title: 'Photosynthesis Overview',
-    createdAt: Date.now() - 1000 * 60 * 60 * 5,
-    updatedAt: Date.now() - 1000 * 60 * 60 * 5,
-    group: 'today',
-    messages: [
-      {
-        id: 'msg-2-1',
-        role: 'user',
-        content: 'What is photosynthesis?',
-        timestamp: '8:30 AM',
-      },
-      {
-        id: 'msg-2-2',
-        role: 'assistant',
-        content: `Photosynthesis is the process plants use to convert light energy into chemical energy, mainly producing glucose from carbon dioxide and water.`,
-        timestamp: '8:30 AM',
-        isDemo: true,
-        mode: 'quick',
-        canCreateProject: false,
-      },
-    ],
-  },
-];
-
 export const AIPage: React.FC = () => {
-  const { user, loading: isAuthLoading } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>(() => createInitialConversations());
   const [activeConversationId, setActiveConversationId] = useState<string | null>('conv-1');
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -289,11 +239,13 @@ export const AIPage: React.FC = () => {
 
   // Check for initial prompt passed via explore/homepage, open requested conversation from History page, and load stored conversations
   useEffect(() => {
+    let availableConversations = createInitialConversations();
     try {
       const stored = localStorage.getItem('omnia_conversations_v1');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          availableConversations = parsed;
           setConversations(parsed);
         }
       }
@@ -304,7 +256,18 @@ export const AIPage: React.FC = () => {
     const requestedConvId = sessionStorage.getItem('omnia_open_conversation_id');
     if (requestedConvId) {
       sessionStorage.removeItem('omnia_open_conversation_id');
-      setActiveConversationId(requestedConvId);
+      if (availableConversations.some((c) => c.id === requestedConvId)) {
+        setActiveConversationId(requestedConvId);
+      } else {
+        const defaultSeeds = createInitialConversations();
+        const seedMatch = defaultSeeds.find((c) => c.id === requestedConvId);
+        if (seedMatch) {
+          setConversations((prev) => [seedMatch, ...prev]);
+          setActiveConversationId(seedMatch.id);
+        } else if (availableConversations.length > 0) {
+          setActiveConversationId(availableConversations[0].id);
+        }
+      }
     }
 
     const savedPrompt = sessionStorage.getItem('vizra_initial_prompt');
@@ -479,7 +442,11 @@ export const AIPage: React.FC = () => {
     updateIntegrationStatus(integrationId, 'connected');
   };
 
-  const handleSendMessage = async (text: string, attachments: Attachment[] = []) => {
+  const handleSendMessage = async (
+    text: string,
+    attachments: Attachment[] = [],
+    overrideBaseMessages?: Message[]
+  ) => {
     if (!text.trim() && attachments.length === 0) return;
 
     let targetConvId = activeConversationId;
@@ -501,7 +468,12 @@ export const AIPage: React.FC = () => {
       targetConvId = newId;
       setActiveConversationId(newId);
     } else {
-      currentMessages = activeConversation ? [...activeConversation.messages] : [];
+      currentMessages =
+        overrideBaseMessages !== undefined
+          ? [...overrideBaseMessages]
+          : activeConversation
+          ? [...activeConversation.messages]
+          : [];
     }
 
     const userMessage: Message = {
@@ -528,10 +500,12 @@ export const AIPage: React.FC = () => {
     setConversations((prev) =>
       prev.map((conv) => {
         if (conv.id === targetConvId) {
+          const prefixMessages =
+            overrideBaseMessages !== undefined ? overrideBaseMessages : conv.messages;
           return {
             ...conv,
             updatedAt: Date.now(),
-            messages: [...conv.messages, userMessage, assistantMessage],
+            messages: [...prefixMessages, userMessage, assistantMessage],
           };
         }
         return conv;
@@ -744,7 +718,16 @@ export const AIPage: React.FC = () => {
   };
 
   const handleEditUserMessage = (messageId: string, newText: string) => {
-    handleSendMessage(newText);
+    const trimmed = newText.trim();
+    if (!trimmed || isStreaming || !activeConversation) return;
+    const targetIdx = activeConversation.messages.findIndex((m) => m.id === messageId);
+    if (targetIdx === -1) {
+      handleSendMessage(trimmed);
+      return;
+    }
+    const preservedPrefix = activeConversation.messages.slice(0, targetIdx);
+    const originalAttachments = activeConversation.messages[targetIdx]?.attachments || [];
+    handleSendMessage(trimmed, originalAttachments, preservedPrefix);
   };
 
   return (
@@ -791,43 +774,44 @@ export const AIPage: React.FC = () => {
         />
 
         {/* Center Workspace Column */}
-        {activeProjectId && activeProject ? (
-          /* Project Workspace View */
-          <ProjectWorkspace
-            project={activeProject}
-            onBackToChat={() => setActiveProjectId(null)}
-            onProjectUpdated={handleProjectUpdated}
-            onRefineWithOmnia={handleRefineStageInChat}
-          />
-        ) : (
-          /* Main Omnia Chat Thread */
-          <div className="flex-1 flex flex-col justify-between bg-black relative overflow-hidden">
-            {/* Active Project Context Banner if project is loaded in background */}
-            {activeProject && (
-              <div className="px-4 py-2 bg-neutral-950 border-b border-neutral-800 text-xs flex items-center justify-between z-10 shrink-0">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d]" />
-                  <span className="text-neutral-400">Project Context:</span>
-                  <span className="font-semibold text-white">{activeProject.title}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400">
-                    {activeProject.stages.length} Stages
-                  </span>
+        <main className="flex-1 flex min-w-0 overflow-hidden">
+          {activeProjectId && activeProject ? (
+            /* Project Workspace View */
+            <ProjectWorkspace
+              project={activeProject}
+              onBackToChat={() => setActiveProjectId(null)}
+              onProjectUpdated={handleProjectUpdated}
+              onRefineWithOmnia={handleRefineStageInChat}
+            />
+          ) : (
+            /* Main Omnia Chat Thread */
+            <div className="flex-1 flex flex-col justify-between bg-black relative overflow-hidden">
+              {/* Active Project Context Banner if project is loaded in background */}
+              {activeProject && (
+                <div className="px-4 py-2 bg-neutral-950 border-b border-neutral-800 text-xs flex items-center justify-between z-10 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d]" />
+                    <span className="text-neutral-400">Project Context:</span>
+                    <span className="font-semibold text-white">{activeProject.title}</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400">
+                      {activeProject.stages.length} Stages
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setActiveProjectId(activeProject.id)}
+                    className="text-[11px] font-medium text-[#eb3b2d] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <span>Open Workspace</span>
+                    <ExternalLink size={11} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setActiveProjectId(activeProject.id)}
-                  className="text-[11px] font-medium text-[#eb3b2d] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>Open Workspace</span>
-                  <ExternalLink size={11} />
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Scrollable Conversation Container */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-4 md:px-8 pt-4">
-              {isInitialMessagesLoading || (isAuthLoading && messages.length > 0 && !isStreaming) ? (
-                <MessageListSkeleton turns={2} mode={currentMode} />
-              ) : messages.length === 0 ? (
+              {/* Scrollable Conversation Container */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-4 md:px-8 pt-4">
+                {isInitialMessagesLoading ? (
+                  <MessageListSkeleton turns={2} mode={currentMode} />
+                ) : messages.length === 0 ? (
                 <EmptyState
                   onSelectPrompt={handleSelectEmptyPrompt}
                   activeMode={currentMode}
@@ -887,6 +871,7 @@ export const AIPage: React.FC = () => {
             </div>
           </div>
         )}
+        </main>
       </div>
 
       {/* AI Music Studio Modal (Lyria 3) */}

@@ -43,6 +43,7 @@ import {
   createPromptBoundaryNonce,
   wrapUntrustedDataBlock,
   derivePrivacySessionHash,
+  derivePrivacySessionHashCandidates,
   detectPromptInjection,
   redactSensitiveOutput,
   sanitizeServerError,
@@ -69,7 +70,10 @@ import {
   MINOR_SAFE_GEMINI_SAFETY_SETTINGS,
   MINOR_SAFE_SYSTEM_DIRECTIVE,
 } from './src/server/compliance/ageAssurance';
-import { setupIntegrationsRoutes } from './src/server/integrations/oauthManager';
+import {
+  setupIntegrationsRoutes,
+  purgeVaultRecordsForUser,
+} from './src/server/integrations/oauthManager';
 import { getOrRunVizraSeoAudit } from './src/services/seoDiagnosticsService';
 import {
   REDIRECT_ALIASES,
@@ -112,7 +116,9 @@ function validateServerEnvironment(): { valid: boolean; warnings: string[] } {
   return { valid: true, warnings: snapshot.warnings };
 }
 
-async function startServer() {
+export async function createExpressApp(options?: {
+  attachFrontendMiddleware?: boolean;
+}): Promise<{ app: express.Express; server?: http.Server; port: number }> {
   const envCheck = validateServerEnvironment();
   if (envCheck.warnings.length > 0) {
     envCheck.warnings.forEach((w) => console.warn(`[Config Warning] ${w}`));
@@ -124,8 +130,27 @@ async function startServer() {
   // Trust first-hop reverse proxy (Vercel / Cloud Run) for accurate client IP rate limiting
   app.set('trust proxy', 1);
 
-  // Body parser with 15MB limit for multimodal attachments
+  // Body parser with 15MB limit for multimodal attachments + clean JSON parse error handler
   app.use(express.json({ limit: '15mb' }));
+  app.use(
+    (
+      err: any,
+      _req: express.Request,
+      res: express.Response,
+      next: express.NextFunction
+    ) => {
+      if (err && (err instanceof SyntaxError || err.type === 'entity.parse.failed')) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_JSON',
+            message: 'Malformed JSON request body.',
+          },
+        });
+        return;
+      }
+      next(err);
+    }
+  );
 
   // Security headers, CORS enforcement & Request-ID observability tracking
   app.use(securityHeadersMiddleware);
@@ -1247,6 +1272,19 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           }
         }
 
+        // 2b. Attached Audio: inlineData for native Gemini audio understanding
+        if (att.type === 'audio' && att.previewUrl && att.previewUrl.startsWith('data:audio/')) {
+          const matches = att.previewUrl.match(/^data:(audio\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+          if (matches) {
+            userParts.push({
+              inlineData: {
+                mimeType: matches[1],
+                data: matches[2],
+              },
+            });
+          }
+        }
+
         // 3. Attached CSV, Code, Text, or Markdown document: isolate inside untrusted boundary block
         if (att.content && typeof att.content === 'string') {
           const wrappedDoc = wrapUntrustedDataBlock(
@@ -1326,7 +1364,12 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       const modelsToTry = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
       let lastError: any = null;
 
+      const TOTAL_CHAT_BUDGET_MS = 34000;
+      const getRemainingChatBudget = () => Math.max(0, TOTAL_CHAT_BUDGET_MS - (Date.now() - startTime));
+
       for (let idx = 0; idx < modelsToTry.length; idx++) {
+        const remaining = getRemainingChatBudget();
+        if (remaining < 4000) break;
         const m = modelsToTry[idx];
         try {
           const modelConfig = buildConfigForModel(m, {
@@ -1335,11 +1378,15 @@ Revise only where necessary. Do not expose this checklist or describe internal r
             deepThink,
             minorSafeMode: chatAgeGate.context.requiresMinorSafeDirectives,
           });
-          response = await generateContentWithTimeout(ai, {
-            model: m,
-            contents,
-            config: modelConfig,
-          }, 25000);
+          response = await generateContentWithTimeout(
+            ai,
+            {
+              model: m,
+              contents,
+              config: modelConfig,
+            },
+            Math.min(18000, remaining)
+          );
           if (
             response &&
             (response.text ||
@@ -1364,6 +1411,8 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       if (!response && enableWebSearch) {
         console.info('[AI Engine] Search tool unavailable; attempting direct model knowledge...');
         for (let idx = 0; idx < modelsToTry.length; idx++) {
+          const remaining = getRemainingChatBudget();
+          if (remaining < 3500) break;
           const m = modelsToTry[idx];
           try {
             const standardConfig = buildConfigForModel(m, {
@@ -1372,11 +1421,15 @@ Revise only where necessary. Do not expose this checklist or describe internal r
               deepThink,
               minorSafeMode: chatAgeGate.context.requiresMinorSafeDirectives,
             });
-            response = await generateContentWithTimeout(ai, {
-              model: m,
-              contents,
-              config: standardConfig,
-            }, 20000);
+            response = await generateContentWithTimeout(
+              ai,
+              {
+                model: m,
+                contents,
+                config: standardConfig,
+              },
+              Math.min(12000, remaining)
+            );
             if (
               response &&
               (response.text ||
@@ -1586,7 +1639,14 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       const researchModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-4-argon'];
       let lastResearchError: any = null;
 
+      const researchStartTime = Date.now();
+      const TOTAL_RESEARCH_BUDGET_MS = 38000;
+      const getRemainingResearchBudget = () =>
+        Math.max(0, TOTAL_RESEARCH_BUDGET_MS - (Date.now() - researchStartTime));
+
       for (let idx = 0; idx < researchModels.length; idx++) {
+        const remaining = getRemainingResearchBudget();
+        if (remaining < 4000) break;
         const rm = researchModels[idx];
         try {
           const researchConfig = buildConfigForModel(rm, {
@@ -1595,11 +1655,15 @@ Revise only where necessary. Do not expose this checklist or describe internal r
             deepThink: false,
             minorSafeMode: researchAgeGate.context.requiresMinorSafeDirectives,
           });
-          response = await generateContentWithTimeout(ai, {
-            model: rm,
-            contents: `Conduct grounded web research on the following user query: "${queryCheck.cleanText}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
-            config: researchConfig,
-          }, 45000);
+          response = await generateContentWithTimeout(
+            ai,
+            {
+              model: rm,
+              contents: `Conduct grounded web research on the following user query: "${queryCheck.cleanText}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
+              config: researchConfig,
+            },
+            Math.min(18000, remaining)
+          );
           if (response && response.text) {
             usedModel = rm;
             if (idx > 0) isFallback = true;
@@ -1617,6 +1681,8 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       if (!response) {
         // Fallback without search tool if search tool quota exhausted
         for (let idx = 0; idx < researchModels.length; idx++) {
+          const remaining = getRemainingResearchBudget();
+          if (remaining < 3500) break;
           const rm = researchModels[idx];
           try {
             const fallbackConfig = buildConfigForModel(rm, {
@@ -1625,11 +1691,15 @@ Revise only where necessary. Do not expose this checklist or describe internal r
               deepThink: false,
               minorSafeMode: researchAgeGate.context.requiresMinorSafeDirectives,
             });
-            response = await generateContentWithTimeout(ai, {
-              model: rm,
-              contents: `Answer the following user query directly from verified knowledge: "${queryCheck.cleanText}".`,
-              config: fallbackConfig,
-            }, 45000);
+            response = await generateContentWithTimeout(
+              ai,
+              {
+                model: rm,
+                contents: `Answer the following user query directly from verified knowledge: "${queryCheck.cleanText}".`,
+                config: fallbackConfig,
+              },
+              Math.min(12000, remaining)
+            );
             if (response && response.text) {
               usedModel = rm;
               isFallback = true;
@@ -2450,13 +2520,261 @@ Revise only where necessary. Do not expose this checklist or describe internal r
 
   loadCreditLedgerStore();
 
-  async function resolveCreditTenantKey(req: express.Request): Promise<string> {
+  // ============================================================================
+  // WORKSPACE CLIENT API TOKENS (SHA-256 HASHED SERVER LEDGER)
+  // ============================================================================
+  interface WorkspaceTokenRecord {
+    id: string;
+    tenantKey: string;
+    label: string;
+    prefix: string;
+    scope: 'read:telemetry' | 'write:projects' | 'engage:events';
+    tokenHash: string;
+    createdAt: number;
+    lastUsedAt?: number;
+  }
+
+  const WORKSPACE_TOKENS_STORE_PATH = path.resolve(
+    process.cwd(),
+    'data',
+    'workspace_tokens_store.json'
+  );
+  let workspaceTokenStore: WorkspaceTokenRecord[] = [];
+
+  function loadWorkspaceTokenStore(): void {
+    try {
+      if (fs.existsSync(WORKSPACE_TOKENS_STORE_PATH)) {
+        const raw = fs.readFileSync(WORKSPACE_TOKENS_STORE_PATH, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          workspaceTokenStore = parsed.filter(
+            (r) => r && typeof r.id === 'string' && typeof r.tokenHash === 'string'
+          );
+        }
+      }
+    } catch (err) {
+      console.warn('[Workspace Tokens] Could not load persisted store:', err);
+    }
+  }
+
+  function saveWorkspaceTokenStore(): void {
+    try {
+      const dir = path.dirname(WORKSPACE_TOKENS_STORE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(
+        WORKSPACE_TOKENS_STORE_PATH,
+        JSON.stringify(workspaceTokenStore, null, 2),
+        'utf-8'
+      );
+    } catch (err) {
+      console.warn('[Workspace Tokens] Could not persist store:', err);
+    }
+  }
+
+  function hashWorkspaceTokenSecret(rawSecret: string): string {
+    return crypto.createHash('sha256').update(rawSecret, 'utf8').digest('hex');
+  }
+
+  function verifyWorkspaceBearerSecret(rawSecret: string): WorkspaceTokenRecord | null {
+    if (!rawSecret || !rawSecret.startsWith('vz_live_')) return null;
+    const candidateHash = hashWorkspaceTokenSecret(rawSecret);
+    const match = workspaceTokenStore.find((rec) => safeCompare(rec.tokenHash, candidateHash));
+    if (!match) return null;
+    match.lastUsedAt = Date.now();
+    saveWorkspaceTokenStore();
+    return match;
+  }
+
+  loadWorkspaceTokenStore();
+
+  async function resolveWorkspaceOwnerKey(req: express.Request): Promise<{
+    tenantKey: string | null;
+    authMethod: 'firebase' | 'client_id' | null;
+    errorStatus?: number;
+    errorMessage?: string;
+  }> {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.slice(7).trim();
-      const verified = await verifyFirebaseIdToken(token);
-      if (verified.valid && verified.uid) {
-        return `uid:${verified.uid}`;
+      if (token && !token.startsWith('vz_live_')) {
+        const verified = await verifyFirebaseIdToken(token);
+        if (!verified.valid || !verified.uid) {
+          return {
+            tenantKey: null,
+            authMethod: null,
+            errorStatus: 401,
+            errorMessage: 'Invalid or expired authentication token.',
+          };
+        }
+        return { tenantKey: `uid:${verified.uid}`, authMethod: 'firebase' };
+      }
+    }
+    const clientTenantHeader = req.headers['x-vizra-client-id'];
+    if (
+      typeof clientTenantHeader === 'string' &&
+      /^[a-zA-Z0-9_-]{4,64}$/.test(clientTenantHeader.trim())
+    ) {
+      return {
+        tenantKey: `client:${clientTenantHeader.trim()}`,
+        authMethod: 'client_id',
+      };
+    }
+    return {
+      tenantKey: null,
+      authMethod: null,
+      errorStatus: 401,
+      errorMessage:
+        'Provide a Firebase Bearer token or valid X-Vizra-Client-Id header to manage workspace tokens.',
+    };
+  }
+
+  app.get('/api/workspace/tokens', generalApiRateLimiter.getMiddleware(), async (req, res) => {
+    const owner = await resolveWorkspaceOwnerKey(req);
+    if (!owner.tenantKey) {
+      res.status(owner.errorStatus || 401).json({
+        error: {
+          code: 'WORKSPACE_AUTH_REQUIRED',
+          message: owner.errorMessage || 'Authentication required.',
+        },
+      });
+      return;
+    }
+
+    const owned = workspaceTokenStore
+      .filter((t) => t.tenantKey === owner.tenantKey)
+      .map((t) => ({
+        id: t.id,
+        label: t.label,
+        prefix: t.prefix,
+        scope: t.scope,
+        createdAt: t.createdAt,
+        lastUsedAt: t.lastUsedAt || null,
+      }));
+
+    res.json({ success: true, tokens: owned });
+  });
+
+  app.post('/api/workspace/tokens', generalApiRateLimiter.getMiddleware(), async (req, res) => {
+    const owner = await resolveWorkspaceOwnerKey(req);
+    if (!owner.tenantKey) {
+      res.status(owner.errorStatus || 401).json({
+        error: {
+          code: 'WORKSPACE_AUTH_REQUIRED',
+          message: owner.errorMessage || 'Authentication required.',
+        },
+      });
+      return;
+    }
+
+    const existingForTenant = workspaceTokenStore.filter((t) => t.tenantKey === owner.tenantKey);
+    if (existingForTenant.length >= 20) {
+      res.status(400).json({
+        error: {
+          code: 'TOKEN_QUOTA_EXCEEDED',
+          message: 'Maximum 20 active workspace tokens per account/session. Revoke an unused token first.',
+        },
+      });
+      return;
+    }
+
+    const rawLabel = typeof req.body?.label === 'string' ? req.body.label.trim() : '';
+    const label = (rawLabel || 'Workspace Integration Key').slice(0, 80);
+    const rawScope = req.body?.scope;
+    const scope: WorkspaceTokenRecord['scope'] =
+      rawScope === 'read:telemetry' || rawScope === 'engage:events' || rawScope === 'write:projects'
+        ? rawScope
+        : 'write:projects';
+
+    const secretHex = crypto.randomBytes(16).toString('hex');
+    const plaintextSecret = `vz_live_${secretHex}`;
+    const record: WorkspaceTokenRecord = {
+      id: `tok_${crypto.randomBytes(8).toString('hex')}`,
+      tenantKey: owner.tenantKey,
+      label,
+      prefix: `${plaintextSecret.slice(0, 12)}...${plaintextSecret.slice(-4)}`,
+      scope,
+      tokenHash: hashWorkspaceTokenSecret(plaintextSecret),
+      createdAt: Date.now(),
+    };
+
+    workspaceTokenStore.unshift(record);
+    if (workspaceTokenStore.length > 1000) {
+      workspaceTokenStore = workspaceTokenStore.slice(0, 1000);
+    }
+    saveWorkspaceTokenStore();
+
+    res.status(201).json({
+      success: true,
+      secret: plaintextSecret,
+      token: {
+        id: record.id,
+        label: record.label,
+        prefix: record.prefix,
+        scope: record.scope,
+        createdAt: record.createdAt,
+        lastUsedAt: null,
+      },
+    });
+  });
+
+  app.delete(
+    '/api/workspace/tokens/:id',
+    generalApiRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const owner = await resolveWorkspaceOwnerKey(req);
+      if (!owner.tenantKey) {
+        res.status(owner.errorStatus || 401).json({
+          error: {
+            code: 'WORKSPACE_AUTH_REQUIRED',
+            message: owner.errorMessage || 'Authentication required.',
+          },
+        });
+        return;
+      }
+
+      const tokenId = String(req.params.id || '').trim();
+      const idx = workspaceTokenStore.findIndex(
+        (t) => t.id === tokenId && t.tenantKey === owner.tenantKey
+      );
+      if (idx === -1) {
+        res.status(404).json({
+          error: {
+            code: 'TOKEN_NOT_FOUND',
+            message: 'Workspace token not found or owned by another session.',
+          },
+        });
+        return;
+      }
+
+      const [removed] = workspaceTokenStore.splice(idx, 1);
+      saveWorkspaceTokenStore();
+      res.json({ success: true, revokedId: removed.id });
+    }
+  );
+
+  async function resolveCreditTenantKey(req: express.Request): Promise<string> {
+    const workspaceTokenHeader = req.headers['x-workspace-token'];
+    if (typeof workspaceTokenHeader === 'string' && workspaceTokenHeader.startsWith('vz_live_')) {
+      const tokenRec = verifyWorkspaceBearerSecret(workspaceTokenHeader.trim());
+      if (tokenRec) {
+        return tokenRec.tenantKey;
+      }
+    }
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7).trim();
+      if (token.startsWith('vz_live_')) {
+        const tokenRec = verifyWorkspaceBearerSecret(token);
+        if (tokenRec) {
+          return tokenRec.tenantKey;
+        }
+      } else {
+        const verified = await verifyFirebaseIdToken(token);
+        if (verified.valid && verified.uid) {
+          return `uid:${verified.uid}`;
+        }
       }
     }
     const clientTenantHeader = req.headers['x-vizra-client-id'];
@@ -3001,6 +3319,47 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         purgedKeys.push('age_assurance_records');
       }
 
+      // Cascade erasure into Workspace API tokens, OAuth token vault & unlink matching safety report session hashes
+      if (ageSeedsToPurge.length > 0) {
+        const beforeTokCount = workspaceTokenStore.length;
+        workspaceTokenStore = workspaceTokenStore.filter(
+          (tok) => !ageSeedsToPurge.includes(tok.tenantKey)
+        );
+        if (workspaceTokenStore.length !== beforeTokCount) {
+          saveWorkspaceTokenStore();
+          purgedKeys.push('workspace_api_tokens');
+        }
+      }
+
+      if (verifiedUid) {
+        const purgedVaultCount = purgeVaultRecordsForUser(verifiedUid);
+        if (purgedVaultCount > 0) {
+          purgedKeys.push('oauth_token_vault');
+        }
+      }
+
+      if (ageSeedsToPurge.length > 0) {
+        const candidateHashes = new Set<string>();
+        for (const seed of ageSeedsToPurge) {
+          for (const h of derivePrivacySessionHashCandidates(seed)) {
+            candidateHashes.add(h);
+          }
+        }
+        const subStore = loadSubmissionsStore();
+        let unlinkedSafetyCount = 0;
+        subStore.safetyReports = subStore.safetyReports.map((rep) => {
+          if (rep.sessionHash && candidateHashes.has(rep.sessionHash)) {
+            unlinkedSafetyCount += 1;
+            return { ...rep, sessionHash: '[ERASED]' };
+          }
+          return rep;
+        });
+        if (unlinkedSafetyCount > 0) {
+          saveSubmissionsStore(subStore);
+          purgedKeys.push('safety_report_session_links');
+        }
+      }
+
       res.json({
         success: true,
         receiptId: `del_${Date.now().toString(36)}`,
@@ -3022,7 +3381,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       dataStorage: {
         conversations: 'Browser localStorage (anonymous); Firestore users/{userId}/conversations (authenticated)',
         projects: 'Browser localStorage (anonymous); Firestore users/{userId}/projects (authenticated)',
-        personalMemory: 'Browser localStorage scoped per user ID (vizra_omnia_personal_memories_v1_{uid}) with PII scrubbing and instant wipe',
+        personalMemory: 'Browser localStorage scoped per user ID (vizra_omnia_personal_memories_v1_{uid}) via user-controlled toggle with zero-persistence wipe and PII scrubbing',
         learningGraph: 'Local data store (data/omnia_learning_store.json) for admin-approved non-personal benchmarks',
         creditLedger: 'Per-tenant credit ledger (data/credit_ledger_store.json) keyed by verified UID or client ID',
       },
@@ -3144,6 +3503,10 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       return false;
     }
     return true;
+  }
+
+  if (options?.attachFrontendMiddleware === false) {
+    return { app, port };
   }
 
   // Create native HTTP server so WebSockets can share port 3000
@@ -3521,12 +3884,40 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     }
   });
 
-  server.listen(port, '0.0.0.0', () => {
+  return { app, server, port };
+}
+
+let cachedVercelAppPromise: Promise<express.Express> | null = null;
+export async function getVercelApp(): Promise<express.Express> {
+  if (!cachedVercelAppPromise) {
+    cachedVercelAppPromise = createExpressApp({ attachFrontendMiddleware: false }).then(
+      ({ app }) => app
+    );
+  }
+  return cachedVercelAppPromise;
+}
+
+export async function startServer() {
+  const { server, port } = await createExpressApp({ attachFrontendMiddleware: true });
+  server?.listen(port, '0.0.0.0', () => {
     console.log(`Vizra Omnia server listening on http://0.0.0.0:${port}`);
   });
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+function isDirectServerEntrypoint(): boolean {
+  if (process.env.VERCEL) return false;
+  const argvPath = process.argv[1];
+  if (!argvPath) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(import.meta.url)) === fs.realpathSync(argvPath);
+  } catch {
+    return fileURLToPath(import.meta.url) === path.resolve(argvPath);
+  }
+}
+
+if (isDirectServerEntrypoint()) {
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}

@@ -229,7 +229,7 @@ Vizra is the dark-matter operating system for human curiosity.
       rawContent: `# OMNIA 1.0 RAG & Verification Architecture Specification
 Lead AI Infrastructure Engineer Specification.
 - Hybrid Retrieval: 60% Dense Cosine Similarity + 40% Sparse BM25 Lexical Matching.
-- Zero Hallucination: Claims without verified citations are rejected or flagged.
+- Citation-Grounded Verification: Factual claims without verified citations are flagged or rejected when sources are unavailable.
 - Grounding Gate: Continuous 6-stage provenance check ensuring URL authentications and excerpt alignment.`,
       chunkCount: 4,
       tokenCount: 220,

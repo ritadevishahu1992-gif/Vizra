@@ -199,6 +199,15 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
     };
   }, [isOpen, startLiveSession, cleanupAudio]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   function floatTo16BitPCM(input: Float32Array): ArrayBuffer {
     const buffer = new ArrayBuffer(input.length * 2);
     const view = new DataView(buffer);
@@ -262,6 +271,7 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
         className="relative w-full max-w-md bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white flex flex-col items-center text-center overflow-hidden"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="voice-live-title"
       >
         {/* Glow */}
         <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#eb3b2d]/15 rounded-full blur-3xl pointer-events-none" />
@@ -281,7 +291,10 @@ export const VoiceLiveModal: React.FC<VoiceLiveModalProps> = ({ isOpen, onClose 
           <VizraLogo size={32} />
         </div>
 
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-1">
+        <h2
+          id="voice-live-title"
+          className="text-xl md:text-2xl font-bold tracking-tight text-white mb-1"
+        >
           Omnia Live Voice
         </h2>
         <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 mb-6">

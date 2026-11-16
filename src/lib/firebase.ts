@@ -12,6 +12,7 @@ import {
   sendEmailVerification,
   updateProfile,
   signOut,
+  deleteUser,
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
@@ -147,6 +148,7 @@ export {
   sendEmailVerification,
   updateProfile,
   signOut,
+  deleteUser,
   onAuthStateChanged,
 };
 export type { FirebaseUser };

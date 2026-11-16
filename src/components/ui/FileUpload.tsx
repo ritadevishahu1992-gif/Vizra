@@ -47,11 +47,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   onAttachmentReady,
   onRemoveAttachment,
   maxSizeMB = 10,
-  accept = 'image/*,video/*,audio/*,.pdf,.csv,.tsv,.txt,.md,.json,.ts,.tsx,.js,.py',
+  accept = 'image/*,audio/*,.pdf,.csv,.tsv,.txt,.md,.json,.ts,.tsx,.js,.py',
   multiple = true,
   compact = false,
   title = 'Upload Creative Assets & Documents',
-  subtitle = 'Drag & drop images, PDFs, CSV datasets, audio, or code files here, or click to browse',
+  subtitle = 'Drag & drop images, audio clips, PDFs, CSV datasets, or code files here, or click to browse',
 }) => {
   const [records, setRecords] = useState<UploadedFileRecord[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -169,6 +169,26 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     );
 
     const attachmentType = detectAttachmentType(file);
+    if (attachmentType === 'video') {
+      const unsupportedVideo: UploadedFileRecord = {
+        id: recordId,
+        file,
+        name: file.name,
+        sizeLabel: formatSize(file.size),
+        mimeType: file.type || 'video/mp4',
+        progress: 0,
+        status: 'error',
+        errorMessage:
+          'Binary video file analysis is not supported in chat attachments yet. Upload frames (PNG/JPG), transcripts (TXT), or audio.',
+      };
+      setRecords((prev) =>
+        existingId
+          ? prev.map((r) => (r.id === existingId ? unsupportedVideo : r))
+          : [unsupportedVideo, ...prev]
+      );
+      return;
+    }
+
     const reader = new FileReader();
 
     reader.onprogress = (ev) => {
@@ -197,7 +217,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     reader.onload = () => {
       const resultStr = typeof reader.result === 'string' ? reader.result : undefined;
-      const isDataUrl = attachmentType === 'image' || attachmentType === 'pdf';
+      const isDataUrl =
+        attachmentType === 'image' || attachmentType === 'pdf' || attachmentType === 'audio';
 
       const attachment: Attachment = {
         id: recordId,
@@ -224,28 +245,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       onAttachmentReady?.(attachment);
     };
 
-    if (attachmentType === 'image' || attachmentType === 'pdf') {
+    if (attachmentType === 'image' || attachmentType === 'pdf' || attachmentType === 'audio') {
       reader.readAsDataURL(file);
     } else if (attachmentType === 'csv' || attachmentType === 'document') {
       reader.readAsText(file);
-    } else {
-      // Binary audio/video metadata ingestion
-      window.setTimeout(() => {
-        const attachment: Attachment = {
-          id: recordId,
-          name: file.name,
-          type: attachmentType,
-          size: formatSize(file.size),
-        };
-        setRecords((prev) =>
-          prev.map((r) =>
-            r.id === recordId
-              ? { ...r, progress: 100, status: 'completed', attachment }
-              : r
-          )
-        );
-        onAttachmentReady?.(attachment);
-      }, 280);
     }
   };
 

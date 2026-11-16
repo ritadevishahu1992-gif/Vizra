@@ -160,8 +160,8 @@ export const PricingSection: React.FC<{ onLaunchOmnia?: () => void }> = ({
     setSelectedTierForModal(null);
 
     toast({
-      title: `${selectedTierForModal.name} Activated`,
-      description: `Your workspace is now configured on the ${selectedTierForModal.name} (${billing}) tier.`,
+      title: `${selectedTierForModal.name} Preview Selected`,
+      description: `Workspace configured on ${selectedTierForModal.name} (${billing}) preview. No card is charged until commercial checkout is enabled.`,
       type: 'success',
     });
   };
@@ -351,11 +351,11 @@ export const PricingSection: React.FC<{ onLaunchOmnia?: () => void }> = ({
         onClose={() => setSelectedTierForModal(null)}
         title={
           selectedTierForModal
-            ? `Activate ${selectedTierForModal.name}`
-            : 'Upgrade Plan'
+            ? `Select ${selectedTierForModal.name} (Preview)`
+            : 'Select Plan'
         }
-        description="Provision instant compute quota and studio capabilities for your VIZRA workspace."
-        badge={billing === 'yearly' ? 'Annual · 20% Off' : 'Monthly'}
+        description="Save your workspace tier preference and log priority studio access. No payment card is collected or charged until commercial billing launches."
+        badge={billing === 'yearly' ? 'Annual · 20% Off Preview' : 'Monthly Preview'}
         maxWidth="md"
       >
         {selectedTierForModal && (

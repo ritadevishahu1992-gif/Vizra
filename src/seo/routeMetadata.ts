@@ -115,12 +115,19 @@ function buildBreadcrumbSchema(
   };
 }
 
+const LEGAL_ENTITY_NAME =
+  (typeof import.meta !== 'undefined' &&
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env
+      ?.VITE_LEGAL_ENTITY_NAME) ||
+  (typeof process !== 'undefined' && process.env?.VITE_LEGAL_ENTITY_NAME) ||
+  'VIZRA AI Creative Studio';
+
 const ORGANIZATION_SCHEMA: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   '@id': `${SITE_ORIGIN}/#organization`,
   name: 'VIZRA',
-  legalName: 'Vizra Technologies Inc.',
+  legalName: LEGAL_ENTITY_NAME,
   url: `${SITE_ORIGIN}/`,
   logo: {
     '@type': 'ImageObject',

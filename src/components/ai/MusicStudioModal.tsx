@@ -75,6 +75,15 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,6 +154,7 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
         className="relative w-full max-w-4xl max-h-[92vh] bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-5 md:p-7 shadow-2xl text-white flex flex-col overflow-hidden"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="music-studio-title"
       >
         {/* Glow */}
         <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#eb3b2d]/10 rounded-full blur-3xl pointer-events-none" />
@@ -157,7 +167,7 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg md:text-xl font-bold tracking-tight text-white">
+                <h2 id="music-studio-title" className="text-lg md:text-xl font-bold tracking-tight text-white">
                   AI Music Studio
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-neutral-900 text-neutral-300 border border-neutral-800">
@@ -241,10 +251,11 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
 
             {/* Prompt Input */}
             <div>
-              <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
+              <label htmlFor="music-prompt-input" className="text-xs font-semibold text-neutral-300 block mb-1.5">
                 Music Prompt & Style Description
               </label>
               <textarea
+                id="music-prompt-input"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe instruments, atmosphere, rhythm, tempo, and mood..."
@@ -255,15 +266,17 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
 
             {/* Image Inspiration (Multimodal input) */}
             <div>
-              <label className="text-xs font-semibold text-neutral-300 block mb-1.5 flex items-center justify-between">
+              <label htmlFor="music-image-input" className="text-xs font-semibold text-neutral-300 block mb-1.5 flex items-center justify-between">
                 <span>Visual Inspiration (Optional)</span>
                 <span className="text-[10px] text-neutral-500">Generate music directly from an image</span>
               </label>
               
               <input
+                id="music-image-input"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                aria-label="Attach visual inspiration image"
                 className="hidden"
                 onChange={handleImageChange}
               />
@@ -286,6 +299,7 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
                   <button
                     type="button"
                     onClick={clearImage}
+                    aria-label="Remove reference image"
                     className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 cursor-pointer"
                   >
                     <X size={15} />
@@ -332,10 +346,11 @@ export const MusicStudioModal: React.FC<MusicStudioModalProps> = ({
             {/* Duration Slider */}
             <div>
               <div className="flex justify-between items-center text-xs font-semibold text-neutral-300 mb-1">
-                <span>Duration</span>
+                <label htmlFor="music-duration-range">Duration</label>
                 <span className="font-mono text-[#eb3b2d]">{duration} seconds</span>
               </div>
               <input
+                id="music-duration-range"
                 type="range"
                 min="5"
                 max={model === 'lyria-3-clip-preview' ? 30 : 120}

@@ -1489,12 +1489,23 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     }
 
     if (!serverFetched) {
+      const attSummary = attachments
+        .slice(0, 5)
+        .map((a) => {
+          const lineInfo =
+            a.content && typeof a.content === 'string'
+              ? `, ${a.content.split(/\r?\n/).length} lines / ${a.content.length} chars`
+              : '';
+          return `• ${a.name} (${a.type}, ${a.size}${lineInfo})`;
+        })
+        .join('\n');
+
       if (intent === 'IMAGE_UNDERSTANDING') {
-        responseText = "I've analyzed the image. Tell me what specific detail, composition, text, or elements you would like to explore.";
-      } else if (intent === 'DOCUMENT_ANALYSIS') {
-        responseText = 'I have inspected the attached document. Structure and data entries extracted with zero schema errors. Let me know which specific table, metric, or segment to explore.';
+        responseText =
+          `Image attachment queued (${attachments.length} file${attachments.length === 1 ? '' : 's'}). Live server multimodal vision analysis (/api/chat) was unavailable for this request.\n\n${attSummary}\n\nRetry with server connectivity active or tell me what visual elements you want examined.`;
       } else {
-        responseText = 'I have inspected the attachment. Key findings: structure is well-formed with zero schema errors. Let me know which specific metric or segment to drill into.';
+        responseText =
+          `Local attachment inspection completed (${attachments.length} file${attachments.length === 1 ? '' : 's'}), but live server AI analysis (/api/chat) was unavailable so deep semantic parsing was skipped.\n\n${attSummary}\n\nCheck server connection and retry for full schema, metric, or document analysis.`;
       }
     }
   } else if (intent === 'EDIT') {

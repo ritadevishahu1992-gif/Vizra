@@ -7,8 +7,11 @@ import { generalApiRateLimiter, feedbackRateLimiter } from '../security';
 import { enforceFeatureAccessForRequest } from '../compliance/ageAssurance';
 import {
   getIntegrationVaultSecret,
+  getIntegrationVaultSecretKeys,
   getOAuthCredentialsForEnv,
   getAppUrl,
+  isProductionEnv,
+  computeSecretFingerprint,
 } from '../config/envConfig';
 
 export interface WorkspaceProviderSpec {
@@ -146,14 +149,17 @@ export const WORKSPACE_OAUTH_CATALOG: WorkspaceProviderSpec[] = [
   },
 ];
 
-interface EncryptedTokenRecord {
+export interface EncryptedTokenRecord {
   uid: string;
   providerId: string;
   ivHex: string;
   authTagHex: string;
   cipherTextHex: string;
+  keyVersion?: 'v1' | 'v2';
+  keyFingerprint?: string;
   scopes: string[];
   connectedAt: string;
+  rotatedAt?: string;
 }
 
 interface PendingOAuthState {
@@ -165,19 +171,42 @@ interface PendingOAuthState {
 
 const VAULT_FILE = path.resolve(process.cwd(), 'data', 'integrations_vault.json');
 const pendingOAuthStates = new Map<string, PendingOAuthState>();
+const derivedVaultKeyCache = new Map<string, Buffer>();
+// In non-production dev mode when INTEGRATION_TOKEN_SECRET is unset, keep tokens strictly in memory
+// so ephemeral per-process ciphertexts never overwrite or pollute persistent disk storage.
+let ephemeralVaultMemory: EncryptedTokenRecord[] = [];
 
-function deriveVaultKey(): Buffer {
-  const { secret } = getIntegrationVaultSecret();
-  return crypto.scryptSync(secret, 'vizra-oauth-vault-v1', 32);
+function deriveVaultKeyForSecret(secret: string): Buffer {
+  const digest = computeSecretFingerprint(secret) + ':' + secret.length;
+  const cached = derivedVaultKeyCache.get(digest);
+  if (cached) return cached;
+  const derived = crypto.scryptSync(secret, 'vizra-oauth-vault-v1', 32);
+  if (derivedVaultKeyCache.size > 32) {
+    const oldest = derivedVaultKeyCache.keys().next().value;
+    if (oldest) derivedVaultKeyCache.delete(oldest);
+  }
+  derivedVaultKeyCache.set(digest, derived);
+  return derived;
 }
 
-export function encryptTokenPayload(payload: {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-}): { ivHex: string; authTagHex: string; cipherTextHex: string } {
+export function encryptTokenPayload(
+  payload: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt?: number;
+  },
+  overrideSecret?: string
+): {
+  ivHex: string;
+  authTagHex: string;
+  cipherTextHex: string;
+  keyVersion: 'v2';
+  keyFingerprint: string;
+} {
+  const activeSecret = overrideSecret || getIntegrationVaultSecret().secret;
+  const keyFingerprint = computeSecretFingerprint(activeSecret);
   const iv = crypto.randomBytes(12);
-  const key = deriveVaultKey();
+  const key = deriveVaultKeyForSecret(activeSecret);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
   const plaintext = Buffer.from(JSON.stringify(payload), 'utf-8');
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
@@ -186,36 +215,106 @@ export function encryptTokenPayload(payload: {
     ivHex: iv.toString('hex'),
     authTagHex: authTag.toString('hex'),
     cipherTextHex: encrypted.toString('hex'),
+    keyVersion: 'v2',
+    keyFingerprint,
   };
 }
 
-export function decryptTokenPayload(encrypted: {
-  ivHex: string;
-  authTagHex: string;
-  cipherTextHex: string;
-}): { accessToken: string; refreshToken?: string; expiresAt?: number } | null {
-  try {
-    const key = deriveVaultKey();
-    const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
-      key,
-      Buffer.from(encrypted.ivHex, 'hex')
-    );
-    decipher.setAuthTag(Buffer.from(encrypted.authTagHex, 'hex'));
-    const decrypted = Buffer.concat([
-      decipher.update(Buffer.from(encrypted.cipherTextHex, 'hex')),
-      decipher.final(),
-    ]);
-    return JSON.parse(decrypted.toString('utf-8'));
-  } catch {
-    return null;
+export function decryptTokenPayloadWithMeta(
+  encrypted: {
+    ivHex: string;
+    authTagHex: string;
+    cipherTextHex: string;
+    keyVersion?: string;
+    keyFingerprint?: string;
+  },
+  candidateSecretsOverride?: string[]
+): {
+  payload: { accessToken: string; refreshToken?: string; expiresAt?: number };
+  matchedPrimaryKey: boolean;
+  keyFingerprint: string;
+} | null {
+  const { primary, previous } = getIntegrationVaultSecretKeys();
+  const secretPool: Array<{ secret: string; keyFingerprint: string; isPrimary: boolean }> = [];
+
+  if (candidateSecretsOverride && candidateSecretsOverride.length > 0) {
+    for (const s of candidateSecretsOverride) {
+      secretPool.push({
+        secret: s,
+        keyFingerprint: computeSecretFingerprint(s),
+        isPrimary: s === primary.secret,
+      });
+    }
+  } else {
+    secretPool.push({
+      secret: primary.secret,
+      keyFingerprint: primary.keyFingerprint,
+      isPrimary: true,
+    });
+    for (const prev of previous) {
+      secretPool.push({
+        secret: prev.secret,
+        keyFingerprint: prev.keyFingerprint,
+        isPrimary: false,
+      });
+    }
   }
+
+  // Prioritize the candidate matching the record's recorded fingerprint (zero key material stored)
+  const orderedPool = encrypted.keyFingerprint
+    ? [
+        ...secretPool.filter((entry) => entry.keyFingerprint === encrypted.keyFingerprint),
+        ...secretPool.filter((entry) => entry.keyFingerprint !== encrypted.keyFingerprint),
+      ]
+    : secretPool;
+
+  for (const candidate of orderedPool) {
+    try {
+      const key = deriveVaultKeyForSecret(candidate.secret);
+      const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        key,
+        Buffer.from(encrypted.ivHex, 'hex')
+      );
+      decipher.setAuthTag(Buffer.from(encrypted.authTagHex, 'hex'));
+      const decrypted = Buffer.concat([
+        decipher.update(Buffer.from(encrypted.cipherTextHex, 'hex')),
+        decipher.final(),
+      ]);
+      const parsed = JSON.parse(decrypted.toString('utf-8'));
+      if (parsed && typeof parsed.accessToken === 'string') {
+        return {
+          payload: parsed,
+          matchedPrimaryKey: candidate.isPrimary,
+          keyFingerprint: candidate.keyFingerprint,
+        };
+      }
+    } catch {
+      // Try next rotation key
+    }
+  }
+
+  return null;
 }
 
-function loadVault(): EncryptedTokenRecord[] {
+export function decryptTokenPayload(
+  encrypted: {
+    ivHex: string;
+    authTagHex: string;
+    cipherTextHex: string;
+    keyVersion?: string;
+    keyFingerprint?: string;
+  },
+  candidateSecretsOverride?: string[]
+): { accessToken: string; refreshToken?: string; expiresAt?: number } | null {
+  const result = decryptTokenPayloadWithMeta(encrypted, candidateSecretsOverride);
+  return result ? result.payload : null;
+}
+
+function loadDiskVault(vaultFilePath = VAULT_FILE): EncryptedTokenRecord[] {
   try {
-    if (fs.existsSync(VAULT_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(VAULT_FILE, 'utf-8'));
+    if (fs.existsSync(vaultFilePath)) {
+      const parsed = JSON.parse(fs.readFileSync(vaultFilePath, 'utf-8'));
       return Array.isArray(parsed) ? parsed : [];
     }
   } catch {
@@ -224,16 +323,105 @@ function loadVault(): EncryptedTokenRecord[] {
   return [];
 }
 
-function saveVault(records: EncryptedTokenRecord[]): void {
-  try {
-    const dir = path.dirname(VAULT_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(VAULT_FILE, JSON.stringify(records, null, 2), 'utf-8');
-  } catch {
-    // Ephemeral fallback
+function saveDiskVault(records: EncryptedTokenRecord[], vaultFilePath = VAULT_FILE): void {
+  const dir = path.dirname(vaultFilePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
+  fs.writeFileSync(vaultFilePath, JSON.stringify(records, null, 2), {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
+}
+
+function loadActiveVault(): EncryptedTokenRecord[] {
+  const { persistent } = getIntegrationVaultSecret();
+  if (!persistent) {
+    // Combine in-memory ephemeral records with any readable persistent records without mutating disk
+    const disk = loadDiskVault();
+    return [...ephemeralVaultMemory, ...disk];
+  }
+  return loadDiskVault();
+}
+
+function saveActiveVault(records: EncryptedTokenRecord[]): { persistedToDisk: boolean } {
+  const { persistent } = getIntegrationVaultSecret();
+  if (!persistent) {
+    ephemeralVaultMemory = records;
+    return { persistedToDisk: false };
+  }
+  try {
+    saveDiskVault(records);
+    return { persistedToDisk: true };
+  } catch {
+    ephemeralVaultMemory = records;
+    return { persistedToDisk: false };
+  }
+}
+
+/**
+ * Re-encrypts any v1 or rotated-key token records onto the current primary INTEGRATION_TOKEN_SECRET.
+ */
+export function rotateVaultTokensToPrimaryKey(vaultFilePath = VAULT_FILE): {
+  total: number;
+  reencrypted: number;
+  undecryptable: number;
+} {
+  const { persistent, secret, keyFingerprint } = getIntegrationVaultSecretKeys().primary;
+  if (!persistent) {
+    return { total: ephemeralVaultMemory.length, reencrypted: 0, undecryptable: 0 };
+  }
+  const records = loadDiskVault(vaultFilePath);
+  let reencrypted = 0;
+  let undecryptable = 0;
+  let changed = false;
+
+  const updated = records.map((rec) => {
+    const decrypted = decryptTokenPayloadWithMeta(rec);
+    if (!decrypted) {
+      undecryptable += 1;
+      return rec;
+    }
+    const needsUpgrade =
+      !decrypted.matchedPrimaryKey ||
+      rec.keyVersion !== 'v2' ||
+      rec.keyFingerprint !== keyFingerprint;
+    if (!needsUpgrade) return rec;
+
+    const fresh = encryptTokenPayload(decrypted.payload, secret);
+    reencrypted += 1;
+    changed = true;
+    return {
+      ...rec,
+      ...fresh,
+      rotatedAt: new Date().toISOString(),
+    };
+  });
+
+  if (changed) {
+    saveDiskVault(updated, vaultFilePath);
+  }
+  return { total: records.length, reencrypted, undecryptable };
+}
+
+export function purgeVaultRecordsForUser(uid: string): number {
+  if (!uid) return 0;
+  let removed = 0;
+  const beforeMem = ephemeralVaultMemory.length;
+  ephemeralVaultMemory = ephemeralVaultMemory.filter((r) => r.uid !== uid);
+  removed += beforeMem - ephemeralVaultMemory.length;
+
+  const disk = loadDiskVault();
+  const filteredDisk = disk.filter((r) => r.uid !== uid);
+  if (filteredDisk.length !== disk.length) {
+    removed += disk.length - filteredDisk.length;
+    try {
+      saveDiskVault(filteredDisk);
+    } catch {
+      // Ignore read-only disk error
+    }
+  }
+  return removed;
 }
 
 export function isProviderConfigured(spec: WorkspaceProviderSpec): boolean {
@@ -257,16 +445,43 @@ async function resolveOptionalUid(req: express.Request): Promise<string | null> 
 }
 
 export function setupIntegrationsRoutes(app: express.Application): void {
-  // Catalog & per-user connection status (never exposes stored tokens)
+  // Catalog & per-user connection status (verifies ciphertext decryptability and never exposes stored tokens)
   app.get('/api/integrations', generalApiRateLimiter.getMiddleware(), async (req, res) => {
     const uid = await resolveOptionalUid(req);
-    const vault = loadVault();
+    const { persistent } = getIntegrationVaultSecret();
+    const vault = loadActiveVault();
+    let reencryptedOnRead = false;
 
+    const updatedVault = [...vault];
     const providers = WORKSPACE_OAUTH_CATALOG.map((spec) => {
       const configured = isProviderConfigured(spec);
-      const userRecord = uid
-        ? vault.find((r) => r.uid === uid && r.providerId === spec.id)
-        : undefined;
+      const recordIdx = uid
+        ? updatedVault.findIndex((r) => r.uid === uid && r.providerId === spec.id)
+        : -1;
+      const userRecord = recordIdx >= 0 ? updatedVault[recordIdx] : undefined;
+
+      let decryptable = false;
+      let staleUndecryptable = false;
+      if (userRecord) {
+        const decrypted = decryptTokenPayloadWithMeta(userRecord);
+        if (decrypted) {
+          decryptable = true;
+          if (
+            persistent &&
+            (!decrypted.matchedPrimaryKey || userRecord.keyVersion !== 'v2')
+          ) {
+            const refreshed = encryptTokenPayload(decrypted.payload);
+            updatedVault[recordIdx] = {
+              ...userRecord,
+              ...refreshed,
+              rotatedAt: new Date().toISOString(),
+            };
+            reencryptedOnRead = true;
+          }
+        } else {
+          staleUndecryptable = true;
+        }
+      }
 
       return {
         id: spec.id,
@@ -278,23 +493,30 @@ export function setupIntegrationsRoutes(app: express.Application): void {
         isGoogleWorkspace1P: spec.isGoogleWorkspace1P,
         scopes: spec.scopes,
         requiredEnvVars: [spec.clientIdEnv, spec.clientSecretEnv],
-        status: userRecord
+        status: decryptable
           ? ('connected' as const)
           : configured
           ? ('connect' as const)
           : ('coming_soon' as const),
-        connectedAt: userRecord?.connectedAt,
+        connectedAt: decryptable ? userRecord?.connectedAt : undefined,
+        ...(staleUndecryptable ? { requiresReauthentication: true } : {}),
       };
     });
+
+    if (reencryptedOnRead && persistent) {
+      saveActiveVault(updatedVault);
+    }
 
     res.json({
       success: true,
       authenticated: Boolean(uid),
+      vaultPersistent: persistent,
       providers,
     });
   });
 
-  // Initiate real OAuth popup flow (fails honestly with 424 if provider OAuth credentials are unset)
+  // Initiate real OAuth popup flow (fails honestly with 424 if provider OAuth credentials are unset,
+  // or 503 VAULT_ENCRYPTION_KEY_MISSING in production if INTEGRATION_TOKEN_SECRET is unset)
   app.get(
     '/api/integrations/:provider/auth-url',
     feedbackRateLimiter.getMiddleware(),
@@ -305,6 +527,17 @@ export function setupIntegrationsRoutes(app: express.Application): void {
           error: {
             code: 'AUTHENTICATION_REQUIRED',
             message: 'Sign in with a verified VIZRA account before connecting external workspaces.',
+          },
+        });
+        return;
+      }
+
+      if (isProductionEnv() && !getIntegrationVaultSecret().persistent) {
+        res.status(503).json({
+          error: {
+            code: 'VAULT_ENCRYPTION_KEY_MISSING',
+            message:
+              'Server INTEGRATION_TOKEN_SECRET must be configured in production before storing encrypted OAuth credentials.',
           },
         });
         return;
@@ -417,6 +650,13 @@ export function setupIntegrationsRoutes(app: express.Application): void {
         return;
       }
 
+      if (isProductionEnv() && !getIntegrationVaultSecret().persistent) {
+        res
+          .status(503)
+          .send('OAuth token storage unavailable: INTEGRATION_TOKEN_SECRET must be configured in production.');
+        return;
+      }
+
       try {
         const oauthCreds = getOAuthCredentialsForEnv(spec.clientIdEnv, spec.clientSecretEnv);
         const redirectUri = resolveCallbackUrl(spec.id, req);
@@ -459,7 +699,8 @@ export function setupIntegrationsRoutes(app: express.Application): void {
               : undefined,
         });
 
-        const vault = loadVault().filter(
+        const { persistent } = getIntegrationVaultSecret();
+        const vault = (persistent ? loadDiskVault() : ephemeralVaultMemory).filter(
           (r) => !(r.uid === pending.uid && r.providerId === spec.id)
         );
         vault.unshift({
@@ -469,7 +710,7 @@ export function setupIntegrationsRoutes(app: express.Application): void {
           scopes: spec.scopes,
           connectedAt: new Date().toISOString(),
         });
-        saveVault(vault);
+        saveActiveVault(vault);
 
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.status(200).send(`<!doctype html><html><body><script>
@@ -511,8 +752,10 @@ export function setupIntegrationsRoutes(app: express.Application): void {
         return;
       }
 
-      const vault = loadVault();
-      const target = vault.find((r) => r.uid === uid && r.providerId === spec.id);
+      const diskVault = loadDiskVault();
+      const target =
+        ephemeralVaultMemory.find((r) => r.uid === uid && r.providerId === spec.id) ||
+        diskVault.find((r) => r.uid === uid && r.providerId === spec.id);
       if (target && spec.revokeUrl) {
         const decrypted = decryptTokenPayload(target);
         if (decrypted?.accessToken) {
@@ -527,8 +770,17 @@ export function setupIntegrationsRoutes(app: express.Application): void {
         }
       }
 
-      const remaining = vault.filter((r) => !(r.uid === uid && r.providerId === spec.id));
-      saveVault(remaining);
+      ephemeralVaultMemory = ephemeralVaultMemory.filter(
+        (r) => !(r.uid === uid && r.providerId === spec.id)
+      );
+      const remainingDisk = diskVault.filter((r) => !(r.uid === uid && r.providerId === spec.id));
+      if (remainingDisk.length !== diskVault.length) {
+        try {
+          saveDiskVault(remainingDisk);
+        } catch {
+          // Ignore write failure on read-only FS
+        }
+      }
 
       res.json({
         success: true,

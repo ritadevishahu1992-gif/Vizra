@@ -54,6 +54,15 @@ export const IntegrationPermissionModal: React.FC<IntegrationPermissionModalProp
     };
   }, [isOpen, integration]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !liveIntegration) return null;
 
   const handleStartOAuth = async () => {
@@ -82,16 +91,23 @@ export const IntegrationPermissionModal: React.FC<IntegrationPermissionModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
-      <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl p-6 text-white animate-in fade-in zoom-in-95 duration-150">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="integration-permission-title"
+        className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl p-6 text-white animate-in fade-in zoom-in-95 duration-150"
+      >
         <div className="flex items-center justify-between pb-4 border-b border-neutral-900 mb-5">
           <div className="flex items-center gap-2.5">
             <VizraLogo size={20} />
-            <h3 className="font-semibold text-base tracking-tight">
+            <h3 id="integration-permission-title" className="font-semibold text-base tracking-tight">
               Connect {liveIntegration.name}
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close modal"
             className="p-1 rounded text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
             <X size={18} />

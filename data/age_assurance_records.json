@@ -1,5 +1,335 @@
 [
   {
+    "recordId": "vpc_mwj0428g_759b",
+    "subjectHash": "59557a6fe5e8717efef838d8",
+    "parentEmailHash": "25b151b5df3370c7ad99755b",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:28:11.728Z",
+    "updatedAt": "2026-11-16T08:28:11.728Z"
+  },
+  {
+    "recordId": "age_mwj0428e_6e36",
+    "subjectHash": "6e8dcbbd53767295dffe03da",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "digitalConsentAge": 18,
+    "applicableStatutes": [
+      "India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "NOT_REQUIRED",
+    "minorProtectionTier": "ADULT_STANDARD",
+    "recordedAt": "2026-11-16T08:28:11.726Z",
+    "updatedAt": "2026-11-16T08:28:11.726Z"
+  },
+  {
+    "recordId": "age_mwj0428c_9fae",
+    "subjectHash": "6e8dcbbd53767295dffe03da",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "PENDING_VENDOR_VERIFICATION",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:28:11.724Z",
+    "updatedAt": "2026-11-16T08:28:11.724Z"
+  },
+  {
+    "recordId": "age_mwj04289_7005",
+    "subjectHash": "6e8dcbbd53767295dffe03da",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:28:11.721Z",
+    "updatedAt": "2026-11-16T08:28:11.721Z"
+  },
+  {
+    "recordId": "vpc_mwj01hzt_bed6",
+    "subjectHash": "42342b7f470ebeefc91f0264",
+    "parentEmailHash": "6c8d164f385ed128127bf8b6",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:26:12.184Z",
+    "updatedAt": "2026-11-16T08:26:12.184Z"
+  },
+  {
+    "recordId": "age_mwj01hzq_6e1c",
+    "subjectHash": "3471f06d13a7c0d282ad6982",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "digitalConsentAge": 18,
+    "applicableStatutes": [
+      "India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "NOT_REQUIRED",
+    "minorProtectionTier": "ADULT_STANDARD",
+    "recordedAt": "2026-11-16T08:26:12.182Z",
+    "updatedAt": "2026-11-16T08:26:12.182Z"
+  },
+  {
+    "recordId": "age_mwj01hzm_b510",
+    "subjectHash": "3471f06d13a7c0d282ad6982",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "PENDING_VENDOR_VERIFICATION",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:26:12.178Z",
+    "updatedAt": "2026-11-16T08:26:12.178Z"
+  },
+  {
+    "recordId": "age_mwj01hzj_eead",
+    "subjectHash": "3471f06d13a7c0d282ad6982",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:26:12.175Z",
+    "updatedAt": "2026-11-16T08:26:12.175Z"
+  },
+  {
+    "recordId": "vpc_mwizwwma_6f99",
+    "subjectHash": "ce33e602eac70178b57a5d74",
+    "parentEmailHash": "f68470ff743b7f946b4d1881",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:22:37.858Z",
+    "updatedAt": "2026-11-16T08:22:37.858Z"
+  },
+  {
+    "recordId": "age_mwizwwm7_4126",
+    "subjectHash": "8133f8df834b2e16df812268",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "digitalConsentAge": 18,
+    "applicableStatutes": [
+      "India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "NOT_REQUIRED",
+    "minorProtectionTier": "ADULT_STANDARD",
+    "recordedAt": "2026-11-16T08:22:37.855Z",
+    "updatedAt": "2026-11-16T08:22:37.855Z"
+  },
+  {
+    "recordId": "age_mwizwwm5_d5e2",
+    "subjectHash": "8133f8df834b2e16df812268",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "PENDING_VENDOR_VERIFICATION",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:22:37.853Z",
+    "updatedAt": "2026-11-16T08:22:37.853Z"
+  },
+  {
+    "recordId": "age_mwizwwm2_53ec",
+    "subjectHash": "8133f8df834b2e16df812268",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T08:22:37.850Z",
+    "updatedAt": "2026-11-16T08:22:37.850Z"
+  },
+  {
+    "recordId": "age_mwik2gsr_5948",
+    "subjectHash": "a74a19a97deb6c9d661d696a",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:59:03.435Z",
+    "updatedAt": "2026-11-16T00:59:03.435Z"
+  },
+  {
+    "recordId": "vpc_mwik2gsb_e17d",
+    "subjectHash": "c2ef6845ee100ed5422a6b5a",
+    "parentEmailHash": "1b779d40ee98dbec28fdf122",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "DE",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8 (Germany retains age 16 threshold)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "WITHDRAWN",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:59:03.419Z",
+    "updatedAt": "2026-11-16T00:59:03.428Z",
+    "withdrawnAt": "2026-11-16T00:59:03.428Z"
+  },
+  {
+    "recordId": "age_mwik2gs1_7611",
+    "subjectHash": "c2ef6845ee100ed5422a6b5a",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "DE",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8 (Germany retains age 16 threshold)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "WITHDRAWN",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:59:03.409Z",
+    "updatedAt": "2026-11-16T00:59:03.428Z",
+    "withdrawnAt": "2026-11-16T00:59:03.428Z"
+  },
+  {
+    "recordId": "vpc_mwik1sah_d81d",
+    "subjectHash": "e3b61f5c9a43625dd8ac158b",
+    "parentEmailHash": "1a168418ddf1df099e2ef048",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:58:31.673Z",
+    "updatedAt": "2026-11-16T00:58:31.673Z"
+  },
+  {
+    "recordId": "age_mwik1sae_24b3",
+    "subjectHash": "124e0891a50d73a4dba1bc78",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "digitalConsentAge": 18,
+    "applicableStatutes": [
+      "India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "NOT_REQUIRED",
+    "minorProtectionTier": "ADULT_STANDARD",
+    "recordedAt": "2026-11-16T00:58:31.670Z",
+    "updatedAt": "2026-11-16T00:58:31.670Z"
+  },
+  {
+    "recordId": "age_mwik1sab_686f",
+    "subjectHash": "124e0891a50d73a4dba1bc78",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "PENDING_VENDOR_VERIFICATION",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:58:31.667Z",
+    "updatedAt": "2026-11-16T00:58:31.667Z"
+  },
+  {
+    "recordId": "age_mwik1sa8_856c",
+    "subjectHash": "124e0891a50d73a4dba1bc78",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:58:31.664Z",
+    "updatedAt": "2026-11-16T00:58:31.664Z"
+  },
+  {
     "recordId": "vpc_mwiihjsa_3a85",
     "subjectHash": "60346127278b44ac29dce82a",
     "parentEmailHash": "933f721a3990bf4019887585",

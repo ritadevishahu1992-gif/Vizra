@@ -11,6 +11,8 @@ export interface OperatorFieldStatus {
 
 export interface ExternalDependencyStatus {
   dependency: string;
+  classification: 'UNUSED';
+  implementedInCodebase: boolean;
   configured: boolean;
   status: 'CONFIGURED' | 'NOT_CONFIGURED' | 'BLOCKED_BY_EXTERNAL_DEPENDENCY';
   reason: string;
@@ -64,11 +66,13 @@ export function getComplianceReadinessSnapshot(): ComplianceReadinessSnapshot {
 
   const cisionDependency: ExternalDependencyStatus = {
     dependency: 'Cision / PR Wire External API & Compliance Decision',
+    classification: 'UNUSED',
+    implementedInCodebase: false,
     configured: cisionConfigured,
-    status: cisionConfigured ? 'CONFIGURED' : 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
+    status: cisionConfigured ? 'NOT_CONFIGURED' : 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
     reason: cisionConfigured
-      ? 'Cision API credentials configured.'
-      : 'No Cision integration exists in the VIZRA codebase. External vendor contract/credentials (and REC-13 operator legal identity decisions if referencing Cision Recommendation 13) remain unconfigured.',
+      ? 'Cision API credentials are set in env, but NO Cision client integration exists in the VIZRA codebase (classification: UNUSED; dispatch returns HTTP 501).'
+      : 'No Cision integration exists in the VIZRA codebase (classification: UNUSED). External vendor contract/credentials and REC-13 operator legal identity decisions remain unconfigured.',
     requiredEnvVars: ['CISION_API_KEY', 'CISION_CLIENT_SECRET'],
   };
 
@@ -97,6 +101,8 @@ export function setupOperatorComplianceRoutes(app: express.Application): void {
         error: {
           code: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
           message: snapshot.cisionDependency.reason,
+          classification: 'UNUSED',
+          implementedInCodebase: false,
           requiredEnvVars: snapshot.cisionDependency.requiredEnvVars,
         },
       });
@@ -105,7 +111,9 @@ export function setupOperatorComplianceRoutes(app: express.Application): void {
     res.status(501).json({
       error: {
         code: 'CISION_ENDPOINT_NOT_PROVISIONED',
-        message: 'Cision credentials present, but commercial wire submission endpoint is not enabled without counsel sign-off.',
+        message: 'Cision credentials present, but commercial wire submission endpoint is not implemented in VIZRA (classification: UNUSED).',
+        classification: 'UNUSED',
+        implementedInCodebase: false,
       },
     });
   });

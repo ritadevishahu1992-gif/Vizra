@@ -322,10 +322,14 @@ ${rec.codeSnippet}
                 {/* Admin Passkey Form */}
                 <form onSubmit={handlePasskeyAuth} className="space-y-3">
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                    <label
+                      htmlFor="seo-admin-passkey"
+                      className="block text-[11px] font-mono text-neutral-400 mb-1"
+                    >
                       Admin Access Key
                     </label>
                     <input
+                      id="seo-admin-passkey"
                       type="password"
                       value={adminPasskey}
                       onChange={(e) => setAdminPasskey(e.target.value)}

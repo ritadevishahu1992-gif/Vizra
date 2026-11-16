@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   Sparkles,
@@ -65,6 +65,15 @@ export const LoginModal: React.FC = () => {
         : 'Strong';
     return { score, label, hasLength, hasUpper, hasNumber, hasSymbol };
   }, [password]);
+
+  useEffect(() => {
+    if (!isLoginModalOpen || user) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLoginModal();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLoginModalOpen, user, closeLoginModal]);
 
   if (!isLoginModalOpen || user) return null;
 

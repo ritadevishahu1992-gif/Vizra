@@ -57,7 +57,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
 
   return (
     <div
-      className={`min-h-screen bg-neutral-950 dark:bg-[#090909] bg-neutral-50 text-neutral-900 dark:text-white font-inter selection:bg-[#eb3b2d] selection:text-white relative overflow-x-clip flex flex-col justify-between ${className}`}
+      className={`min-h-screen bg-neutral-50 dark:bg-[#090909] text-neutral-900 dark:text-white font-inter selection:bg-[#eb3b2d] selection:text-white relative overflow-x-clip flex flex-col justify-between ${className}`}
     >
       <Navbar onLaunchOmnia={() => navigate('/ai')} />
       <main className="flex-1 relative z-10 pb-16">{children}</main>

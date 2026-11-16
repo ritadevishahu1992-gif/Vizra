@@ -32,13 +32,13 @@
           "format": "date-time",
           "description": "Timestamp when profile was created"
         },
-        "updatedAt": {
+        "lastLoginAt": {
           "type": "string",
           "format": "date-time",
-          "description": "Timestamp when profile was last updated"
+          "description": "Timestamp when profile was last signed into or updated"
         }
       },
-      "required": ["uid", "email", "createdAt", "updatedAt"]
+      "required": ["uid", "email", "createdAt", "lastLoginAt"]
     },
     "Project": {
       "title": "Project",
@@ -124,13 +124,13 @@
           "description": "Message text payload",
           "maxLength": 20000
         },
-        "createdAt": {
+        "timestamp": {
           "type": "string",
           "format": "date-time",
-          "description": "Creation timestamp"
+          "description": "Message timestamp"
         }
       },
-      "required": ["id", "userId", "conversationId", "role", "content", "createdAt"]
+      "required": ["id", "userId", "conversationId", "role", "content", "timestamp"]
     }
   },
   "firestore": {

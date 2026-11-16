@@ -225,6 +225,196 @@
       "validationNotes": [
         "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
       ]
+    },
+    {
+      "sourceId": "src_corr_1794790462590",
+      "title": "Correction on: \"Omnia Conversational Query...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_bacef07932571371",
+      "version": 1,
+      "createdAt": "2026-11-16T00:54:22.590Z",
+      "updatedAt": "2026-11-16T00:54:22.590Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "The chhath puja will happen from 13 to 17 November.",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Omnia Conversational Query\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794790711626",
+      "title": "Correction on: \"Verify correction quarantine [REDACT...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_edade822ec6f8632",
+      "version": 1,
+      "createdAt": "2026-11-16T00:58:31.625Z",
+      "updatedAt": "2026-11-16T00:58:31.625Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Safe factual update without email [REDACTED_EMAIL]",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794790717297",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T00:58:37.297Z",
+      "updatedAt": "2026-11-16T00:58:37.297Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794790916989",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T01:01:56.989Z",
+      "updatedAt": "2026-11-16T01:01:56.989Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817357818",
+      "title": "Correction on: \"Verify correction quarantine [REDACT...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_edade822ec6f8632",
+      "version": 1,
+      "createdAt": "2026-11-16T08:22:37.817Z",
+      "updatedAt": "2026-11-16T08:22:37.817Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Safe factual update without email [REDACTED_EMAIL]",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817363610",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T08:22:43.610Z",
+      "updatedAt": "2026-11-16T08:22:43.610Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817490742",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T08:24:50.741Z",
+      "updatedAt": "2026-11-16T08:24:50.741Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817572139",
+      "title": "Correction on: \"Verify correction quarantine [REDACT...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_edade822ec6f8632",
+      "version": 1,
+      "createdAt": "2026-11-16T08:26:12.138Z",
+      "updatedAt": "2026-11-16T08:26:12.138Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Safe factual update without email [REDACTED_EMAIL]",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817691686",
+      "title": "Correction on: \"Verify correction quarantine [REDACT...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_edade822ec6f8632",
+      "version": 1,
+      "createdAt": "2026-11-16T08:28:11.685Z",
+      "updatedAt": "2026-11-16T08:28:11.685Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Safe factual update without email [REDACTED_EMAIL]",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794817697282",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T08:28:17.282Z",
+      "updatedAt": "2026-11-16T08:28:17.282Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
     }
   ],
   "concepts": [
@@ -539,6 +729,86 @@
   },
   "logs": [
     {
+      "id": "log_1794817697282",
+      "timestamp": "2026-11-16T08:28:17.282Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794817697282"
+    },
+    {
+      "id": "log_1794817691686",
+      "timestamp": "2026-11-16T08:28:11.685Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Verify correction quarantine [...\"",
+      "sourceId": "src_corr_1794817691686"
+    },
+    {
+      "id": "log_1794817572139",
+      "timestamp": "2026-11-16T08:26:12.138Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Verify correction quarantine [...\"",
+      "sourceId": "src_corr_1794817572139"
+    },
+    {
+      "id": "log_1794817490742",
+      "timestamp": "2026-11-16T08:24:50.741Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794817490742"
+    },
+    {
+      "id": "log_1794817363610",
+      "timestamp": "2026-11-16T08:22:43.610Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794817363610"
+    },
+    {
+      "id": "log_1794817357818",
+      "timestamp": "2026-11-16T08:22:37.817Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Verify correction quarantine [...\"",
+      "sourceId": "src_corr_1794817357818"
+    },
+    {
+      "id": "log_1794790916990",
+      "timestamp": "2026-11-16T01:01:56.989Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794790916989"
+    },
+    {
+      "id": "log_1794790717297",
+      "timestamp": "2026-11-16T00:58:37.297Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794790717297"
+    },
+    {
+      "id": "log_1794790711626",
+      "timestamp": "2026-11-16T00:58:31.625Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Verify correction quarantine [...\"",
+      "sourceId": "src_corr_1794790711626"
+    },
+    {
+      "id": "log_1794790462590",
+      "timestamp": "2026-11-16T00:54:22.590Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Omnia Conversational Query...\"",
+      "sourceId": "src_corr_1794790462590"
+    },
+    {
       "id": "log_1794788087873",
       "timestamp": "2026-11-16T00:14:47.872Z",
       "level": "info",
@@ -611,6 +881,169 @@
     }
   ],
   "feedback": [
+    {
+      "id": "fb_1794817697282_3g0z",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T08:28:17.282Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "ef6340e8718e799c84d33cd2",
+      "sourceCreatedId": "src_corr_1794817697282"
+    },
+    {
+      "id": "fb_1794817691685_uvl4",
+      "question": "Verify correction quarantine [REDACTED_PHONE]",
+      "answer": "Original answer",
+      "retrievedSources": [
+        {
+          "title": "Valid Reference",
+          "url": "https://example.org/spec",
+          "score": 92
+        },
+        {
+          "title": "XSS Link",
+          "score": 99
+        }
+      ],
+      "userFeedback": "CORRECTION",
+      "correction": "Safe factual update without email [REDACTED_EMAIL]",
+      "timestamp": "2026-11-16T08:28:11.685Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "ef6340e8718e799c84d33cd2",
+      "sourceCreatedId": "src_corr_1794817691686"
+    },
+    {
+      "id": "fb_1794817572138_7ymt",
+      "question": "Verify correction quarantine [REDACTED_PHONE]",
+      "answer": "Original answer",
+      "retrievedSources": [
+        {
+          "title": "Valid Reference",
+          "url": "https://example.org/spec",
+          "score": 92
+        },
+        {
+          "title": "XSS Link",
+          "score": 99
+        }
+      ],
+      "userFeedback": "CORRECTION",
+      "correction": "Safe factual update without email [REDACTED_EMAIL]",
+      "timestamp": "2026-11-16T08:26:12.138Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "2c3c1a7ebb4dc81cd572f660",
+      "sourceCreatedId": "src_corr_1794817572139"
+    },
+    {
+      "id": "fb_1794817490741_lcy4",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T08:24:50.741Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "2c3c1a7ebb4dc81cd572f660",
+      "sourceCreatedId": "src_corr_1794817490742"
+    },
+    {
+      "id": "fb_1794817363610_xr7p",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T08:22:43.610Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "045c1231a42e75b2c5621612",
+      "sourceCreatedId": "src_corr_1794817363610"
+    },
+    {
+      "id": "fb_1794817357817_upnd",
+      "question": "Verify correction quarantine [REDACTED_PHONE]",
+      "answer": "Original answer",
+      "retrievedSources": [
+        {
+          "title": "Valid Reference",
+          "url": "https://example.org/spec",
+          "score": 92
+        },
+        {
+          "title": "XSS Link",
+          "score": 99
+        }
+      ],
+      "userFeedback": "CORRECTION",
+      "correction": "Safe factual update without email [REDACTED_EMAIL]",
+      "timestamp": "2026-11-16T08:22:37.817Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "045c1231a42e75b2c5621612",
+      "sourceCreatedId": "src_corr_1794817357818"
+    },
+    {
+      "id": "fb_1794790916989_imhi",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T01:01:56.989Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "236b1409c5e21ea1dbcb3522",
+      "sourceCreatedId": "src_corr_1794790916989"
+    },
+    {
+      "id": "fb_1794790717297_tzkb",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T00:58:37.297Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "4ea6d062f6d21013340f513b",
+      "sourceCreatedId": "src_corr_1794790717297"
+    },
+    {
+      "id": "fb_1794790711625_tn83",
+      "question": "Verify correction quarantine [REDACTED_PHONE]",
+      "answer": "Original answer",
+      "retrievedSources": [
+        {
+          "title": "Valid Reference",
+          "url": "https://example.org/spec",
+          "score": 92
+        },
+        {
+          "title": "XSS Link",
+          "score": 99
+        }
+      ],
+      "userFeedback": "CORRECTION",
+      "correction": "Safe factual update without email [REDACTED_EMAIL]",
+      "timestamp": "2026-11-16T00:58:31.625Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "4ea6d062f6d21013340f513b",
+      "sourceCreatedId": "src_corr_1794790711626"
+    },
+    {
+      "id": "fb_1794790462590_pnf5",
+      "question": "Omnia Conversational Query",
+      "answer": "Chhath Puja in 2026 will span four days, from **November 17 to November 20**. \n\nThe festival schedule is as follows:\n\n*   **Nahay Khay:** Tuesday, November 17, 2026\n*   **Kharna:** Wednesday, November 18, 2026\n*   **Sandhya Arghya (Evening Offering):** Thursday, November 19, 2026\n*   **Usha Arghya (Morning Offering):** Friday, November 20, 2026",
+      "userFeedback": "CORRECTION",
+      "correction": "The chhath puja will happen from 13 to 17 November.",
+      "timestamp": "2026-11-16T00:54:22.590Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "ac284a738064009fb2499361",
+      "sourceCreatedId": "src_corr_1794790462590"
+    },
+    {
+      "id": "fb_1794790433624_s8vm",
+      "question": "Omnia Conversational Query",
+      "answer": "Chhath Puja in 2026 will span four days, from **November 17 to November 20**. \n\nThe festival schedule is as follows:\n\n*   **Nahay Khay:** Tuesday, November 17, 2026\n*   **Kharna:** Wednesday, November 18, 2026\n*   **Sandhya Arghya (Evening Offering):** Thursday, November 19, 2026\n*   **Usha Arghya (Morning Offering):** Friday, November 20, 2026",
+      "userFeedback": "NOT_HELPFUL",
+      "timestamp": "2026-11-16T00:53:53.624Z",
+      "status": "APPROVED",
+      "submittedByHash": "ac284a738064009fb2499361"
+    },
     {
       "id": "fb_1794788087872_1411",
       "question": "Verify correction quarantine [REDACTED_PHONE]",

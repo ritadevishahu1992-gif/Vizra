@@ -64,7 +64,7 @@
       "destination": "/$1/index.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ],

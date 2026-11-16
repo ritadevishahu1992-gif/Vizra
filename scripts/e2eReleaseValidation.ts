@@ -163,11 +163,11 @@ export async function runEndToEndValidation() {
       const totalGates = aiSummary.results.length + secSummary.length;
       const totalPassed = aiSummary.results.filter(r => r.passed).length + secSummary.filter(r => r.passed).length;
       
-      const isPassed = totalGates === 38 && totalPassed === 38;
+      const isPassed = totalGates >= 38 && totalPassed === totalGates;
       return {
         status: isPassed ? 'PASS' : 'FAIL',
         actual: `Cataloged ${totalGates} gates: ${aiSummary.results.length} AI gates, ${secSummary.length} Security gates. Passed: ${totalPassed}/${totalGates}.`,
-        evidence: `AI Suite Duration: ${aiSummary.durationMs}ms; Security Suite passed: ${secSummary.every(s => s.passed)}. All 38 gates passed cleanly.`,
+        evidence: `AI Suite Duration: ${aiSummary.durationMs}ms; Security Suite passed: ${secSummary.every(s => s.passed)}. All ${totalGates} gates passed cleanly.`,
       };
     }
   );
@@ -185,12 +185,13 @@ export async function runEndToEndValidation() {
 
       const hasUnitMath = aiSrc.includes('Math & Coding Accuracy');
       const hasSecuritySSRF = secSrc.includes('SSRF Defense');
-      const hasRateLimiting = secSrc.includes('Sliding Window Algorithm');
+      const hasRateLimiting =
+        secSrc.includes('11. Rate Limiting') && secSrc.includes('SlidingWindowRateLimiter');
 
       return {
         status: hasUnitMath && hasSecuritySSRF && hasRateLimiting ? 'PASS' : 'FAIL',
-        actual: '21 AI Gates (12 Unit logic tests, 7 classification/grounding tests, 2 router tests); 17 Security Gates (6 SSRF integration tests, 2 sliding-window rate limit tests, 4 payload validation tests, 2 observability tests, 3 deployment config tests).',
-        evidence: 'All quality gates exercise real logic in security.ts, observability.ts, and aiEvaluationSuite.ts without synthetic stubbing.',
+        actual: 'AI Gates (Deterministic logic, classification/grounding, router tests) and Security/Privacy Gates (SSRF, sliding-window rate limit, payload bounds, observability, deployment, consent lifecycle).',
+        evidence: 'All quality gates exercise real logic in security.ts, observability.ts, consentService.ts, and aiEvaluationSuite.ts without synthetic stubbing.',
       };
     }
   );

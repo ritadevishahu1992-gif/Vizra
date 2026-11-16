@@ -194,27 +194,45 @@ export async function runLoginNotificationTests() {
     return userFailed && adminSucceeded && dispatches.length === 2;
   });
 
-  // SCENARIO 8: Unconfigured provider runs safely in simulated sandbox mode
+  // SCENARIO 8: Unconfigured provider runs safely in simulated sandbox mode without personal fallback
   await assertTest('NOTIF-08', 'Unconfigured email provider degrades gracefully to simulation', async () => {
     clearIdempotencyStoreForTesting();
     setMockEmailDispatcher(null);
     const savedApiKey = process.env.RESEND_API_KEY;
+    const savedAdminEmail = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL;
     delete process.env.RESEND_API_KEY;
+    delete process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL;
 
     try {
-      const record = await processLoginNotifications({
+      const recordNoAdmin = await processLoginNotifications({
         uid: 'user_sim_test',
         email: 'simulated_creator@vizra.ai',
         authTime: 1700030000,
       });
 
-      const isSimulated =
-        record.userDelivery.status === 'simulated' &&
-        record.adminDelivery.status === 'simulated';
-      return isSimulated && record.eventId.length > 0;
+      process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL = 'security-ops@vizra.example';
+      const recordWithAdmin = await processLoginNotifications({
+        uid: 'user_sim_test_2',
+        email: 'simulated_creator@vizra.ai',
+        authTime: 1700030001,
+      });
+
+      return (
+        recordNoAdmin.userDelivery.status === 'simulated' &&
+        recordNoAdmin.adminDelivery.status === 'skipped' &&
+        recordNoAdmin.eventId.length > 0 &&
+        recordWithAdmin.userDelivery.status === 'simulated' &&
+        recordWithAdmin.adminDelivery.status === 'simulated' &&
+        recordWithAdmin.eventId.length > 0
+      );
     } finally {
       if (savedApiKey !== undefined) {
         process.env.RESEND_API_KEY = savedApiKey;
+      }
+      if (savedAdminEmail !== undefined) {
+        process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL = savedAdminEmail;
+      } else {
+        delete process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL;
       }
     }
   });

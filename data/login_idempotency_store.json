@@ -1,21 +1,42 @@
 {
   "auth_user_sim_test_1700030000": {
-    "eventId": "viz_sec_mwiii0jt_594f55d6",
+    "eventId": "viz_sec_mwj042ie_89b6b4b5",
     "idempotencyKey": "auth_user_sim_test_1700030000",
     "uid": "user_sim_test",
     "userEmail": "simulated_creator@vizra.ai",
     "authTime": 1700030000,
-    "timestamp": "2026-11-16T00:15:09.641Z",
+    "timestamp": "2026-11-16T08:28:12.087Z",
     "userDelivery": {
       "recipient": "simulated_creator@vizra.ai",
       "status": "simulated",
-      "messageId": "sim_mwiii0jt_a499dc43",
+      "messageId": "sim_mwj042if_a6a06928",
       "attempts": 1
     },
     "adminDelivery": {
-      "recipient": "security-admin@vizra.ai",
+      "recipient": "unconfigured",
+      "status": "skipped",
+      "error": "VIZRA_ADMIN_NOTIFICATION_EMAIL not configured",
+      "attempts": 0
+    },
+    "isDuplicate": false
+  },
+  "auth_user_sim_test_2_1700030001": {
+    "eventId": "viz_sec_mwj042if_727fd2e0",
+    "idempotencyKey": "auth_user_sim_test_2_1700030001",
+    "uid": "user_sim_test_2",
+    "userEmail": "simulated_creator@vizra.ai",
+    "authTime": 1700030001,
+    "timestamp": "2026-11-16T08:28:12.087Z",
+    "userDelivery": {
+      "recipient": "simulated_creator@vizra.ai",
       "status": "simulated",
-      "messageId": "sim_mwiii0jt_bc5e26a7",
+      "messageId": "sim_mwj042if_7c9f9a9d",
+      "attempts": 1
+    },
+    "adminDelivery": {
+      "recipient": "security-ops@vizra.example",
+      "status": "simulated",
+      "messageId": "sim_mwj042if_3a03fcb2",
       "attempts": 1
     },
     "isDuplicate": false

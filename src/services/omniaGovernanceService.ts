@@ -348,26 +348,62 @@ class OmniaGovernanceService {
         ? Math.round(
             (recordsList.reduce((acc, r) => acc + r.confidence, 0) / recordsList.length) * 1000
           ) / 10
-        : 90.0;
+        : 0;
+
+    // Dynamically calculate source attribution coverage from stored evidence & source_score
+    const attributedCount = recordsList.filter(
+      (r) => Boolean(r.source_score?.source_identity) && Array.isArray(r.evidence) && r.evidence.length > 0
+    ).length;
+    const computedAttributionRecall =
+      recordsList.length > 0
+        ? Math.round((attributedCount / recordsList.length) * 1000) / 10
+        : 0;
+
     const tracesList = Array.from(this.traces.values());
     const safeTraces = tracesList.filter((t) => t.safety_check?.allowed !== false).length;
     const computedSafetyRate =
       tracesList.length > 0
         ? Math.round((safeTraces / tracesList.length) * 1000) / 10
-        : 99.2;
+        : recordsList.length > 0
+        ? Math.round(
+            (recordsList.filter((r) => (r.source_score?.misinfo_risk_score ?? 0) < 0.2).length /
+              recordsList.length) *
+              1000
+          ) / 10
+        : 0;
+
+    // Compute distinct observed trace intents / coverage (0 when no traces recorded)
+    const distinctObservedIntents = new Set(tracesList.map((t) => t.intent).filter(Boolean)).size;
+    const computedMultilingualOrIntentCoverage =
+      tracesList.length > 0
+        ? Math.min(100, Math.round((distinctObservedIntents / Math.max(1, tracesList.length)) * 1000) / 10)
+        : 0;
+
+    const blockedTraces = tracesList.length - safeTraces;
+    const observedIssueRate =
+      recordsList.length > 0
+        ? Math.round(
+            ((recordsList.filter((r) => r.contradictions && r.contradictions.length > 0).length + blockedTraces) /
+              Math.max(1, recordsList.length + tracesList.length)) *
+              1000
+          ) / 10
+        : 0;
 
     this.evalReports = [
       {
         id: 'eval_live_runtime_v1',
         evaluation_date: new Date().toISOString(),
-        version: `OMNIA 1.0 Live Governance (${recordsList.length} Records, ${verifiedCount} Verified)`,
+        version: `OMNIA 1.0 Live Telemetry (${recordsList.length} Records, ${verifiedCount} Verified, ${tracesList.length} Traces)`,
         factual_accuracy_score: avgConfidence,
-        hallucination_rate: Math.max(0.5, Math.round((100 - avgConfidence) * 0.25 * 10) / 10),
-        attribution_recall: 94.5,
-        multilingual_coverage_score: 91.0,
+        hallucination_rate: observedIssueRate,
+        attribution_recall: computedAttributionRecall,
+        multilingual_coverage_score: computedMultilingualOrIntentCoverage,
         safety_pass_rate: computedSafetyRate,
-        status: 'passed',
-        benchmark_name: 'Dynamic Runtime Corpus & Trace Telemetry (Calculated from Active Records)',
+        status: avgConfidence >= 80 ? 'passed' : 'warning',
+        benchmark_name:
+          tracesList.length > 0
+            ? 'Live Corpus & Runtime Trace Telemetry'
+            : 'Live Corpus Metrics Only (0 Runtime Traces Recorded Yet)',
       },
     ];
   }

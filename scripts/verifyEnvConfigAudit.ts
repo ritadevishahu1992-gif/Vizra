@@ -214,13 +214,13 @@ async function runTests() {
 
     const minimalDegradationValid =
       minSnap.coreReadyWithMinimalConfig === true &&
-      minSnap.summary.totalDocumentedOrReferencedVariables === 44 &&
+      minSnap.summary.totalDocumentedOrReferencedVariables === 46 &&
       minSnap.summary.requiredCoreCount +
         minSnap.summary.optionalCount +
         minSnap.summary.featureDependentCount +
         minSnap.summary.unusedCount +
         minSnap.summary.duplicateCount ===
-        44 &&
+        46 &&
       getPort() === 3000 &&
       typeof getNodeEnv() === 'string' &&
       getAppUrl() === 'https://vizra.vercel.app' &&

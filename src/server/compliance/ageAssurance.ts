@@ -3,7 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { HarmCategory, HarmBlockThreshold } from '@google/genai';
-import { generalApiRateLimiter, derivePrivacySessionHash, safeCompare } from '../security';
+import {
+  generalApiRateLimiter,
+  derivePrivacySessionHash,
+  derivePrivacySessionHashCandidates,
+  safeCompare,
+} from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
 import { getParentalConsentConfig } from '../config/envConfig';
 
@@ -427,14 +432,17 @@ function upsertAgeRecord(record: AgeAssuranceConsentRecord): void {
 
 /**
  * Removes all persisted age-assurance records matching any of the supplied raw subject seeds
- * (e.g. `uid:${uid}`, `client:${clientId}`, etc.) so GDPR/DPDP account deletion cascades cleanly.
+ * (e.g. `uid:${uid}`, `client:${clientId}`, etc.) across active and rotated SESSION_HASH_SECRET_PREVIOUS
+ * salts so GDPR/DPDP account deletion cascades cleanly even after key rotation.
  */
 export function purgeAgeAssuranceRecordsForSubjects(subjectSeeds: string[]): number {
-  const targetHashes = new Set(
-    subjectSeeds
-      .filter((s) => typeof s === 'string' && s.trim().length > 0)
-      .map((s) => derivePrivacySessionHash(s))
-  );
+  const targetHashes = new Set<string>();
+  for (const seed of subjectSeeds) {
+    if (typeof seed !== 'string' || !seed.trim()) continue;
+    for (const candidateHash of derivePrivacySessionHashCandidates(seed)) {
+      targetHashes.add(candidateHash);
+    }
+  }
   if (targetHashes.size === 0) return 0;
 
   const existing = loadAgeRecords();
@@ -451,6 +459,14 @@ export function getLatestRecordForSubjectHash(
 ): AgeAssuranceConsentRecord | null {
   const records = loadAgeRecords();
   return records.find((r) => r.subjectHash === subjectHash) || null;
+}
+
+export function getLatestRecordForSubjectSeed(
+  subjectSeed: string
+): AgeAssuranceConsentRecord | null {
+  const candidateHashes = new Set(derivePrivacySessionHashCandidates(subjectSeed));
+  const records = loadAgeRecords();
+  return records.find((r) => candidateHashes.has(r.subjectHash)) || null;
 }
 
 /**
@@ -714,7 +730,7 @@ export async function resolveRequestAgePolicyContext(
   }
 
   const subjectHash = derivePrivacySessionHash(subjectSeed);
-  const record = getLatestRecordForSubjectHash(subjectHash);
+  const record = getLatestRecordForSubjectSeed(subjectSeed);
 
   if (!record) {
     return {
@@ -1018,7 +1034,7 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     // Anti-circumvention guard for named/authenticated subjects: once evaluated under-18,
     // prevent instant "self-aging up" on a subsequent request to bypass minor protection.
     if (hasExplicitIdentity) {
-      const priorRecord = getLatestRecordForSubjectHash(subjectHash);
+      const priorRecord = getLatestRecordForSubjectSeed(boundSubject.seed);
       if (
         priorRecord &&
         priorRecord.bracket !== 'ADULT_18_PLUS' &&
@@ -1261,14 +1277,14 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         return;
       }
 
-      const subjectHash = derivePrivacySessionHash(boundSubject.seed);
-      const providedParentHash =
+      const candidateSubjectHashes = new Set(derivePrivacySessionHashCandidates(boundSubject.seed));
+      const candidateParentHashes =
         typeof parentEmail === 'string' && parentEmail.includes('@')
-          ? derivePrivacySessionHash(parentEmail.trim().toLowerCase())
+          ? derivePrivacySessionHashCandidates(parentEmail.trim().toLowerCase())
           : null;
 
       const records = loadAgeRecords();
-      const subjectRecords = records.filter((rec) => rec.subjectHash === subjectHash);
+      const subjectRecords = records.filter((rec) => candidateSubjectHashes.has(rec.subjectHash));
       const registeredParentHashes = subjectRecords
         .map((rec) => rec.parentEmailHash)
         .filter((h): h is string => typeof h === 'string' && h.length > 0);
@@ -1276,8 +1292,10 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       if (!boundSubject.authenticated) {
         if (registeredParentHashes.length > 0) {
           const matchesRegisteredParent =
-            providedParentHash !== null &&
-            registeredParentHashes.some((h) => safeCompare(h, providedParentHash));
+            candidateParentHashes !== null &&
+            candidateParentHashes.some((cand) =>
+              registeredParentHashes.some((h) => safeCompare(h, cand))
+            );
           if (!matchesRegisteredParent) {
             res.status(404).json({
               error: {
@@ -1288,7 +1306,7 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
             });
             return;
           }
-        } else if (providedParentHash !== null) {
+        } else if (candidateParentHashes !== null) {
           res.status(404).json({
             error: {
               code: 'CONSENT_RECORD_NOT_FOUND_OR_UNAUTHORIZED',
@@ -1304,7 +1322,7 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       const nowIso = new Date().toISOString();
 
       const updated = records.map((rec) => {
-        if (rec.subjectHash !== subjectHash) return rec;
+        if (!candidateSubjectHashes.has(rec.subjectHash)) return rec;
         updatedCount += 1;
         return {
           ...rec,

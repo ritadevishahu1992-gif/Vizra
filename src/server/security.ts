@@ -8,6 +8,7 @@ import {
   getAdminAllowlistEmails,
   getCronSecret,
   getSessionHashSecret,
+  getSessionHashSecretKeys,
   isProductionEnv,
 } from './config/envConfig';
 
@@ -340,10 +341,26 @@ export function safeCompare(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-export function derivePrivacySessionHash(rawIdentifier: string): string {
+export function derivePrivacySessionHash(rawIdentifier: string, secretOverride?: string): string {
   const clean = (rawIdentifier || 'anonymous').trim();
-  const { secret } = getSessionHashSecret();
+  const secret = secretOverride || getSessionHashSecret().secret;
   return crypto.createHmac('sha256', secret).update(clean).digest('hex').slice(0, 24);
+}
+
+/**
+ * Computes candidate HMAC hashes across active + SESSION_HASH_SECRET_PREVIOUS keys so
+ * persisted age-assurance blocks, consent withdrawals, and GDPR account deletions remain
+ * traceable across planned key rotations.
+ */
+export function derivePrivacySessionHashCandidates(rawIdentifier: string): string[] {
+  const clean = (rawIdentifier || 'anonymous').trim();
+  const { primary, previous } = getSessionHashSecretKeys();
+  const hashes = new Set<string>();
+  hashes.add(crypto.createHmac('sha256', primary.secret).update(clean).digest('hex').slice(0, 24));
+  for (const prevSecret of previous) {
+    hashes.add(crypto.createHmac('sha256', prevSecret).update(clean).digest('hex').slice(0, 24));
+  }
+  return Array.from(hashes);
 }
 
 /**

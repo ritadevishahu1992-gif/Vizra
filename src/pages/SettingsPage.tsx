@@ -18,6 +18,8 @@ import { LiquidGlassToggle } from '../components/ui/LiquidGlassToggle';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { CreditUsageIndicator } from '../components/ui/CreditUsageIndicator';
+import { deleteUserFirestoreWorkspace } from '../services/firestoreService';
+import { auth, deleteUser } from '../lib/firebase';
 
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -98,30 +100,63 @@ export const SettingsPage: React.FC = () => {
       const headers: Record<string, string> = {};
       if (user && typeof (user as any).getIdToken === 'function') {
         const idToken = await (user as any).getIdToken();
-        headers['Authorization'] = `Bearer ${idToken}`;
+        if (idToken) {
+          headers['Authorization'] = `Bearer ${idToken}`;
+        }
       } else {
         const clientId = localStorage.getItem('vizra_client_tenant_id_v1') || 'anon_client_purge';
         headers['X-Vizra-Client-Id'] = clientId;
+      }
+
+      // Collect conversation IDs prior to clearing localStorage so Firestore messages can be cascaded
+      let conversationIds: string[] = [];
+      try {
+        const rawConvs = localStorage.getItem('omnia_conversations_v1');
+        if (rawConvs) {
+          const parsed = JSON.parse(rawConvs);
+          if (Array.isArray(parsed)) {
+            conversationIds = parsed.map((c: any) => String(c?.id || '')).filter(Boolean);
+          }
+        }
+      } catch {
+        // Ignore parse failures
       }
 
       const res = await fetch('/api/account/data', {
         method: 'DELETE',
         headers,
       });
-
       const data = await res.json().catch(() => null);
+
+      let cloudDeletedNote = '';
+      if (user?.uid) {
+        const fsRes = await deleteUserFirestoreWorkspace(user.uid, conversationIds);
+        cloudDeletedNote = ` Cloud docs purged (projects: ${fsRes.deletedProjects}, messages: ${fsRes.deletedMessages}).`;
+        if (auth.currentUser && auth.currentUser.uid === user.uid) {
+          try {
+            await deleteUser(auth.currentUser);
+            cloudDeletedNote += ' Firebase Auth account deleted.';
+          } catch (authDelErr: any) {
+            if (authDelErr?.code === 'auth/requires-recent-login') {
+              cloudDeletedNote += ' Re-authenticate cleanly if permanently deleting Firebase login credentials.';
+            }
+          }
+        }
+      }
+
       handleClearLocalData();
       localStorage.removeItem('vizra_workspace_uploaded_assets_v1');
       localStorage.removeItem('vizra_workspace_client_tokens_v1');
+      localStorage.removeItem('vizra_active_plan_v1');
 
       if (user) {
         await signOutUser();
       }
 
       setDeleteReceipt(
-        data?.receiptId
-          ? `Erasure complete (Receipt: ${data.receiptId})`
-          : 'Local & server workspace data purged.'
+        (data?.receiptId
+          ? `Erasure complete (Receipt: ${data.receiptId}).`
+          : 'Local & server workspace data purged.') + cloudDeletedNote
       );
     } catch {
       handleClearLocalData();
@@ -140,31 +175,31 @@ export const SettingsPage: React.FC = () => {
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-4xl mx-auto space-y-8">
         {/* Header Bar */}
-        <div className="pb-6 border-b border-white/10 dark:border-white/10 border-neutral-300">
+        <div className="pb-6 border-b border-neutral-300 dark:border-white/10">
           <div className="typo-eyebrow flex items-center gap-2">
             <SettingsIcon size={14} />
             <span>Studio Preferences & Configuration</span>
           </div>
           <h1 className="typo-section-title mt-1">Application Settings</h1>
-          <p className="text-sm text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
             Manage your global visual theme, account credentials, model response tone, and local memory.
           </p>
         </div>
 
         {/* Section 1: Appearance & Liquid Glass Theme Toggle */}
-        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-5">
+        <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
                 {theme === 'dark' ? <Moon size={18} className="text-[#eb3b2d]" /> : <Sun size={18} className="text-amber-500" />}
                 <span>Global Visual Appearance</span>
               </h2>
-              <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">
                 Toggle between Obsidian Dark Mode (default) and Studio Light Mode using the Liquid Glass Surface Tension switch.
               </p>
             </div>
             <div className="shrink-0 flex items-center gap-3">
-              <span className="text-xs font-mono text-neutral-400 dark:text-neutral-400 text-neutral-500 hidden sm:inline">
+              <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400 hidden sm:inline">
                 {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
               </span>
               <LiquidGlassToggle size="md" />
@@ -173,14 +208,14 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Section 2: Account & Entitlements */}
-        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-5">
+        <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
                 <User size={18} className="text-[#eb3b2d]" />
                 <span>Account & Studio Identity</span>
               </h2>
-              <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">
                 {user
                   ? `Signed in as ${user.displayName || 'Creator'} (${user.email})`
                   : 'You are using Vizra in guest creator mode.'}
@@ -190,7 +225,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => signOutUser()}
-                className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs text-neutral-300 hover:text-white font-medium cursor-pointer transition-colors"
+                className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-xs text-neutral-800 dark:text-neutral-300 hover:text-black dark:hover:text-white font-medium cursor-pointer transition-colors"
               >
                 Sign Out
               </button>
@@ -198,19 +233,19 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={openLoginModal}
-                className="px-4 py-2 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-semibold cursor-pointer transition-colors"
+                className="px-4 py-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 text-xs font-semibold cursor-pointer transition-colors"
               >
                 Sign In / Register
               </button>
             )}
           </div>
 
-          <div className="pt-4 border-t border-white/10 dark:border-white/10 border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="pt-4 border-t border-neutral-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-medium text-white dark:text-white text-neutral-900 block">
+              <span className="text-xs font-medium text-neutral-900 dark:text-white block">
                 Credit Allowance & Priority Compute
               </span>
-              <span className="text-[11px] text-neutral-400">
+              <span className="text-[11px] text-neutral-600 dark:text-neutral-400">
                 View your real-time generation credit quota and upgrade options.
               </span>
             </div>
@@ -219,8 +254,8 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Section 3: Omnia AI Behavior & Tone */}
-        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-5">
-          <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+        <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-5 shadow-sm">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
             <Sliders size={18} className="text-[#eb3b2d]" />
             <span>AI Response Preferences</span>
           </h2>
@@ -228,13 +263,17 @@ export const SettingsPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Language */}
             <div>
-              <label className="block text-xs font-medium text-neutral-300 dark:text-neutral-300 text-neutral-700 mb-1.5">
+              <label
+                htmlFor="settings-language-select"
+                className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
+              >
                 Conversation Language
               </label>
               <select
+                id="settings-language-select"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-xl bg-neutral-950 dark:bg-neutral-950 bg-neutral-100 border border-white/10 dark:border-white/10 border-neutral-300 text-xs text-white dark:text-white text-neutral-900 focus:outline-none focus:border-[#eb3b2d]"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-white/10 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#eb3b2d]"
               >
                 <option value="auto">Auto-Detect Intent</option>
                 <option value="en">English (US/UK)</option>
@@ -245,13 +284,17 @@ export const SettingsPage: React.FC = () => {
 
             {/* Response Style */}
             <div>
-              <label className="block text-xs font-medium text-neutral-300 dark:text-neutral-300 text-neutral-700 mb-1.5">
+              <label
+                htmlFor="settings-style-select"
+                className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
+              >
                 Response Proportionality
               </label>
               <select
+                id="settings-style-select"
                 value={responseStyle}
                 onChange={(e) => setResponseStyle(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-xl bg-neutral-950 dark:bg-neutral-950 bg-neutral-100 border border-white/10 dark:border-white/10 border-neutral-300 text-xs text-white dark:text-white text-neutral-900 focus:outline-none focus:border-[#eb3b2d]"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-white/10 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#eb3b2d]"
               >
                 <option value="kinetic">Proportional (Default)</option>
                 <option value="concise">Ultra-Concise</option>
@@ -261,13 +304,17 @@ export const SettingsPage: React.FC = () => {
 
             {/* Stream Pacing */}
             <div>
-              <label className="block text-xs font-medium text-neutral-300 dark:text-neutral-300 text-neutral-700 mb-1.5">
+              <label
+                htmlFor="settings-stream-select"
+                className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
+              >
                 Generation Streaming
               </label>
               <select
+                id="settings-stream-select"
                 value={streamSpeed}
                 onChange={(e) => setStreamSpeed(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-xl bg-neutral-950 dark:bg-neutral-950 bg-neutral-100 border border-white/10 dark:border-white/10 border-neutral-300 text-xs text-white dark:text-white text-neutral-900 focus:outline-none focus:border-[#eb3b2d]"
+                className="w-full px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-950 border border-neutral-300 dark:border-white/10 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-[#eb3b2d]"
               >
                 <option value="fast">High-Throughput (Fast)</option>
                 <option value="natural">Natural Pacing</option>
@@ -294,32 +341,32 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Section 4: Privacy, Cache & Account Data Erasure */}
-        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-4">
-          <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+        <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-4 shadow-sm">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
             <Shield size={18} className="text-[#eb3b2d]" />
             <span>Privacy, Storage &amp; Data Erasure Controls</span>
           </h2>
-          <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600">
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">
             Vizra routes AI requests through server-side proxies with user-scoped storage and zero third-party advertising trackers. Review our Privacy Policy for subprocessor retention details.
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             <div>
-              <span className="text-xs font-medium text-white dark:text-white text-neutral-900 block">
+              <span className="text-xs font-medium text-neutral-900 dark:text-white block">
                 Clear Local Browser Cache
               </span>
-              <span className="text-[11px] text-neutral-400">
+              <span className="text-[11px] text-neutral-600 dark:text-neutral-400">
                 Removes saved conversation threads, memories, and drafts from this browser.
               </span>
             </div>
             <div className="flex items-center gap-2">
               {clearedNotice && (
-                <span className="text-xs font-mono text-emerald-400">Cache cleared</span>
+                <span className="text-xs font-mono text-emerald-500 dark:text-emerald-400">Cache cleared</span>
               )}
               <button
                 type="button"
                 onClick={handleClearLocalData}
-                className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5"
               >
                 <Trash2 size={13} />
                 <span>Clear Local Cache</span>
@@ -327,16 +374,16 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-white/10 dark:border-white/10 border-neutral-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-neutral-200 dark:border-white/10">
             <div>
-              <span className="text-xs font-medium text-red-400 block">
+              <span className="text-xs font-medium text-red-600 dark:text-red-400 block">
                 Delete Account &amp; Server Data (GDPR Art. 17 / DPDP Erasure)
               </span>
-              <span className="text-[11px] text-neutral-400">
+              <span className="text-[11px] text-neutral-600 dark:text-neutral-400">
                 Purges server-side credit ledgers, contact/early-access records, and local workspace storage.
               </span>
               {deleteReceipt && (
-                <span className="block text-[11px] font-mono text-emerald-400 mt-1">
+                <span className="block text-[11px] font-mono text-emerald-600 dark:text-emerald-400 mt-1">
                   {deleteReceipt}
                 </span>
               )}
@@ -345,7 +392,7 @@ export const SettingsPage: React.FC = () => {
               type="button"
               disabled={isDeletingAccount}
               onClick={handleDeleteAccountAndData}
-              className="px-3.5 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 text-red-300 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+              className="px-3.5 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-300 dark:border-red-800/40 text-red-700 dark:text-red-300 text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
             >
               <Trash2 size={13} />
               <span>{isDeletingAccount ? 'Purging Data…' : 'Delete Account & Data'}</span>
@@ -354,14 +401,14 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Section 5: Child Online Safety & Age Assurance Governance */}
-        <div className="p-6 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 space-y-4">
+        <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-4 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-semibold text-white dark:text-white text-neutral-900 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
                 <Lock size={18} className="text-[#eb3b2d]" />
                 <span>Child Online Safety &amp; Age Assurance Policy</span>
               </h2>
-              <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">
                 Live platform policy posture and server-enforced minor protection boundaries.
               </p>
             </div>
@@ -371,24 +418,24 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-white/10 space-y-1">
-              <div className="text-[11px] font-mono text-neutral-400 uppercase">Option 3 • Parental Consent</div>
-              <div className="font-medium text-white">
+            <div className="p-3.5 rounded-xl bg-neutral-100 dark:bg-neutral-950/80 border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="text-[11px] font-mono text-neutral-600 dark:text-neutral-400 uppercase">Option 3 • Parental Consent</div>
+              <div className="font-medium text-neutral-900 dark:text-white">
                 {agePolicyOverview?.option3VendorConfigured
                   ? 'External VPC Vendor Configured'
                   : 'Blocked Pending External VPC Vendor & Counsel Sign-Off'}
               </div>
-              <div className="text-[11px] text-neutral-500">
+              <div className="text-[11px] text-neutral-600 dark:text-neutral-500">
                 Jurisdiction thresholds (US 13, EU 13–16, UK 13/AADC 18, IN 18), fail-closed 424 guard, consent withdrawal, and Delete Account cascade active.
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-white/10 space-y-1">
-              <div className="text-[11px] font-mono text-neutral-400 uppercase">Option 4 • Feature Safeguards</div>
-              <div className="font-medium text-white">
+            <div className="p-3.5 rounded-xl bg-neutral-100 dark:bg-neutral-950/80 border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="text-[11px] font-mono text-neutral-600 dark:text-neutral-400 uppercase">Option 4 • Feature Safeguards</div>
+              <div className="font-medium text-neutral-900 dark:text-white">
                 Server-Enforced ({agePolicyOverview?.option4EnforcedEndpoints ?? 8} Protected Routes)
               </div>
-              <div className="text-[11px] text-neutral-500">
+              <div className="text-[11px] text-neutral-600 dark:text-neutral-500">
                 Blocks under-18 Voice Live, OAuth connectors, unrestricted music, commercial Engage placements, and paid upgrades. Option 2 Teen access stays dormant; Option 5 stays rejected.
               </div>
             </div>

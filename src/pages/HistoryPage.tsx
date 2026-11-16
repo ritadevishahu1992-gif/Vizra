@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { Conversation } from '../types/ai';
+import { createInitialConversations } from '../services/conversationSeeds';
 
 export const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,67 +30,7 @@ export const HistoryPage: React.FC = () => {
     } catch {
       // fallback
     }
-    return [
-      {
-        id: 'conv-1',
-        title: 'Welcome to Omnia',
-        createdAt: Date.now() - 1000 * 60 * 60 * 2,
-        updatedAt: Date.now() - 1000 * 60 * 60 * 2,
-        group: 'today',
-        messages: [
-          {
-            id: 'msg-1',
-            role: 'user',
-            content: 'Hi Omnia, what can you help me with?',
-            timestamp: '10:14 AM',
-          },
-          {
-            id: 'msg-2',
-            role: 'assistant',
-            content: `Hey! I can answer questions across science, history, coding, and general knowledge, explain complex concepts, write code, research topics, or help you build creative projects whenever you're ready. What are you working on today?`,
-            timestamp: '10:14 AM',
-            mode: 'quick',
-          },
-        ],
-      },
-      {
-        id: 'conv-2',
-        title: 'Photosynthesis Overview',
-        createdAt: Date.now() - 1000 * 60 * 60 * 24,
-        updatedAt: Date.now() - 1000 * 60 * 60 * 24,
-        group: 'yesterday',
-        messages: [
-          {
-            id: 'msg-2-1',
-            role: 'user',
-            content: 'What is photosynthesis?',
-            timestamp: '8:30 AM',
-          },
-          {
-            id: 'msg-2-2',
-            role: 'assistant',
-            content: `Photosynthesis is the process plants use to convert light energy into chemical energy, mainly producing glucose from carbon dioxide and water.`,
-            timestamp: '8:30 AM',
-            mode: 'quick',
-          },
-        ],
-      },
-      {
-        id: 'conv-3',
-        title: 'Procedural GLSL Shader Concept',
-        createdAt: Date.now() - 1000 * 60 * 60 * 72,
-        updatedAt: Date.now() - 1000 * 60 * 60 * 72,
-        group: 'previous7Days',
-        messages: [
-          {
-            id: 'msg-3-1',
-            role: 'user',
-            content: 'Synthesize a WebGL raymarched fluid shader in GLSL',
-            timestamp: '3:15 PM',
-          },
-        ],
-      },
-    ];
+    return createInitialConversations();
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,14 +97,14 @@ export const HistoryPage: React.FC = () => {
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-6xl mx-auto">
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 dark:border-white/10 border-neutral-300">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-300 dark:border-white/10">
           <div>
             <div className="typo-eyebrow flex items-center gap-2">
               <HistoryIcon size={14} />
               <span>Workspace Memory & Archives</span>
             </div>
             <h1 className="typo-section-title mt-1">Saved Conversations</h1>
-            <p className="text-sm text-neutral-400 dark:text-neutral-400 text-neutral-600 mt-0.5">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
               Access your previous reasoning sessions, prompt blueprints, and code generations.
             </p>
           </div>
@@ -172,7 +113,7 @@ export const HistoryPage: React.FC = () => {
             <button
               type="button"
               onClick={handleExportAll}
-              className="px-3.5 py-2 rounded-xl bg-neutral-900 dark:bg-neutral-900 bg-white border border-white/10 dark:border-white/10 border-neutral-300 text-xs font-medium text-neutral-300 dark:text-neutral-300 text-neutral-700 hover:text-white dark:hover:text-white hover:border-[#eb3b2d] flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-white/10 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:border-[#eb3b2d] flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Download size={14} />
               <span>Export All</span>
@@ -198,19 +139,20 @@ export const HistoryPage: React.FC = () => {
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search saved conversations"
             placeholder="Search conversations, questions, code, and keywords..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-300 text-sm text-white dark:text-white text-neutral-900 placeholder-neutral-500 focus:outline-none focus:border-[#eb3b2d] transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900/60 border border-neutral-300 dark:border-white/10 text-sm text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-[#eb3b2d] transition-colors"
           />
         </div>
 
         {/* Conversation List */}
         {filteredConversations.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl bg-neutral-900/40 dark:bg-neutral-900/40 bg-neutral-100 border border-white/5 dark:border-white/5 border-neutral-300 space-y-3">
+          <div className="p-12 text-center rounded-2xl bg-neutral-100 dark:bg-neutral-900/40 border border-neutral-300 dark:border-white/5 space-y-3">
             <MessageSquare size={32} className="mx-auto text-neutral-500" />
-            <h3 className="text-base font-semibold text-white dark:text-white text-neutral-900">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
               No conversations found
             </h3>
-            <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 max-w-sm mx-auto">
+            <p className="text-xs text-neutral-600 dark:text-neutral-400 max-w-sm mx-auto">
               {searchQuery
                 ? `No sessions matched “${searchQuery}”. Try clearing your search term.`
                 : 'You have not created any conversations yet. Start a new chat to begin exploring with Omnia.'}
@@ -236,7 +178,7 @@ export const HistoryPage: React.FC = () => {
               return (
                 <div
                   key={conv.id}
-                  className="group relative p-4 sm:p-5 rounded-2xl bg-neutral-900/60 dark:bg-neutral-900/60 bg-white border border-white/10 dark:border-white/10 border-neutral-200 hover:border-[#eb3b2d]/60 dark:hover:border-[#eb3b2d]/60 transition-all duration-200 shadow-sm"
+                  className="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 hover:border-[#eb3b2d]/60 dark:hover:border-[#eb3b2d]/60 transition-all duration-200 shadow-sm"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     {/* Left: Title & Preview */}
@@ -251,7 +193,8 @@ export const HistoryPage: React.FC = () => {
                               if (e.key === 'Enter') handleConfirmRename(conv.id);
                               if (e.key === 'Escape') setEditingId(null);
                             }}
-                            className="flex-1 px-3 py-1.5 rounded-lg bg-neutral-950 dark:bg-neutral-950 bg-neutral-100 border border-[#eb3b2d] text-sm text-white dark:text-white text-neutral-900 focus:outline-none"
+                            aria-label="Conversation title"
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-950 border border-[#eb3b2d] text-sm text-neutral-900 dark:text-white focus:outline-none"
                             autoFocus
                           />
                           <button
@@ -276,17 +219,17 @@ export const HistoryPage: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <h2
                               onClick={() => handleOpenConversation(conv.id)}
-                              className="text-base font-semibold text-white dark:text-white text-neutral-900 hover:text-[#eb3b2d] cursor-pointer transition-colors truncate"
+                              className="text-base font-semibold text-neutral-900 dark:text-white hover:text-[#eb3b2d] cursor-pointer transition-colors truncate"
                             >
                               {conv.title}
                             </h2>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-800 dark:bg-neutral-800 bg-neutral-200 text-neutral-400 dark:text-neutral-400 text-neutral-700 shrink-0">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-400 shrink-0">
                               {messageCount} msg{messageCount === 1 ? '' : 's'}
                             </span>
                           </div>
 
                           {lastMessage && (
-                            <p className="text-xs text-neutral-400 dark:text-neutral-400 text-neutral-600 line-clamp-1 mt-1 font-mono">
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-1 mt-1 font-mono">
                               {lastMessage.role === 'user' ? 'You: ' : 'Omnia: '}
                               {lastMessage.content}
                             </p>

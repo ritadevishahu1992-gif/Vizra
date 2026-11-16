@@ -10,7 +10,8 @@ import {
   limit,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Project } from '../types/ai';
+import { Project, ProjectWorkflowStage } from '../types/ai';
+import { DEFAULT_STAGE_TEMPLATES } from './projectService';
 
 export interface UserProfileData {
   uid: string;
@@ -18,7 +19,7 @@ export interface UserProfileData {
   displayName?: string;
   photoURL?: string;
   createdAt: string;
-  updatedAt: string;
+  lastLoginAt: string;
 }
 
 export interface ChatMessageRecord {
@@ -27,11 +28,11 @@ export interface ChatMessageRecord {
   conversationId: string;
   role: 'user' | 'assistant';
   content: string;
-  createdAt: string;
+  timestamp: string;
 }
 
 /**
- * Sync user profile to Firestore
+ * Sync user profile to Firestore (strictly aligned with firestore.rules isValidUserProfile)
  */
 export async function syncUserProfile(user: {
   uid: string;
@@ -43,7 +44,7 @@ export async function syncUserProfile(user: {
   try {
     const userRef = doc(db, 'users', user.uid);
     let existing: Partial<UserProfileData> | null = null;
-    
+
     try {
       const existingSnap = await getDoc(userRef);
       if (existingSnap.exists()) {
@@ -60,7 +61,7 @@ export async function syncUserProfile(user: {
       displayName: (user.displayName || existing?.displayName || 'Vizra Creator').slice(0, 100),
       photoURL: (user.photoURL || existing?.photoURL || '').slice(0, 4000),
       createdAt: existing?.createdAt || now,
-      updatedAt: now,
+      lastLoginAt: now,
     };
 
     await setDoc(userRef, profilePayload);
@@ -84,15 +85,44 @@ export async function saveUserProjectToFirestore(
   try {
     const projectRef = doc(db, 'users', userId, 'projects', project.id);
     const now = new Date().toISOString();
-    
-    // Ensure payload adheres strictly to blueprint bounds
+
+    const allowedCategories = new Set([
+      'video',
+      'animation',
+      'campaign',
+      'app',
+      'research',
+      'writing',
+      'general',
+    ]);
+    const normalizedCategory = allowedCategories.has(project.category)
+      ? project.category
+      : 'general';
+
+    const sanitizedStages = Array.isArray(project.stages)
+      ? project.stages.slice(0, 25).map((s, idx) => ({
+          id: String(s.id || `stage-${idx + 1}`).slice(0, 64),
+          index: Number(s.index || idx + 1),
+          title: String(s.title || `Stage ${idx + 1}`).slice(0, 120),
+          description: String(s.description || '').slice(0, 300),
+          status:
+            s.status === 'completed' || s.status === 'in_progress'
+              ? s.status
+              : 'not_started',
+          content: String(s.content || '').slice(0, 4000),
+          updatedAt: Number(s.updatedAt || Date.now()),
+        }))
+      : [];
+
+    // Ensure payload adheres strictly to blueprint & firestore.rules bounds (stages <= 25)
     const payload = {
       id: project.id,
       ownerId: userId,
       title: project.title.slice(0, 120),
-      category: project.category || 'general',
+      category: normalizedCategory,
       description: (project.description || '').slice(0, 2000),
       status: 'active',
+      stages: sanitizedStages,
       createdAt: new Date(project.createdAt || Date.now()).toISOString(),
       updatedAt: now,
     };
@@ -115,6 +145,34 @@ export async function getUserProjectsFromFirestore(userId: string): Promise<Proj
 
     return snapshot.docs.map((docSnap) => {
       const data = docSnap.data();
+      const rawStages = Array.isArray(data.stages) ? data.stages : [];
+      const hydratedStages: ProjectWorkflowStage[] =
+        rawStages.length > 0
+          ? rawStages.map((s: any, idx: number) => {
+              const tmpl = DEFAULT_STAGE_TEMPLATES[idx];
+              return {
+                id: String(s?.id || `stage-${idx + 1}`),
+                index: Number(s?.index || idx + 1),
+                title: String(s?.title || tmpl?.title || `Stage ${idx + 1}`),
+                description: String(s?.description || tmpl?.description || ''),
+                status:
+                  s?.status === 'completed' || s?.status === 'in_progress'
+                    ? s.status
+                    : 'not_started',
+                content: String(s?.content || tmpl?.defaultContent || ''),
+                updatedAt: Number(s?.updatedAt || Date.now()),
+              };
+            })
+          : DEFAULT_STAGE_TEMPLATES.map((tmpl, idx) => ({
+              id: `stage-${idx + 1}`,
+              index: idx + 1,
+              title: tmpl.title,
+              description: tmpl.description,
+              status: idx === 0 ? 'completed' : idx === 1 ? 'in_progress' : 'not_started',
+              content: tmpl.defaultContent,
+              updatedAt: Date.now(),
+            }));
+
       return {
         id: data.id,
         title: data.title,
@@ -122,14 +180,14 @@ export async function getUserProjectsFromFirestore(userId: string): Promise<Proj
         description: data.description || '',
         createdAt: new Date(data.createdAt).getTime() || Date.now(),
         updatedAt: new Date(data.updatedAt).getTime() || Date.now(),
-        stages: [],
+        stages: hydratedStages,
         memory: {
           goal: data.description || '',
           targetAudience: 'Vizra Community',
           style: 'Obsidian Kinetic 60fps',
           requirements: [],
           previousDecisions: [],
-          currentProgress: 'Initiated in Firestore',
+          currentProgress: `${hydratedStages.filter((s) => s.status === 'completed').length}/${hydratedStages.length} stages completed`,
         },
         tasks: [],
         notes: '',
@@ -158,7 +216,7 @@ export async function deleteUserProjectFromFirestore(
 }
 
 /**
- * Save chat message to Firestore
+ * Save chat message to Firestore (strictly aligned with firestore.rules isValidChatMessage)
  */
 export async function saveChatMessageToFirestore(
   userId: string,
@@ -174,10 +232,67 @@ export async function saveChatMessageToFirestore(
       conversationId,
       role: msg.role,
       content: msg.content.slice(0, 20000),
-      createdAt: new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     };
     await setDoc(msgRef, payload);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
+}
+
+/**
+ * Deletes all user-owned Firestore projects, conversation messages, and profile documents
+ * while respecting firestore.rules ownership constraints.
+ */
+export async function deleteUserFirestoreWorkspace(
+  userId: string,
+  conversationIds: string[] = []
+): Promise<{
+  deletedProjects: number;
+  deletedMessages: number;
+  deletedProfile: boolean;
+}> {
+  let deletedProjects = 0;
+  let deletedMessages = 0;
+  let deletedProfile = false;
+
+  if (!userId) {
+    return { deletedProjects, deletedMessages, deletedProfile };
+  }
+
+  try {
+    const projectsSnap = await getDocs(collection(db, 'users', userId, 'projects'));
+    for (const projDoc of projectsSnap.docs) {
+      await deleteDoc(projDoc.ref);
+      deletedProjects += 1;
+    }
+  } catch (err) {
+    console.warn('[Firestore] Non-fatal project cascade delete warning:', err);
+  }
+
+  const validConvIds = Array.from(
+    new Set(conversationIds.filter((cid) => typeof cid === 'string' && /^[a-zA-Z0-9_\-]+$/.test(cid)))
+  );
+  for (const convId of validConvIds) {
+    try {
+      const msgsSnap = await getDocs(
+        collection(db, 'users', userId, 'conversations', convId, 'messages')
+      );
+      for (const msgDoc of msgsSnap.docs) {
+        await deleteDoc(msgDoc.ref);
+        deletedMessages += 1;
+      }
+    } catch (err) {
+      console.warn(`[Firestore] Non-fatal message cascade warning (${convId}):`, err);
+    }
+  }
+
+  try {
+    await deleteDoc(doc(db, 'users', userId));
+    deletedProfile = true;
+  } catch (err) {
+    console.warn('[Firestore] Non-fatal user profile delete warning:', err);
+  }
+
+  return { deletedProjects, deletedMessages, deletedProfile };
 }

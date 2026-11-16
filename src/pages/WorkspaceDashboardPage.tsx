@@ -44,6 +44,7 @@ import {
   saveUserProjectToFirestore,
   deleteUserProjectFromFirestore,
 } from '../services/firestoreService';
+import { auth } from '../lib/firebase';
 import { Project, Attachment } from '../types/ai';
 import {
   resolveRouteSeoPayload,
@@ -56,11 +57,26 @@ interface WorkspaceApiToken {
   prefix: string;
   scope: 'read:telemetry' | 'write:projects' | 'engage:events';
   createdAt: number;
-  lastUsedAt?: number;
+  lastUsedAt?: number | null;
 }
 
-const TOKENS_STORAGE_KEY = 'vizra_workspace_client_tokens_v1';
+const CLIENT_ID_STORAGE_KEY = 'vizra_workspace_client_id_v1';
 const ASSETS_STORAGE_KEY = 'vizra_workspace_uploaded_assets_v1';
+
+function getOrCreateWorkspaceClientId(): string {
+  try {
+    let cid = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
+    if (cid && /^[a-zA-Z0-9_-]{4,64}$/.test(cid)) {
+      return cid;
+    }
+    const rand = Math.random().toString(36).slice(2, 10);
+    cid = `ws_${Date.now().toString(36)}_${rand}`;
+    localStorage.setItem(CLIENT_ID_STORAGE_KEY, cid);
+    return cid;
+  } catch {
+    return 'ws_default_session';
+  }
+}
 
 export const WorkspaceDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -98,6 +114,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
   });
 
   // Real Backend Telemetry State
+  const [healthStatus, setHealthStatus] = useState<any>(null);
   const [serverMetrics, setServerMetrics] = useState<any>(null);
   const [engageOverview, setEngageOverview] = useState<any>(null);
   const [isSyncingTelemetry, setIsSyncingTelemetry] = useState(false);
@@ -113,19 +130,8 @@ export const WorkspaceDashboardPage: React.FC = () => {
   const [newProjectTitle, setNewProjectTitle] = useState('');
   const [newProjectPrompt, setNewProjectPrompt] = useState('');
 
-  // Developer API Token Management State
-  const [apiTokens, setApiTokens] = useState<WorkspaceApiToken[]>(() => {
-    try {
-      const raw = localStorage.getItem(TOKENS_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch {
-      // Ignore
-    }
-    return [];
-  });
+  // Developer API Token Management State (server-backed via /api/workspace/tokens)
+  const [apiTokens, setApiTokens] = useState<WorkspaceApiToken[]>([]);
   const [newTokenLabel, setNewTokenLabel] = useState('');
   const [newTokenScope, setNewTokenScope] =
     useState<WorkspaceApiToken['scope']>('write:projects');
@@ -165,7 +171,32 @@ export const WorkspaceDashboardPage: React.FC = () => {
       getUserProjectsFromFirestore(user.uid)
         .then((remote) => {
           if (remote && remote.length > 0) {
-            setProjects(remote);
+            const localMap = new Map(local.map((p) => [p.id, p]));
+            const merged = remote.map((r) => {
+              const loc = localMap.get(r.id);
+              if (!loc) return r;
+              const locCompleted = loc.stages.filter((s) => s.status === 'completed').length;
+              const remCompleted = r.stages.filter((s) => s.status === 'completed').length;
+              const preferredStages =
+                loc.updatedAt > r.updatedAt && locCompleted >= remCompleted
+                  ? loc.stages
+                  : r.stages.length >= loc.stages.length
+                  ? r.stages
+                  : loc.stages;
+              return {
+                ...loc,
+                ...r,
+                stages: preferredStages,
+                updatedAt: Math.max(loc.updatedAt, r.updatedAt),
+              };
+            });
+            for (const loc of local) {
+              if (!merged.some((p) => p.id === loc.id)) {
+                merged.push(loc);
+              }
+            }
+            merged.forEach((p) => saveProject(p));
+            setProjects(merged);
           }
         })
         .catch(() => {
@@ -173,6 +204,46 @@ export const WorkspaceDashboardPage: React.FC = () => {
         });
     }
   }, [user]);
+
+  const buildWorkspaceAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Vizra-Client-Id': getOrCreateWorkspaceClientId(),
+    };
+    if (auth?.currentUser) {
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        if (idToken) {
+          headers.Authorization = `Bearer ${idToken}`;
+        }
+      } catch {
+        // Fallback to X-Vizra-Client-Id
+      }
+    }
+    return headers;
+  }, []);
+
+  // Load server-persisted workspace client API tokens
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const headers = await buildWorkspaceAuthHeaders();
+        const res = await fetch('/api/workspace/tokens', { headers });
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          if (Array.isArray(data?.tokens)) {
+            setApiTokens(data.tokens);
+          }
+        }
+      } catch {
+        // Non-fatal
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, buildWorkspaceAuthHeaders]);
 
   // Persist uploaded assets
   useEffect(() => {
@@ -194,22 +265,40 @@ export const WorkspaceDashboardPage: React.FC = () => {
     }
   }, [assets]);
 
-  // Fetch Real Server Metrics & Engage Telemetry
+  // Fetch Real Server Telemetry (public /api/health always; admin telemetry only when unlocked)
   const fetchLiveTelemetry = useCallback(async () => {
     setIsSyncingTelemetry(true);
     try {
-      const [metricsRes, engageRes] = await Promise.all([
-        fetch('/api/metrics').catch(() => null),
-        fetch('/api/engage/admin/overview').catch(() => null),
-      ]);
-
-      if (metricsRes && metricsRes.ok) {
-        const mJson = await metricsRes.json();
-        setServerMetrics(mJson);
+      const healthRes = await fetch('/api/health').catch(() => null);
+      if (healthRes && healthRes.ok) {
+        const hJson = await healthRes.json();
+        setHealthStatus(hJson);
       }
-      if (engageRes && engageRes.ok) {
-        const eJson = await engageRes.json();
-        setEngageOverview(eJson);
+
+      let storedAdminKey: string | null = null;
+      try {
+        storedAdminKey = sessionStorage.getItem('vizra_admin_key');
+      } catch {
+        // Ignore sessionStorage restrictions
+      }
+
+      if (storedAdminKey) {
+        const adminHeaders: Record<string, string> = {
+          'x-admin-api-key': storedAdminKey,
+        };
+        const [metricsRes, engageRes] = await Promise.all([
+          fetch('/api/metrics', { headers: adminHeaders }).catch(() => null),
+          fetch('/api/engage/admin/overview', { headers: adminHeaders }).catch(() => null),
+        ]);
+
+        if (metricsRes && metricsRes.ok) {
+          const mJson = await metricsRes.json();
+          setServerMetrics(mJson);
+        }
+        if (engageRes && engageRes.ok) {
+          const eJson = await engageRes.json();
+          setEngageOverview(eJson);
+        }
       }
     } finally {
       window.setTimeout(() => setIsSyncingTelemetry(false), 320);
@@ -233,8 +322,8 @@ export const WorkspaceDashboardPage: React.FC = () => {
     }
 
     // Fallback to real server metrics & engage inventory counts
-    const totalReq = Number(serverMetrics?.requests?.total || 1);
-    const aiReq = Number(serverMetrics?.requests?.aiChat || 1);
+    const totalReq = Number(serverMetrics?.metrics?.requests?.total || 0);
+    const aiReq = Number(serverMetrics?.metrics?.requests?.aiChat || 0);
     const engageImpressions = Number(
       engageOverview?.analytics?.totals?.impressions || 0
     );
@@ -300,6 +389,11 @@ export const WorkspaceDashboardPage: React.FC = () => {
     };
     saveProject(updatedProject);
     setProjects(getAllProjects());
+    if (user) {
+      saveUserProjectToFirestore(user.uid, updatedProject).catch(() => {
+        // Non-fatal
+      });
+    }
     toast({
       title: `Stage ${nextStage.index} Completed`,
       description: `${nextStage.title} marked complete in "${proj.title}".`,
@@ -343,38 +437,70 @@ export const WorkspaceDashboardPage: React.FC = () => {
     });
   };
 
-  const handleCreateApiToken = (e: React.FormEvent) => {
+  const handleCreateApiToken = async (e: React.FormEvent) => {
     e.preventDefault();
     const label = newTokenLabel.trim() || 'Workspace Integration Key';
-    const bytes = new Uint8Array(16);
-    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
-      window.crypto.getRandomValues(bytes);
-    }
-    const randomHex = Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    const fullSecret = `vz_live_${randomHex}`;
-    const newEntry: WorkspaceApiToken = {
-      id: `tok-${Date.now()}`,
-      label,
-      prefix: `${fullSecret.slice(0, 12)}...${fullSecret.slice(-4)}`,
-      scope: newTokenScope,
-      createdAt: Date.now(),
-    };
-    const updated = [newEntry, ...apiTokens];
-    setApiTokens(updated);
     try {
-      localStorage.setItem(TOKENS_STORAGE_KEY, JSON.stringify(updated));
+      const headers = await buildWorkspaceAuthHeaders();
+      const res = await fetch('/api/workspace/tokens', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ label, scope: newTokenScope }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.token || !data?.secret) {
+        toast({
+          title: 'Token Generation Failed',
+          description: data?.error?.message || 'Unable to create token on server.',
+          type: 'warning',
+        });
+        return;
+      }
+      setApiTokens((prev) => [data.token, ...prev]);
+      setNewlyGeneratedSecret(data.secret);
+      setNewTokenLabel('');
+      toast({
+        title: 'Client Workspace Token Generated',
+        description: 'Stored as SHA-256 hash on server. Copy your token secret now.',
+        type: 'success',
+      });
     } catch {
-      // Ignore
+      toast({
+        title: 'Network Unavailable',
+        description: 'Could not reach server to issue workspace token.',
+        type: 'warning',
+      });
     }
-    setNewlyGeneratedSecret(fullSecret);
-    setNewTokenLabel('');
-    toast({
-      title: 'Client Workspace Token Generated',
-      description: 'Copy your token now; only its prefix is stored after dismissal.',
-      type: 'success',
-    });
+  };
+
+  const handleRevokeApiToken = async (tok: WorkspaceApiToken) => {
+    try {
+      const headers = await buildWorkspaceAuthHeaders();
+      const res = await fetch(`/api/workspace/tokens/${encodeURIComponent(tok.id)}`, {
+        method: 'DELETE',
+        headers,
+      });
+      if (!res.ok) {
+        toast({
+          title: 'Revocation Failed',
+          description: 'Could not revoke token on server.',
+          type: 'warning',
+        });
+        return;
+      }
+      setApiTokens((prev) => prev.filter((t) => t.id !== tok.id));
+      toast({
+        title: 'Token Revoked',
+        description: `"${tok.label}" was permanently revoked on the server.`,
+        type: 'warning',
+      });
+    } catch {
+      toast({
+        title: 'Network Unavailable',
+        description: 'Could not reach server to revoke token.',
+        type: 'warning',
+      });
+    }
   };
 
   const projectColumns: DataTableColumn<Project>[] = [
@@ -544,14 +670,19 @@ export const WorkspaceDashboardPage: React.FC = () => {
 
         <div className="p-4 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-1">
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Server API Requests</span>
+            <span>{serverMetrics?.metrics ? 'Server API Requests' : 'Engine Runtime Status'}</span>
             <Activity size={14} className="text-[#EB3B2D]" />
           </div>
           <div className="text-2xl font-bold text-white">
-            {serverMetrics?.requests?.total ?? 1}
+            {serverMetrics?.metrics?.requests?.total ??
+              (healthStatus?.status === 'ok' ? 'Online' : 'Syncing')}
           </div>
           <div className="text-[11px] font-mono text-emerald-400">
-            Uptime: {Math.round(Number(serverMetrics?.uptimeSeconds || 60))}s · Healthy
+            Uptime:{' '}
+            {Math.round(
+              Number(serverMetrics?.metrics?.uptimeSeconds ?? healthStatus?.uptimeSeconds ?? 0)
+            )}
+            s · {healthStatus?.hasGemini ? 'Gemini Active' : 'Healthy'}
           </div>
         </div>
 
@@ -862,19 +993,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        const filtered = apiTokens.filter((t) => t.id !== tok.id);
-                        setApiTokens(filtered);
-                        localStorage.setItem(
-                          TOKENS_STORAGE_KEY,
-                          JSON.stringify(filtered)
-                        );
-                        toast({
-                          title: 'Token Revoked',
-                          description: `"${tok.label}" was revoked immediately.`,
-                          type: 'warning',
-                        });
-                      }}
+                      onClick={() => handleRevokeApiToken(tok)}
                       className="p-1.5 rounded-lg hover:bg-red-950/40 text-neutral-500 hover:text-[#EB3B2D] cursor-pointer"
                       title="Revoke token"
                     >

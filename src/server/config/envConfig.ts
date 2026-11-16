@@ -215,6 +215,27 @@ export function getCronSecret(): string | null {
 const EPHEMERAL_SESSION_SALT = crypto.randomBytes(32).toString('hex');
 const EPHEMERAL_VAULT_SECRET = crypto.randomBytes(32).toString('hex');
 
+/**
+ * Returns a non-reversible 12-hex-char fingerprint for identifying active/rotated
+ * encryption keys without ever exposing raw key material in vaults or logs.
+ */
+export function computeSecretFingerprint(secret: string): string {
+  return crypto.createHash('sha256').update(secret).digest('hex').slice(0, 12);
+}
+
+/**
+ * Parses comma-separated previous secrets for zero-downtime cryptographic key rotation.
+ */
+function getSecretRotationList(envName: string, minLength = 16): string[] {
+  const raw = getCleanEnv(envName);
+  if (!raw) return [];
+  const list = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length >= minLength && isRealEnvValue(s));
+  return Array.from(new Set(list));
+}
+
 export function getSessionHashSecret(): { secret: string; persistent: boolean } {
   const configured = getCleanEnv('SESSION_HASH_SECRET');
   if (configured && configured.length >= 16) {
@@ -223,12 +244,49 @@ export function getSessionHashSecret(): { secret: string; persistent: boolean } 
   return { secret: EPHEMERAL_SESSION_SALT, persistent: false };
 }
 
+export function getSessionHashSecretKeys(): {
+  primary: { secret: string; persistent: boolean; fingerprint: string };
+  previous: string[];
+} {
+  const primary = getSessionHashSecret();
+  const previous = getSecretRotationList('SESSION_HASH_SECRET_PREVIOUS', 16).filter(
+    (s) => s !== primary.secret
+  );
+  return {
+    primary: {
+      ...primary,
+      fingerprint: computeSecretFingerprint(primary.secret),
+    },
+    previous,
+  };
+}
+
 export function getIntegrationVaultSecret(): { secret: string; persistent: boolean } {
   const configured = getCleanEnv('INTEGRATION_TOKEN_SECRET');
   if (configured && configured.length >= 16) {
     return { secret: configured, persistent: true };
   }
   return { secret: EPHEMERAL_VAULT_SECRET, persistent: false };
+}
+
+export function getIntegrationVaultSecretKeys(): {
+  primary: { secret: string; persistent: boolean; keyFingerprint: string };
+  previous: Array<{ secret: string; keyFingerprint: string }>;
+} {
+  const primary = getIntegrationVaultSecret();
+  const previousSecrets = getSecretRotationList('INTEGRATION_TOKEN_SECRET_PREVIOUS', 16).filter(
+    (s) => s !== primary.secret
+  );
+  return {
+    primary: {
+      ...primary,
+      keyFingerprint: computeSecretFingerprint(primary.secret),
+    },
+    previous: previousSecrets.map((secret) => ({
+      secret,
+      keyFingerprint: computeSecretFingerprint(secret),
+    })),
+  };
 }
 
 // ============================================================================
@@ -502,6 +560,7 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
         'OAUTH_CANVA_CLIENT_ID',
         'OAUTH_CANVA_CLIENT_SECRET',
         'INTEGRATION_TOKEN_SECRET',
+        'INTEGRATION_TOKEN_SECRET_PREVIOUS',
       ],
       missingEnvVars: [
         ...(!googleOAuth.configured ? ['OAUTH_GOOGLE_CLIENT_ID', 'OAUTH_GOOGLE_CLIENT_SECRET'] : []),
@@ -511,7 +570,7 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
         ...(!canvaOAuth.configured ? ['OAUTH_CANVA_CLIENT_ID', 'OAUTH_CANVA_CLIENT_SECRET'] : []),
         ...(!vaultSecret.persistent ? ['INTEGRATION_TOKEN_SECRET'] : []),
       ],
-      notes: 'Each provider activates independently when both Client ID and Client Secret are configured.',
+      notes: 'Each provider activates independently when both Client ID and Client Secret are configured. Persistent token encryption requires INTEGRATION_TOKEN_SECRET in production (supports INTEGRATION_TOKEN_SECRET_PREVIOUS during rotation).',
     },
     {
       id: 'privacy_hashing',
@@ -520,12 +579,17 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
       configured: sessionSecret.persistent && vaultSecret.persistent,
       status: sessionSecret.persistent && vaultSecret.persistent ? 'CONFIGURED' : 'OPTIONAL_SIMULATED',
       requiredToBootCoreApp: false,
-      envVars: ['SESSION_HASH_SECRET', 'INTEGRATION_TOKEN_SECRET'],
+      envVars: [
+        'SESSION_HASH_SECRET',
+        'SESSION_HASH_SECRET_PREVIOUS',
+        'INTEGRATION_TOKEN_SECRET',
+        'INTEGRATION_TOKEN_SECRET_PREVIOUS',
+      ],
       missingEnvVars: [
         ...(sessionSecret.persistent ? [] : ['SESSION_HASH_SECRET']),
         ...(vaultSecret.persistent ? [] : ['INTEGRATION_TOKEN_SECRET']),
       ],
-      notes: 'Ephemeral CSPRNG salts protect sessions automatically; set explicit secrets in production for cross-restart correlation.',
+      notes: 'HTTP rate limiters use in-memory IP maps (reset on restart). SESSION_HASH_SECRET stabilizes persisted age-assurance & safety pseudonym hashes across restarts/rotation; INTEGRATION_TOKEN_SECRET stabilizes AES-256-GCM OAuth vault persistence.',
     },
     {
       id: 'parental_consent_vendor',
@@ -564,14 +628,14 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
     },
     {
       id: 'cision_pr_wire',
-      label: 'External Cision PR Wire Dependency (No active codebase client)',
+      label: 'External Cision PR Wire Dependency (Unused / Status Reporting Only)',
       classification: 'UNUSED',
       configured: cisionCfg.configured,
-      status: cisionCfg.configured ? 'CONFIGURED' : 'UNUSED',
+      status: 'UNUSED',
       requiredToBootCoreApp: false,
       envVars: ['CISION_API_KEY', 'CISION_CLIENT_SECRET'],
       missingEnvVars: cisionCfg.configured ? [] : ['CISION_API_KEY', 'CISION_CLIENT_SECRET'],
-      notes: 'Retained solely for REC-13 external dependency compliance reporting; returns HTTP 424 when dispatched.',
+      notes: 'No Cision integration or outbound client exists in the VIZRA codebase. Retained strictly as an UNUSED status reporting check on /api/compliance/status and /api/compliance/cision/dispatch (HTTP 424/501).',
     },
   ];
 
@@ -591,7 +655,14 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
     warnings.push('Deprecated WORKFLOW_SECRET alias is active; set ADMIN_API_KEY instead.');
   }
   if (isProductionEnv() && !sessionSecret.persistent) {
-    warnings.push('SESSION_HASH_SECRET unset in production; ephemeral per-instance HMAC salt active.');
+    warnings.push(
+      'SESSION_HASH_SECRET unset in production; ephemeral salt breaks cross-restart correlation for persisted age-assurance blocks, safety report session hashes, and deletion lookups.'
+    );
+  }
+  if (isProductionEnv() && !vaultSecret.persistent) {
+    warnings.push(
+      'INTEGRATION_TOKEN_SECRET unset in production; persistent OAuth vault writes fail closed to prevent unrecoverable encrypted tokens.'
+    );
   }
 
   const deprecatedAliasesInUse: string[] = [];
@@ -606,9 +677,9 @@ export function getSystemConfigurationSnapshot(): SystemConfigurationSnapshot {
     environment: getNodeEnv(),
     coreReadyWithMinimalConfig: true,
     summary: {
-      totalDocumentedOrReferencedVariables: 44,
+      totalDocumentedOrReferencedVariables: 46,
       requiredCoreCount: 1,
-      optionalCount: 9,
+      optionalCount: 11,
       featureDependentCount: 27,
       unusedCount: 4,
       duplicateCount: 3,

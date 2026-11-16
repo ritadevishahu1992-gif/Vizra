@@ -154,7 +154,36 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
       return;
     }
 
-    // Default fallback for other file formats
+    // 4. Audio handling: Read as Data URL for Gemini audio multimodal analysis
+    if (isAudio) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        onAddAttachment({
+          id: Date.now().toString(),
+          name: file.name,
+          type: 'audio',
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          previewUrl: dataUrl,
+        });
+      };
+      reader.onerror = () => {
+        console.error('Failed to read audio file');
+      };
+      reader.readAsDataURL(file);
+      onClose();
+      return;
+    }
+
+    // 5. Reject binary video files honestly until server video ingestion is enabled
+    if (isVideo) {
+      setComingSoonNotice(
+        `Video "${file.name}" cannot be analyzed in chat attachments yet. Upload frames (PNG/JPG), audio, or transcripts.`
+      );
+      return;
+    }
+
+    // Default fallback for other readable document formats
     const attachment: Attachment = {
       id: Date.now().toString(),
       name: file.name,
