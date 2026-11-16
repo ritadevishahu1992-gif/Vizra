@@ -23,7 +23,7 @@ export const INITIAL_INTEGRATIONS: Integration[] = [
     status: 'coming_soon',
     scopeRequired: 'https://www.googleapis.com/auth/drive.readonly',
     configured: false,
-    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID'],
+    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID', 'OAUTH_GOOGLE_CLIENT_SECRET'],
     isGoogleWorkspace1P: true,
   },
   {
@@ -35,7 +35,7 @@ export const INITIAL_INTEGRATIONS: Integration[] = [
     status: 'coming_soon',
     scopeRequired: 'https://www.googleapis.com/auth/documents.readonly',
     configured: false,
-    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID'],
+    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID', 'OAUTH_GOOGLE_CLIENT_SECRET'],
     isGoogleWorkspace1P: true,
   },
   {
@@ -47,7 +47,7 @@ export const INITIAL_INTEGRATIONS: Integration[] = [
     status: 'coming_soon',
     scopeRequired: 'https://www.googleapis.com/auth/spreadsheets.readonly',
     configured: false,
-    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID'],
+    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID', 'OAUTH_GOOGLE_CLIENT_SECRET'],
     isGoogleWorkspace1P: true,
   },
   {
@@ -107,7 +107,7 @@ export const INITIAL_INTEGRATIONS: Integration[] = [
     status: 'coming_soon',
     scopeRequired: 'https://www.googleapis.com/auth/youtube.readonly',
     configured: false,
-    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID'],
+    requiredEnvVars: ['OAUTH_GOOGLE_CLIENT_ID', 'OAUTH_GOOGLE_CLIENT_SECRET'],
     isGoogleWorkspace1P: true,
   },
 ];

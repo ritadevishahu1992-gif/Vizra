@@ -26,6 +26,7 @@ import {
   getAdminNotificationEmail,
 } from '../../lib/email';
 import { maskIpAddress } from '../security';
+import { getAppUrl } from '../config/envConfig';
 
 export interface LoginNotificationRequest {
   uid: string;
@@ -217,7 +218,7 @@ export async function processLoginNotifications(
   const loginTime = dateObj.toUTCString();
   const timezone = 'UTC';
 
-  const appBaseUrl = process.env.APP_URL || 'https://vizra.vercel.app';
+  const appBaseUrl = getAppUrl();
   const securityUrl = `${appBaseUrl}/settings`;
   const adminDashboardUrl = `${appBaseUrl}/api/metrics`;
 

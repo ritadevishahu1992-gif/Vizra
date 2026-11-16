@@ -7,8 +7,7 @@
  */
 
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
+import { getFirebaseProjectId, isProductionEnv } from './config/envConfig';
 
 interface GooglePublicKeys {
   [kid: string]: string;
@@ -17,17 +16,8 @@ interface GooglePublicKeys {
 let cachedKeys: GooglePublicKeys | null = null;
 let cachedKeysExpiry = 0;
 
-function getFirebaseProjectId(): string {
-  try {
-    const configPath = path.resolve('firebase-applet-config.json');
-    if (fs.existsSync(configPath)) {
-      const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      if (cfg.projectId) return cfg.projectId;
-    }
-  } catch {
-    // fallback
-  }
-  return process.env.VITE_FIREBASE_PROJECT_ID || 'nice-dolphin-n7c1c';
+function resolveFirebaseProjectId(): string {
+  return getFirebaseProjectId().projectId;
 }
 
 /**
@@ -105,7 +95,7 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       return { valid: false, error: `Invalid algorithm: ${header.alg}. Expected RS256.` };
     }
 
-    const projectId = getFirebaseProjectId();
+    const projectId = resolveFirebaseProjectId();
     const nowSec = Math.floor(Date.now() / 1000);
 
     // 1. Check expiration and issued-at time
@@ -152,7 +142,7 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       }
     } else {
       // If Google public certificates are loaded, any unknown or missing kid is a forged token and must be rejected in ALL environments.
-      if (Object.keys(googleKeys).length > 0 || process.env.NODE_ENV === 'production') {
+      if (Object.keys(googleKeys).length > 0 || isProductionEnv()) {
         return {
           valid: false,
           error: `Public key kid '${header.kid || 'none'}' not recognized by Google certificate authority`,

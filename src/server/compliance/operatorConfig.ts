@@ -1,5 +1,6 @@
 import express from 'express';
 import { generalApiRateLimiter } from '../security';
+import { getOperatorLegalConfig, getCisionConfig } from '../config/envConfig';
 
 export interface OperatorFieldStatus {
   envVar: string;
@@ -24,59 +25,42 @@ export interface ComplianceReadinessSnapshot {
   evaluatedAt: string;
 }
 
-function isRealEnvValue(val: string | undefined, placeholders: string[] = []): boolean {
-  if (!val || typeof val !== 'string') return false;
-  const trimmed = val.trim();
-  if (!trimmed) return false;
-  return !placeholders.includes(trimmed.toLowerCase());
-}
-
 /**
  * Evaluates REC-13 operator legal identity readiness (legal entity name, registered
  * address, DPO contact, governing law) and external PR/media dependency status (Cision)
  * without fabricating corporate credentials or API keys.
  */
 export function getComplianceReadinessSnapshot(): ComplianceReadinessSnapshot {
+  const legal = getOperatorLegalConfig();
   const legalFields: OperatorFieldStatus[] = [
     {
       envVar: 'VITE_LEGAL_ENTITY_NAME',
       label: 'Registered Legal Entity Name',
-      configured: isRealEnvValue(process.env.VITE_LEGAL_ENTITY_NAME),
-      valuePreview: isRealEnvValue(process.env.VITE_LEGAL_ENTITY_NAME)
-        ? String(process.env.VITE_LEGAL_ENTITY_NAME).trim()
-        : '[PENDING_COUNSEL_SIGN_OFF]',
+      configured: Boolean(legal.entityName),
+      valuePreview: legal.entityName || '[PENDING_COUNSEL_SIGN_OFF]',
     },
     {
       envVar: 'VITE_LEGAL_REGISTERED_ADDRESS',
       label: 'Registered Principal Office Address',
-      configured: isRealEnvValue(process.env.VITE_LEGAL_REGISTERED_ADDRESS),
-      valuePreview: isRealEnvValue(process.env.VITE_LEGAL_REGISTERED_ADDRESS)
-        ? String(process.env.VITE_LEGAL_REGISTERED_ADDRESS).trim()
-        : '[PENDING_COUNSEL_SIGN_OFF]',
+      configured: Boolean(legal.registeredAddress),
+      valuePreview: legal.registeredAddress || '[PENDING_COUNSEL_SIGN_OFF]',
     },
     {
       envVar: 'VITE_DPO_EMAIL',
       label: 'Designated Privacy / DPO Contact Email',
-      configured: isRealEnvValue(process.env.VITE_DPO_EMAIL),
-      valuePreview: isRealEnvValue(process.env.VITE_DPO_EMAIL)
-        ? String(process.env.VITE_DPO_EMAIL).trim()
-        : '[PENDING_COUNSEL_SIGN_OFF]',
+      configured: Boolean(legal.dpoEmail),
+      valuePreview: legal.dpoEmail || '[PENDING_COUNSEL_SIGN_OFF]',
     },
     {
       envVar: 'VITE_GOVERNING_LAW',
       label: 'Governing Law & Dispute Jurisdiction',
-      configured: isRealEnvValue(process.env.VITE_GOVERNING_LAW),
-      valuePreview: isRealEnvValue(process.env.VITE_GOVERNING_LAW)
-        ? String(process.env.VITE_GOVERNING_LAW).trim()
-        : '[PENDING_COUNSEL_SIGN_OFF]',
+      configured: Boolean(legal.governingLaw),
+      valuePreview: legal.governingLaw || '[PENDING_COUNSEL_SIGN_OFF]',
     },
   ];
 
   const missingLegalFields = legalFields.filter((f) => !f.configured).map((f) => f.envVar);
-
-  const cisionConfigured =
-    isRealEnvValue(process.env.CISION_API_KEY, ['your_cision_api_key', 'placeholder']) &&
-    isRealEnvValue(process.env.CISION_CLIENT_SECRET, ['your_cision_client_secret', 'placeholder']);
+  const cisionConfigured = getCisionConfig().configured;
 
   const cisionDependency: ExternalDependencyStatus = {
     dependency: 'Cision / PR Wire External API & Compliance Decision',

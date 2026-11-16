@@ -3,6 +3,13 @@ import rateLimit from 'express-rate-limit';
 import dns from 'dns';
 import crypto from 'crypto';
 import { verifyFirebaseIdToken } from './authVerification';
+import {
+  getConfiguredAdminKey,
+  getAdminAllowlistEmails,
+  getCronSecret,
+  getSessionHashSecret,
+  isProductionEnv,
+} from './config/envConfig';
 
 // ============================================================================
 // 1. SSRF PROTECTION FOR EXTERNAL URLS & IMAGES
@@ -333,30 +340,20 @@ export function safeCompare(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-const EPHEMERAL_SESSION_SALT = crypto.randomBytes(32).toString('hex');
-
-/**
- * Derives a non-reversible privacy-preserving HMAC hash for user/session correlation
- * in audit logs and safety reports without storing raw UIDs, emails, or IPs.
- */
 export function derivePrivacySessionHash(rawIdentifier: string): string {
   const clean = (rawIdentifier || 'anonymous').trim();
-  const secret = process.env.SESSION_HASH_SECRET || EPHEMERAL_SESSION_SALT;
+  const { secret } = getSessionHashSecret();
   return crypto.createHmac('sha256', secret).update(clean).digest('hex').slice(0, 24);
 }
 
 /**
  * Protects administrative endpoints (/api/omnia/train, /api/omnia/knowledge POST,
  * /api/omnia/feedback GET/PATCH, /api/safety/reports GET/PATCH, /api/metrics).
- * Fails closed on missing credentials. Accepts configured ADMIN_API_KEY / WORKFLOW_SECRET
+ * Fails closed on missing credentials. Accepts configured ADMIN_API_KEY
  * OR cryptographically verified Firebase ID token matching ADMIN_ALLOWLIST_EMAILS.
  */
 export async function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
-  const hasConfiguredAdminKey =
-    Boolean(configuredAdminKey) &&
-    configuredAdminKey !== 'your_admin_api_key' &&
-    configuredAdminKey !== 'your_workflow_secret';
+  const { key: configuredAdminKey } = getConfiguredAdminKey();
 
   const authHeader = req.headers.authorization;
   const xAdminKey = req.headers['x-admin-key'];
@@ -379,7 +376,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
   }
 
   // 1. Accept configured server Admin API Key via constant-time comparison
-  if (hasConfiguredAdminKey && configuredAdminKey && safeCompare(token, configuredAdminKey)) {
+  if (configuredAdminKey && safeCompare(token, configuredAdminKey)) {
     (req as any).adminActor = 'admin_api_key';
     next();
     return;
@@ -396,14 +393,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
   }
 
   if (authResult.valid) {
-    const rawAllowlist =
-      process.env.ADMIN_ALLOWLIST_EMAILS ||
-      process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL ||
-      '';
-    const allowedEmails = rawAllowlist
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    const allowedEmails = getAdminAllowlistEmails();
     const userEmail = (authResult.email || '').trim().toLowerCase();
 
     if (
@@ -439,10 +429,10 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
  * Protects scheduled Vercel Cron endpoints (/api/cron/omnia-sync).
  */
 export function cronAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const configuredCronSecret = process.env.CRON_SECRET;
+  const configuredCronSecret = getCronSecret();
 
-  if (!configuredCronSecret || configuredCronSecret === 'your_vercel_cron_secret') {
-    if (process.env.NODE_ENV === 'production') {
+  if (!configuredCronSecret) {
+    if (isProductionEnv()) {
       res.status(503).json({
         error: {
           code: 'CRON_SECRET_NOT_CONFIGURED',

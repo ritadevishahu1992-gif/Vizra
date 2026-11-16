@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import type { Express, Request, Response } from 'express';
 import { SlidingWindowRateLimiter } from '../security';
+import { getGoogleSheetsConsentConfig } from '../config/envConfig';
 
 export const CURRENT_CONSENT_VERSION = '1.0';
 export const CURRENT_POLICY_VERSION = '2026-11';
@@ -147,31 +148,8 @@ export function isGoogleSheetsConsentConfigured(): {
   configured: boolean;
   mode: 'service_account' | 'webhook' | 'none';
 } {
-  const webhookUrl = process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL;
-  if (
-    webhookUrl &&
-    webhookUrl !== 'your_google_sheets_webhook_url' &&
-    webhookUrl.startsWith('https://')
-  ) {
-    return { configured: true, mode: 'webhook' };
-  }
-
-  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-  if (
-    spreadsheetId &&
-    spreadsheetId !== 'your_spreadsheet_id' &&
-    clientEmail &&
-    clientEmail !== 'your_service_account_email' &&
-    privateKey &&
-    privateKey.includes('BEGIN PRIVATE KEY')
-  ) {
-    return { configured: true, mode: 'service_account' };
-  }
-
-  return { configured: false, mode: 'none' };
+  const cfg = getGoogleSheetsConsentConfig();
+  return { configured: cfg.configured, mode: cfg.mode };
 }
 
 /**
@@ -250,7 +228,7 @@ export async function exportConsentEventToGoogleSheets(
   event: ConsentAuditEvent,
   customFetcher?: typeof fetch
 ): Promise<'synced' | 'skipped_unconfigured' | 'failed_gracefully'> {
-  const config = isGoogleSheetsConsentConfigured();
+  const config = getGoogleSheetsConsentConfig();
   if (!config.configured) {
     return 'skipped_unconfigured';
   }
@@ -259,9 +237,9 @@ export async function exportConsentEventToGoogleSheets(
   const rowValues = formatConsentRowForSheets(event);
 
   try {
-    if (config.mode === 'webhook') {
-      const webhookUrl = process.env.GOOGLE_SHEETS_CONSENT_WEBHOOK_URL!;
-      const secret = process.env.GOOGLE_SHEETS_WEBHOOK_SECRET || '';
+    if (config.mode === 'webhook' && config.webhookUrl) {
+      const webhookUrl = config.webhookUrl;
+      const secret = config.webhookSecret || '';
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4500);
 
@@ -300,16 +278,19 @@ export async function exportConsentEventToGoogleSheets(
       }
     }
 
-    if (config.mode === 'service_account') {
-      const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID!;
-      const sheetRange = process.env.GOOGLE_SHEETS_RANGE || 'ConsentLogs!A:L';
-      const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!;
-      const privateKey = process.env.GOOGLE_PRIVATE_KEY!;
-
-      const accessToken = await getGoogleServiceAccountAccessToken(clientEmail, privateKey);
+    if (
+      config.mode === 'service_account' &&
+      config.spreadsheetId &&
+      config.clientEmail &&
+      config.privateKey
+    ) {
+      const accessToken = await getGoogleServiceAccountAccessToken(
+        config.clientEmail,
+        config.privateKey
+      );
       const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(
-        spreadsheetId
-      )}/values/${encodeURIComponent(sheetRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+        config.spreadsheetId
+      )}/values/${encodeURIComponent(config.sheetRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
       const res = await fetchImpl(endpoint, {
         method: 'POST',

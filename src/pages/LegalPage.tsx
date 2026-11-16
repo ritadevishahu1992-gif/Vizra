@@ -310,7 +310,7 @@ export const LegalPage: React.FC = () => {
                   <strong>Google Sheets API (Optional):</strong> When configured by the operator, receives anonymous consent audit rows (`consentId`, timestamp, boolean category flags, and policy version) containing zero PII.
                 </li>
                 <li>
-                  <strong>Transactional SMTP / Nodemailer (Optional):</strong> When configured via `EMAIL_USER` / `SMTP_HOST`, dispatches masked security login notification emails.
+                  <strong>Transactional Email via Resend (Optional):</strong> When configured via server-side `RESEND_API_KEY` (and optional `VIZRA_EMAIL_FROM`), dispatches masked security login notification emails. Otherwise runs locally in non-networked simulated mode.
                 </li>
               </ul>
             </div>

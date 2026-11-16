@@ -1,0 +1,23 @@
+{
+  "auth_user_sim_test_1700030000": {
+    "eventId": "viz_sec_mwiii0jt_594f55d6",
+    "idempotencyKey": "auth_user_sim_test_1700030000",
+    "uid": "user_sim_test",
+    "userEmail": "simulated_creator@vizra.ai",
+    "authTime": 1700030000,
+    "timestamp": "2026-11-16T00:15:09.641Z",
+    "userDelivery": {
+      "recipient": "simulated_creator@vizra.ai",
+      "status": "simulated",
+      "messageId": "sim_mwiii0jt_a499dc43",
+      "attempts": 1
+    },
+    "adminDelivery": {
+      "recipient": "security-admin@vizra.ai",
+      "status": "simulated",
+      "messageId": "sim_mwiii0jt_bc5e26a7",
+      "attempts": 1
+    },
+    "isDuplicate": false
+  }
+}

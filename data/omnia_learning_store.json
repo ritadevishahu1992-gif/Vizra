@@ -187,6 +187,44 @@
       "validationNotes": [
         "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
       ]
+    },
+    {
+      "sourceId": "src_corr_1794788077596",
+      "title": "Correction on: \"Contact my private email [REDACTED_E...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_a488e4d7ce10afcb",
+      "version": 1,
+      "createdAt": "2026-11-16T00:14:37.595Z",
+      "updatedAt": "2026-11-16T00:14:37.595Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "chunkCount": 1,
+      "tokenCount": 22,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]\""
+      ]
+    },
+    {
+      "sourceId": "src_corr_1794788087873",
+      "title": "Correction on: \"Verify correction quarantine [REDACT...\"",
+      "sourceType": "correction",
+      "contentHash": "hash_edade822ec6f8632",
+      "version": 1,
+      "createdAt": "2026-11-16T00:14:47.872Z",
+      "updatedAt": "2026-11-16T00:14:47.872Z",
+      "status": "PENDING",
+      "trustLevel": "user_correction",
+      "rawContent": "Safe factual update without email [REDACTED_EMAIL]",
+      "chunkCount": 1,
+      "tokenCount": 13,
+      "tier": "project",
+      "accessLevel": "private",
+      "validationNotes": [
+        "Awaiting admin review for prompt: \"Verify correction quarantine [REDACTED_PHONE]\""
+      ]
     }
   ],
   "concepts": [
@@ -501,6 +539,22 @@
   },
   "logs": [
     {
+      "id": "log_1794788087873",
+      "timestamp": "2026-11-16T00:14:47.872Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Verify correction quarantine [...\"",
+      "sourceId": "src_corr_1794788087873"
+    },
+    {
+      "id": "log_1794788077596",
+      "timestamp": "2026-11-16T00:14:37.595Z",
+      "level": "info",
+      "stage": "QUEUED",
+      "message": "User correction queued for admin review: \"Contact my private email [REDA...\"",
+      "sourceId": "src_corr_1794788077596"
+    },
+    {
       "id": "log_1794662607077",
       "timestamp": "2026-11-14T13:23:27.076Z",
       "level": "info",
@@ -557,6 +611,39 @@
     }
   ],
   "feedback": [
+    {
+      "id": "fb_1794788087872_1411",
+      "question": "Verify correction quarantine [REDACTED_PHONE]",
+      "answer": "Original answer",
+      "retrievedSources": [
+        {
+          "title": "Valid Reference",
+          "url": "https://example.org/spec",
+          "score": 92
+        },
+        {
+          "title": "XSS Link",
+          "score": 99
+        }
+      ],
+      "userFeedback": "CORRECTION",
+      "correction": "Safe factual update without email [REDACTED_EMAIL]",
+      "timestamp": "2026-11-16T00:14:47.872Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "e0e7622181045fa99e6235c1",
+      "sourceCreatedId": "src_corr_1794788087873"
+    },
+    {
+      "id": "fb_1794788077595_fp4o",
+      "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",
+      "answer": "Sample answer",
+      "userFeedback": "CORRECTION",
+      "correction": "Updated factual specification without my email [REDACTED_EMAIL] or +[REDACTED_PHONE].",
+      "timestamp": "2026-11-16T00:14:37.595Z",
+      "status": "PENDING_REVIEW",
+      "submittedByHash": "e0e7622181045fa99e6235c1",
+      "sourceCreatedId": "src_corr_1794788077596"
+    },
     {
       "id": "fb_1794662607076_43e6",
       "question": "Contact my private email [REDACTED_EMAIL] or +[REDACTED_PHONE]",

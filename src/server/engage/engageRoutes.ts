@@ -7,6 +7,11 @@ import {
 import { verifyFirebaseIdToken } from '../authVerification';
 import { resolveRequestAgePolicyContext } from '../compliance/ageAssurance';
 import {
+  getConfiguredAdminKey,
+  getAdminAllowlistEmails,
+  isProductionEnv,
+} from '../config/envConfig';
+import {
   getEngageConfig,
   updateEngageConfig,
   listEngageContent,
@@ -104,16 +109,8 @@ export async function engageAdminAuthMiddleware(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  const allowedAdminEmails = (
-    process.env.ADMIN_ALLOWLIST_EMAILS ||
-    process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL ||
-    process.env.VIZRA_ADMIN_NOTIFY_EMAIL ||
-    ''
-  )
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
+  const allowedAdminEmails = getAdminAllowlistEmails();
+  const { key: configuredAdminKey } = getConfiguredAdminKey();
 
   const xAdminKey =
     typeof req.headers['x-admin-key'] === 'string'
@@ -127,7 +124,6 @@ export async function engageAdminAuthMiddleware(
   // 1. Check X-Admin-Key or Bearer matching ADMIN_API_KEY
   if (
     configuredAdminKey &&
-    configuredAdminKey !== 'your_admin_api_key' &&
     ((xAdminKey && safeCompareStrings(xAdminKey, configuredAdminKey)) ||
       (bearerToken && safeCompareStrings(bearerToken, configuredAdminKey)))
   ) {
@@ -176,7 +172,7 @@ export async function engageAdminAuthMiddleware(
   }
 
   // 3. No credentials provided: reject in production
-  if (process.env.NODE_ENV === 'production') {
+  if (isProductionEnv()) {
     res.status(401).json({
       error: {
         code: 'ENGAGE_AUTH_REQUIRED',

@@ -8,6 +8,7 @@
 
 import { Resend } from 'resend';
 import crypto from 'crypto';
+import { getEmailConfig } from '../server/config/envConfig';
 
 export interface TransactionalEmailPayload {
   from?: string;
@@ -33,43 +34,28 @@ export interface TransactionalEmailResult {
  * Safely retrieves the Resend API key from server-side environment variables.
  */
 function getResendApiKey(): string | null {
-  if (typeof process === 'undefined' || !process.env) {
-    return null;
-  }
-  const key = process.env.RESEND_API_KEY?.trim();
-  if (!key || key === 're_placeholder_key' || key.length <= 5) {
-    return null;
-  }
-  return key;
+  return getEmailConfig().resendApiKey;
 }
 
 /**
  * Checks whether a live Resend API key is configured in the environment.
  */
 export function isEmailServiceConfigured(): boolean {
-  return getResendApiKey() !== null;
+  return getEmailConfig().configured;
 }
 
 /**
  * Safely retrieves the default sender address from server-side environment variables.
  */
 export function getDefaultSenderEmail(): string {
-  return process.env.VIZRA_EMAIL_FROM?.trim() || 'VIZRA Security <onboarding@resend.dev>';
+  return getEmailConfig().fromAddress;
 }
 
 /**
  * Safely retrieves the administrator security notification email from server-side environment variables.
  */
 export function getAdminNotificationEmail(): string {
-  const configured = process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL?.trim() || '';
-  if (configured && configured.includes('@')) {
-    return configured;
-  }
-  const allowlistFirst = (process.env.ADMIN_ALLOWLIST_EMAILS || '')
-    .split(',')
-    .map((e) => e.trim())
-    .find((e) => e.includes('@'));
-  return allowlistFirst || '';
+  return getEmailConfig().adminNotificationEmail;
 }
 
 /**

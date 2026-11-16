@@ -29,6 +29,7 @@ import {
   safeCompare,
 } from '../server/security';
 import { verifyFirebaseIdToken } from '../server/authVerification';
+import { getCronSecret } from '../server/config/envConfig';
 
 const ALLOWED_FEEDBACK_TYPES = new Set(['HELPFUL', 'NOT_HELPFUL', 'CORRECTION', 'REPORT']);
 
@@ -1091,9 +1092,9 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
   const handleCronSync = async (req: express.Request, res: express.Response) => {
     loadStoredData();
     const authHeader = req.headers.authorization || '';
-    const cronSecret = process.env.CRON_SECRET;
+    const cronSecret = getCronSecret();
 
-    if (cronSecret && cronSecret !== 'your_vercel_cron_secret') {
+    if (cronSecret) {
       const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
       if (!token || !safeCompare(token, cronSecret)) {
         res.status(401).json({ error: 'Unauthorized: Invalid cron secret' });

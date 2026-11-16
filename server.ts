@@ -81,6 +81,15 @@ import {
   ensurePublicOgImageExists,
   generateVizraOgImageBuffer,
 } from './src/server/seo/ogImageGenerator';
+import {
+  getPort,
+  getNodeEnv,
+  isProductionEnv,
+  getGeminiApiKey,
+  getConfiguredAdminKey,
+  getAdminAllowlistEmails,
+  getSystemConfigurationSnapshot,
+} from './src/server/config/envConfig';
 
 dotenv.config();
 
@@ -96,32 +105,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function validateServerEnvironment(): { valid: boolean; warnings: string[] } {
-  const warnings: string[] = [];
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim().length <= 5) {
-    warnings.push('GEMINI_API_KEY not configured. Falling back to local intelligence on client.');
-  } else {
-    // Redacted confirmation in logs
-    const masked = `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
-    console.log(`[Config] GEMINI_API_KEY detected (${masked}, length: ${apiKey.length})`);
+  const snapshot = getSystemConfigurationSnapshot();
+  if (snapshot.coreStatus.geminiApiConfigured) {
+    console.log('[Config] GEMINI_API_KEY configured (server-side proxy ready)');
   }
-
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey || resendKey === 're_placeholder_key') {
-    warnings.push('RESEND_API_KEY is unconfigured. Login notifications will operate in secure simulated sandbox mode.');
-  }
-
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || cronSecret === 'your_vercel_cron_secret') {
-    warnings.push('CRON_SECRET is unconfigured. Vercel cron endpoints require authentication in production.');
-  }
-
-  const adminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
-  if (!adminKey || adminKey === 'your_admin_api_key') {
-    warnings.push('ADMIN_API_KEY is unconfigured. Admin training endpoints require authentication in production.');
-  }
-
-  return { valid: true, warnings };
+  return { valid: true, warnings: snapshot.warnings };
 }
 
 async function startServer() {
@@ -131,7 +119,7 @@ async function startServer() {
   }
 
   const app = express();
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = getPort();
 
   // Trust first-hop reverse proxy (Vercel / Cloud Run) for accurate client IP rate limiting
   app.set('trust proxy', 1);
@@ -150,8 +138,8 @@ async function startServer() {
 
   // Server-side Gemini initialization
   let ai: GoogleGenAI | null = null;
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.trim().length > 5) {
+  const apiKey = getGeminiApiKey();
+  if (apiKey) {
     try {
       ai = new GoogleGenAI({
         apiKey,
@@ -1760,13 +1748,9 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       return;
     }
 
-    // 1. Accept configured Admin API key via constant-time comparison (no hardcoded fallback secret)
-    const configuredAdminKey = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
-    if (
-      configuredAdminKey &&
-      configuredAdminKey !== 'your_admin_api_key' &&
-      safeCompare(token, configuredAdminKey)
-    ) {
+    // 1. Accept configured Admin API key via constant-time comparison (placeholder values rejected)
+    const { key: configuredAdminKey } = getConfiguredAdminKey();
+    if (configuredAdminKey && safeCompare(token, configuredAdminKey)) {
       next();
       return;
     }
@@ -1774,14 +1758,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     // 2. Cryptographically verify Firebase ID Token and enforce Administrator Email RBAC
     const authResult = await verifyFirebaseIdToken(token);
     if (authResult.valid) {
-      const rawAllowlist =
-        process.env.ADMIN_ALLOWLIST_EMAILS ||
-        process.env.VIZRA_ADMIN_NOTIFICATION_EMAIL ||
-        '';
-      const allowedEmails = rawAllowlist
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
+      const allowedEmails = getAdminAllowlistEmails();
       const userEmail = (authResult.email || '').trim().toLowerCase();
 
       if (
@@ -2171,16 +2148,19 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     }
   });
 
-  // Health check endpoint with system metrics & environment status
+  // Health check endpoint with system metrics & zero-secret configuration status
   app.get('/api/health', (_req, res) => {
     const mem = process.memoryUsage();
+    const configSnapshot = getSystemConfigurationSnapshot();
     res.json({
       status: 'ok',
       service: 'Vizra AI Creative Studio',
       engine: 'Omnia 1.0',
       hasGemini: !!ai,
+      coreReadyWithMinimalConfig: configSnapshot.coreReadyWithMinimalConfig,
+      configSummary: configSnapshot.summary,
       uptimeSeconds: Math.floor(process.uptime()),
-      environment: process.env.NODE_ENV || 'development',
+      environment: getNodeEnv(),
       memory: {
         heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024),
         heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024),
@@ -2188,6 +2168,11 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       },
       timestamp: new Date().toISOString(),
     });
+  });
+
+  // Zero-secret environment configuration & optional integration readiness snapshot
+  app.get('/api/config/status', generalApiRateLimiter.getMiddleware(), (_req, res) => {
+    res.json(getSystemConfigurationSnapshot());
   });
 
   // Cryptographically verified user login notification & webhook endpoints
@@ -2608,12 +2593,12 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       });
       saveCreditLedgerStore();
     } else if (action === 'refill') {
-      const adminSecret = process.env.ADMIN_API_KEY || process.env.WORKFLOW_SECRET;
+      const { key: adminSecret } = getConfiguredAdminKey();
       const providedAdminKey = (req.headers['x-admin-api-key'] as string) || '';
       const isAuthorizedRefill =
         (adminSecret && providedAdminKey && safeCompare(providedAdminKey, adminSecret)) ||
         tenantKey.startsWith('uid:') ||
-        process.env.NODE_ENV !== 'production';
+        !isProductionEnv();
 
       if (!isAuthorizedRefill) {
         res.status(403).json({
@@ -3058,7 +3043,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           dataRetention: 'Retained until user initiates Delete Account & Cloud Data erasure',
         },
         {
-          provider: 'Transactional Email (Resend / Nodemailer SMTP, when configured)',
+          provider: 'Transactional Email (Resend SDK, optional via RESEND_API_KEY)',
           purpose: 'Security login alerts with masked IP (/24 or /48) and device summary',
           dataRetention: 'Idempotency hashes retained for 7 days to prevent duplicate alerts',
         },
@@ -3168,7 +3153,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
   });
 
   // In development, mount Vite's middleware with route-aware initial HTML metadata injection
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProductionEnv()) {
     const vite = await createViteServer({
       server: {
         middlewareMode: true,

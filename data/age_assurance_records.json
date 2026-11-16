@@ -1,5 +1,74 @@
 [
   {
+    "recordId": "vpc_mwiihjsa_3a85",
+    "subjectHash": "60346127278b44ac29dce82a",
+    "parentEmailHash": "933f721a3990bf4019887585",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:14:47.914Z",
+    "updatedAt": "2026-11-16T00:14:47.914Z"
+  },
+  {
+    "recordId": "age_mwiihjs7_775e",
+    "subjectHash": "c6899eaa8637edc79f0954da",
+    "bracket": "ADULT_18_PLUS",
+    "jurisdiction": "IN",
+    "digitalConsentAge": 18,
+    "applicableStatutes": [
+      "India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "NOT_REQUIRED",
+    "minorProtectionTier": "ADULT_STANDARD",
+    "recordedAt": "2026-11-16T00:14:47.911Z",
+    "updatedAt": "2026-11-16T00:14:47.911Z"
+  },
+  {
+    "recordId": "age_mwiihjs4_53cf",
+    "subjectHash": "c6899eaa8637edc79f0954da",
+    "bracket": "TEEN_13_17_PENDING_PARENTAL_CONSENT",
+    "jurisdiction": "EU",
+    "digitalConsentAge": 16,
+    "applicableStatutes": [
+      "EU GDPR Article 8"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "PENDING_VENDOR_VERIFICATION",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:14:47.908Z",
+    "updatedAt": "2026-11-16T00:14:47.908Z"
+  },
+  {
+    "recordId": "age_mwiihjs2_3c78",
+    "subjectHash": "c6899eaa8637edc79f0954da",
+    "bracket": "UNDER_13_BLOCKED",
+    "jurisdiction": "US",
+    "digitalConsentAge": 13,
+    "applicableStatutes": [
+      "US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)"
+    ],
+    "activePolicy": "STRICT_18_PLUS",
+    "option2ActiveAtEvaluation": false,
+    "parentalConsentVerified": false,
+    "consentStatus": "BLOCKED_BY_EXTERNAL_DEPENDENCY",
+    "minorProtectionTier": "BLOCKED",
+    "recordedAt": "2026-11-16T00:14:47.906Z",
+    "updatedAt": "2026-11-16T00:14:47.906Z"
+  },
+  {
     "recordId": "age_mwgeis56",
     "subjectHash": "c405a8bd45926011d8c29822",
     "bracket": "ADULT_18_PLUS",

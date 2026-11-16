@@ -10,7 +10,7 @@
     "maxSponsoredRatio": 0.35,
     "defaultDisclosureText": "Independent placement via VIZRA Engage. Does not influence Omnia 1.0 answers or citations.",
     "respectReducedMotion": true,
-    "updatedAt": 1793545246663,
+    "updatedAt": 1794788112909,
     "updatedBy": "admin@vizra.ai"
   },
   "partners": [
@@ -436,6 +436,19 @@
       "renderLatencyMs": 11,
       "revenueDeltaUsd": 0,
       "timestamp": 1793545246638
+    },
+    {
+      "id": "ev-1794788112878-jcsd8",
+      "eventType": "impression",
+      "contentId": "eng-vis-neural-synthesis",
+      "contentType": "visualization",
+      "category": "AI Architecture",
+      "sessionHash": "dedupe-session-99",
+      "mode": "quick",
+      "lifecycleState": "generating",
+      "renderLatencyMs": 11,
+      "revenueDeltaUsd": 0,
+      "timestamp": 1794788112878
     }
   ],
   "auditLog": [
@@ -789,6 +802,78 @@
       "targetId": "global",
       "summary": "Updated VIZRA Engage global settings",
       "timestamp": 1793545246663
+    },
+    {
+      "id": "aud-1794788112551-lhzw",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1794788112551
+    },
+    {
+      "id": "aud-1794788112581-cxzh",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1794788112581-hpdiu",
+      "summary": "Created content \"Expired Promo Card\" [knowledge_card]",
+      "timestamp": 1794788112581
+    },
+    {
+      "id": "aud-1794788112582-dtkt",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1794788112581-hpdiu",
+      "summary": "Deleted content \"Expired Promo Card\"",
+      "timestamp": 1794788112583
+    },
+    {
+      "id": "aud-1794788112583-q3id",
+      "actor": "admin@vizra.ai",
+      "action": "CREATE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1794788112583-icwtm",
+      "summary": "Created content \"Pending Governance Item\" [creative_tip]",
+      "timestamp": 1794788112583
+    },
+    {
+      "id": "aud-1794788112584-jykb",
+      "actor": "security-admin@vizra.ai",
+      "action": "CONTENT_APPROVED",
+      "targetType": "content",
+      "targetId": "eng-1794788112583-icwtm",
+      "summary": "Set approval status of \"Pending Governance Item\" to approved",
+      "timestamp": 1794788112585
+    },
+    {
+      "id": "aud-1794788112586-yelu",
+      "actor": "admin@vizra.ai",
+      "action": "DELETE_CONTENT",
+      "targetType": "content",
+      "targetId": "eng-1794788112583-icwtm",
+      "summary": "Deleted content \"Pending Governance Item\"",
+      "timestamp": 1794788112586
+    },
+    {
+      "id": "aud-1794788112909-9hnp",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1794788112909
+    },
+    {
+      "id": "aud-1794788112909-dqaa",
+      "actor": "admin@vizra.ai",
+      "action": "UPDATE_GLOBAL_CONFIG",
+      "targetType": "config",
+      "targetId": "global",
+      "summary": "Updated VIZRA Engage global settings",
+      "timestamp": 1794788112909
     }
   ]
 }

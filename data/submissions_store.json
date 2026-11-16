@@ -1,6 +1,14 @@
 {
   "contacts": [
     {
+      "id": "cnt_mwiihc13_sk30",
+      "name": "Verification Tester",
+      "email": "tester@vizra.ai",
+      "topic": "Security Inquiry",
+      "message": "Testing real backend contact form submission persistence.",
+      "createdAt": "2026-11-16T00:14:37.863Z"
+    },
+    {
       "id": "cnt_mwgfs2ei_4h24",
       "name": "Verification Tester",
       "email": "tester@vizra.ai",
@@ -27,6 +35,12 @@
   ],
   "earlyAccess": [
     {
+      "id": "ea_mwiihc17_vox2",
+      "email": "earlybird_1794788077864@vizra.ai",
+      "interest": "Omnia Studio",
+      "createdAt": "2026-11-16T00:14:37.867Z"
+    },
+    {
       "id": "ea_mwgfs2ek_839b",
       "email": "earlybird_1794662607403@vizra.ai",
       "interest": "Omnia Studio",
@@ -46,6 +60,28 @@
     }
   ],
   "safetyReports": [
+    {
+      "id": "saf_mwiihjro_mg1x",
+      "messageId": "msg_safety_check_1",
+      "category": "hallucination_or_misinfo",
+      "reason": "Inaccurate medical or legal claim",
+      "details": "Exposed [REDACTED_EMAIL] or [REDACTED_PHONE] inside draft output.",
+      "modelId": "omnia-1.0",
+      "sessionHash": "e0e7622181045fa99e6235c1",
+      "createdAt": "2026-11-16T00:14:47.892Z",
+      "status": "open"
+    },
+    {
+      "id": "saf_mwiihc1a_3sli",
+      "messageId": "msg_test_101",
+      "category": "hallucination_or_misinfo",
+      "reason": "hallucination_or_misinfo",
+      "details": "Sample user-reported AI safety incident from MessageActions.",
+      "modelId": "omnia-1.0",
+      "sessionHash": "e0e7622181045fa99e6235c1",
+      "createdAt": "2026-11-16T00:14:37.870Z",
+      "status": "open"
+    },
     {
       "id": "saf_mwgfs2eo_72mr",
       "messageId": "msg_test_101",

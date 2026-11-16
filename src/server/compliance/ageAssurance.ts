@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { HarmCategory, HarmBlockThreshold } from '@google/genai';
 import { generalApiRateLimiter, derivePrivacySessionHash, safeCompare } from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
+import { getParentalConsentConfig } from '../config/envConfig';
 
 /**
  * Policy governance flags.
@@ -1199,8 +1200,8 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     '/api/compliance/age-assurance/parental-consent/callback',
     generalApiRateLimiter.getMiddleware(),
     (req, res) => {
-      const webhookSecret = process.env.PARENTAL_CONSENT_WEBHOOK_SECRET;
-      if (!webhookSecret || webhookSecret.trim().length < 16) {
+      const { webhookSecret } = getParentalConsentConfig();
+      if (!webhookSecret) {
         res.status(424).json({
           error: {
             code: 'PARENTAL_VERIFICATION_VENDOR_NOT_CONFIGURED',

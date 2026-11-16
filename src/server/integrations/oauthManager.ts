@@ -5,6 +5,11 @@ import path from 'path';
 import { verifyFirebaseIdToken } from '../authVerification';
 import { generalApiRateLimiter, feedbackRateLimiter } from '../security';
 import { enforceFeatureAccessForRequest } from '../compliance/ageAssurance';
+import {
+  getIntegrationVaultSecret,
+  getOAuthCredentialsForEnv,
+  getAppUrl,
+} from '../config/envConfig';
 
 export interface WorkspaceProviderSpec {
   id:
@@ -159,15 +164,11 @@ interface PendingOAuthState {
 }
 
 const VAULT_FILE = path.resolve(process.cwd(), 'data', 'integrations_vault.json');
-const EPHEMERAL_VAULT_KEY = crypto.randomBytes(32);
 const pendingOAuthStates = new Map<string, PendingOAuthState>();
 
 function deriveVaultKey(): Buffer {
-  const configuredSecret = process.env.INTEGRATION_TOKEN_SECRET;
-  if (configuredSecret && configuredSecret.trim().length >= 16) {
-    return crypto.scryptSync(configuredSecret.trim(), 'vizra-oauth-vault-v1', 32);
-  }
-  return EPHEMERAL_VAULT_KEY;
+  const { secret } = getIntegrationVaultSecret();
+  return crypto.scryptSync(secret, 'vizra-oauth-vault-v1', 32);
 }
 
 export function encryptTokenPayload(payload: {
@@ -236,20 +237,11 @@ function saveVault(records: EncryptedTokenRecord[]): void {
 }
 
 export function isProviderConfigured(spec: WorkspaceProviderSpec): boolean {
-  const cid = process.env[spec.clientIdEnv];
-  const csec = process.env[spec.clientSecretEnv];
-  if (!cid || !cid.trim() || cid.includes('your_') || cid.includes('MY_')) return false;
-  if (!spec.isGoogleWorkspace1P && (!csec || !csec.trim() || csec.includes('your_'))) {
-    return false;
-  }
-  return true;
+  return getOAuthCredentialsForEnv(spec.clientIdEnv, spec.clientSecretEnv).configured;
 }
 
 function resolveCallbackUrl(providerId: string, req: express.Request): string {
-  const baseUrl =
-    process.env.APP_URL && !process.env.APP_URL.includes('MY_APP_URL')
-      ? process.env.APP_URL.replace(/\/+$/, '')
-      : `${req.protocol}://${req.get('host') || 'localhost:3000'}`;
+  const baseUrl = getAppUrl(req.protocol, req.get('host') || 'localhost:3000');
   return `${baseUrl}/api/integrations/${providerId}/callback`;
 }
 
@@ -285,9 +277,7 @@ export function setupIntegrationsRoutes(app: express.Application): void {
         configured,
         isGoogleWorkspace1P: spec.isGoogleWorkspace1P,
         scopes: spec.scopes,
-        requiredEnvVars: spec.isGoogleWorkspace1P
-          ? [spec.clientIdEnv]
-          : [spec.clientIdEnv, spec.clientSecretEnv],
+        requiredEnvVars: [spec.clientIdEnv, spec.clientSecretEnv],
         status: userRecord
           ? ('connected' as const)
           : configured
@@ -347,15 +337,14 @@ export function setupIntegrationsRoutes(app: express.Application): void {
           configured: false,
           error: {
             code: 'PROVIDER_CREDENTIALS_MISSING',
-            message: `${spec.name} requires external OAuth app approval and configured client credentials (${spec.clientIdEnv}${spec.isGoogleWorkspace1P ? '' : `, ${spec.clientSecretEnv}`}).`,
-            requiredEnvVars: spec.isGoogleWorkspace1P
-              ? [spec.clientIdEnv]
-              : [spec.clientIdEnv, spec.clientSecretEnv],
+            message: `${spec.name} requires external OAuth app approval and configured client credentials (${spec.clientIdEnv}, ${spec.clientSecretEnv}).`,
+            requiredEnvVars: [spec.clientIdEnv, spec.clientSecretEnv],
           },
         });
         return;
       }
 
+      const oauthCreds = getOAuthCredentialsForEnv(spec.clientIdEnv, spec.clientSecretEnv);
       const state = crypto.randomBytes(24).toString('hex');
       pendingOAuthStates.set(state, {
         state,
@@ -366,7 +355,7 @@ export function setupIntegrationsRoutes(app: express.Application): void {
 
       const redirectUri = resolveCallbackUrl(spec.id, req);
       const params = new URLSearchParams({
-        client_id: process.env[spec.clientIdEnv] || '',
+        client_id: oauthCreds.clientId,
         redirect_uri: redirectUri,
         response_type: 'code',
         scope: spec.scopes.join(' '),
@@ -429,13 +418,14 @@ export function setupIntegrationsRoutes(app: express.Application): void {
       }
 
       try {
+        const oauthCreds = getOAuthCredentialsForEnv(spec.clientIdEnv, spec.clientSecretEnv);
         const redirectUri = resolveCallbackUrl(spec.id, req);
         const bodyParams = new URLSearchParams({
           grant_type: 'authorization_code',
           code: code.trim(),
           redirect_uri: redirectUri,
-          client_id: process.env[spec.clientIdEnv] || '',
-          client_secret: process.env[spec.clientSecretEnv] || '',
+          client_id: oauthCreds.clientId,
+          client_secret: oauthCreds.clientSecret,
         });
 
         const tokenRes = await fetch(spec.tokenUrl, {
