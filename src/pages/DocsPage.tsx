@@ -27,7 +27,7 @@ import {
   DocsMobileDrawer,
   StatusLabel,
 } from '../components/docs/DocsLayoutPrimitives';
-import { StickyDocsSidebar } from '../components/docs/StickyDocsSidebar';
+import { DocsSidebar } from '../components/docs/DocsSidebar';
 import { DocsDiagramFigure } from '../components/docs/DocsDiagrams';
 
 export const DocsPage: React.FC = () => {
@@ -225,15 +225,14 @@ export const DocsPage: React.FC = () => {
       <section className="py-10 md:py-14 px-5 sm:px-8 lg:px-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Desktop Sticky Sidebar */}
-          <aside className="hidden lg:block lg:col-span-3 sticky top-24">
-            <StickyDocsSidebar
-              activeSlug={activeArticle?.slug || null}
-              activeSectionFilter={requestedSectionLetter}
-              onSelectHome={handleSelectHome}
-              onSelectArticle={handleSelectArticle}
-              onJumpToSection={handleJumpToSection}
-            />
-          </aside>
+          <DocsSidebar
+            className="hidden lg:block lg:col-span-3"
+            activeSlug={activeArticle?.slug || null}
+            activeSectionFilter={requestedSectionLetter}
+            onSelectHome={handleSelectHome}
+            onSelectArticle={handleSelectArticle}
+            onJumpToSection={handleJumpToSection}
+          />
 
           {/* Main Content Area */}
           <div className="lg:col-span-9 space-y-8">

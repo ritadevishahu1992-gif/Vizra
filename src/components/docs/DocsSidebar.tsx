@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import {
   DocArticle,
-  DocSectionGroup,
   DocSectionGroupId,
 } from '../../data/publicDocs/types';
 import {
@@ -21,24 +20,24 @@ import {
   getArticlesBySection,
 } from '../../data/publicDocs';
 
-export interface StickyDocsSidebarProps {
+export interface DocsSidebarProps {
   activeSlug: string | null;
   activeSectionFilter?: DocSectionGroupId | null;
   onSelectHome: () => void;
   onSelectArticle: (slug: string) => void;
   onJumpToSection?: (sectionId: DocSectionGroupId) => void;
+  variant?: 'sticky' | 'drawer';
   className?: string;
-  isDrawer?: boolean;
 }
 
-export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
+export const DocsSidebar: React.FC<DocsSidebarProps> = ({
   activeSlug,
   activeSectionFilter = null,
   onSelectHome,
   onSelectArticle,
   onJumpToSection,
+  variant = 'sticky',
   className = '',
-  isDrawer = false,
 }) => {
   const [sidebarQuery, setSidebarQuery] = useState('');
   const [openSections, setOpenSections] = useState<
@@ -67,7 +66,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
     return match ? match.sectionId : null;
   }, [activeSlug, activeSectionFilter]);
 
-  // Expand the section matching the currently viewed article and keep it visible inside the sticky scroll container
+  // Expand the section matching the currently viewed article
   useEffect(() => {
     if (!activeArticleSection) return;
     setOpenSections((prev) =>
@@ -77,6 +76,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
     );
   }, [activeArticleSection]);
 
+  // Keep active article visible inside the sticky scroll region
   useEffect(() => {
     if (!activeSlug || !activeItemRef.current) return;
     if (typeof activeItemRef.current.scrollIntoView === 'function') {
@@ -89,8 +89,8 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
 
   const normalizedQuery = sidebarQuery.trim().toLowerCase();
 
-  // Compute filtered articles per section while preserving 8-section A-H structure
-  const filteredGroups = useMemo(() => {
+  // Map the 8 documentation sections (A-H) and their matching articles
+  const mappedSections = useMemo(() => {
     return DOC_SECTION_GROUPS.map((group) => {
       const allGroupArticles = getArticlesBySection(group.id);
       const matchingArticles = !normalizedQuery
@@ -113,8 +113,8 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
   }, [normalizedQuery]);
 
   const totalMatchingArticles = useMemo(
-    () => filteredGroups.reduce((acc, item) => acc + item.articles.length, 0),
-    [filteredGroups]
+    () => mappedSections.reduce((acc, item) => acc + item.articles.length, 0),
+    [mappedSections]
   );
 
   const allExpanded = useMemo(
@@ -144,7 +144,6 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
     setSidebarQuery('');
     setOpenSections((prev) => ({ ...prev, [sectionId]: true }));
 
-    // Scroll section header into view inside the sidebar scroll region
     window.setTimeout(() => {
       const targetEl = sectionRefs.current[sectionId];
       if (targetEl && typeof targetEl.scrollIntoView === 'function') {
@@ -157,18 +156,16 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
     }
   };
 
-  const containerShellClasses = isDrawer
-    ? 'flex flex-col h-full bg-neutral-50 dark:bg-[#090909]'
-    : 'flex flex-col max-h-[calc(100vh-7.5rem)] rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] overflow-hidden';
+  const isStickyVariant = variant === 'sticky';
 
-  return (
-    <nav
-      aria-label="Documentation Sections A–H"
-      className={`${containerShellClasses} ${className}`}
-    >
-      {/* Fixed Header Inside Sticky Sidebar: Home, A-H Jump Strip, Filter Input & Controls */}
+  const navClasses = isStickyVariant
+    ? 'flex flex-col max-h-[calc(100vh-7.5rem)] rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] overflow-hidden'
+    : 'flex flex-col h-full bg-neutral-50 dark:bg-[#090909]';
+
+  const navContent = (
+    <nav aria-label="Documentation Sections A–H" className={navClasses}>
+      {/* Fixed Header: Home Link, A-H Section Quick Jump, Filter Input & Expand/Collapse */}
       <div className="p-3.5 border-b border-neutral-200 dark:border-white/[0.08] space-y-3 shrink-0 bg-white dark:bg-[#111111]">
-        {/* Primary Home Entry */}
         <button
           type="button"
           onClick={onSelectHome}
@@ -190,7 +187,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
         {/* 8-Section Quick Jump Bar (A - H) */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 uppercase tracking-wider px-0.5">
-            <span>Jump Section</span>
+            <span>Sections A–H</span>
             <button
               type="button"
               onClick={handleToggleAll}
@@ -273,7 +270,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
         </div>
       </div>
 
-      {/* Scrollable Section & Article List */}
+      {/* Scrollable Vertical 8-Section Navigation Menu */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto divide-y divide-neutral-200 dark:divide-white/[0.06]"
@@ -292,7 +289,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
             </button>
           </div>
         ) : (
-          filteredGroups.map(({ group, totalCount, articles }) => {
+          mappedSections.map(({ group, totalCount, articles }) => {
             if (normalizedQuery && articles.length === 0) return null;
 
             const isOpen = Boolean(normalizedQuery) || openSections[group.id];
@@ -400,7 +397,7 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
         )}
       </div>
 
-      {/* Pinned Utility Footer Inside Sticky Sidebar */}
+      {/* Pinned Utility Links */}
       <div className="p-3 border-t border-neutral-200 dark:border-white/[0.08] bg-neutral-50/90 dark:bg-[#0D0D0D] space-y-1.5 shrink-0">
         <Link
           to="/contact"
@@ -419,4 +416,17 @@ export const StickyDocsSidebar: React.FC<StickyDocsSidebarProps> = ({
       </div>
     </nav>
   );
+
+  if (isStickyVariant) {
+    return (
+      <aside
+        aria-label="Sticky documentation navigation sidebar"
+        className={`sticky top-24 ${className}`}
+      >
+        {navContent}
+      </aside>
+    );
+  }
+
+  return navContent;
 };

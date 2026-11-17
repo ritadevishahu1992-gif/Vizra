@@ -18,9 +18,9 @@ import {
   FeatureAvailabilityStatus,
 } from '../../data/publicDocs/types';
 import { DocsDiagramFigure } from './DocsDiagrams';
-import { StickyDocsSidebar } from './StickyDocsSidebar';
+import { DocsSidebar } from './DocsSidebar';
 
-export { StickyDocsSidebar as DocsSidebarNav };
+export { DocsSidebar, DocsSidebar as DocsSidebarNav };
 
 export const StatusLabel: React.FC<{ status: FeatureAvailabilityStatus }> = ({
   status,
@@ -107,8 +107,8 @@ export const DocsMobileDrawer: React.FC<MobileDrawerProps> = ({
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden">
-          <StickyDocsSidebar
-            isDrawer
+          <DocsSidebar
+            variant="drawer"
             activeSlug={activeSlug}
             activeSectionFilter={activeSectionFilter}
             onSelectHome={() => {
