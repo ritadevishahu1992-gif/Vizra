@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ChevronDown,
-  ChevronRight,
   ArrowLeft,
   ArrowRight,
   Copy,
@@ -11,21 +9,18 @@ import {
   Info,
   Lightbulb,
   AlertTriangle,
-  Home,
   X,
   ArrowUpRight,
 } from 'lucide-react';
 import {
   DocArticle,
-  DocSectionGroup,
   DocSectionGroupId,
   FeatureAvailabilityStatus,
 } from '../../data/publicDocs/types';
-import {
-  DOC_SECTION_GROUPS,
-  getArticlesBySection,
-} from '../../data/publicDocs';
 import { DocsDiagramFigure } from './DocsDiagrams';
+import { StickyDocsSidebar } from './StickyDocsSidebar';
+
+export { StickyDocsSidebar as DocsSidebarNav };
 
 export const StatusLabel: React.FC<{ status: FeatureAvailabilityStatus }> = ({
   status,
@@ -50,182 +45,24 @@ export const StatusLabel: React.FC<{ status: FeatureAvailabilityStatus }> = ({
   );
 };
 
-interface SidebarNavProps {
-  activeSlug: string | null;
-  onSelectHome: () => void;
-  onSelectArticle: (slug: string) => void;
-}
-
-export const DocsSidebarNav: React.FC<SidebarNavProps> = ({
-  activeSlug,
-  onSelectHome,
-  onSelectArticle,
-}) => {
-  const [openSections, setOpenSections] = useState<Record<DocSectionGroupId, boolean>>({
-    A: true,
-    B: true,
-    C: true,
-    D: false,
-    E: false,
-    F: false,
-    G: false,
-    H: false,
-  });
-
-  // Automatically expand the section containing the currently selected article
-  useEffect(() => {
-    if (!activeSlug) return;
-    for (const grp of DOC_SECTION_GROUPS) {
-      const items = getArticlesBySection(grp.id);
-      if (items.some((i) => i.slug === activeSlug)) {
-        setOpenSections((prev) => ({ ...prev, [grp.id]: true }));
-        break;
-      }
-    }
-  }, [activeSlug]);
-
-  const toggleGroup = (id: DocSectionGroupId) => {
-    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  return (
-    <nav aria-label="Documentation Sections" className="space-y-3">
-      <button
-        type="button"
-        onClick={onSelectHome}
-        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-display font-semibold transition-colors cursor-pointer ${
-          !activeSlug
-            ? 'bg-neutral-900 dark:bg-white text-white dark:text-black border-neutral-900 dark:border-white'
-            : 'bg-white dark:bg-[#111111] border-neutral-200 dark:border-white/[0.08] text-neutral-700 dark:text-neutral-200 hover:border-[#EB3B2D]/60'
-        }`}
-      >
-        <span className="flex items-center gap-2">
-          <Home size={14} className={!activeSlug ? 'text-[#EB3B2D]' : 'text-[#EB3B2D]'} />
-          <span>Documentation Home</span>
-        </span>
-        <span className="font-mono text-[10px] opacity-75">A–Z</span>
-      </button>
-
-      <div className="space-y-2">
-        {DOC_SECTION_GROUPS.map((group: DocSectionGroup) => {
-          const isOpen = openSections[group.id];
-          const articles = getArticlesBySection(group.id);
-          const containsActive = articles.some((a) => a.slug === activeSlug);
-
-          return (
-            <div
-              key={group.id}
-              className="rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] overflow-hidden"
-            >
-              <button
-                type="button"
-                onClick={() => toggleGroup(group.id)}
-                aria-expanded={isOpen}
-                className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-neutral-100/70 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
-              >
-                <div className="min-w-0 pr-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold text-[#EB3B2D]">
-                      {group.letter}
-                    </span>
-                    <span
-                      className={`font-display text-xs font-semibold truncate ${
-                        containsActive
-                          ? 'text-neutral-900 dark:text-white'
-                          : 'text-neutral-800 dark:text-neutral-200'
-                      }`}
-                    >
-                      {group.title}
-                    </span>
-                  </div>
-                  <div className="text-[10px] font-mono text-neutral-500 mt-0.5">
-                    {group.subtitle}
-                  </div>
-                </div>
-                {isOpen ? (
-                  <ChevronDown size={14} className="text-neutral-500 shrink-0" />
-                ) : (
-                  <ChevronRight size={14} className="text-neutral-500 shrink-0" />
-                )}
-              </button>
-
-              {isOpen && (
-                <ul className="border-t border-neutral-200 dark:border-white/[0.06] py-1.5 px-1.5 space-y-0.5 bg-neutral-50/70 dark:bg-[#0B0B0B]">
-                  {articles.map((art) => {
-                    const isSelected = activeSlug === art.slug;
-                    return (
-                      <li key={art.slug}>
-                        <button
-                          type="button"
-                          onClick={() => onSelectArticle(art.slug)}
-                          aria-current={isSelected ? 'page' : undefined}
-                          className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-colors flex items-start justify-between gap-2 cursor-pointer ${
-                            isSelected
-                              ? 'bg-[#EB3B2D]/12 text-[#C92317] dark:text-white font-semibold border border-[#EB3B2D]/40'
-                              : 'text-neutral-700 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/50 dark:hover:bg-white/[0.04]'
-                          }`}
-                        >
-                          <span className="flex items-start gap-2 min-w-0">
-                            <span className="font-mono text-[10px] text-neutral-500 shrink-0 pt-0.5">
-                              {art.code}
-                            </span>
-                            <span className="leading-snug">{art.title}</span>
-                          </span>
-                          {art.status && art.status !== 'AVAILABLE' && (
-                            <span className="font-mono text-[9px] uppercase text-neutral-500 shrink-0 pt-0.5">
-                              {art.status === 'COMING SOON'
-                                ? 'SOON'
-                                : art.status === 'UNAVAILABLE'
-                                ? 'N/A'
-                                : 'LIM'}
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Quick Studio Utility Links */}
-      <div className="pt-2 space-y-2">
-        <Link
-          to="/contact"
-          className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#111111] border border-neutral-200 dark:border-white/[0.08] hover:border-[#EB3B2D]/50 text-xs font-medium text-neutral-800 dark:text-neutral-200 flex items-center justify-between transition-colors"
-        >
-          <span>Contact &amp; Support</span>
-          <ArrowUpRight size={13} className="text-[#EB3B2D]" />
-        </Link>
-        <Link
-          to="/ai"
-          className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-display font-semibold text-xs hover:opacity-90 flex items-center justify-between transition-opacity"
-        >
-          <span>Open Omnia Workspace</span>
-          <ArrowUpRight size={13} className="text-[#EB3B2D]" />
-        </Link>
-      </div>
-    </nav>
-  );
-};
-
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   activeSlug: string | null;
+  activeSectionFilter?: DocSectionGroupId | null;
   onSelectHome: () => void;
   onSelectArticle: (slug: string) => void;
+  onJumpToSection?: (sectionId: DocSectionGroupId) => void;
 }
 
 export const DocsMobileDrawer: React.FC<MobileDrawerProps> = ({
   isOpen,
   onClose,
   activeSlug,
+  activeSectionFilter = null,
   onSelectHome,
   onSelectArticle,
+  onJumpToSection,
 }) => {
   useEffect(() => {
     if (!isOpen) return;
@@ -250,7 +87,7 @@ export const DocsMobileDrawer: React.FC<MobileDrawerProps> = ({
         onClick={onClose}
       />
       <div className="relative z-10 w-[86%] max-w-sm h-full bg-neutral-50 dark:bg-[#090909] border-r border-neutral-200 dark:border-white/[0.1] flex flex-col overflow-hidden">
-        <div className="px-4 py-3.5 border-b border-neutral-200 dark:border-white/[0.08] flex items-center justify-between">
+        <div className="px-4 py-3.5 border-b border-neutral-200 dark:border-white/[0.08] flex items-center justify-between shrink-0">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-[#EB3B2D]">
               VIZRA Public Docs
@@ -269,9 +106,11 @@ export const DocsMobileDrawer: React.FC<MobileDrawerProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <DocsSidebarNav
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <StickyDocsSidebar
+            isDrawer
             activeSlug={activeSlug}
+            activeSectionFilter={activeSectionFilter}
             onSelectHome={() => {
               onSelectHome();
               onClose();
@@ -279,6 +118,14 @@ export const DocsMobileDrawer: React.FC<MobileDrawerProps> = ({
             onSelectArticle={(slug) => {
               onSelectArticle(slug);
               onClose();
+            }}
+            onJumpToSection={(sectionId) => {
+              if (onJumpToSection) {
+                onJumpToSection(sectionId);
+              }
+              if (!activeSlug) {
+                onClose();
+              }
             }}
           />
         </div>

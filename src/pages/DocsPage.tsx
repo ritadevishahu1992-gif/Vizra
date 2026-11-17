@@ -25,9 +25,9 @@ import { DocArticle, DocSectionGroupId } from '../data/publicDocs/types';
 import {
   DocsArticleReader,
   DocsMobileDrawer,
-  DocsSidebarNav,
   StatusLabel,
 } from '../components/docs/DocsLayoutPrimitives';
+import { StickyDocsSidebar } from '../components/docs/StickyDocsSidebar';
 import { DocsDiagramFigure } from '../components/docs/DocsDiagrams';
 
 export const DocsPage: React.FC = () => {
@@ -69,6 +69,18 @@ export const DocsPage: React.FC = () => {
 
   const handleSelectArticle = (slug: string) => {
     setSearchParams({ doc: slug });
+  };
+
+  const handleJumpToSection = (sectionId: DocSectionGroupId) => {
+    if (!activeArticle) {
+      setSearchParams({ cat: sectionId });
+      window.setTimeout(() => {
+        const card = document.getElementById(`doc-section-card-${sectionId}`);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 40);
+    }
   };
 
   // Search filtering across titles, summaries, codes, statuses, and block bodies
@@ -147,8 +159,10 @@ export const DocsPage: React.FC = () => {
         isOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
         activeSlug={activeArticle?.slug || null}
+        activeSectionFilter={requestedSectionLetter}
         onSelectHome={handleSelectHome}
         onSelectArticle={handleSelectArticle}
+        onJumpToSection={handleJumpToSection}
       />
 
       {/* Top Documentation Header & In-Docs Search */}
@@ -211,11 +225,13 @@ export const DocsPage: React.FC = () => {
       <section className="py-10 md:py-14 px-5 sm:px-8 lg:px-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Desktop Sticky Sidebar */}
-          <aside className="hidden lg:block lg:col-span-3 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
-            <DocsSidebarNav
+          <aside className="hidden lg:block lg:col-span-3 sticky top-24">
+            <StickyDocsSidebar
               activeSlug={activeArticle?.slug || null}
+              activeSectionFilter={requestedSectionLetter}
               onSelectHome={handleSelectHome}
               onSelectArticle={handleSelectArticle}
+              onJumpToSection={handleJumpToSection}
             />
           </aside>
 
@@ -411,7 +427,8 @@ export const DocsPage: React.FC = () => {
                           return (
                             <div
                               key={group.id}
-                              className={`p-5 sm:p-6 rounded-2xl border bg-white dark:bg-[#111111] flex flex-col justify-between space-y-4 ${
+                              id={`doc-section-card-${group.id}`}
+                              className={`scroll-mt-24 p-5 sm:p-6 rounded-2xl border bg-white dark:bg-[#111111] flex flex-col justify-between space-y-4 ${
                                 isHighlighted
                                   ? 'border-[#EB3B2D]'
                                   : 'border-neutral-200 dark:border-white/[0.08]'
