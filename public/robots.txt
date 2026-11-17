@@ -1,4 +1,176 @@
+# VIZRA AI Creative Studio — Crawler & AI Bot Access Policy
+# Canonical Host: https://vizra.vercel.app
+#
+# Policy Design:
+#   1. All genuine public marketing, product, documentation, showcase, pricing,
+#      and legal routes plus /llms.txt, /llms-full.txt, /sitemap.xml, and
+#      /og-image.png are explicitly OPEN to search engines and AI search/retrieval
+#      bots (Googlebot, Bingbot, OAI-SearchBot, ChatGPT-User, PerplexityBot,
+#      Claude-SearchBot, Applebot).
+#   2. AI foundation/training crawlers (GPTBot, Google-Extended, ClaudeBot) are
+#      likewise permitted across VIZRA's public documentation and product pages
+#      so assistants can accurately ground product answers on verified facts.
+#   3. Private user-specific workspaces, authentication flows, admin consoles,
+#      and API/WebSocket endpoints (/api/, /live, /ai, /history, /settings,
+#      /workspace, /seo-diagnostics, /dashboard, /crawler-audit) are strictly
+#      DISALLOWED across every user agent and additionally enforce
+#      `noindex, nofollow` and authentication checks server-side.
+
+# Search Engines & Default Crawlers
 User-agent: *
 Allow: /
+Allow: /features
+Allow: /tools
+Allow: /studio
+Allow: /explore
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /docs
+Allow: /terms-and-conditions
+Allow: /privacy-policy
+Allow: /cookie-policy
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /og-image.png
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
 
+# Google Search Indexer
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Google Gemini / AI Training & Grounding Control
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Microsoft Bing Search & Copilot Indexer
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# OpenAI Search & Live User Retrieval (ChatGPT Search / Browse)
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# OpenAI Model Training Crawler (public docs only; workspaces strictly blocked)
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Perplexity Search & Answer Grounding Crawler
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Anthropic Search & Claude Crawlers
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Apple Siri & Spotlight Crawler
+User-agent: Applebot
+Allow: /
+Disallow: /api/
+Disallow: /live
+Disallow: /ai
+Disallow: /history
+Disallow: /settings
+Disallow: /workspace
+Disallow: /seo-diagnostics
+Disallow: /dashboard
+Disallow: /crawler-audit
+
+# Canonical XML Sitemap & LLMs Discovery
 Sitemap: https://vizra.vercel.app/sitemap.xml
+# LLMs Reference: https://vizra.vercel.app/llms.txt

@@ -1,0 +1,31 @@
+# VIZRA — AI Creative Studio & Omnia 1.0
+
+> VIZRA (`https://vizra.vercel.app/`) is an AI creative studio and multimodal workflow workspace powered by Omnia 1.0. It unites conversational reasoning, grounded web search, code and WebGL shader synthesis, design systems, visual synthesis, audio composition, and persistent 10-stage project workflows in one web platform.
+
+## Canonical Entry Points
+
+- [Home — VIZRA AI Creative Studio](https://vizra.vercel.app/): Overview of VIZRA, Omnia 1.0 preview, platform architecture, and studio entry points.
+- [Features & Pipeline](https://vizra.vercel.app/features): 4 Core Pillars (Think, Create, Build, Explore), 5-Step Idea-to-Finish pipeline, and 10-stage persistent project memory.
+- [AI Tools & Create Hub](https://vizra.vercel.app/tools): 8 specialized creative disciplines covering writing, design tokens, visual canvas, React/TypeScript/GLSL code, presentations, grounded web research, multimodal file audit, and staged video synthesis.
+- [Creative Studio & R&D Roadmap](https://vizra.vercel.app/studio): 4 studio engines (Temporal Motion Synthesis, Omnia Neural Direction, Procedural Shader Synthesis, Kinetic Spatial Typography) and 6 future R&D concept prototypes.
+- [Explore 3D Creative Showcase](https://vizra.vercel.app/explore): Interactive 3D perspective showcase tunnel and starter prompt remix profiles across 6 creative disciplines.
+- [Pricing & Compute Tiers](https://vizra.vercel.app/pricing): Creator Free ($0), Omnia Pro ($19/mo billed annually or $24/mo monthly), and VIZRA Studio & Team ($64/mo billed annually or $79/mo monthly), plus billing FAQs.
+- [Technical Documentation](https://vizra.vercel.app/docs): System architecture, intent classification & model routing, 10-stage project workflows, REST API reference, payload limits, and SSRF security controls.
+- [About VIZRA & Core Creed](https://vizra.vercel.app/about): Mission ("Don't just ask AI. Work with it."), response proportionality, zero fabricated citations, and studio philosophy.
+- [Contact & Studio Inquiries](https://vizra.vercel.app/contact): Enterprise studio onboarding, technical support, partnerships, and early-access beta requests.
+
+## Policy & Governance
+
+- [Privacy Policy](https://vizra.vercel.app/privacy-policy): Minimal data collection, UID-scoped Firestore rules, consent records, self-service account deletion (`DELETE /api/account/data`), and subprocessors.
+- [Terms & Conditions](https://vizra.vercel.app/terms-and-conditions): Active 18+ operating policy (`STRICT_18_PLUS`), acceptable use, AI copyrightability notice, DMCA procedure, and EU AI Act Article 50(2) provenance disclosures.
+- [Cookie & Storage Policy](https://vizra.vercel.app/cookie-policy): Default-off optional categories (`Analytics`, `Functional`, `Marketing`), cookieless Vercel Web Analytics separation, and storage inventory.
+
+## Extended AI Reference
+
+- [Full Structured Reference (/llms-full.txt)](https://vizra.vercel.app/llms-full.txt): Complete factual specification of Omnia 1.0 models, live vs. staging capabilities, rate/payload limits, safety posture, and non-indexed workspace boundaries.
+
+## Key Factual Boundaries
+
+- **Age Policy**: VIZRA operates strictly as an 18+ adult creative studio (`STRICT_18_PLUS`).
+- **Live vs. Staging Status**: Conversational reasoning, grounded Google Search citations, React/TypeScript/GLSL code synthesis, Science Hub queries (AlphaFold DB, PubChem, PubMed), Lyria 3 audio generation, and authenticated Live Voice WebSocket sessions are implemented server-side (`GEMINI_API_KEY` required). Temporal Video & Scene Synthesis and third-party external OAuth connectors (Google Workspace, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disclosed in the UI and docs as In Staging / Pending Approval.
+- **Non-Indexed Private Routes**: `/ai`, `/history`, `/settings`, `/workspace`, `/seo-diagnostics`, and `/api/*` are user-specific, authenticated, or operational routes marked `noindex, nofollow` and excluded from crawling.

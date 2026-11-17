@@ -224,7 +224,10 @@ function analyzeRobotsTxt(status: number | null, contentType: string, body: stri
     }
   }
 
-  const blocksImportantRoutes = disallowRules.some((r) => r === '/' || r.startsWith('/ai') || r.startsWith('/studio'));
+  const publicPaths = ['/features', '/tools', '/studio', '/explore', '/pricing', '/about', '/contact', '/docs'];
+  const blocksImportantRoutes = disallowRules.some(
+    (r) => r === '/' || publicPaths.some((p) => r === p || r.startsWith(`${p}/`))
+  );
 
   return {
     url,

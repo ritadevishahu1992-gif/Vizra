@@ -41,11 +41,22 @@ export const PRIVATE_OR_UTILITY_ROUTES = [
   '/seo-diagnostics',
 ] as const;
 
+export interface RoutePrehydrationSection {
+  heading: string;
+  body: string;
+  bullets?: string[];
+  table?: {
+    headers: string[];
+    rows: string[][];
+  };
+  faqs?: { q: string; a: string }[];
+}
+
 export interface RoutePrehydrationContent {
   eyebrow: string;
   h1: string;
   lead: string;
-  sections: { heading: string; body: string }[];
+  sections: RoutePrehydrationSection[];
 }
 
 export interface RouteSeoDefinition {
@@ -115,6 +126,29 @@ function buildBreadcrumbSchema(
   };
 }
 
+function buildWebPageSchema(
+  name: string,
+  description: string,
+  path: string
+): Record<string, unknown> {
+  const fullUrl = `${SITE_ORIGIN}${path === '/' ? '/' : path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${fullUrl}#webpage`,
+    url: fullUrl,
+    name,
+    description,
+    inLanguage: 'en-US',
+    isPartOf: {
+      '@id': `${SITE_ORIGIN}/#website`,
+    },
+    about: {
+      '@id': `${SITE_ORIGIN}/#software`,
+    },
+  };
+}
+
 const LEGAL_ENTITY_NAME =
   (typeof import.meta !== 'undefined' &&
     (import.meta as unknown as { env?: Record<string, string | undefined> }).env
@@ -178,43 +212,36 @@ const SOFTWARE_APPLICATION_SCHEMA: Record<string, unknown> = {
   },
 };
 
+const PRICING_FAQS: { q: string; a: string }[] = [
+  {
+    q: 'How are AI generation credits calculated across Omnia 1.0 modes?',
+    a: 'Standard conversational queries (Quick and Think modes) use 1 credit per turn. Deep web research, high-resolution visual synthesis, and Lyria 3 audio generation consume credits proportional to compute complexity, tracked live in your header Credit Usage Indicator.',
+  },
+  {
+    q: 'Can I switch between Monthly and Yearly billing at any time?',
+    a: 'Yes. You can toggle between Monthly and Annual billing directly from the Pricing page or your Workspace Console. Annual billing provides an immediate 20% discount across Omnia Pro and VIZRA Studio tiers.',
+  },
+  {
+    q: 'What happens to my 10-stage projects if I downgrade to Creator Free?',
+    a: 'Your existing project history, files, and research notes are never deleted. On Creator Free, up to 3 projects remain actively editable while additional projects stay safely archived in read-only mode until you re-activate Pro or Studio.',
+  },
+  {
+    q: 'Do you offer custom enterprise deployments or academic studio grants?',
+    a: 'Yes. Production studios, universities, and research teams can request tailored concurrency quotas and dedicated onboarding through our Contact page.',
+  },
+];
+
 const PRICING_FAQ_SCHEMA: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'How are AI generation credits calculated across Omnia 1.0 modes?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Standard conversational queries (Quick and Think modes) use 1 credit per turn. Deep web research, high-resolution visual synthesis, and Lyria 3 audio generation consume credits proportional to compute complexity, tracked live in your header Credit Usage Indicator.',
-      },
+  mainEntity: PRICING_FAQS.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
     },
-    {
-      '@type': 'Question',
-      name: 'Can I switch between Monthly and Yearly billing at any time?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes. You can toggle between Monthly and Annual billing directly from the Pricing page or your Workspace Console. Annual billing provides an immediate 20% discount across Omnia Pro and VIZRA Studio tiers.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What happens to my 10-stage projects if I downgrade to Creator Free?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Your existing project history, files, and research notes are never deleted. On Creator Free, up to 3 projects remain actively editable while additional projects stay safely archived in read-only mode until you re-activate Pro or Studio.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Do you offer custom enterprise deployments or academic studio grants?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes. Production studios, universities, and research teams can request tailored concurrency quotas and dedicated onboarding through our Contact page.',
-      },
-    },
-  ],
+  })),
 };
 
 export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
@@ -226,19 +253,40 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
-    jsonLd: [ORGANIZATION_SCHEMA, WEBSITE_SCHEMA, SOFTWARE_APPLICATION_SCHEMA],
+    jsonLd: [
+      ORGANIZATION_SCHEMA,
+      WEBSITE_SCHEMA,
+      SOFTWARE_APPLICATION_SCHEMA,
+      buildWebPageSchema(
+        'Vizra — AI Creative Studio & Omnia 1.0 Workspace',
+        'A modern AI creative studio powered by Omnia 1.0. Generate, design, write, research, and build across 10-stage creative workflows in one unified workspace.',
+        '/'
+      ),
+    ],
     prehydration: {
       eyebrow: 'VIZRA AI CREATIVE STUDIO · OMNIA 1.0',
-      h1: 'Vizra — AI Creative Studio & Omnia 1.0',
-      lead: 'A modern AI creative studio built to make AI-powered creation simpler for creators, animators, motion designers, developers, and beginners.',
+      h1: 'An intelligent creative workspace. Powered by Omnia 1.0.',
+      lead: 'Think, create, and build with one unified AI creative studio—moving seamlessly from raw intuition to production-ready work.',
       sections: [
         {
-          heading: 'Core Studio Engines',
-          body: 'Motion Engine for physics-based animations and timeline sequencing, Character Engine for multi-angle 3D avatar animation, and Omnia 1.0 for conversational reasoning and 10-stage creative workflows.',
+          heading: 'Navigate the Vizra Ecosystem',
+          body: 'Every capability in Vizra has a dedicated workspace uniting conversational reasoning, grounded research, specialized tools, 60fps studio engines, and 3D showcase exploration.',
+          bullets: [
+            'Features & Pipeline (/features): Explore the 4 Core Pillars (Think, Create, Build, Explore), 5-Step Idea-to-Finish pipeline, and 10-stage persistent project memory.',
+            'AI Tools & Create Hub (/tools): Launch specialized workflows for scriptwriting, design systems, visual canvas synthesis, React & GLSL code, presentations, and grounded research.',
+            'Creative Studio & Roadmap (/studio): Inspect 4 core studio engines (Temporal Motion Synthesis, Omnia Neural Direction, Procedural Shader Synthesis, Kinetic Spatial Typography) plus 6 interactive R&D prototypes.',
+            '3D Creative Universe Showcase (/explore): Fly through the 3D perspective tunnel featuring curated AI artworks, inspect synthesis prompts, and launch directly inside Omnia 1.0.',
+          ],
         },
         {
-          heading: 'On the Horizon — Future Features',
-          body: 'Spatial AI Canvas, Real-Time Motion Diffusion, and Multi-Agent Studio Collaboration.',
+          heading: 'Plans, Technical Documentation & Governance',
+          body: 'VIZRA offers predictable compute tiers from Creator Free ($0 forever) to Omnia Pro ($19/mo annual) and VIZRA Studio & Team ($64/mo annual), backed by deterministic SSRF protection and strict 18+ operating policies.',
+          bullets: [
+            'Pricing & Compute Tiers (/pricing): Compare Creator Free ($0), Omnia Pro ($19/mo annual or $24/mo monthly), and VIZRA Studio & Team ($64/mo annual or $79/mo monthly).',
+            'Technical Documentation (/docs): Architecture guides covering intent routing, 10-stage project continuity, REST endpoints, and payload boundaries (50,000-char prompt limit, 15MB request limit).',
+            'About VIZRA (/about): Core philosophy ("Don\'t just ask AI. Work with it.") and zero fabricated citations policy.',
+            'Contact & Early Access (/contact): Enterprise onboarding, technical support SLAs (<4h Pro/Studio, <24h general), and beta access requests.',
+          ],
         },
       ],
     },
@@ -252,15 +300,36 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Features & Architecture',
-    jsonLd: [buildBreadcrumbSchema('Features & Architecture', '/features')],
+    jsonLd: [
+      buildBreadcrumbSchema('Features & Architecture', '/features'),
+      buildWebPageSchema(
+        'Features & Architecture — Vizra AI Creative Studio',
+        'Explore the 4 Core Pillars of Vizra (Think, Create, Build, Explore), our 5-step Idea-to-Finish pipeline, and 10-stage persistent project memory in Omnia 1.0.',
+        '/features'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'PLATFORM ARCHITECTURE',
+      eyebrow: 'PLATFORM ARCHITECTURE · 10-STAGE WORKFLOW',
       h1: 'Engineered to carry your work from initial spark to finished production.',
-      lead: 'Explore the 4 Core Pillars of Vizra (Think, Create, Build, Explore), our 5-step Idea-to-Finish pipeline, and 10-stage persistent project memory.',
+      lead: 'Explore the 4 Core Pillars of Vizra (Think, Create, Build, Explore), our 5-step Idea-to-Finish pipeline, and 10-stage persistent project memory in Omnia 1.0.',
       sections: [
         {
           heading: 'Four Core Pillars',
-          body: 'Think with grounded reasoning, Create across writing and visual disciplines, Build 10-stage engineering and shader workflows, and Explore interactive spatial galleries.',
+          body: 'VIZRA organizes multimodal creation across four interconnected operational pillars.',
+          bullets: [
+            'Think: Multi-step analytical reasoning, live Google Search grounding with verified clickable citations, and cross-session memory.',
+            'Create: Editorial and script writing in English, Hindi, or Hinglish alongside design systems and procedural visual synthesis.',
+            'Build: Production-grade React, TypeScript, WebGL/GLSL shaders, and 10-stage structured project deliverables.',
+            'Explore: Interactive 3D creative universe tunnel, starter prompt library, and scientific retrieval (AlphaFold DB, PubChem, PubMed).',
+          ],
+        },
+        {
+          heading: '5-Step Idea-to-Finish Pipeline & 10-Stage Memory',
+          body: 'Structured creative projects preserve shared objectives, style tokens, research sources, and iteration checkpoints across 10 discrete workflow stages synchronized via Cloud Firestore (`users/{userId}/projects`) or local browser persistence.',
+        },
+        {
+          heading: 'Live vs. Staging Capabilities Transparency',
+          body: 'Conversational AI modes, live web grounding, Science Hub, Lyria 3 audio composition, and authenticated Gemini Live Voice are implemented in production routes, while Temporal Video & Scene Synthesis and third-party OAuth cloud drive connectors remain clearly labeled In Staging.',
         },
       ],
     },
@@ -276,16 +345,35 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     breadcrumbLabel: 'AI Tools & Create Hub',
     jsonLd: [
       buildBreadcrumbSchema('AI Tools & Create Hub', '/tools'),
+      buildWebPageSchema(
+        'AI Tools & Create Hub — Vizra AI Creative Studio',
+        'Launch 8 specialized AI creative tools in Omnia 1.0 for scriptwriting, design systems, visual synthesis, React and GLSL shaders, presentations, and research.',
+        '/tools'
+      ),
       SOFTWARE_APPLICATION_SCHEMA,
     ],
     prehydration: {
-      eyebrow: '8 SPECIALIZED DISCIPLINES',
+      eyebrow: '8 SPECIALIZED CREATIVE TOOLS',
       h1: 'One intelligence. Every creative discipline.',
-      lead: 'Dedicated AI tools for writing, visual systems, motion direction, React and GLSL code synthesis, presentations, and grounded research.',
+      lead: 'Launch any specialized workflow directly inside Omnia 1.0. Every tool shares unified project context, brand tokens, and persistent workspace memory.',
       sections: [
         {
-          heading: 'Unified Creative Tools',
-          body: 'Switch seamlessly between scriptwriting, design token synthesis, WebGL shader coding, document analysis, and Lyria 3 music generation.',
+          heading: 'Live & Staged Creative Disciplines (8 Tools)',
+          body: 'Seven live multimodal creative workflows and one video synthesis workflow currently in staging:',
+          bullets: [
+            '1. Editorial & Script Writing (Live): Long-form articles, film scripts, pitch decks, and multilingual tone in English, Hindi, and Hinglish.',
+            '2. Design System & Token Architect (Live): Typographic scales, Obsidian color tokens, UI component blueprints, and accessibility contrast audits.',
+            '3. Visual & Procedural Canvas Synthesis (Live): Concept art, SVG compositions, procedural graphics, and AI visual ideation.',
+            '4. React, TypeScript & GLSL Code (Live): Modular React/TypeScript components, 60fps WebGL fragment shaders, state logic, and security reviews.',
+            '5. Executive Presentation Builder (Live): Slide outlines, narrative arcs, structured key takeaways, and clean deck copy.',
+            '6. Grounded Live Web Research (Live): Live Google Search verification returning validated, clickable citation links.',
+            '7. Multimodal File & Code Audit (Live): Analyze uploaded code files, PDFs, screenshots, CSVs, and logs inside the unified prompt bar.',
+            '8. Temporal Video & Scene Synthesis (In Staging): Multi-scene storyboard sequencing and motion prompt choreography currently undergoing internal testing.',
+          ],
+        },
+        {
+          heading: 'Supported Workspace Connectors & OAuth Status',
+          body: 'Local multimodal file uploads (up to 5 files, 15MB request payload) are live. External third-party OAuth integrations—Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, and Dropbox—are displayed transparently in Staging pending external OAuth app configuration.',
         },
       ],
     },
@@ -299,15 +387,40 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Creative Studio & Roadmap',
-    jsonLd: [buildBreadcrumbSchema('Creative Studio & Roadmap', '/studio')],
+    jsonLd: [
+      buildBreadcrumbSchema('Creative Studio & Roadmap', '/studio'),
+      buildWebPageSchema(
+        'Creative Studio & Roadmap — Vizra AI Creative Studio',
+        'Inspect Vizra’s 60fps studio engines—Temporal Motion, Neural Direction, Procedural Shaders, and Kinetic Typography—plus 6 interactive R&D roadmap prototypes.',
+        '/studio'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'CREATIVE STUDIO ENGINES & ROADMAP',
+      eyebrow: 'CREATIVE STUDIO · ENGINES & R&D',
       h1: 'Precision creative engines built for motion, shaders, and spatial direction.',
-      lead: 'Four production studio engines paired with our transparent R&D engineering roadmap.',
+      lead: 'Explore the four production engines powering Vizra Creative Studio today, alongside six interactive R&D roadmap concept prototypes.',
       sections: [
         {
-          heading: 'Studio Engines & Upcoming R&D',
-          body: 'Temporal Motion Engine, Neural Direction Engine, Procedural Shader Forge, and Kinetic Typography System.',
+          heading: 'Four Core Studio Engines',
+          body: 'Built for motion designers, animators, and creative developers seeking speed without sacrificing surgical compositional control.',
+          bullets: [
+            '01. Temporal Motion Synthesis (Kinetic Physics — 60 FPS · Zero Drift · Bezier Output): Fluid motion paths, camera trajectories, and organic physics interactions from natural language prompts.',
+            '02. Omnia Neural Direction (Creative Control — Multi-layer · PBR Lighting · 4K): Direct cinematic lighting vectors, depth-of-field focal stops, and Obsidian color grading.',
+            '03. Procedural Shader Synthesis (Code & WebGL — GLSL · WebGL2 · Pure Math): Production GLSL fragment shaders, raymarching volumetric effects, and WebGL/Three.js-ready code.',
+            '04. Kinetic Spatial Typography (Editorial Motion — Variable Axes · Audio Reactive · SVG): Variable font harmonization, procedural kerning, and dimensional kinetic text.',
+          ],
+        },
+        {
+          heading: 'Future of VIZRA — R&D Concept Roadmap (6 Prototypes)',
+          body: 'Transparent engineering preview of upcoming concepts across active development and planning phases:',
+          bullets: [
+            'Omnia Spatial Director (PROJECT AETHER — In Development): Multi-camera 3D virtual blocking & Hermite cubic spline paths.',
+            'Neural Audio Stem Decomposer (PROJECT HARMONIX — In Development): 6-stem adaptive audio synthesis synchronized to visual pacing.',
+            'Kinetic Consistency Engine (PROJECT CHRONOS — Coming Soon): Cross-shot character, wardrobe, and PBR lighting persistence.',
+            'Vizra Team Production Canvas (PROJECT SYNDICATE — Coming Soon): Multiplayer CRDT collaborative timeline with branching takes.',
+            'Edge Omnia Local Runtime (PROJECT SILICON — Planned): Quantized 4-bit offline inference for Apple Silicon & RTX workstations.',
+            'Tactile Cinematic Jog Controller (PROJECT TACTILE — Planned): USB-C WebHID rotary jog-wheel for 0.01-frame latent scrubbing.',
+          ],
         },
       ],
     },
@@ -321,15 +434,30 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Explore & Creative Showcase',
-    jsonLd: [buildBreadcrumbSchema('Explore & Creative Showcase', '/explore')],
+    jsonLd: [
+      buildBreadcrumbSchema('Explore & Creative Showcase', '/explore'),
+      buildWebPageSchema(
+        'Explore 3D Creative Showcase — Vizra AI Creative Studio',
+        'Enter the Vizra 3D Creative Universe Showcase. Explore curated AI visuals inside an interactive perspective tunnel, inspect prompts, and launch in Omnia 1.0.',
+        '/explore'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'VIZRA CREATIVE SHOWCASE',
+      eyebrow: 'VIZRA CREATIVE UNIVERSE SHOWCASE',
       h1: 'ENTER THE CREATIVE UNIVERSE.',
-      lead: 'Explore a universe of ideas, visuals and creative possibilities, brought to life with AI.',
+      lead: 'Explore a universe of ideas, visuals, and creative possibilities brought to life with AI inside the 3D perspective showcase, and launch starter prompts directly in Omnia 1.0.',
       sections: [
         {
-          heading: 'Built for anyone with an idea.',
-          body: 'Vizra scales from rapid conversational questions to full 10-stage creative production across directors, designers, developers, students, and writers.',
+          heading: 'Built for Every Creative Discipline (6 Creator Profiles)',
+          body: 'Vizra scales from rapid conversational questions to full 10-stage creative production across six core creator workflows:',
+          bullets: [
+            'Creators & Directors: Synthesize motion concepts, 3-act cinematic treatments, and visual direction.',
+            'Designers & Art Directors: Iterate dark-mode typographic hierarchies pairing Space Grotesk with Inter and high-contrast Obsidian tokens.',
+            'Creative Developers: Build 60fps interactive React, TypeScript, and WebGL raymarched shader components.',
+            'Students & Researchers: Ask complex scientific and academic questions with verified, source-grounded explanations.',
+            'Writers & Storytellers: Brainstorm storylines, scripts, and editorial pieces naturally in English, Hindi, or Hinglish.',
+            'Beginners & Explorers: Turn raw ideas into structured 10-stage digital projects step-by-step.',
+          ],
         },
       ],
     },
@@ -345,6 +473,11 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     breadcrumbLabel: 'Pricing & Compute Tiers',
     jsonLd: [
       buildBreadcrumbSchema('Pricing & Compute Tiers', '/pricing'),
+      buildWebPageSchema(
+        'Pricing & Compute Tiers — Vizra AI Creative Studio',
+        'Compare Vizra’s Creator Free ($0), Omnia Pro ($19/mo), and VIZRA Studio ($64/mo) plans with transparent compute quotas and 10-stage creative workspaces.',
+        '/pricing'
+      ),
       PRICING_FAQ_SCHEMA,
     ],
     prehydration: {
@@ -353,8 +486,36 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       lead: 'Start free with Omnia 1.0 conversational intelligence and grounded search, then upgrade as your creative pipeline scales into multi-stage production.',
       sections: [
         {
-          heading: 'Compute & Entitlement Matrix',
-          body: 'Creator Free ($0), Omnia Pro ($19/mo), and VIZRA Studio ($64/mo) tiers with transparent concurrency and workspace entitlements.',
+          heading: 'Plan Tiers & Compute Quotas',
+          body: 'Three transparent tiers designed for solo creators, power builders, and studios. Note: Paid plan upgrade selections currently log early-access preview requests inside the platform without charging payment cards until commercial billing launches.',
+          bullets: [
+            'Creator Free ($0 / forever): Omnia 1.0 Quick, Think & Research modes, grounded Google Search citations, up to 3 active 10-stage projects, 60 requests/min rate quota, 10 MB multimodal attachments, and local history JSON export.',
+            'Omnia Pro ($19/mo billed yearly — Save 20%, or $24/mo billed monthly): Unlimited 10-stage workspaces, 240 requests/min quota, 15 MB multimodal attachments, Lyria 3 AI Music Studio & Gemini Live Voice, DeepMind Science Hub, cross-device Firestore project sync, and personal memory bank.',
+            'VIZRA Studio & Team ($64/mo billed yearly — Save 20%, or $79/mo billed monthly): Custom enterprise concurrency SLA, shared team workspaces with role permissions, private RAG corpus indexing, Developer Console API keys, VIZRA Engage & Technical SEO Diagnostic Suite, and priority onboarding.',
+          ],
+        },
+        {
+          heading: 'Full Plan Entitlement Comparison',
+          body: 'Side-by-side comparison of limits, quotas, and studio capabilities across plans:',
+          table: {
+            headers: ['Feature / Entitlement', 'Creator Free', 'Omnia Pro', 'VIZRA Studio'],
+            rows: [
+              ['Monthly Price', '$0 / forever', '$24 / mo', '$79 / mo'],
+              ['Annual Price (Save 20%)', '$0 / forever', '$19 / mo ($228/yr)', '$64 / mo ($768/yr)'],
+              ['Active 10-Stage Projects', 'Up to 3 Projects', 'Unlimited', 'Unlimited + Shared Team'],
+              ['Request Rate Quota', '60 req / min', '240 req / min', 'Custom Concurrency SLA'],
+              ['Multimodal Attachments', 'Up to 10 MB', 'Up to 15 MB', 'Up to 15 MB + Batch RAG'],
+              ['Grounded Web Search Citations', 'Included', 'Included', 'Included + Domain Filters'],
+              ['Lyria 3 & Gemini Live Voice', 'Standard Preview', 'Unlimited Studio', 'Unlimited + Team Access'],
+              ['DeepMind Science Hub (AlphaFold / PubChem)', 'Included', 'Included', 'Included'],
+              ['Developer API Keys & VIZRA Engage', '—', '—', 'Included'],
+            ],
+          },
+        },
+        {
+          heading: 'Frequently Asked Pricing Questions',
+          body: 'Details on credit accounting, billing toggles, project preservation upon downgrade, and academic/enterprise grants:',
+          faqs: PRICING_FAQS,
         },
       ],
     },
@@ -385,11 +546,21 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     prehydration: {
       eyebrow: 'ABOUT VIZRA · CORE CREED',
       h1: '“Don’t just ask AI. Work with it.”',
-      lead: 'Vizra was created to bridge the gap between fleeting AI chat threads and real finished creative work—uniting conversation, context, creativity, and workflow under one platform.',
+      lead: 'Vizra was created to bridge the gap between fleeting AI chat threads and real finished creative work—uniting conversation, context, creativity, and workflow under one Obsidian studio platform.',
       sections: [
         {
-          heading: 'Core Engineering Principles',
-          body: 'Response Proportionality, Zero Fabricated Citations, Persistent Studio Context, and Architectural Honesty.',
+          heading: 'Four Core Engineering Principles',
+          body: 'Every capability in VIZRA and Omnia 1.0 adheres to deterministic engineering and editorial transparency standards:',
+          bullets: [
+            '1. Response Proportionality: Short greetings receive natural direct replies; complex design, coding, or research requests receive thorough structured execution.',
+            '2. Zero Fabricated Citations: When external search grounding fails to confirm a source or query targets an unannounced product, Omnia states the uncertainty candidly.',
+            '3. Persistent Studio Context: Long-running creative work persists across 10 project stages, design decisions, and research sources without losing thread coherence.',
+            '4. Architectural Honesty: Live production capabilities are strictly separated in UI and documentation from staging prototypes and future R&D concepts.',
+          ],
+        },
+        {
+          heading: 'Who Vizra Is Built For',
+          body: 'Designed for creators, film directors, motion designers, frontend/GLSL developers, researchers, and writers seeking speed with full creative control.',
         },
       ],
     },
@@ -417,11 +588,18 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     prehydration: {
       eyebrow: 'CONTACT & STUDIO ONBOARDING',
       h1: 'Connect with the Vizra team.',
-      lead: 'Whether you are scaling a creative studio, integrating with our developer API, or requesting private beta access for upcoming engines, our team is ready to help.',
+      lead: 'Whether you are scaling a creative studio, integrating with our developer API, or requesting private beta access for upcoming engines, reach our team directly at /contact.',
       sections: [
         {
-          heading: 'Direct Studio & Enterprise Inquiry',
-          body: 'Submit studio onboarding, technical support, partnership, or press inquiries directly to the Vizra team.',
+          heading: 'Direct Support Channels & Response SLAs',
+          body: 'Inquiries submitted via the /contact form are routed directly to backend persistence (`POST /api/contact` and `POST /api/early-access`) with strict payload validation:',
+          bullets: [
+            'Enterprise Studio & Pricing: Custom concurrency quotas, team seats, academic grants, and institutional onboarding.',
+            'Developer API & Technical Support: Troubleshooting for Omnia 1.0 workflows, REST streaming routes, and security questions.',
+            'Private Beta Early Access: Waitlist requests for Temporal Video & Scene Synthesis, Omnia Spatial Director, Harmonix, Chronos, and Syndicate.',
+            'Response SLA — Studio & Pro Priority Support: Under 4 Hours.',
+            'Response SLA — General Inquiries: Under 24 Hours.',
+          ],
         },
       ],
     },
@@ -453,13 +631,34 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       },
     ],
     prehydration: {
-      eyebrow: 'TECHNICAL DOCUMENTATION',
+      eyebrow: 'TECHNICAL DOCUMENTATION · ARCHITECTURE & API REFERENCE',
       h1: 'Omnia 1.0 Technical Documentation & Architecture.',
-      lead: 'System architecture guides, deterministic intent routing, 10-stage project workflows, REST streaming APIs, and SSRF security controls.',
+      lead: 'System architecture guides, deterministic intent classification & model routing, 10-stage project continuity, REST API limits, and SSRF network security.',
       sections: [
         {
-          heading: 'Platform Overview & Neural Routing',
-          body: 'Intent classification, cross-request context isolation, grounded web retrieval, and server-side API governance.',
+          heading: '1. Platform Overview & Model Routing',
+          body: 'Omnia 1.0 dynamically routes queries across specialized server-side models depending on task complexity:',
+          bullets: [
+            'Casual & Fast Conversational Synthesis (gemini-3.1-flash-lite): Ultra-low-latency direct replies.',
+            'Deep Reasoning, Coding & Research (gemini-3.8-flash / gemini-4-argon): Multi-step reasoning (`ThinkingLevel`), TypeScript/React/GLSL code generation, and live Google Search grounding.',
+            'Real-Time Live Voice (gemini-3.8-live): Authenticated, single-use ticketed WebSocket session (`/api/live/session` -> `/live`).',
+            'AI Music Generation (Lyria 3): Original instrumental compositions generated server-side.',
+            'DeepMind Science Hub: Server-proxied queries to EMBL-EBI AlphaFold DB, NCBI PubChem, and NCBI PubMed.',
+          ],
+        },
+        {
+          heading: '2. REST Endpoints & Enforced Request Boundaries',
+          body: 'All AI inference runs exclusively through server-side `/api/*` proxy routes with secrets isolated from frontend bundles:',
+          bullets: [
+            'Maximum Prompt Size: 50,000 characters per turn.',
+            'Multimodal Attachment Limit: Maximum 5 attachments per request within a 15 MB Express JSON body ceiling.',
+            'Global Public API Rate Limit: 120 requests/minute per IP (`express-rate-limit`), with stricter per-endpoint sliding windows on chat, music, feedback, contact, and account erasure.',
+            'WebSocket Bounds (`/live`): Firebase ID token authentication required, max 2 concurrent sessions per UID, 10-minute session cap, 512 KB frame payload cap.',
+          ],
+        },
+        {
+          heading: '3. Security, PII Scrubbing & SSRF Prevention',
+          body: 'URL inspection endpoints enforce strict HTTP/HTTPS protocol checks and DNS validation blocking loopback (`127.0.0.1`, `::1`), cloud metadata (`169.254.169.254`), and private RFC1918 networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`). Diagnostic endpoints require administrator authentication (`HTTP 401` if unauthenticated).',
         },
       ],
     },
@@ -473,15 +672,35 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Terms & Conditions',
-    jsonLd: [buildBreadcrumbSchema('Terms & Conditions', '/terms-and-conditions')],
+    jsonLd: [
+      buildBreadcrumbSchema('Terms & Conditions', '/terms-and-conditions'),
+      buildWebPageSchema(
+        'Terms & Conditions — Vizra AI Creative Studio',
+        'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, and liability limits.',
+        '/terms-and-conditions'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'PLATFORM AGREEMENT & RULES OF USE',
+      eyebrow: 'PLATFORM AGREEMENT & RULES OF USE · POLICY V2026-11-11',
       h1: 'Terms & Conditions',
-      lead: 'Official Terms and Conditions governing access to and use of Vizra AI Creative Studio and Omnia 1.0.',
+      lead: 'Effective Date: November 11, 2026. Official Terms and Conditions governing access to and use of VIZRA AI Creative Studio and Omnia 1.0.',
       sections: [
         {
-          heading: 'Service Description & Acceptable Use',
-          body: 'Covers account responsibilities, intellectual property rights, AI-generated output disclosures, and limitation of liability.',
+          heading: '1. Age Eligibility (`STRICT_18_PLUS`) & Child Online Safety Controls',
+          body: 'VIZRA currently operates strictly as an 18+ adult creative studio (`STRICT_18_PLUS`), with minor-safe safeguards enforced in server middleware:',
+          bullets: [
+            'Active Operating Policy: 18+ minimum age requirement; passive minor access is rejected.',
+            'Jurisdictional Verifiable Parental Consent Readiness (Option 3): Designed without storing raw minor birthdates or unhashed guardian emails; live external parental verification remains blocked (`HTTP 424`) pending accredited vendor integration.',
+            'Age-Appropriate Feature Restrictions (Option 4): Middleware blocks under-18 flagged sessions from Live Voice (`/live`), external workspace OAuth connectors, unrestricted audio synthesis, paid upgrades, and sponsored VIZRA Engage cards, paired with strict `BLOCK_LOW_AND_ABOVE` safety thresholds.',
+          ],
+        },
+        {
+          heading: '2. Intellectual Property, AI Copyrightability & DMCA Procedure',
+          body: 'Users retain ownership of original human inputs. Under USCO guidance, purely AI-generated outputs without sufficient human authorship may not qualify for copyright registration. Copyright takedown notices under 17 U.S.C. § 512 may be submitted via /contact.',
+        },
+        {
+          heading: '3. Acceptable Use, API Limits & AI Provenance',
+          body: 'Requests must respect the 50,000-character prompt limit, 15MB attachment cap, and safety prohibitions against CSAM/CSAE, self-harm, CBRN, and non-consensual synthetic media. Exported visuals and audio include machine-readable AI provenance aligned with EU AI Act Article 50(2).',
         },
       ],
     },
@@ -495,15 +714,32 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Privacy Policy',
-    jsonLd: [buildBreadcrumbSchema('Privacy Policy', '/privacy-policy')],
+    jsonLd: [
+      buildBreadcrumbSchema('Privacy Policy', '/privacy-policy'),
+      buildWebPageSchema(
+        'Privacy Policy & Data Protection — Vizra AI Studio',
+        'Privacy Policy detailing information collection, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
+        '/privacy-policy'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'DATA PROTECTION & PRIVACY NOTICE',
+      eyebrow: 'DATA PROTECTION & PRIVACY NOTICE · POLICY V2026-11-11',
       h1: 'Privacy Policy',
-      lead: 'How Vizra AI Creative Studio collects, processes, secures, and protects your data and privacy rights.',
+      lead: 'Effective Date: November 11, 2026. How VIZRA AI Creative Studio collects, processes, protects, and lets you export or erase your data.',
       sections: [
         {
-          heading: 'Data Governance & User Rights',
-          body: 'Details workspace data isolation, third-party processors, retention schedules, and GDPR/CCPA rights.',
+          heading: '1. Data Collected & Legal Bases',
+          body: 'VIZRA practices strict data minimization (GDPR Arts. 6, 15–22; CCPA/CPRA; India DPDP Act 2023):',
+          bullets: [
+            'Account Information (Optional Google Sign-In): Firebase User UID, display name, email, and avatar (`users/{userId}`).',
+            'Workspace Prompts & Attachments: User prompts and uploaded multimodal files routed via HTTPS proxy (`/api/*`) to Google Gemini (`@google/genai`), with personal memories scoped per UID and scrubbed for email/phone/key patterns.',
+            'Consent & Security Records: Anonymous random consent UUID (`consentId`) without raw IP logging; login security notification alerts mask IPs (`/24` IPv4 or `/48` IPv6).',
+            'Zero Data Sales: VIZRA never sells personal data to data brokers or advertisers.',
+          ],
+        },
+        {
+          heading: '2. Subprocessors & Self-Service Rights',
+          body: 'Infrastructure subprocessors include Google Cloud & Firebase (Auth/Firestore), Google Gemini API & Lyria, EMBL-EBI AlphaFold DB & NCBI PubChem/PubMed (Science Hub), Vercel Inc. (hosting & cookieless Web Analytics), Google Fonts, and optional Google Sheets / Resend email. Users can export JSON threads from /history or permanently erase server and local account records via `DELETE /api/account/data` on /settings.',
         },
       ],
     },
@@ -517,15 +753,39 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     robots: 'index, follow',
     ogType: 'website',
     breadcrumbLabel: 'Cookie Policy',
-    jsonLd: [buildBreadcrumbSchema('Cookie Policy', '/cookie-policy')],
+    jsonLd: [
+      buildBreadcrumbSchema('Cookie Policy', '/cookie-policy'),
+      buildWebPageSchema(
+        'Cookie & Storage Policy — Vizra AI Creative Studio',
+        'Cookie and browser storage policy explaining strictly necessary, analytics, functional, and marketing technologies used in Vizra and consent controls.',
+        '/cookie-policy'
+      ),
+    ],
     prehydration: {
-      eyebrow: 'CONSENT & BROWSER STORAGE GOVERNANCE',
+      eyebrow: 'CONSENT & BROWSER STORAGE GOVERNANCE · POLICY V2026-11-11',
       h1: 'Cookie & Storage Policy',
-      lead: 'Transparent disclosure of browser storage and cookies used across Vizra AI Creative Studio, with real-time consent withdrawal controls.',
+      lead: 'Effective Date: November 11, 2026. Transparent disclosure of browser localStorage, IndexedDB, cookieless Vercel Web Analytics, and consent withdrawal controls.',
       sections: [
         {
-          heading: 'Storage Categories & Consent Controls',
-          body: 'Strictly Necessary, Analytics, Functional, and Marketing storage governance.',
+          heading: '1. Default-Off Optional Consent & Cookieless Analytics',
+          body: 'Optional categories (`Analytics` / `@vercel/speed-insights`, `Functional`, and `Marketing` / VIZRA Engage) default to OFF until explicit user opt-in and can be withdrawn immediately on /cookie-policy or in the footer. `@vercel/analytics` operates cookieless without cross-site identifiers.',
+        },
+        {
+          heading: '2. Browser Storage & Technology Inventory',
+          body: 'Complete inventory of browser keys and telemetry scripts used in VIZRA:',
+          table: {
+            headers: ['Key / Technology', 'Category', 'Storage Type', 'Purpose'],
+            rows: [
+              ['vizra_cookie_consent_v1', 'Strictly Necessary', 'localStorage', 'Stores versioned cookie consent state'],
+              ['vizra_anonymous_consent_id_v1', 'Strictly Necessary', 'localStorage', 'Anonymous UUID linking consent audit events'],
+              ['firebase:authUser:*', 'Strictly Necessary', 'IndexedDB / Local', 'Maintains authenticated Google sign-in session'],
+              ['@vercel/analytics', 'Cookieless Web', 'Cookieless Beacon', 'Aggregate pageview metrics without cookies'],
+              ['@vercel/speed-insights', 'Analytics (Opt-In)', 'Telemetry Script', 'Core Web Vitals gated behind Analytics consent'],
+              ['vizra_theme_mode_v1', 'Functional', 'localStorage', 'Remembers Dark/Light UI theme across reloads'],
+              ['omnia_conversations_v1', 'Functional', 'localStorage', 'Local Omnia chat threads for /history and /ai'],
+              ['vizra_engage_dismissed_cards', 'Marketing (Opt-In)', 'sessionStorage', 'Dismissed studio tips purged on consent withdrawal'],
+            ],
+          },
         },
       ],
     },
@@ -542,9 +802,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'OMNIA 1.0 LIVE WORKSPACE',
+      eyebrow: 'OMNIA 1.0 LIVE WORKSPACE · NOINDEX',
       h1: 'Omnia 1.0 AI Creative Workspace',
-      lead: 'Interactive workspace for multimodal reasoning, grounded research, code generation, and 10-stage creative projects.',
+      lead: 'Private interactive workspace for multimodal reasoning, grounded research, code synthesis, and 10-stage creative projects.',
       sections: [],
     },
   },
@@ -558,9 +818,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'SESSION ARCHIVE',
+      eyebrow: 'SESSION ARCHIVE · NOINDEX',
       h1: 'Saved Conversations',
-      lead: 'Manage your saved Omnia 1.0 conversation threads.',
+      lead: 'Private user-specific session archive for managing saved Omnia 1.0 threads.',
       sections: [],
     },
   },
@@ -574,9 +834,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'STUDIO PREFERENCES',
+      eyebrow: 'STUDIO PREFERENCES · NOINDEX',
       h1: 'Application Settings',
-      lead: 'Configure theme, response style, language preferences, and privacy controls.',
+      lead: 'Private account preferences, response style controls, and data erasure tools.',
       sections: [],
     },
   },
@@ -590,9 +850,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'WORKSPACE & DEVELOPER CONSOLE',
+      eyebrow: 'WORKSPACE & DEVELOPER CONSOLE · NOINDEX',
       h1: 'Workspace & Developer Console',
-      lead: 'Manage 10-stage creative projects, multimodal assets, and usage telemetry.',
+      lead: 'Private user console for 10-stage creative projects, usage telemetry, and workspace tools.',
       sections: [],
     },
   },
@@ -606,9 +866,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'ADMINISTRATOR DIAGNOSTICS',
+      eyebrow: 'ADMINISTRATOR DIAGNOSTICS · NOINDEX',
       h1: 'Search Indexing & Crawlability Verification',
-      lead: 'Restricted administrator console for technical SEO and crawler diagnostics.',
+      lead: 'Restricted administrator console for technical SEO and crawler verification.',
       sections: [],
     },
   },
@@ -625,7 +885,7 @@ const NOT_FOUND_DEFINITION: Omit<RouteSeoDefinition, 'canonicalPath'> = {
   prehydration: {
     eyebrow: 'HTTP 404 · ROUTE NOT FOUND',
     h1: 'This route does not exist in the Vizra workspace.',
-    lead: 'The requested URL could not be resolved. Return to the Vizra homepage or launch Omnia 1.0.',
+    lead: 'The requested URL could not be resolved. Return to the Vizra homepage or browse our public documentation.',
     sections: [],
   },
 };
@@ -774,7 +1034,6 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
 
     if (matches.length > 0) {
       matches[0].setAttribute('content', content);
-      // Remove any accidental duplicates
       for (let i = 1; i < matches.length; i++) {
         matches[i].remove();
       }
@@ -790,7 +1049,6 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
   upsertMeta('name', 'robots', payload.robots);
   upsertMeta('name', 'googlebot', payload.robots);
 
-  // Open Graph tags (automatically removed if payload is a private/utility or 404 route)
   upsertMeta('property', 'og:title', payload.ogTitle);
   upsertMeta('property', 'og:description', payload.ogDescription);
   upsertMeta('property', 'og:type', payload.ogType);
@@ -802,14 +1060,12 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
   upsertMeta('property', 'og:site_name', payload.ogSiteName);
   upsertMeta('property', 'og:locale', payload.ogLocale);
 
-  // Twitter / X Card tags (automatically removed if payload is a private/utility or 404 route)
   upsertMeta('name', 'twitter:card', payload.twitterCard);
   upsertMeta('name', 'twitter:title', payload.twitterTitle);
   upsertMeta('name', 'twitter:description', payload.twitterDescription);
   upsertMeta('name', 'twitter:image', payload.twitterImage);
   upsertMeta('name', 'twitter:image:alt', payload.twitterImageAlt);
 
-  // Canonical link tag (removed on 404 routes)
   const canonicalLinks = Array.from(
     document.head.querySelectorAll('link[rel="canonical"]')
   );
@@ -829,7 +1085,6 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
     canonicalLinks.forEach((el) => el.remove());
   }
 
-  // JSON-LD Structured Data script
   const existingJsonLd = Array.from(
     document.head.querySelectorAll('script[type="application/ld+json"]')
   );
@@ -872,8 +1127,115 @@ function escapeHtmlText(str: string): string {
 }
 
 /**
- * Injects route-specific metadata, JSON-LD, and accessible pre-hydration HTML into index.html
- * for initial server responses before React hydration.
+ * Generates visible, Obsidian dark-themed semantic HTML for `<div id="root">`
+ * with zero nested `<div>` elements so any crawler or HTML parser extracts
+ * complete headings, navigation links, feature lists, tables, and FAQs cleanly
+ * prior to React mount. React cleanly replaces `#root` contents on boot.
+ */
+export function buildPrehydrationRootHtml(payload: RouteSeoPayload): string {
+  if (!payload.isIndexable) {
+    return `<!-- VIZRA_PRERENDER_START -->
+      <main style="background:#050505;color:#e5e5e5;font-family:Inter,system-ui,sans-serif;max-width:48rem;margin:4rem auto;padding:2rem;">
+        <p style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#eb3b2d;margin:0 0 0.75rem;">${escapeHtmlText(payload.prehydration.eyebrow)}</p>
+        <h1 style="font-size:2rem;line-height:1.2;color:#ffffff;margin:0 0 0.75rem;">${escapeHtmlText(payload.prehydration.h1)}</h1>
+        <p style="font-size:1rem;line-height:1.6;color:#a3a3a3;margin:0 0 1.5rem;">${escapeHtmlText(payload.prehydration.lead)}</p>
+        <nav aria-label="Primary recovery links"><a href="/" style="color:#ffffff;text-decoration:underline;margin-right:1.25rem;">Return to VIZRA Home</a><a href="/docs" style="color:#d4d4d4;text-decoration:underline;">Technical Documentation</a></nav>
+      </main>
+      <!-- VIZRA_PRERENDER_END -->`;
+  }
+
+  const navLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/features', label: 'Features' },
+    { href: '/tools', label: 'AI Tools' },
+    { href: '/studio', label: 'Creative Studio' },
+    { href: '/explore', label: 'Explore 3D' },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/docs', label: 'Docs' },
+    { href: '/about', label: 'About' },
+    { href: '/contact', label: 'Contact' },
+  ];
+
+  const navHtml = navLinks
+    .map(
+      (link) =>
+        `<a href="${escapeHtmlAttr(link.href)}" style="color:${
+          payload.canonicalPath === link.href ? '#ffffff' : '#a3a3a3'
+        };text-decoration:none;font-size:13px;margin-right:16px;">${escapeHtmlText(link.label)}</a>`
+    )
+    .join('');
+
+  const sectionsHtml = payload.prehydration.sections
+    .map((sec) => {
+      const bulletsHtml =
+        sec.bullets && sec.bullets.length > 0
+          ? `<ul style="margin:0.75rem 0 0;padding-left:1.25rem;color:#d4d4d4;line-height:1.7;">${sec.bullets
+              .map((b) => `<li style="margin-bottom:0.4rem;">${escapeHtmlText(b)}</li>`)
+              .join('')}</ul>`
+          : '';
+
+      const tableHtml = sec.table
+        ? `<table style="width:100%;border-collapse:collapse;margin-top:1rem;font-size:13px;text-align:left;color:#e5e5e5;">
+            <thead><tr style="border-bottom:1px solid #262626;">${sec.table.headers
+              .map((h) => `<th style="padding:10px 8px;color:#ffffff;">${escapeHtmlText(h)}</th>`)
+              .join('')}</tr></thead>
+            <tbody>${sec.table.rows
+              .map(
+                (row) =>
+                  `<tr style="border-bottom:1px solid #171717;">${row
+                    .map((cell) => `<td style="padding:10px 8px;color:#d4d4d4;">${escapeHtmlText(cell)}</td>`)
+                    .join('')}</tr>`
+              )
+              .join('')}</tbody>
+          </table>`
+        : '';
+
+      const faqsHtml =
+        sec.faqs && sec.faqs.length > 0
+          ? `<dl style="margin:1rem 0 0;">${sec.faqs
+              .map(
+                (f) =>
+                  `<dt style="font-weight:600;color:#ffffff;margin-top:0.9rem;">${escapeHtmlText(f.q)}</dt><dd style="margin:0.35rem 0 0;color:#a3a3a3;line-height:1.6;">${escapeHtmlText(f.a)}</dd>`
+              )
+              .join('')}</dl>`
+          : '';
+
+      return `<section style="margin-top:2rem;padding:1.5rem;border:1px solid #1f1f1f;border-radius:12px;background:#111111;">
+          <h2 style="font-size:1.25rem;color:#ffffff;margin:0 0 0.6rem;">${escapeHtmlText(sec.heading)}</h2>
+          <p style="font-size:0.95rem;line-height:1.65;color:#a3a3a3;margin:0;">${escapeHtmlText(sec.body)}</p>${bulletsHtml}${tableHtml}${faqsHtml}
+        </section>`;
+    })
+    .join('\n');
+
+  return `<!-- VIZRA_PRERENDER_START -->
+      <header style="background:#050505;border-bottom:1px solid #1a1a1a;padding:18px 24px;">
+        <nav aria-label="Main navigation" style="max-width:68rem;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+          <a href="/" style="color:#ffffff;font-weight:700;letter-spacing:0.08em;text-decoration:none;margin-right:24px;">VIZRA</a>
+          ${navHtml}
+        </nav>
+      </header>
+      <main style="background:#050505;color:#e5e5e5;font-family:Inter,system-ui,sans-serif;max-width:68rem;margin:0 auto;padding:48px 24px 56px;">
+        <p style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#eb3b2d;margin:0 0 0.75rem;">${escapeHtmlText(payload.prehydration.eyebrow)}</p>
+        <h1 style="font-size:2.25rem;line-height:1.15;color:#ffffff;margin:0 0 1rem;">${escapeHtmlText(payload.prehydration.h1)}</h1>
+        <p style="font-size:1.05rem;line-height:1.65;color:#d4d4d4;margin:0 0 2rem;max-width:52rem;">${escapeHtmlText(payload.prehydration.lead)}</p>
+        ${sectionsHtml}
+      </main>
+      <footer style="background:#050505;border-top:1px solid #1a1a1a;padding:24px;color:#737373;font-size:12px;">
+        <nav aria-label="Footer navigation" style="max-width:68rem;margin:0 auto;display:flex;flex-wrap:wrap;gap:16px;">
+          <span>VIZRA — AI Creative Studio &amp; Omnia 1.0</span>
+          <a href="/terms-and-conditions" style="color:#a3a3a3;text-decoration:none;">Terms &amp; Conditions</a>
+          <a href="/privacy-policy" style="color:#a3a3a3;text-decoration:none;">Privacy Policy</a>
+          <a href="/cookie-policy" style="color:#a3a3a3;text-decoration:none;">Cookie Policy</a>
+          <a href="/llms.txt" style="color:#a3a3a3;text-decoration:none;">llms.txt</a>
+          <a href="/sitemap.xml" style="color:#a3a3a3;text-decoration:none;">Sitemap</a>
+        </nav>
+      </footer>
+      <!-- VIZRA_PRERENDER_END -->`;
+}
+
+/**
+ * Injects route-specific metadata, JSON-LD, and complete visible semantic HTML
+ * inside `<div id="root">` for initial server responses and prerendered static files.
  */
 export function injectSeoIntoHtml(
   rawHtml: string,
@@ -947,22 +1309,18 @@ export function injectSeoIntoHtml(
     html = html.replace(fallbackPattern, headBlock);
   }
 
-  // Replace pre-hydration <main> inside #root with route-accurate accessible content (without aria-hidden="true")
-  const sectionsHtml = payload.prehydration.sections
-    .map(
-      (sec) =>
-        `\n        <h2>${escapeHtmlText(sec.heading)}</h2>\n        <p>${escapeHtmlText(sec.body)}</p>`
-    )
-    .join('');
-
-  const mainFallbackHtml = `<main class="sr-only">
-        <h1>${escapeHtmlText(payload.prehydration.h1)}</h1>
-        <p>${escapeHtmlText(payload.prehydration.lead)}</p>${sectionsHtml}
-      </main>`;
-
+  const prerenderHtml = buildPrehydrationRootHtml(payload);
+  const prerenderMarkerPattern =
+    /<!--\s*VIZRA_PRERENDER_START\s*-->[\s\S]*?<!--\s*VIZRA_PRERENDER_END\s*-->/i;
   const mainPattern = /<main\b[^>]*>[\s\S]*?<\/main>/i;
-  if (mainPattern.test(html)) {
-    html = html.replace(mainPattern, mainFallbackHtml);
+  const rootEmptyPattern = /(<div\b[^>]*id=["']root["'][^>]*>)[\s\S]*?(<\/div>)/i;
+
+  if (prerenderMarkerPattern.test(html)) {
+    html = html.replace(prerenderMarkerPattern, prerenderHtml);
+  } else if (mainPattern.test(html)) {
+    html = html.replace(mainPattern, prerenderHtml);
+  } else if (rootEmptyPattern.test(html)) {
+    html = html.replace(rootEmptyPattern, `$1\n      ${prerenderHtml}\n    $2`);
   }
 
   return html;

@@ -3457,6 +3457,18 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     res.sendFile(path.resolve(__dirname, 'public', 'sitemap.xml'));
   });
 
+  app.get('/llms.txt', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.sendFile(path.resolve(__dirname, 'public', 'llms.txt'));
+  });
+
+  app.get('/llms-full.txt', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.sendFile(path.resolve(__dirname, 'public', 'llms-full.txt'));
+  });
+
   app.get('/og-image.png', (_req, res) => {
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=604800');

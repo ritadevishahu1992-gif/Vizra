@@ -239,23 +239,46 @@ async function runVerification() {
   const rootDir = process.cwd();
 
   // 1. Verify robots.txt (File + HTTP endpoint)
-  const expectedRobots = `User-agent: *\nAllow: /\n\nSitemap: https://vizra.vercel.app/sitemap.xml\n`;
   const robotsFileContent = fs
     .readFileSync(path.join(rootDir, 'public/robots.txt'), 'utf-8')
     .replace(/\r\n/g, '\n');
   const robotsHttp = await httpGet('/robots.txt');
   const robotsBody = robotsHttp.body.toString('utf-8').replace(/\r\n/g, '\n');
-  const hasDisallow = /Disallow:/i.test(robotsBody);
+  const requiredBotTokens = [
+    'User-agent: *',
+    'User-agent: Googlebot',
+    'User-agent: Google-Extended',
+    'User-agent: Bingbot',
+    'User-agent: OAI-SearchBot',
+    'User-agent: ChatGPT-User',
+    'User-agent: GPTBot',
+    'User-agent: PerplexityBot',
+    'User-agent: Claude-SearchBot',
+    'User-agent: ClaudeBot',
+    'Allow: /',
+    'Allow: /llms.txt',
+    'Allow: /llms-full.txt',
+    'Allow: /og-image.png',
+    'Disallow: /api/',
+    'Disallow: /ai',
+    'Disallow: /workspace',
+    'Disallow: /seo-diagnostics',
+    'Sitemap: https://vizra.vercel.app/sitemap.xml',
+  ];
+  const robotsHasRequiredRules = requiredBotTokens.every(
+    (token) => robotsFileContent.includes(token) && robotsBody.includes(token)
+  );
+  const robotsAllowsRoot = !/^\s*Disallow:\s*\/\s*$/im.test(robotsBody);
 
   record(
     'Robots.txt',
-    'public/robots.txt & GET /robots.txt allow crawlers across all public routes & OG image assets',
+    'public/robots.txt & GET /robots.txt allow public routes/AI crawlers & protect private/API routes',
     robotsHttp.status === 200 &&
       String(robotsHttp.headers['content-type']).includes('text/plain') &&
-      robotsFileContent.trim() === expectedRobots.trim() &&
-      robotsBody.trim() === expectedRobots.trim() &&
-      !hasDisallow,
-    `Status=${robotsHttp.status} | Content-Type=${robotsHttp.headers['content-type']} | Disallow=${hasDisallow ? 'PRESENT' : 'NONE'}`
+      robotsFileContent.trim() === robotsBody.trim() &&
+      robotsHasRequiredRules &&
+      robotsAllowsRoot,
+    `Status=${robotsHttp.status} | Content-Type=${robotsHttp.headers['content-type']} | Required rules=${robotsHasRequiredRules} | Public root allowed=${robotsAllowsRoot}`
   );
 
   // 2. Verify Uniqueness of Titles, Descriptions, and Canonicals across all 12 Public Routes
