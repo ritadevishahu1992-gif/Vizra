@@ -10,22 +10,23 @@
 - [Creative Studio & R&D Roadmap](https://vizra.vercel.app/studio): 4 studio engines (Temporal Motion Synthesis, Omnia Neural Direction, Procedural Shader Synthesis, Kinetic Spatial Typography) and 6 future R&D concept prototypes.
 - [Explore 3D Creative Showcase](https://vizra.vercel.app/explore): Interactive 3D perspective showcase tunnel and starter prompt remix profiles across 6 creative disciplines.
 - [Pricing & Compute Tiers](https://vizra.vercel.app/pricing): Creator Free ($0), Omnia Pro ($19/mo billed annually or $24/mo monthly), and VIZRA Studio & Team ($64/mo billed annually or $79/mo monthly), plus billing FAQs.
-- [Technical Documentation](https://vizra.vercel.app/docs): System architecture, intent classification & model routing, 10-stage project workflows, REST API reference, payload limits, and SSRF security controls.
+- [Public Documentation Centre (A–H)](https://vizra.vercel.app/docs): Complete A–Z documentation (Sections A–H, 50 reference topics and 17 feature guides) covering Omnia 1.0, 10-stage workflows, live vs. staged availability, privacy & security, troubleshooting, and Public API status.
 - [About VIZRA & Core Creed](https://vizra.vercel.app/about): Mission ("Don't just ask AI. Work with it."), response proportionality, zero fabricated citations, and studio philosophy.
 - [Contact & Studio Inquiries](https://vizra.vercel.app/contact): Enterprise studio onboarding, technical support, partnerships, and early-access beta requests.
 
 ## Policy & Governance
 
-- [Privacy Policy](https://vizra.vercel.app/privacy-policy): Minimal data collection, UID-scoped Firestore rules, consent records, self-service account deletion (`DELETE /api/account/data`), and subprocessors.
+- [Privacy Policy](https://vizra.vercel.app/privacy-policy): Minimal data collection, user-isolated cloud storage, consent records, self-service account deletion (`DELETE /api/account/data`), and subprocessors.
 - [Terms & Conditions](https://vizra.vercel.app/terms-and-conditions): Active 18+ operating policy (`STRICT_18_PLUS`), acceptable use, AI copyrightability notice, DMCA procedure, and EU AI Act Article 50(2) provenance disclosures.
 - [Cookie & Storage Policy](https://vizra.vercel.app/cookie-policy): Default-off optional categories (`Analytics`, `Functional`, `Marketing`), cookieless Vercel Web Analytics separation, and storage inventory.
 
 ## Extended AI Reference
 
-- [Full Structured Reference (/llms-full.txt)](https://vizra.vercel.app/llms-full.txt): Complete factual specification of Omnia 1.0 models, live vs. staging capabilities, rate/payload limits, safety posture, and non-indexed workspace boundaries.
+- [Full Structured Reference (/llms-full.txt)](https://vizra.vercel.app/llms-full.txt): Complete factual specification of Omnia 1.0 capabilities, live vs. staging availability, workspace boundaries, safety posture, and non-indexed routes.
 
 ## Key Factual Boundaries
 
 - **Age Policy**: VIZRA operates strictly as an 18+ adult creative studio (`STRICT_18_PLUS`).
-- **Live vs. Staging Status**: Conversational reasoning, grounded Google Search citations, React/TypeScript/GLSL code synthesis, Science Hub queries (AlphaFold DB, PubChem, PubMed), Lyria 3 audio generation, and authenticated Live Voice WebSocket sessions are implemented server-side (`GEMINI_API_KEY` required). Temporal Video & Scene Synthesis and third-party external OAuth connectors (Google Workspace, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disclosed in the UI and docs as In Staging / Pending Approval.
-- **Non-Indexed Private Routes**: `/ai`, `/history`, `/settings`, `/workspace`, `/seo-diagnostics`, and `/api/*` are user-specific, authenticated, or operational routes marked `noindex, nofollow` and excluded from crawling.
+- **Live vs. Staging Status**: Conversational reasoning, grounded Google Search citations, React/TypeScript/GLSL code synthesis, Science Hub queries (AlphaFold DB, PubChem, PubMed), AI Music Studio (5–120s instrumental WAV audio), and authenticated Live Voice Mode are live inside the web studio. Temporal Video & Scene Synthesis (`COMING SOON`) and third-party external OAuth connectors (Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disclosed in the UI and docs as `UNAVAILABLE` / In Staging pending external approval.
+- **Public External API Status**: `UNAVAILABLE` — VIZRA does not currently offer an external public REST API, SDK, or webhook platform (`/docs?doc=public-api-status`). Interactive studio capabilities operate inside `/ai` and `/workspace`.
+- **Non-Indexed Private Routes**: `/ai`, `/history`, `/settings`, `/workspace`, `/seo-diagnostics`, `/live`, and `/api/*` are user-specific, authenticated, or operational routes marked `noindex, nofollow` and excluded from crawling.

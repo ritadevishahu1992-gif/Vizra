@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false,
   "crons": [
     {
       "path": "/api/cron/omnia-sync",
@@ -137,9 +138,17 @@
       ]
     },
     {
-      "source": "/(ai|history|settings|workspace|dashboard|seo-diagnostics|crawler-audit)",
+      "source": "/(ai|history|settings|workspace|dashboard|seo-diagnostics|crawler-audit|live)(/.*)?",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" }
       ]
     }
   ]

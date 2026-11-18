@@ -13,8 +13,8 @@
 Core Operating Principles (from `/about`):
 1. **Response Proportionality**: Brief conversational greetings receive direct concise replies; complex technical, research, or creative requests unlock deep structured analysis.
 2. **Zero Fabricated Citations**: When real-time web grounding fails to verify a claim, or when queried about unannounced products, Omnia explicitly communicates uncertainty instead of fabricating URLs or facts.
-3. **Persistent Studio Context**: Work organized in 10-stage projects synchronizes across sessions via Firebase Authentication and Cloud Firestore (`users/{userId}/projects`) or browser localStorage (`omnia_conversations_v1`) when anonymous.
-4. **Architectural Honesty**: Live production tools are clearly separated in documentation and UI from staging prototypes and future R&D concepts.
+3. **Persistent Studio Context**: Work organized in 10-stage projects synchronizes across sessions via owner-isolated cloud storage (when signed in) or local browser storage (when exploring as a guest).
+4. **Architectural Honesty**: Live production tools are clearly separated in UI and public documentation (`AVAILABLE`, `LIMITED`, `UNAVAILABLE`, `COMING SOON`) from staging prototypes and future R&D concepts.
 
 ---
 
@@ -26,29 +26,29 @@ Core Operating Principles (from `/about`):
 4. `/studio` — Creative Studio & R&D Roadmap: 4 Studio Engines and 6 Interactive R&D Roadmap Prototypes.
 5. `/explore` — Explore 3D Creative Showcase: Interactive 3D perspective tunnel of curated AI visual prompts and 6 discipline starter profiles.
 6. `/pricing` — Pricing & Compute Tiers: Creator Free, Omnia Pro, VIZRA Studio & Team, full entitlement comparison table, and 4 billing FAQs.
-7. `/docs` — Technical Documentation: Overview, Intent Routing, 10-Stage Workflows, API Reference & Limits, and Security & SSRF protection.
+7. `/docs` — Public Documentation Centre (Sections A–H): 50 topics and 17 dedicated feature guides covering getting started, platform architecture, OMNIA prompting, security/privacy, troubleshooting, feature availability matrix, and Public API status.
 8. `/about` — About VIZRA: Philosophy creed, core engineering principles, and target creator disciplines.
-9. `/contact` — Contact & Studio Inquiries: Direct inquiry form (`POST /api/contact`), Early-Access Beta form (`POST /api/early-access`), and response SLAs.
-10. `/terms-and-conditions` — Legal Terms & Conditions (including `STRICT_18_PLUS` policy, USCO AI copyrightability notice, DMCA 17 U.S.C. § 512 procedure, and EU AI Act Art. 50(2) provenance).
-11. `/privacy-policy` — Privacy Policy & Data Protection (data collection, legal bases, retention, subprocessors, GDPR/CCPA/DPDP rights, `DELETE /api/account/data`).
+9. `/contact` — Contact & Studio Inquiries: Direct studio inquiry form, early-access beta request form, and response SLAs.
+10. `/terms-and-conditions` — Legal Terms & Conditions (`STRICT_18_PLUS` adult studio policy, acceptable use, USCO AI copyrightability notice, DMCA 17 U.S.C. § 512 procedure, and EU AI Act Art. 50(2) provenance).
+11. `/privacy-policy` — Privacy Policy & Data Protection (data minimization, legal bases, retention, subprocessors, GDPR/CCPA/DPDP rights, `DELETE /api/account/data`).
 12. `/cookie-policy` — Cookie & Storage Policy (storage inventory table, cookieless `@vercel/analytics` separation, default-off opt-in consent & withdrawal).
 
 ---
 
-## 3. Architecture, Models & Live Capabilities (`/features`, `/docs`)
+## 3. Architecture, Capabilities & Verified Safety Posture (`/features`, `/docs`)
 
 ### 3.1 Four Core Pillars
 - **Think**: Multi-step analytical reasoning, live Google Search grounding with clickable verified sources, and cross-session memory continuity.
 - **Create**: Editorial writing, narrative scripts, design tokens, procedural visual synthesis, and interactive HTML/Canvas/SVG artifacts.
-- **Build**: Production React/TypeScript components, GLSL fragment shaders, presentation decks, and structured project deliverables.
+- **Build**: Production React/TypeScript components, GLSL fragment shaders, presentation decks, and structured 10-stage project deliverables.
 - **Explore**: Interactive 3D creative universe gallery (`/explore`), Science Hub lookups (`AlphaFold DB`, `PubChem`, `PubMed`), and prompt remixing.
 
-### 3.2 Omnia 1.0 Intent Classification & Model Routing
-- **Fast Conversational Synthesis** (`gemini-3.1-flash-lite`): Casual chat, greetings, and quick clarifications.
-- **Reasoning, Coding & Multimodal Synthesis** (`gemini-3.8-flash` / `gemini-4-argon` with configurable `ThinkingLevel`): Architecture design, UI/GLSL engineering, document audits, and grounded research.
-- **Real-Time Live Voice** (`gemini-3.8-live`): Authenticated, ticketed bidirectional PCM audio WebSocket session (`/api/live/session` -> `/live` WS).
-- **AI Music Generation** (`Lyria 3`): Original instrumental audio stems and studio playback via backend music generation endpoint.
-- **Deterministic URL & SSRF Verification**: Web URL inspection endpoints validate protocols (`http`/`https`), perform DNS resolution, and block RFC1918 subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.1`, `::1`), and cloud metadata IPs (`169.254.169.254`).
+### 3.2 Omnia 1.0 Capabilities & Security Controls
+- **Conversational & Reasoning Modes**: Adapts dynamically between concise Quick replies, deep analytical Think reasoning, grounded web Research, Writing, Design, Code, and Multimodal File Analysis.
+- **Live Voice Mode** (`LIMITED`): Authenticated, 18+ real-time voice conversations inside `/ai` (requires signed-in account and microphone permission).
+- **AI Music Studio** (`AVAILABLE`): Original 5–120 second instrumental WAV compositions generated server-side with provenance metadata.
+- **Science Hub** (`AVAILABLE`): Educational scientific retrieval referencing EMBL-EBI AlphaFold DB, NCBI PubChem, and NCBI PubMed.
+- **Deterministic URL & SSRF Verification**: Web URL inspection endpoints validate HTTP/HTTPS protocols, perform DNS resolution, and block RFC1918 private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.1`, `::1`), and cloud metadata IPs (`169.254.169.254`).
 
 ---
 
@@ -61,14 +61,15 @@ Live Creative Tools (7):
 4. **React, TypeScript & GLSL Code** — Clean modular components, 60fps WebGL shaders, state logic, and security audits.
 5. **Executive Presentation Builder** — Structured slide outlines, data narrative flow, and clean deck copy.
 6. **Grounded Live Web Research** — Real-time web verification returning clickable citation chips with source domain validation.
-7. **Multimodal File & Code Audit** — Upload code files, PDFs, screenshots, CSVs, or logs for structural analysis inside the prompt bar.
+7. **Multimodal File & Code Audit** — Upload code files, PDFs, screenshots, CSVs, or logs for structural analysis inside the prompt bar (binary video files are not analyzed in chat).
 
 In Staging / Roadmap Tool (1):
-8. **Temporal Video & Scene Synthesis** (In Staging) — Storyboard sequencing and motion prompt choreography currently undergoing internal testing before public activation.
+8. **Temporal Video & Scene Synthesis** (`COMING SOON` / In Staging) — Storyboard sequencing and motion prompt choreography currently undergoing internal development before public activation.
 
 Data & Connector Disclosures:
-- **Local Multimodal File Upload** (`local_files`): **Live** (up to 5 files per prompt, 15MB request limit).
-- **Google Drive / Docs / Sheets**, **GitHub Repositories**, **Figma Design Files**, **Canva**, **YouTube**, **Notion**, **Dropbox**: **In Staging / External OAuth Configuration Pending** — require production OAuth client credentials and vendor app approval before external token exchange is enabled.
+- **Local Multimodal File Upload**: `LIMITED` / Live (up to `5` files per turn, `10 MB` max per file).
+- **Knowledge Base Explorer**: `LIMITED` / Live in local browser session index (up to `25 MB` upload).
+- **Google Drive / Docs / Sheets**, **GitHub Repositories**, **Figma Design Files**, **Canva**, **YouTube**, **Notion**, **Dropbox**: `UNAVAILABLE` / In Staging — require production OAuth client credentials and external provider approval before user connections are enabled.
 
 ---
 
@@ -92,50 +93,49 @@ Data & Connector Disclosures:
 
 ## 6. Pricing Plans, Quotas & Billing FAQs (`/pricing`)
 
-*Commercial Notice*: Paid tiers log preview/waitlist upgrade requests inside the workspace without collecting payment card details until live payment processing is activated.
+*Commercial Notice*: Paid tiers currently configure preview/waitlist tier preferences inside the workspace without collecting payment card details until live commercial checkout is activated.
 
 - **Creator Free** (`$0 / forever`):
   - Omnia 1.0 Quick, Think & Research modes
   - Grounded Google Search web citations
   - Up to 3 active 10-stage creative projects
-  - Standard API rate quota (`60 requests / min`)
+  - Standard request rate quota (`60 requests / min`)
   - Multimodal file analysis (`10 MB max`)
   - Local history persistence & JSON export
 - **Omnia Pro** (`$19 / mo` billed yearly — Save 20%, or `$24 / mo` monthly):
   - Unlimited 10-stage creative workspaces
   - High-priority quota (`240 requests / min`)
-  - Expanded multimodal attachments (`15 MB max`)
-  - Lyria 3 AI Music Studio & Gemini Live Voice
+  - Expanded studio workflows, AI Music Studio & Gemini Live Voice
   - DeepMind Science Hub (`AlphaFold`, `PubChem`, `PubMed`)
-  - Cross-device Firebase project & history sync
+  - Cross-device cloud project & history sync
   - Custom brand tone & personal memory bank
 - **VIZRA Studio & Team** (`$64 / mo` billed yearly — Save 20%, or `$79 / mo` monthly):
   - Dedicated enterprise compute & custom concurrency SLA
   - Shared team workspaces & role-based permissions
   - Private RAG corpus indexing & custom vector search
-  - Developer Console API key access
-  - VIZRA Engage campaign & Technical SEO Diagnostic Suite
+  - Workspace governance tokens (for authorized interactive studio sessions; external public API remains `UNAVAILABLE`)
+  - VIZRA Engage & Technical SEO Diagnostic Suite
   - Dedicated onboarding & priority SLA support
 
 Frequently Asked Questions (verbatim summary):
-- **Credit Calculation**: Quick and Think turns consume 1 credit per turn; Deep Web Research, high-resolution synthesis, and Lyria 3 audio generation consume compute-proportional credits tracked in the header Credit Usage Indicator.
+- **Credit Calculation**: Quick and Think turns consume 1 credit per turn; Deep Web Research, high-resolution synthesis, and audio generation consume compute-proportional credits tracked in the header Credit Usage Indicator.
 - **Billing Switching**: Monthly and Annual toggles apply immediately; annual billing discounts Omnia Pro and VIZRA Studio by 20%.
 - **Downgrading**: Existing project histories, files, and research notes are preserved (never deleted); up to 3 projects remain actively editable on Creator Free while extra projects switch to read-only mode.
 - **Enterprise & Academic Grants**: Custom concurrency and onboarding requests are accepted through `/contact`.
 
 ---
 
-## 7. API & Technical Limits (`/docs`)
+## 7. Operational Limits, Public API Status & Private Boundaries (`/docs`)
 
+- **Public External REST API**: `UNAVAILABLE` (`/docs?doc=public-api-status`) — VIZRA does not currently offer an external public REST API, SDK, or webhook platform for third-party applications.
 - **Prompt Character Cap**: Maximum `50,000` characters per prompt.
-- **Multimodal Attachments**: Up to `5` attachments per request; maximum `15 MB` total Express JSON body payload.
-- **Public API Rate Limit**: Sliding-window rate limiting across `/api/*` routes (`120 req/min` global ceiling, with stricter per-endpoint caps on `/api/chat`, `/api/music`, `/api/contact`, `/api/account/data`, `/api/live/session`).
-- **Live Voice Session Bounds**: Single-use short-lived ticket from `POST /api/live/session` (Firebase Auth required), max 2 concurrent sockets per UID, 10-minute session cap, `512 KB` max WebSocket frame payload.
+- **Multimodal Attachments**: Up to `5` files per prompt turn (`10 MB` max per file; binary video uploads are not supported in chat); Knowledge Base Explorer local index accepts up to `25 MB`.
+- **Interactive Abuse Protection**: Sliding-window rate limiting across server endpoints, plus authenticated 18+ account checks and concurrency caps (`max 2` concurrent sessions, `10-minute` session cap) on interactive Live Voice Mode.
 - **Non-Public / Authenticated Routes (Excluded from Crawling & Indexing)**:
   - `/ai` (Interactive Omnia Workspace)
   - `/history` (Saved Conversation Threads)
   - `/settings` (User Preferences & Self-Service Deletion)
-  - `/workspace` (Developer Console & Project Manager)
+  - `/workspace` (Workspace & Project Manager)
   - `/seo-diagnostics` (Restricted Admin Diagnostic Console)
   - `/api/*` and `/live`
 
@@ -143,6 +143,6 @@ Frequently Asked Questions (verbatim summary):
 
 ## 8. Contact & Support Channels (`/contact`)
 
-- **Enterprise Studio & Pricing** & **Developer API & Technical Support**: Submit via interactive contact form at `https://vizra.vercel.app/contact` (`POST /api/contact`).
-- **Early-Access Private Beta Requests**: Submit via `/contact` (`POST /api/early-access`) for upcoming engines (`Spatial Director`, `Harmonix`, `Chronos`, `Syndicate`).
+- **Enterprise Studio & Pricing** & **Technical Support**: Submit via interactive contact form at `https://vizra.vercel.app/contact`.
+- **Early-Access Private Beta Requests**: Submit via `/contact` for upcoming engines (`Spatial Director`, `Harmonix`, `Chronos`, `Syndicate`).
 - **Response SLAs**: Studio & Pro Priority Support `< 4 Hours`; General Inquiries `< 24 Hours`.

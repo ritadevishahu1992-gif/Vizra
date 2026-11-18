@@ -283,7 +283,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
           body: 'VIZRA offers predictable compute tiers from Creator Free ($0 forever) to Omnia Pro ($19/mo annual) and VIZRA Studio & Team ($64/mo annual), backed by deterministic SSRF protection and strict 18+ operating policies.',
           bullets: [
             'Pricing & Compute Tiers (/pricing): Compare Creator Free ($0), Omnia Pro ($19/mo annual or $24/mo monthly), and VIZRA Studio & Team ($64/mo annual or $79/mo monthly).',
-            'Technical Documentation (/docs): Architecture guides covering intent routing, 10-stage project continuity, REST endpoints, and payload boundaries (50,000-char prompt limit, 15MB request limit).',
+            'Public Documentation Centre (/docs): Complete A–Z user and platform guide (Sections A–H), 10-stage project workflows, feature availability matrix, and operational boundaries (50,000-char prompt limit, 10 MB file upload limit).',
             'About VIZRA (/about): Core philosophy ("Don\'t just ask AI. Work with it.") and zero fabricated citations policy.',
             'Contact & Early Access (/contact): Enterprise onboarding, technical support SLAs (<4h Pro/Studio, <24h general), and beta access requests.',
           ],
@@ -325,7 +325,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
         },
         {
           heading: '5-Step Idea-to-Finish Pipeline & 10-Stage Memory',
-          body: 'Structured creative projects preserve shared objectives, style tokens, research sources, and iteration checkpoints across 10 discrete workflow stages synchronized via Cloud Firestore (`users/{userId}/projects`) or local browser persistence.',
+          body: 'Structured creative projects preserve shared objectives, style tokens, research sources, and iteration checkpoints across 10 discrete workflow stages synchronized via owner-isolated cloud storage (when signed in) or local browser persistence.',
         },
         {
           heading: 'Live vs. Staging Capabilities Transparency',
@@ -373,7 +373,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
         },
         {
           heading: 'Supported Workspace Connectors & OAuth Status',
-          body: 'Local multimodal file uploads (up to 5 files, 15MB request payload) are live. External third-party OAuth integrations—Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, and Dropbox—are displayed transparently in Staging pending external OAuth app configuration.',
+          body: 'Local multimodal file uploads are live (up to 5 files per turn, 10 MB per file; binary video files are not analyzed in chat). External third-party OAuth integrations—Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, and Dropbox—are displayed transparently as UNAVAILABLE / In Staging pending external OAuth configuration.',
         },
       ],
     },
@@ -592,10 +592,10 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       sections: [
         {
           heading: 'Direct Support Channels & Response SLAs',
-          body: 'Inquiries submitted via the /contact form are routed directly to backend persistence (`POST /api/contact` and `POST /api/early-access`) with strict payload validation:',
+          body: 'Inquiries submitted via the /contact form are routed via `POST /api/contact` and Early-Access requests are validated with strict payload checks:',
           bullets: [
             'Enterprise Studio & Pricing: Custom concurrency quotas, team seats, academic grants, and institutional onboarding.',
-            'Developer API & Technical Support: Troubleshooting for Omnia 1.0 workflows, REST streaming routes, and security questions.',
+            'Platform & Technical Support: Troubleshooting for Omnia 1.0 workspace tools, 10-stage workflows, account controls, and security questions.',
             'Private Beta Early Access: Waitlist requests for Temporal Video & Scene Synthesis, Omnia Spatial Director, Harmonix, Chronos, and Syndicate.',
             'Response SLA — Studio & Pro Priority Support: Under 4 Hours.',
             'Response SLA — General Inquiries: Under 24 Hours.',
@@ -606,21 +606,21 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
   },
   '/docs': {
     canonicalPath: '/docs',
-    title: 'Technical Documentation & API Reference — Vizra AI Creative Studio',
+    title: 'Public Documentation Centre (A–Z) — Vizra AI Creative Studio',
     description:
-      'Official technical documentation for Vizra and Omnia 1.0 covering intent classification, model routing, 10-stage project workflows, REST APIs, and SSRF security.',
+      'Complete A–Z Public Documentation Centre for VIZRA and Omnia 1.0 covering platform guides, verified feature availability, prompting, privacy, security, and troubleshooting.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'article',
-    breadcrumbLabel: 'Technical Documentation',
+    breadcrumbLabel: 'Public Documentation',
     jsonLd: [
-      buildBreadcrumbSchema('Technical Documentation', '/docs'),
+      buildBreadcrumbSchema('Public Documentation', '/docs'),
       {
         '@context': 'https://schema.org',
         '@type': 'TechArticle',
-        headline: 'Omnia 1.0 Technical Documentation & Architecture',
+        headline: 'VIZRA Public Documentation Centre (Sections A–H)',
         description:
-          'Official technical documentation for Vizra and Omnia 1.0 covering intent classification, model routing, 10-stage project workflows, REST APIs, and SSRF security.',
+          'Complete A–Z Public Documentation Centre for VIZRA and Omnia 1.0 covering platform guides, verified feature availability, prompting, privacy, security, and troubleshooting.',
         url: `${SITE_ORIGIN}/docs`,
         author: {
           '@id': `${SITE_ORIGIN}/#organization`,
@@ -631,34 +631,33 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       },
     ],
     prehydration: {
-      eyebrow: 'TECHNICAL DOCUMENTATION · ARCHITECTURE & API REFERENCE',
-      h1: 'Omnia 1.0 Technical Documentation & Architecture.',
-      lead: 'System architecture guides, deterministic intent classification & model routing, 10-stage project continuity, REST API limits, and SSRF network security.',
+      eyebrow: 'PUBLIC DOCUMENTATION CENTRE · SECTIONS A–H',
+      h1: 'VIZRA Documentation',
+      lead: 'Verified A–Z guides for creators, visitors, and teams covering Omnia 1.0, studio tools, 10-stage workflows, live vs. staged availability, privacy & safety controls, and troubleshooting.',
       sections: [
         {
-          heading: '1. Platform Overview & Model Routing',
-          body: 'Omnia 1.0 dynamically routes queries across specialized server-side models depending on task complexity:',
+          heading: '1. Complete Documentation Structure (Sections A–H)',
+          body: 'Browse 50 public reference topics and 17 dedicated feature guides organized across eight clear sections:',
           bullets: [
-            'Casual & Fast Conversational Synthesis (gemini-3.1-flash-lite): Ultra-low-latency direct replies.',
-            'Deep Reasoning, Coding & Research (gemini-3.8-flash / gemini-4-argon): Multi-step reasoning (`ThinkingLevel`), TypeScript/React/GLSL code generation, and live Google Search grounding.',
-            'Real-Time Live Voice (gemini-3.8-live): Authenticated, single-use ticketed WebSocket session (`/api/live/session` -> `/live`).',
-            'AI Music Generation (Lyria 3): Original instrumental compositions generated server-side.',
-            'DeepMind Science Hub: Server-proxied queries to EMBL-EBI AlphaFold DB, NCBI PubChem, and NCBI PubMed.',
+            'Section A — Introduction (Topics 01–08): What VIZRA is, core philosophy, 18+ adult studio eligibility, getting started, and terminology.',
+            'Section B — Understanding the Platform (Topics 09–15): Platform overview, how Omnia 1.0 assists users, project workflows, navigation, and device compatibility.',
+            'Section C — Features & Tools (17 Feature Guides): Clear availability statuses (AVAILABLE, LIMITED, UNAVAILABLE, COMING SOON) across Chat, Live Web Research, Design, Code, Visual Canvas, AI Music Studio, Science Hub, Live Voice, and Knowledge Base.',
+            'Section D & E — OMNIA Prompting & User Guides (Topics 16–29): Effective prompting habits, multimodal file workflows, citations, and 10-stage studio walkthroughs.',
+            'Section F, G & H — Security, Troubleshooting & Technical Info (Topics 30–50): Privacy controls, 18+ safety safeguards, FAQs, system limits, and Public API status.',
           ],
         },
         {
-          heading: '2. REST Endpoints & Enforced Request Boundaries',
-          body: 'All AI inference runs exclusively through server-side `/api/*` proxy routes with secrets isolated from frontend bundles:',
+          heading: '2. Verified Availability, Operational Limits & Public API Status',
+          body: 'VIZRA operates transparently by separating production features from staged concepts:',
           bullets: [
-            'Maximum Prompt Size: 50,000 characters per turn.',
-            'Multimodal Attachment Limit: Maximum 5 attachments per request within a 15 MB Express JSON body ceiling.',
-            'Global Public API Rate Limit: 120 requests/minute per IP (`express-rate-limit`), with stricter per-endpoint sliding windows on chat, music, feedback, contact, and account erasure.',
-            'WebSocket Bounds (`/live`): Firebase ID token authentication required, max 2 concurrent sessions per UID, 10-minute session cap, 512 KB frame payload cap.',
+            'Public External API Status (UNAVAILABLE — Topic 48): VIZRA does not currently offer a public external REST API, SDK, or webhook platform; interactive creation operates inside /ai and /workspace.',
+            'Prompt & File Bounds: Up to 50,000 characters per prompt; up to 5 file attachments per turn (10 MB max per file in chat); Knowledge Base Explorer local index up to 25 MB.',
+            'Staged Features Disclosed Clearly: Temporal Video & Scene Synthesis (COMING SOON) and external OAuth cloud connectors (Drive, GitHub, Figma, Canva, YouTube, Notion, Dropbox) remain UNAVAILABLE / In Staging.',
           ],
         },
         {
-          heading: '3. Security, PII Scrubbing & SSRF Prevention',
-          body: 'URL inspection endpoints enforce strict HTTP/HTTPS protocol checks and DNS validation blocking loopback (`127.0.0.1`, `::1`), cloud metadata (`169.254.169.254`), and private RFC1918 networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`). Diagnostic endpoints require administrator authentication (`HTTP 401` if unauthenticated).',
+          heading: '3. Security, Privacy & SSRF Controls',
+          body: 'All AI generation runs strictly through protected server proxies without client-exposed API keys. URL inspection validates HTTP/HTTPS protocols and DNS resolution while blocking loopback (127.0.0.1, ::1), cloud metadata (169.254.169.254), and private RFC1918 networks. Diagnostic and user workspaces remain isolated behind authentication and `noindex, nofollow` controls.',
         },
       ],
     },

@@ -113,6 +113,7 @@ async function runTests() {
     'PerplexityBot',
     'Claude-SearchBot',
     'ClaudeBot',
+    'Applebot',
   ].every((b) => robotsBody.includes(`User-agent: ${b}`));
   const privateDisallowed = [
     'Disallow: /api/',
@@ -122,6 +123,8 @@ async function runTests() {
     'Disallow: /settings',
     'Disallow: /workspace',
     'Disallow: /seo-diagnostics',
+    'Disallow: /dashboard',
+    'Disallow: /crawler-audit',
   ].every((d) => robotsBody.includes(d));
 
   record(
@@ -149,13 +152,18 @@ async function runTests() {
     `HTTP ${sitemapRes.status} | Count=${locs.length}`
   );
 
-  // 3. Test Google Search Console file preservation & OG image
+  // 3. Test Google Search Console & Bing Webmaster verification files
   const gscRes = await httpGet('/googlef66bb3a90d865a89.html');
+  const bingRes = await httpGet('/BingSiteAuth.xml');
   record(
-    'Verification Asset',
-    'Google Search Console verification file remains intact',
-    gscRes.status === 200 && gscRes.body.includes('google-site-verification: googlef66bb3a90d865a89.html'),
-    `HTTP ${gscRes.status}`
+    'Verification Assets',
+    'Google Search Console & BingSiteAuth.xml verification files remain intact',
+    gscRes.status === 200 &&
+      gscRes.body.includes('google-site-verification: googlef66bb3a90d865a89.html') &&
+      bingRes.status === 200 &&
+      String(bingRes.headers['content-type']).includes('application/xml') &&
+      bingRes.body.includes('<users>'),
+    `GSC=HTTP ${gscRes.status} | Bing=HTTP ${bingRes.status}`
   );
 
   // 4. Test Rich Semantic Extraction on All 12 Public Routes (Without JS Execution)
@@ -168,7 +176,7 @@ async function runTests() {
     '/pricing': ['Creator Free', '$0', 'Omnia Pro', '$19', '$24', 'VIZRA Studio', '$64', '$79'],
     '/about': ['Don’t just ask AI. Work with it', 'Zero Fabricated Citations'],
     '/contact': ['Under 4 Hours', 'Under 24 Hours', '/api/contact'],
-    '/docs': ['50,000', '15 MB', '169.254.169.254', 'gemini-3.8-flash'],
+    '/docs': ['Sections A–H', '50,000', '10 MB', '169.254.169.254', 'UNAVAILABLE'],
     '/terms-and-conditions': ['STRICT_18_PLUS', 'USCO', '17 U.S.C.', '50(2)'],
     '/privacy-policy': ['DELETE /api/account/data', 'Google Cloud', 'DPDP'],
     '/cookie-policy': ['vizra_cookie_consent_v1', '@vercel/analytics', 'Cookieless'],
@@ -216,6 +224,7 @@ async function runTests() {
     { name: 'PerplexityBot', ua: 'Mozilla/5.0 (compatible; PerplexityBot/1.0; +https://perplexity.ai/perplexitybot)' },
     { name: 'Claude-SearchBot', ua: 'Claude-SearchBot/1.0' },
     { name: 'ClaudeBot', ua: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)' },
+    { name: 'Applebot', ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15 (Applebot/0.1; +http://www.apple.com/go/applebot)' },
     { name: 'curl', ua: 'curl/8.5.0' },
   ];
 
@@ -280,24 +289,41 @@ async function runTests() {
     `HTTP ${notFoundRes.status} | X-Robots-Tag=${notFoundRes.headers['x-robots-tag']}`
   );
 
+  const apiHealthRes = await httpGet('/api/health', 'GPTBot/1.2');
+  const liveHttpRes = await httpGet('/live', 'GPTBot/1.2');
+  record(
+    'API & Live Isolation',
+    '/api/health and /live enforce HTTP X-Robots-Tag: noindex, nofollow',
+    apiHealthRes.status === 200 &&
+      apiHealthRes.headers['x-robots-tag'] === 'noindex, nofollow' &&
+      liveHttpRes.status === 404 &&
+      liveHttpRes.headers['x-robots-tag'] === 'noindex, nofollow',
+    `/api/health=${apiHealthRes.status}(${apiHealthRes.headers['x-robots-tag']}) | /live=${liveHttpRes.status}(${liveHttpRes.headers['x-robots-tag']})`
+  );
+
   // 8. Verify vercel.json & built dist/ artifacts if built
   const vercelRaw = fs.readFileSync(path.join(rootDir, 'vercel.json'), 'utf-8');
   const vercelCfg = JSON.parse(vercelRaw);
   const rewritesOk =
+    vercelCfg.trailingSlash === false &&
     vercelCfg.rewrites.some((r: any) => r.source === '/llms.txt' && r.destination === '/llms.txt') &&
-    vercelCfg.rewrites.some((r: any) => r.source === '/llms-full.txt' && r.destination === '/llms-full.txt');
+    vercelCfg.rewrites.some((r: any) => r.source === '/llms-full.txt' && r.destination === '/llms-full.txt') &&
+    vercelCfg.headers.some((h: any) => h.source === '/api/(.*)' && h.headers?.some((kv: any) => kv.key === 'X-Robots-Tag' && kv.value === 'noindex, nofollow'));
   const distDir = path.join(rootDir, 'dist');
   const distFilesOk =
     fs.existsSync(path.join(distDir, 'llms.txt')) &&
     fs.existsSync(path.join(distDir, 'llms-full.txt')) &&
     fs.existsSync(path.join(distDir, 'robots.txt')) &&
     fs.existsSync(path.join(distDir, 'sitemap.xml')) &&
+    fs.existsSync(path.join(distDir, 'BingSiteAuth.xml')) &&
     fs.existsSync(path.join(distDir, 'pricing', 'index.html')) &&
-    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'pricing', 'index.html'), 'utf-8')).includes('Creator Free');
+    fs.existsSync(path.join(distDir, 'docs', 'index.html')) &&
+    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'pricing', 'index.html'), 'utf-8')).includes('Creator Free') &&
+    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'docs', 'index.html'), 'utf-8')).includes('VIZRA Documentation');
 
   record(
     'Vercel & Build Artifacts',
-    'vercel.json configures llms rewrites & dist/ includes static TXT/XML + rich prerendered HTML',
+    'vercel.json configures llms/noindex/trailingSlash & dist/ includes static TXT/XML + rich prerendered HTML',
     rewritesOk && distFilesOk,
     `vercel.json=${rewritesOk} | dist/ artifacts=${distFilesOk}`
   );
