@@ -44,6 +44,10 @@
       "destination": "/googlef66bb3a90d865a89.html"
     },
     {
+      "source": "/BingSiteAuth.xml",
+      "destination": "/BingSiteAuth.xml"
+    },
+    {
       "source": "/robots.txt",
       "destination": "/robots.txt"
     },
@@ -72,7 +76,7 @@
       "destination": "/$1/index.html"
     },
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|og-image\\.png).*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|BingSiteAuth\\.xml|og-image\\.png).*)",
       "destination": "/index.html"
     }
   ],
@@ -99,6 +103,13 @@
     },
     {
       "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=86400" }
+      ]
+    },
+    {
+      "source": "/BingSiteAuth.xml",
       "headers": [
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=86400" }
