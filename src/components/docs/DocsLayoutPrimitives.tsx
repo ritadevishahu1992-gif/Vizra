@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   X,
   ArrowUpRight,
+  Link2,
 } from 'lucide-react';
 import {
   DocArticle,
@@ -42,6 +43,88 @@ export const StatusLabel: React.FC<{ status: FeatureAvailabilityStatus }> = ({
     >
       {status}
     </span>
+  );
+};
+
+interface CopySectionLinkButtonProps {
+  anchorId: string;
+  sectionLabel: string;
+  queryString?: string;
+  compact?: boolean;
+}
+
+export const CopySectionLinkButton: React.FC<CopySectionLinkButtonProps> = ({
+  anchorId,
+  sectionLabel,
+  queryString,
+  compact = false,
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const search =
+      queryString !== undefined ? queryString : window.location.search;
+    const shareUrl = `${window.location.origin}${window.location.pathname}${search}#${anchorId}`;
+
+    let didCopy = false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        didCopy = true;
+      } catch {
+        didCopy = false;
+      }
+    }
+
+    if (!didCopy) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        didCopy = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch {
+        didCopy = false;
+      }
+    }
+
+    if (didCopy) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopyLink}
+      aria-label={`Copy direct link to ${sectionLabel}`}
+      title={copied ? 'Link copied to clipboard' : `Copy link to ${sectionLabel}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border font-mono text-[11px] font-medium transition-colors shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB3B2D] ${
+        compact ? 'px-2 py-1' : 'px-2.5 py-1'
+      } ${
+        copied
+          ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+          : 'border-neutral-200 dark:border-white/[0.1] bg-neutral-50 dark:bg-[#090909] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:border-[#EB3B2D]/60'
+      }`}
+    >
+      {copied ? (
+        <>
+          <Check size={12} className="shrink-0" />
+          <span>Copied</span>
+        </>
+      ) : (
+        <>
+          <Link2 size={12} className="shrink-0 text-[#EB3B2D]" />
+          <span>Copy Link</span>
+        </>
+      )}
+    </button>
   );
 };
 
@@ -158,9 +241,15 @@ export const DocsArticleReader: React.FC<ArticleReaderProps> = ({
   };
 
   const scrollToHeading = (blockId: string) => {
-    const el = document.getElementById(`doc-block-${blockId}`);
+    const anchorId = `doc-block-${blockId}`;
+    const el = document.getElementById(anchorId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${window.location.search}#${anchorId}`
+      );
     }
   };
 
@@ -254,9 +343,16 @@ export const DocsArticleReader: React.FC<ArticleReaderProps> = ({
               id={`doc-block-${block.id}`}
               className="scroll-mt-24 space-y-3.5"
             >
-              <h3 className="font-display text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white tracking-tight">
-                {block.heading}
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-1.5 border-b border-neutral-100 dark:border-white/[0.05]">
+                <h3 className="font-display text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white tracking-tight">
+                  {block.heading}
+                </h3>
+                <CopySectionLinkButton
+                  anchorId={`doc-block-${block.id}`}
+                  sectionLabel={block.heading}
+                  queryString={`?doc=${encodeURIComponent(article.slug)}`}
+                />
+              </div>
 
               {block.paragraphs?.map((p, idx) => (
                 <p

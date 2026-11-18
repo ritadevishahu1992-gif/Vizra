@@ -26,6 +26,7 @@ import {
   DocsArticleReader,
   DocsMobileDrawer,
   StatusLabel,
+  CopySectionLinkButton,
 } from '../components/docs/DocsLayoutPrimitives';
 import { DocsSidebar } from '../components/docs/DocsSidebar';
 import { DocsDiagramFigure } from '../components/docs/DocsDiagrams';
@@ -60,6 +61,14 @@ export const DocsPage: React.FC = () => {
     Boolean(requestedParam) && !activeArticle && !requestedSectionLetter;
 
   useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (hash) {
+      const target = document.getElementById(hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeArticle?.slug]);
 
@@ -370,7 +379,10 @@ export const DocsPage: React.FC = () => {
                     <DocsDiagramFigure diagramId="platform-overview" />
 
                     {/* Live Feature Status Directory (Section C Summary) */}
-                    <div className="rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] p-6 sm:p-8 space-y-5">
+                    <div
+                      id="doc-section-features-directory"
+                      className="scroll-mt-24 rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] p-6 sm:p-8 space-y-5"
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200 dark:border-white/[0.06]">
                         <div>
                           <div className="font-mono text-[10px] uppercase tracking-wider text-[#EB3B2D]">
@@ -380,9 +392,16 @@ export const DocsPage: React.FC = () => {
                             Features &amp; Tools Directory
                           </h2>
                         </div>
-                        <span className="font-mono text-[11px] text-neutral-500">
-                          {featureStatusDirectory.length} documented features
-                        </span>
+                        <div className="flex items-center gap-3 self-start sm:self-auto">
+                          <span className="font-mono text-[11px] text-neutral-500">
+                            {featureStatusDirectory.length} documented features
+                          </span>
+                          <CopySectionLinkButton
+                            anchorId="doc-section-features-directory"
+                            sectionLabel="Features & Tools Directory"
+                            queryString=""
+                          />
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -408,14 +427,24 @@ export const DocsPage: React.FC = () => {
                     </div>
 
                     {/* Complete A–H Sections Index */}
-                    <div className="space-y-6">
-                      <div className="space-y-1">
-                        <div className="font-mono text-[10px] uppercase tracking-wider text-[#EB3B2D]">
-                          Complete Knowledge Index
+                    <div
+                      id="doc-section-all-sections"
+                      className="scroll-mt-24 space-y-6"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="font-mono text-[10px] uppercase tracking-wider text-[#EB3B2D]">
+                            Complete Knowledge Index
+                          </div>
+                          <h2 className="font-display text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">
+                            Browse All Sections (A–H)
+                          </h2>
                         </div>
-                        <h2 className="font-display text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">
-                          Browse All Sections (A–H)
-                        </h2>
+                        <CopySectionLinkButton
+                          anchorId="doc-section-all-sections"
+                          sectionLabel="Browse All Sections (A–H)"
+                          queryString=""
+                        />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -434,13 +463,21 @@ export const DocsPage: React.FC = () => {
                               }`}
                             >
                               <div className="space-y-2">
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                   <span className="font-mono text-xs font-bold text-[#EB3B2D]">
                                     SECTION {group.letter}
                                   </span>
-                                  <span className="font-mono text-[10px] text-neutral-500">
-                                    {group.subtitle}
-                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono text-[10px] text-neutral-500">
+                                      {group.subtitle}
+                                    </span>
+                                    <CopySectionLinkButton
+                                      anchorId={`doc-section-card-${group.id}`}
+                                      sectionLabel={`Section ${group.letter}: ${group.title}`}
+                                      queryString={`?cat=${group.id}`}
+                                      compact
+                                    />
+                                  </div>
                                 </div>
                                 <h3 className="font-display text-base font-bold text-neutral-900 dark:text-white">
                                   {group.title}
