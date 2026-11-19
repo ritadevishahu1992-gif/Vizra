@@ -27,9 +27,11 @@ Allow: /pricing
 Allow: /about
 Allow: /contact
 Allow: /docs
+Allow: /blog
 Allow: /terms-and-conditions
 Allow: /privacy-policy
 Allow: /cookie-policy
+Allow: /ads.txt
 Allow: /llms.txt
 Allow: /llms-full.txt
 Allow: /sitemap.xml

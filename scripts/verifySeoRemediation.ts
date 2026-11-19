@@ -147,6 +147,9 @@ function runClientNavigationSimulation(): { passed: boolean; details: string } {
                 el.getAttribute('type') === 'application/ld+json')
           );
         }
+        if (selector === 'script') {
+          return headChildren.filter((el) => el.tagName === 'SCRIPT');
+        }
         return [];
       },
     },
@@ -222,9 +225,22 @@ function runClientNavigationSimulation(): { passed: boolean; details: string } {
       }
     }
 
+    const adSenseScriptEls = mockDocument.head
+      .querySelectorAll('script')
+      .filter((el) =>
+        (el.getAttribute('src') || '').includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')
+      );
+
+    if (adSenseScriptEls.length !== 1) {
+      return {
+        passed: false,
+        details: `Expected strictly 1 AdSense script after client navigation across public routes, found ${adSenseScriptEls.length}`,
+      };
+    }
+
     return {
       passed: true,
-      details: `Verified 8 sequential client-side & popstate route transitions (/ -> /features -> /pricing -> /docs -> /workspace -> /explore -> /non-existent-404 -> /studio) with 0 duplicates`,
+      details: `Verified 8 sequential client-side & popstate route transitions (/ -> /features -> /pricing -> /docs -> /workspace -> /explore -> /non-existent-404 -> /studio) with 0 duplicates and single AdSense script`,
     };
   } finally {
     (globalThis as any).document = prevDoc;
@@ -281,7 +297,26 @@ async function runVerification() {
     `Status=${robotsHttp.status} | Content-Type=${robotsHttp.headers['content-type']} | Required rules=${robotsHasRequiredRules} | Public root allowed=${robotsAllowsRoot}`
   );
 
-  // 2. Verify Uniqueness of Titles, Descriptions, and Canonicals across all 12 Public Routes
+  // 1b. Verify public/ads.txt & GET /ads.txt
+  const adsFileContent = fs
+    .readFileSync(path.join(rootDir, 'public/ads.txt'), 'utf-8')
+    .trim();
+  const adsHttp = await httpGet('/ads.txt');
+  const adsBody = adsHttp.body.toString('utf-8').trim();
+  const expectedAdsLine = 'google.com, pub-2808034055890408, DIRECT, f08c47fec0942fa0';
+
+  record(
+    'AdSense Ads.txt',
+    'public/ads.txt & GET /ads.txt return exact single publisher authorization record with HTTP 200',
+    adsHttp.status === 200 &&
+      String(adsHttp.headers['content-type']).includes('text/plain') &&
+      adsFileContent === expectedAdsLine &&
+      adsBody === expectedAdsLine,
+    `Status=${adsHttp.status} | Content-Type=${adsHttp.headers['content-type']} | Exact match=${adsBody === expectedAdsLine}`
+  );
+
+  // 2. Verify Uniqueness of Titles, Descriptions, and Canonicals across all Public Routes
+  const expectedPublicCount = PUBLIC_INDEXABLE_ROUTES.length;
   const titles = new Set<string>();
   const descriptions = new Set<string>();
   const canonicals = new Set<string>();
@@ -293,11 +328,11 @@ async function runVerification() {
   }
   record(
     'Metadata Uniqueness',
-    'All 12 public indexable routes have 100% unique titles, descriptions, and canonical paths',
-    titles.size === PUBLIC_INDEXABLE_ROUTES.length &&
-      descriptions.size === PUBLIC_INDEXABLE_ROUTES.length &&
-      canonicals.size === PUBLIC_INDEXABLE_ROUTES.length,
-    `Unique titles=${titles.size}/12 | Unique descriptions=${descriptions.size}/12 | Unique canonicals=${canonicals.size}/12`
+    `All ${expectedPublicCount} public indexable routes have 100% unique titles, descriptions, and canonical paths`,
+    titles.size === expectedPublicCount &&
+      descriptions.size === expectedPublicCount &&
+      canonicals.size === expectedPublicCount,
+    `Unique titles=${titles.size}/${expectedPublicCount} | Unique descriptions=${descriptions.size}/${expectedPublicCount} | Unique canonicals=${canonicals.size}/${expectedPublicCount}`
   );
 
   // 3. Verify Social Image Asset (public/og-image.png & GET /og-image.png)
@@ -395,23 +430,29 @@ async function runVerification() {
       twImage === 'https://vizra.vercel.app/og-image.png' &&
       twAlt === ogAlt;
 
+    const adSenseMatches = countTag(
+      html,
+      /<script[^>]+pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=ca-pub-2808034055890408/gi
+    );
+
     const ok =
       res.status === 200 &&
       xRobots === 'index, follow' &&
       hasExactCanonical &&
       singleTagCountsOk &&
       ogValuesOk &&
-      twitterValuesOk;
+      twitterValuesOk &&
+      adSenseMatches === 1;
 
     record(
-      'Public Social SEO Route',
-      `GET ${route} (OG + Twitter Card + Canonical)`,
+      'Public Social SEO & AdSense Route',
+      `GET ${route} (OG + Twitter Card + Canonical + Single AdSense)`,
       ok,
-      `HTTP ${res.status} | og:type=${ogType} | og:url=${ogUrl} | twitter:card=${twCard} | No duplicate tags=${singleTagCountsOk}`
+      `HTTP ${res.status} | og:type=${ogType} | og:url=${ogUrl} | twitter:card=${twCard} | AdSense=${adSenseMatches}/1 | No duplicate tags=${singleTagCountsOk}`
     );
   }
 
-  // 5. Verify Private / Utility / Diagnostic Routes Privacy Isolation (Zero OG/Twitter tags, no token leakage)
+  // 5. Verify Private / Utility / Diagnostic Routes Privacy & AdSense Isolation
   for (const route of PRIVATE_OR_UTILITY_ROUTES) {
     const res = await httpGet(`${route}?session_token=secret_12345&user=private_user`);
     const html = res.body.toString('utf-8');
@@ -419,6 +460,7 @@ async function runVerification() {
     const hasMetaNoindex = html.includes('<meta name="robots" content="noindex, nofollow" />');
     const ogTagCount = countTag(html, /<meta\s+property="og:/gi);
     const twitterTagCount = countTag(html, /<meta\s+name="twitter:/gi);
+    const adSenseCount = countTag(html, /adsbygoogle\.js/gi);
     const leaksQueryToken = html.includes('secret_12345') || html.includes('private_user');
 
     const ok =
@@ -427,13 +469,14 @@ async function runVerification() {
       hasMetaNoindex &&
       ogTagCount === 0 &&
       twitterTagCount === 0 &&
+      adSenseCount === 0 &&
       !leaksQueryToken;
 
     record(
-      'Private Route Social Isolation',
-      `GET ${route} excludes public OG/Twitter preview tags & prevents token leakage`,
+      'Private Route Isolation',
+      `GET ${route} excludes public OG/Twitter & AdSense tags and prevents token leakage`,
       ok,
-      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | OG tags=${ogTagCount} | Twitter tags=${twitterTagCount} | Token leaked=${leaksQueryToken}`
+      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | OG tags=${ogTagCount} | AdSense=${adSenseCount} | Token leaked=${leaksQueryToken}`
     );
   }
 
@@ -468,8 +511,8 @@ async function runVerification() {
     `HTTP ${queryRedirectRes.status} | Location: "${queryRedirectRes.headers['location']}"`
   );
 
-  // 8. Verify Unknown 404 Routes (HTTP 404, noindex/nofollow, NO canonical tag, NO misleading homepage OG/Twitter tags)
-  for (const unknownPath of ['/non-existent-route-xyz', '/random-404-check']) {
+  // 8. Verify Unknown 404 Routes (HTTP 404, noindex/nofollow, NO canonical, NO OG/Twitter, NO AdSense)
+  for (const unknownPath of ['/non-existent-route-xyz', '/random-404-check', '/blog/nonexistent-post-slug']) {
     const res = await httpGet(unknownPath);
     const html = res.body.toString('utf-8');
     const xRobots = String(res.headers['x-robots-tag'] || '');
@@ -477,6 +520,7 @@ async function runVerification() {
     const hasCanonical = /<link\s+rel="canonical"/i.test(html);
     const ogCount = countTag(html, /<meta\s+property="og:/gi);
     const twCount = countTag(html, /<meta\s+name="twitter:/gi);
+    const adCount = countTag(html, /adsbygoogle\.js/gi);
 
     const ok =
       res.status === 404 &&
@@ -484,17 +528,18 @@ async function runVerification() {
       hasMetaNoindex &&
       !hasCanonical &&
       ogCount === 0 &&
-      twCount === 0;
+      twCount === 0 &&
+      adCount === 0;
 
     record(
-      '404 Status & Social Prevention',
-      `GET ${unknownPath} returns HTTP 404 without canonical or misleading homepage OG tags`,
+      '404 Status & AdSense/Social Prevention',
+      `GET ${unknownPath} returns HTTP 404 without canonical, OG tags, or AdSense`,
       ok,
-      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | canonical=${hasCanonical} | OG tags=${ogCount} | Twitter tags=${twCount}`
+      `HTTP ${res.status} | X-Robots-Tag: "${xRobots}" | canonical=${hasCanonical} | OG=${ogCount} | AdSense=${adCount}`
     );
   }
 
-  // 9. Verify Sitemap Completeness & Hygiene (Strictly 12 Canonical Public Indexable Pages)
+  // 9. Verify Sitemap Completeness & Hygiene (Strictly canonical public indexable pages)
   const sitemapRes = await httpGet('/sitemap.xml');
   const sitemapXml = sitemapRes.body.toString('utf-8');
   const sitemapLocs = (sitemapXml.match(/<loc>(.*?)<\/loc>/g) || []).map((m) =>
@@ -510,13 +555,13 @@ async function runVerification() {
 
   record(
     'Sitemap Hygiene & Coverage',
-    '/sitemap.xml contains strictly the 12 canonical indexable public URLs',
+    `/sitemap.xml contains strictly the ${expectedPublicCount} canonical indexable public URLs`,
     sitemapRes.status === 200 &&
       String(sitemapRes.headers['content-type']).includes('application/xml') &&
-      sitemapLocs.length === 12 &&
+      sitemapLocs.length === expectedPublicCount &&
       allPublicRoutesInSitemap &&
       excludesNonIndexable,
-    `HTTP ${sitemapRes.status} | Total URLs=${sitemapLocs.length}/12 | Public present=${allPublicRoutesInSitemap} | Excludes private=${excludesNonIndexable}`
+    `HTTP ${sitemapRes.status} | Total URLs=${sitemapLocs.length}/${expectedPublicCount} | Public present=${allPublicRoutesInSitemap} | Excludes private=${excludesNonIndexable}`
   );
 
   // 10. Verify Pre-Rendered Static Route Files in dist/ (Initial HTML before hydration on Vercel CDN)
@@ -524,6 +569,9 @@ async function runVerification() {
   if (fs.existsSync(distDir)) {
     let distPublicValid = true;
     let distPrivateIsolated = true;
+    const distAdsTxtOk =
+      fs.existsSync(path.join(distDir, 'ads.txt')) &&
+      fs.readFileSync(path.join(distDir, 'ads.txt'), 'utf-8').trim() === expectedAdsLine;
 
     for (const route of PUBLIC_INDEXABLE_ROUTES) {
       const targetHtmlPath =
@@ -541,7 +589,8 @@ async function runVerification() {
         extractMetaContent(distHtml, 'property', 'og:url') !== expected.canonicalUrl ||
         extractMetaContent(distHtml, 'property', 'og:image') !==
           'https://vizra.vercel.app/og-image.png' ||
-        extractMetaContent(distHtml, 'name', 'twitter:card') !== 'summary_large_image'
+        extractMetaContent(distHtml, 'name', 'twitter:card') !== 'summary_large_image' ||
+        countTag(distHtml, /adsbygoogle\.js/gi) !== 1
       ) {
         distPublicValid = false;
         break;
@@ -557,7 +606,8 @@ async function runVerification() {
       const distHtml = fs.readFileSync(targetHtmlPath, 'utf-8');
       if (
         countTag(distHtml, /<meta\s+property="og:/gi) !== 0 ||
-        countTag(distHtml, /<meta\s+name="twitter:/gi) !== 0
+        countTag(distHtml, /<meta\s+name="twitter:/gi) !== 0 ||
+        countTag(distHtml, /adsbygoogle\.js/gi) !== 0
       ) {
         distPrivateIsolated = false;
         break;
@@ -566,9 +616,9 @@ async function runVerification() {
 
     record(
       'Vercel Static Build Prerender',
-      'dist/ static HTML files contain full OG/Twitter tags for 12 public routes & exclude social tags on 5 private routes',
-      distPublicValid && distPrivateIsolated,
-      `Public dist/ social valid=${distPublicValid} | Private dist/ social isolated=${distPrivateIsolated}`
+      `dist/ static HTML files contain full OG/Twitter + single AdSense for ${expectedPublicCount} public routes, dist/ads.txt intact & zero AdSense/social on 5 private routes`,
+      distPublicValid && distPrivateIsolated && distAdsTxtOk,
+      `Public dist/ valid=${distPublicValid} | Private dist/ isolated=${distPrivateIsolated} | dist/ads.txt=${distAdsTxtOk}`
     );
   }
 

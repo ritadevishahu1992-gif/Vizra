@@ -11,6 +11,7 @@
 - [Explore 3D Creative Showcase](https://vizra.vercel.app/explore): Interactive 3D perspective showcase tunnel and starter prompt remix profiles across 6 creative disciplines.
 - [Pricing & Compute Tiers](https://vizra.vercel.app/pricing): Creator Free ($0), Omnia Pro ($19/mo billed annually or $24/mo monthly), and VIZRA Studio & Team ($64/mo billed annually or $79/mo monthly), plus billing FAQs.
 - [Public Documentation Centre (A–H)](https://vizra.vercel.app/docs): Complete A–Z documentation (Sections A–H, 50 reference topics and 17 feature guides) covering Omnia 1.0, 10-stage workflows, live vs. staged availability, privacy & security, troubleshooting, and Public API status.
+- [Blog & Studio Updates](https://vizra.vercel.app/blog): Official editorial announcements and workflow guides (`No articles published yet.` until articles are authored).
 - [About VIZRA & Core Creed](https://vizra.vercel.app/about): Mission ("Don't just ask AI. Work with it."), response proportionality, zero fabricated citations, and studio philosophy.
 - [Contact & Studio Inquiries](https://vizra.vercel.app/contact): Enterprise studio onboarding, technical support, partnerships, and early-access beta requests.
 

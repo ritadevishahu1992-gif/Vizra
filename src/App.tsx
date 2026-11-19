@@ -40,6 +40,9 @@ const ExplorePage = lazy(() =>
 const DocsPage = lazy(() =>
   import('./pages/DocsPage').then((m) => ({ default: m.DocsPage }))
 );
+const BlogPage = lazy(() =>
+  import('./pages/BlogPage').then((m) => ({ default: m.BlogPage }))
+);
 const HistoryPage = lazy(() =>
   import('./pages/HistoryPage').then((m) => ({ default: m.HistoryPage }))
 );
@@ -120,6 +123,8 @@ export default function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/docs" element={<DocsPage />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:slug" element={<BlogPage />} />
 
                 {/* Legal, Privacy & Cookie Policy Routes (including legacy aliases) */}
                 <Route path="/terms-and-conditions" element={<LegalPage />} />

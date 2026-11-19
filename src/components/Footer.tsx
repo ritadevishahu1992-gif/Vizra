@@ -33,6 +33,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     title: 'Resources',
     links: [
       { label: 'Documentation', to: '/docs' },
+      { label: 'Blog & Updates', to: '/blog' },
       { label: 'Developer API Reference', to: '/docs?section=api' },
       { label: 'Security & Governance', to: '/docs?section=security' },
     ],
@@ -191,6 +192,10 @@ export const Footer: React.FC = () => {
               <Sliders size={11} className="text-[#EB3B2D]" />
               <span>Manage Cookie Preferences</span>
             </button>
+            <span aria-hidden="true">·</span>
+            <Link to="/blog" className="hover:text-neutral-300 transition-colors">
+              Blog
+            </Link>
             <span aria-hidden="true">·</span>
             <Link to="/contact" className="hover:text-neutral-300 transition-colors">
               Contact / Privacy Requests

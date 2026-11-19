@@ -11,9 +11,9 @@ import { ensurePublicOgImageExists } from '../src/server/seo/ogImageGenerator';
 /**
  * Post-build static route HTML pre-renderer for Vercel CDN.
  *
- * Generates `dist/<route>/index.html` for all 12 public indexable routes (with
- * self-referencing canonicals and `index, follow`) and all 5 utility/private/diagnostic
- * routes (with `noindex, nofollow`) so Vercel's static CDN serves accurate
+ * Generates `dist/<route>/index.html` for all public indexable routes (with
+ * self-referencing canonicals, `index, follow`, and AdSense head script) and all utility/private/diagnostic
+ * routes (with `noindex, nofollow` and strict AdSense exclusion) so Vercel's static CDN serves accurate
  * route-level metadata on initial HTTP fetch before JavaScript hydration.
  */
 function prerenderStaticRoutes() {

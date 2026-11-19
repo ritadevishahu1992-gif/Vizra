@@ -1,3 +1,5 @@
+import { getPublishedBlogPost } from '../data/blogPosts';
+
 export const SITE_ORIGIN = 'https://vizra.vercel.app';
 export const SITE_NAME = 'VIZRA — AI Creative Studio';
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
@@ -28,6 +30,7 @@ export const PUBLIC_INDEXABLE_ROUTES = [
   '/about',
   '/contact',
   '/docs',
+  '/blog',
   '/terms-and-conditions',
   '/privacy-policy',
   '/cookie-policy',
@@ -662,11 +665,51 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       ],
     },
   },
+  '/blog': {
+    canonicalPath: '/blog',
+    title: 'Blog & Studio Updates — Vizra AI Creative Studio',
+    description:
+      'Official blog and editorial updates for VIZRA AI Creative Studio and Omnia 1.0.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'Blog',
+    jsonLd: [
+      buildBreadcrumbSchema('Blog', '/blog'),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        name: 'VIZRA Blog & Studio Updates',
+        url: `${SITE_ORIGIN}/blog`,
+        description:
+          'Official editorial announcements, product notes, and workflow guides from VIZRA AI Creative Studio.',
+        publisher: {
+          '@id': `${SITE_ORIGIN}/#organization`,
+        },
+      },
+    ],
+    prehydration: {
+      eyebrow: 'VIZRA EDITORIAL & STUDIO UPDATES',
+      h1: 'Blog',
+      lead: 'Product announcements, engineering notes, and creative workflow guides from VIZRA AI Creative Studio.',
+      sections: [
+        {
+          heading: 'Editorial Archive Status',
+          body: 'No articles published yet. Verified product releases, technical essays, and Omnia 1.0 creative workflow guides will be indexed here and at /blog/:slug as they are released.',
+          bullets: [
+            'Browse Documentation (/docs): Explore complete A–Z user and developer reference guides across Sections A–H.',
+            'Platform Features (/features): Review the 4 Core Pillars, 5-step Idea-to-Finish pipeline, and 10-stage workflow architecture.',
+            'Creative Studio (/studio): Inspect production 60fps engines and R&D roadmap prototypes.',
+          ],
+        },
+      ],
+    },
+  },
   '/terms-and-conditions': {
     canonicalPath: '/terms-and-conditions',
     title: 'Terms & Conditions — Vizra AI Creative Studio',
     description:
-      'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, and liability limits.',
+      'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, third-party advertising, and liability limits.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
@@ -675,14 +718,14 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       buildBreadcrumbSchema('Terms & Conditions', '/terms-and-conditions'),
       buildWebPageSchema(
         'Terms & Conditions — Vizra AI Creative Studio',
-        'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, and liability limits.',
+        'Terms and Conditions governing use of Vizra AI Creative Studio and Omnia 1.0, user responsibilities, acceptable use, intellectual property, third-party advertising, and liability limits.',
         '/terms-and-conditions'
       ),
     ],
     prehydration: {
-      eyebrow: 'PLATFORM AGREEMENT & RULES OF USE · POLICY V2026-11-11',
+      eyebrow: 'PLATFORM AGREEMENT & RULES OF USE · POLICY V2026-11',
       h1: 'Terms & Conditions',
-      lead: 'Effective Date: November 11, 2026. Official Terms and Conditions governing access to and use of VIZRA AI Creative Studio and Omnia 1.0.',
+      lead: 'Effective Date: November 11, 2026 · Updated: November 18, 2026. Official Terms and Conditions governing access to VIZRA AI Creative Studio, Omnia 1.0, and advertising-supported public pages.',
       sections: [
         {
           heading: '1. Age Eligibility (`STRICT_18_PLUS`) & Child Online Safety Controls',
@@ -698,8 +741,8 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
           body: 'Users retain ownership of original human inputs. Under USCO guidance, purely AI-generated outputs without sufficient human authorship may not qualify for copyright registration. Copyright takedown notices under 17 U.S.C. § 512 may be submitted via /contact.',
         },
         {
-          heading: '3. Acceptable Use, API Limits & AI Provenance',
-          body: 'Requests must respect the 50,000-character prompt limit, 15MB attachment cap, and safety prohibitions against CSAM/CSAE, self-harm, CBRN, and non-consensual synthetic media. Exported visuals and audio include machine-readable AI provenance aligned with EU AI Act Article 50(2).',
+          heading: '3. Acceptable Use, API Limits, AI Provenance & Third-Party Advertising',
+          body: 'Requests must respect the 50,000-character prompt limit, 15MB attachment cap, and safety prohibitions against CSAM/CSAE, self-harm, CBRN, and non-consensual synthetic media. Exported visuals and audio include machine-readable AI provenance aligned with EU AI Act Article 50(2). Public informational pages integrate Google AdSense (publisher pub-2808034055890408); VIZRA does not endorse third-party advertisers, external ad links are governed by third-party terms, and ad availability is not guaranteed.',
         },
       ],
     },
@@ -708,7 +751,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     canonicalPath: '/privacy-policy',
     title: 'Privacy Policy & Data Protection — Vizra AI Studio',
     description:
-      'Privacy Policy detailing information collection, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
+      'Privacy Policy detailing information collection, Google AdSense advertising disclosures, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
@@ -717,14 +760,14 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       buildBreadcrumbSchema('Privacy Policy', '/privacy-policy'),
       buildWebPageSchema(
         'Privacy Policy & Data Protection — Vizra AI Studio',
-        'Privacy Policy detailing information collection, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
+        'Privacy Policy detailing information collection, Google AdSense advertising disclosures, processing, retention, third-party processors, security controls, and user privacy rights in Vizra.',
         '/privacy-policy'
       ),
     ],
     prehydration: {
-      eyebrow: 'DATA PROTECTION & PRIVACY NOTICE · POLICY V2026-11-11',
+      eyebrow: 'DATA PROTECTION & PRIVACY NOTICE · POLICY V2026-11',
       h1: 'Privacy Policy',
-      lead: 'Effective Date: November 11, 2026. How VIZRA AI Creative Studio collects, processes, protects, and lets you export or erase your data.',
+      lead: 'Effective Date: November 11, 2026 · Updated: November 18, 2026. How VIZRA AI Creative Studio collects, processes, protects, discloses Google AdSense advertising on public pages, and lets you export or erase your data.',
       sections: [
         {
           heading: '1. Data Collected & Legal Bases',
@@ -733,12 +776,16 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
             'Account Information (Optional Google Sign-In): Firebase User UID, display name, email, and avatar (`users/{userId}`).',
             'Workspace Prompts & Attachments: User prompts and uploaded multimodal files routed via HTTPS proxy (`/api/*`) to Google Gemini (`@google/genai`), with personal memories scoped per UID and scrubbed for email/phone/key patterns.',
             'Consent & Security Records: Anonymous random consent UUID (`consentId`) without raw IP logging; login security notification alerts mask IPs (`/24` IPv4 or `/48` IPv6).',
-            'Zero Data Sales: VIZRA never sells personal data to data brokers or advertisers.',
+            'Zero Data Sales: VIZRA never sells personal data to data brokers.',
           ],
         },
         {
-          heading: '2. Subprocessors & Self-Service Rights',
-          body: 'Infrastructure subprocessors include Google Cloud & Firebase (Auth/Firestore), Google Gemini API & Lyria, EMBL-EBI AlphaFold DB & NCBI PubChem/PubMed (Science Hub), Vercel Inc. (hosting & cookieless Web Analytics), Google Fonts, and optional Google Sheets / Resend email. Users can export JSON threads from /history or permanently erase server and local account records via `DELETE /api/account/data` on /settings.',
+          heading: '2. Google AdSense, Advertising Technologies & Regional Rights',
+          body: 'Eligible public pages load Google AdSense (`ca-pub-2808034055890408`), which is excluded from private AI workspaces (`/ai`, `/workspace`, `/history`, `/settings`). Google and its partners may use cookies or device identifiers to serve personalized or non-personalized ads (see https://policies.google.com/technologies/ads). When enabled in the AdSense publisher console, regional consent for EEA/UK/Switzerland (GDPR/TCF) and applicable US states is managed via Google Privacy & Messaging alongside VIZRA consent controls.',
+        },
+        {
+          heading: '3. Subprocessors & Self-Service Rights',
+          body: 'Infrastructure and advertising subprocessors include Google Cloud & Firebase (Auth/Firestore), Google Gemini API & Lyria, Google AdSense & Funding Choices, EMBL-EBI AlphaFold DB & NCBI PubChem/PubMed (Science Hub), Vercel Inc. (hosting & cookieless Web Analytics), Google Fonts, and optional Google Sheets / Resend email. Users can export JSON threads from /history or permanently erase server and local account records via `DELETE /api/account/data` on /settings.',
         },
       ],
     },
@@ -747,7 +794,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     canonicalPath: '/cookie-policy',
     title: 'Cookie & Storage Policy — Vizra AI Creative Studio',
     description:
-      'Cookie and browser storage policy explaining strictly necessary, analytics, functional, and marketing technologies used in Vizra and consent controls.',
+      'Cookie and browser storage policy explaining strictly necessary, analytics, functional, marketing, and Google AdSense advertising technologies used in Vizra and consent controls.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
@@ -756,26 +803,26 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       buildBreadcrumbSchema('Cookie Policy', '/cookie-policy'),
       buildWebPageSchema(
         'Cookie & Storage Policy — Vizra AI Creative Studio',
-        'Cookie and browser storage policy explaining strictly necessary, analytics, functional, and marketing technologies used in Vizra and consent controls.',
+        'Cookie and browser storage policy explaining strictly necessary, analytics, functional, marketing, and Google AdSense advertising technologies used in Vizra and consent controls.',
         '/cookie-policy'
       ),
     ],
     prehydration: {
-      eyebrow: 'CONSENT & BROWSER STORAGE GOVERNANCE · POLICY V2026-11-11',
+      eyebrow: 'CONSENT & BROWSER STORAGE GOVERNANCE · POLICY V2026-11',
       h1: 'Cookie & Storage Policy',
-      lead: 'Effective Date: November 11, 2026. Transparent disclosure of browser localStorage, IndexedDB, cookieless Vercel Web Analytics, and consent withdrawal controls.',
+      lead: 'Effective Date: November 11, 2026 · Updated: November 18, 2026. Transparent disclosure of browser localStorage, IndexedDB, cookieless Vercel Web Analytics, Google AdSense advertising technologies, and consent withdrawal controls.',
       sections: [
         {
-          heading: '1. Default-Off Optional Consent & Cookieless Analytics',
-          body: 'Optional categories (`Analytics` / `@vercel/speed-insights`, `Functional`, and `Marketing` / VIZRA Engage) default to OFF until explicit user opt-in and can be withdrawn immediately on /cookie-policy or in the footer. `@vercel/analytics` operates cookieless without cross-site identifiers.',
+          heading: '1. First-Party Storage Categories, Cookieless Analytics & Google AdSense',
+          body: 'VIZRA first-party optional categories (`Analytics` / `@vercel/speed-insights`, `Functional`, and `Marketing` / VIZRA Engage) default to OFF until explicit opt-in. `@vercel/analytics` operates cookieless without cross-site identifiers. On eligible public pages, Google AdSense (`pub-2808034055890408`) is integrated and may read/write advertising or measurement cookies subject to regional Google Privacy & Messaging CMP choices; rejecting optional advertising cookies affects personalization rather than removing non-personalized contextual ads.',
         },
         {
           heading: '2. Browser Storage & Technology Inventory',
-          body: 'Complete inventory of browser keys and telemetry scripts used in VIZRA:',
+          body: 'Complete inventory of browser keys, telemetry scripts, and third-party advertising technologies referenced in VIZRA:',
           table: {
             headers: ['Key / Technology', 'Category', 'Storage Type', 'Purpose'],
             rows: [
-              ['vizra_cookie_consent_v1', 'Strictly Necessary', 'localStorage', 'Stores versioned cookie consent state'],
+              ['vizra_cookie_consent_v1', 'Strictly Necessary', 'localStorage', 'Stores versioned first-party consent state'],
               ['vizra_anonymous_consent_id_v1', 'Strictly Necessary', 'localStorage', 'Anonymous UUID linking consent audit events'],
               ['firebase:authUser:*', 'Strictly Necessary', 'IndexedDB / Local', 'Maintains authenticated Google sign-in session'],
               ['@vercel/analytics', 'Cookieless Web', 'Cookieless Beacon', 'Aggregate pageview metrics without cookies'],
@@ -783,6 +830,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
               ['vizra_theme_mode_v1', 'Functional', 'localStorage', 'Remembers Dark/Light UI theme across reloads'],
               ['omnia_conversations_v1', 'Functional', 'localStorage', 'Local Omnia chat threads for /history and /ai'],
               ['vizra_engage_dismissed_cards', 'Marketing (Opt-In)', 'sessionStorage', 'Dismissed studio tips purged on consent withdrawal'],
+              ['Google AdSense / Funding Choices', 'Advertising (Third-Party)', 'Third-Party Cookies / Storage', 'Ad delivery, frequency capping, fraud prevention, and regional consent signals on public pages'],
             ],
           },
         },
@@ -919,6 +967,72 @@ export function resolveRouteSeoPayload(
   const effectivePath = redirectTarget || normalizedPath;
 
   const matchedDef = ROUTE_DEFINITIONS[effectivePath];
+
+  if (!matchedDef && effectivePath.startsWith('/blog/')) {
+    const slug = effectivePath.slice('/blog/'.length);
+    const publishedPost = getPublishedBlogPost(slug);
+    if (publishedPost) {
+      const canonicalPath = `/blog/${publishedPost.slug}`;
+      const canonicalUrl = `${SITE_ORIGIN}${canonicalPath}`;
+      return {
+        requestedPath: normalizedPath,
+        canonicalPath,
+        canonicalUrl,
+        httpStatus: 200,
+        isIndexable: true,
+        includeSocialPreview: true,
+        robots: 'index, follow',
+        xRobotsTag: 'index, follow',
+        title: `${publishedPost.title} — Vizra Blog`,
+        description: publishedPost.description,
+        ogTitle: `${publishedPost.title} — Vizra Blog`,
+        ogDescription: publishedPost.description,
+        ogType: 'article',
+        ogUrl: canonicalUrl,
+        ogImage: DEFAULT_OG_IMAGE,
+        ogImageWidth: OG_IMAGE_WIDTH,
+        ogImageHeight: OG_IMAGE_HEIGHT,
+        ogImageAlt: OG_IMAGE_ALT,
+        ogSiteName: SITE_NAME,
+        ogLocale: 'en_US',
+        twitterCard: 'summary_large_image',
+        twitterTitle: `${publishedPost.title} — Vizra Blog`,
+        twitterDescription: publishedPost.description,
+        twitterImage: DEFAULT_OG_IMAGE,
+        twitterImageAlt: OG_IMAGE_ALT,
+        jsonLd: [
+          buildBreadcrumbSchema(publishedPost.title, canonicalPath),
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: publishedPost.title,
+            description: publishedPost.description,
+            datePublished: publishedPost.publishedAt,
+            dateModified: publishedPost.updatedAt || publishedPost.publishedAt,
+            url: canonicalUrl,
+            author: {
+              '@type': 'Organization',
+              name: publishedPost.author,
+            },
+            publisher: {
+              '@id': `${SITE_ORIGIN}/#organization`,
+            },
+          },
+        ],
+        prehydration: {
+          eyebrow: `VIZRA BLOG · ${publishedPost.category}`,
+          h1: publishedPost.title,
+          lead: publishedPost.description,
+          sections: [
+            {
+              heading: publishedPost.category,
+              body: publishedPost.body.join(' '),
+            },
+          ],
+        },
+      };
+    }
+  }
 
   if (!matchedDef) {
     // Unknown 404 Route — must never receive a self-referencing canonical or misleading homepage social preview
@@ -1108,6 +1222,27 @@ export function applySeoToDocument(payload: RouteSeoPayload): void {
   } else {
     existingJsonLd.forEach((el) => el.remove());
   }
+
+  // Ensure Google AdSense script is mounted once if user navigated client-side from a private route onto an eligible public route
+  if (payload.isIndexable && typeof document.head?.querySelectorAll === 'function') {
+    const existingAdSenseScripts = Array.from(
+      document.head.querySelectorAll('script')
+    ).filter((el) => {
+      const src = el.getAttribute?.('src') || '';
+      return src.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js');
+    });
+
+    if (existingAdSenseScripts.length === 0) {
+      const adScript = document.createElement('script');
+      adScript.async = true;
+      adScript.setAttribute(
+        'src',
+        'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2808034055890408'
+      );
+      adScript.setAttribute('crossorigin', 'anonymous');
+      document.head.appendChild(adScript);
+    }
+  }
 }
 
 function escapeHtmlAttr(str: string): string {
@@ -1151,6 +1286,7 @@ export function buildPrehydrationRootHtml(payload: RouteSeoPayload): string {
     { href: '/explore', label: 'Explore 3D' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/docs', label: 'Docs' },
+    { href: '/blog', label: 'Blog' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ];
@@ -1306,6 +1442,25 @@ export function injectSeoIntoHtml(
     html = html.replace(markerPattern, headBlock);
   } else if (fallbackPattern.test(html)) {
     html = html.replace(fallbackPattern, headBlock);
+  }
+
+  // Conditionally include Google AdSense script ONLY on eligible public HTML routes (never on /ai, /history, /settings, /workspace, /seo-diagnostics, or 404s)
+  const adSenseTag = payload.isIndexable
+    ? `<!-- VIZRA_ADSENSE_HEAD_START -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2808034055890408"
+     crossorigin="anonymous"></script>
+    <!-- VIZRA_ADSENSE_HEAD_END -->`
+    : '<!-- VIZRA_ADSENSE_HEAD_START --><!-- VIZRA_ADSENSE_HEAD_END -->';
+
+  const adSenseMarkerPattern =
+    /<!--\s*VIZRA_ADSENSE_HEAD_START\s*-->[\s\S]*?<!--\s*VIZRA_ADSENSE_HEAD_END\s*-->/i;
+  if (adSenseMarkerPattern.test(html)) {
+    html = html.replace(adSenseMarkerPattern, adSenseTag);
+  } else if (!payload.isIndexable) {
+    html = html.replace(
+      /<script[^>]+pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js[^>]*>\s*<\/script>/gi,
+      ''
+    );
   }
 
   const prerenderHtml = buildPrehydrationRootHtml(payload);

@@ -18,6 +18,7 @@ import {
   CreditCard,
   Info,
   Mail,
+  Newspaper,
 } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
 import { NotificationCenterTrigger } from './ui/Toast';
@@ -103,6 +104,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
       icon: BookOpen,
       tag: 'Reference',
     },
+    {
+      label: 'Blog & Studio Updates',
+      desc: 'Official editorial announcements, product notes, and workflow guides.',
+      href: '/blog',
+      icon: Newspaper,
+      tag: 'Editorial',
+    },
   ];
 
   const primaryLinks = [
@@ -112,6 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
     { label: 'Explore', href: '/explore', icon: Compass },
     { label: 'Pricing', href: '/pricing', icon: CreditCard },
     { label: 'Docs', href: '/docs', icon: BookOpen },
+    { label: 'Blog', href: '/blog', icon: Newspaper },
     { label: 'About', href: '/about', icon: Info },
     { label: 'Contact', href: '/contact', icon: Mail },
   ];
@@ -239,7 +248,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
                   key={link.href}
                   to={link.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`relative px-3 py-1.5 text-xs xl:text-sm font-medium transition-colors duration-150 rounded-lg whitespace-nowrap ${
+                  className={`relative px-2.5 xl:px-3 py-1.5 text-xs xl:text-sm font-medium transition-colors duration-150 rounded-lg whitespace-nowrap ${
                     active
                       ? 'text-white bg-white/[0.05]'
                       : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
@@ -247,7 +256,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
                 >
                   <span>{link.label}</span>
                   {active && (
-                    <span className="absolute bottom-0.5 left-3 right-3 h-[2px] rounded-full bg-[#EB3B2D]" />
+                    <span className="absolute bottom-0.5 left-2.5 right-2.5 h-[2px] rounded-full bg-[#EB3B2D]" />
                   )}
                 </Link>
               );

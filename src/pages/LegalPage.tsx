@@ -95,7 +95,7 @@ export const LegalPage: React.FC = () => {
             <div className="typo-eyebrow">{pageMeta.eyebrow}</div>
             <h1 className="typo-page-title">{pageMeta.heading}</h1>
             <p className="text-xs sm:text-sm text-neutral-400 font-mono">
-              Effective Date: November 11, 2026 · Last Updated: November 11, 2026 · Policy v{CURRENT_POLICY_VERSION}
+              Effective Date: November 11, 2026 · Last Updated: November 18, 2026 · Policy v{CURRENT_POLICY_VERSION}
             </p>
           </div>
 
@@ -259,7 +259,9 @@ export const LegalPage: React.FC = () => {
               <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 <li><strong>Contractual Necessity (GDPR Art. 6(1)(b)):</strong> To execute AI text, code, visual, audio, and research requests within the Omnia 1.0 studio and synchronize your authenticated workspace projects.</li>
                 <li><strong>Legitimate Interests &amp; Security (GDPR Art. 6(1)(f)):</strong> To protect infrastructure against Server-Side Request Forgery (SSRF), prompt injection, automated abuse, and unauthorized account access.</li>
-                <li><strong>Explicit Consent (GDPR Art. 6(1)(a) / DPDP Sec. 6):</strong> For optional analytics/functional/marketing browser storage categories, which remain disabled by default until you opt in.</li>
+                <li>
+                  <strong>Explicit Consent &amp; Regional Ad Consent (GDPR Art. 6(1)(a) / DPDP Sec. 6):</strong> For optional analytics/functional/marketing first-party storage categories (disabled by default until opt-in), and for third-party advertising personalization via Google AdSense Privacy &amp; Messaging where enabled and required by regional law.
+                </li>
               </ul>
             </div>
 
@@ -298,6 +300,9 @@ export const LegalPage: React.FC = () => {
                   <strong>Google Gemini API &amp; Lyria (`@google/genai`, Google LLC):</strong> Multimodal AI text, code, vision, speech, audio synthesis, embeddings, and live Google Search grounding.
                 </li>
                 <li>
+                  <strong>Google AdSense &amp; Google Privacy &amp; Messaging (Google LLC):</strong> Integrated on eligible public informational pages (`ca-pub-2808034055890408`) to serve advertisements and, when enabled in the AdSense publisher console, present EEA/UK/Switzerland GDPR TCF v2.2 and US state privacy messaging. Excluded from private AI workspaces (`/ai`, `/workspace`, `/history`, `/settings`, `/seo-diagnostics`, and `/api/*`).
+                </li>
+                <li>
                   <strong>Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`):</strong> Web font stylesheet and font binary delivery for studio typography.
                 </li>
                 <li>
@@ -316,14 +321,53 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">6. Security Measures</h2>
+              <h2 className="typo-card-title">6. Google AdSense Advertising, Cookies &amp; Regional Privacy Rights</h2>
+              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                Public informational routes of VIZRA (including `/`, `/features`, `/tools`, `/studio`, `/explore`, `/pricing`, `/docs`, `/blog`, `/about`, `/contact`, and legal pages) include the Google AdSense script (`ca-pub-2808034055890408`). Authenticated or private application routes (`/ai`, `/workspace`, `/history`, `/settings`, `/seo-diagnostics`, and `/api/*`) are excluded from Google AdSense loading.
+              </p>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                <li>
+                  <strong>Advertising Technologies:</strong> Third-party vendors, including Google, use cookies, web beacons, IP/browser technical signals, and local storage to serve ads based on a visitor&apos;s prior visits to this website or other websites, prevent ad fraud, enforce frequency caps, and measure campaign performance.
+                </li>
+                <li>
+                  <strong>Personalized vs. Non-Personalized Ads:</strong> Subject to your region and consent selections, Google AdSense may deliver personalized ads or non-personalized (contextual) ads. Rejecting advertising personalization reduces profiling and interest-based targeting, though non-personalized ads may still be displayed using basic technical/contextual data.
+                </li>
+                <li>
+                  <strong>Google Advertising Disclosures &amp; Opt-Out Links:</strong> Learn how Google uses information from sites that use its services at{' '}
+                  <a
+                    href="https://policies.google.com/technologies/ads"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline hover:text-[#EB3B2D]"
+                  >
+                    Google Advertising Privacy &amp; Terms (policies.google.com/technologies/ads)
+                  </a>{' '}
+                  and manage personalized ad settings directly via{' '}
+                  <a
+                    href="https://adssettings.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline hover:text-[#EB3B2D]"
+                  >
+                    Google Ad Settings (adssettings.google.com)
+                  </a>
+                  .
+                </li>
+                <li>
+                  <strong>EEA / UK / Swiss &amp; US State Privacy Notices:</strong> For visitors in the EEA, UK, Switzerland, or applicable US states (such as California under CCPA/CPRA), AdSense-based GDPR TCF v2.2 and US state opt-out messaging is provided via Google Privacy &amp; Messaging (`fundingchoicesmessages.google.com`) once activated in the publisher&apos;s AdSense console. VIZRA itself does not sell user account data or AI workspace prompts to advertisers.
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
+              <h2 className="typo-card-title">7. Security Measures</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 VIZRA enforces Attribute-Based Access Control (ABAC) in `firestore.rules` with default-deny catch-all rules, strict schema validation, and owner UID verification. Server routes enforce sliding-window rate limits, input length caps (50,000 characters max), attachment size limits (15MB max), prompt-injection and sensitive-output filters, and SSRF network filters blocking loopback (`127.0.0.1`, `::1`), cloud metadata (`169.254.169.254`), and private RFC1918 subnets.
               </p>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">7. User Privacy Rights &amp; Self-Service Account Erasure</h2>
+              <h2 className="typo-card-title">8. User Privacy Rights &amp; Self-Service Account Erasure</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 Depending on your jurisdiction (including GDPR Arts. 15–22, CCPA/CPRA, and India DPDP Act Secs. 11–14), you have the right to access, correct, export, or erase your personal data, restrict or object to processing, and withdraw consent at any time:
               </p>
@@ -335,15 +379,15 @@ export const LegalPage: React.FC = () => {
                   <strong>Self-Service Export &amp; Thread Deletion:</strong> Export conversations and memories as JSON or delete individual/all threads on the <Link to="/history" className="text-white underline hover:text-[#EB3B2D]">History</Link> and <Link to="/settings" className="text-white underline hover:text-[#EB3B2D]">Settings</Link> pages.
                 </li>
                 <li>
-                  <strong>Consent Withdrawal:</strong> Use the <em>Manage Cookie Preferences</em> or <em>Withdraw Optional Consent</em> controls on this page or in the site footer at any time.
+                  <strong>Consent Withdrawal &amp; Privacy Requests:</strong> Use the <em>Manage Cookie Preferences</em> or <em>Withdraw Optional Consent</em> controls on this page or in the site footer, or submit formal privacy inquiries via <Link to="/contact" className="text-white underline hover:text-[#EB3B2D]">Contact / Privacy Requests</Link>.
                 </li>
               </ul>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">8. Applicable Legal Framework &amp; Operator Identity</h2>
+              <h2 className="typo-card-title">9. Applicable Legal Framework &amp; Operator Identity</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                These privacy controls are engineered to support transparency, data minimization, and opt-in consent principles aligned with the EU/UK General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA/CPRA), and India&apos;s Digital Personal Data Protection Act (DPDP Act). Publication of these technical pages does not by itself constitute a legal certification.
+                These privacy controls are engineered to support transparency, data minimization, and opt-in consent principles aligned with the EU/UK General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA/CPRA), and India&apos;s Digital Personal Data Protection Act (DPDP Act). Publication of these technical pages does not by itself constitute formal legal counsel certification; live regulatory consent messaging for AdSense must also remain active and verified in the Google AdSense dashboard.
               </p>
               <div className="p-4 rounded-xl bg-[#090909] border border-amber-500/30 text-xs text-neutral-300 space-y-1.5 font-mono">
                 <div className="flex items-center gap-2 text-amber-400 font-semibold">
@@ -422,21 +466,36 @@ export const LegalPage: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">6. Service Availability, Modifications &amp; Termination</h2>
+              <h2 className="typo-card-title">6. Advertising-Supported Services, Third-Party Ad Providers &amp; External Links</h2>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                <li>
+                  <strong>Advertising Support:</strong> To help keep public documentation, exploration pages, and free-tier informational resources accessible without charge, eligible public pages of VIZRA display or integrate third-party advertising via Google AdSense (`pub-2808034055890408`). AdSense scripts are excluded from internal AI generation workspaces (`/ai`, `/workspace`, `/history`, `/settings`).
+                </li>
+                <li>
+                  <strong>Third-Party Ad Providers &amp; External Links:</strong> Advertisements and any third-party websites, products, or promotions linked from ad placements are operated independently by external advertisers and ad networks. VIZRA does not control, endorse, sponsor, or warrant third-party advertised content, and your interactions with external advertisers are governed strictly by those third parties&apos; own terms and privacy policies.
+                </li>
+                <li>
+                  <strong>Ad Availability:</strong> VIZRA makes no guarantee regarding the continuous availability, frequency, formatting, or personalization of advertisements on any page or in any region, and reserves the right to adjust ad placements, consent messaging, or ad-blocking recovery notices at any time.
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
+              <h2 className="typo-card-title">7. Service Availability, Modifications &amp; Termination</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 VIZRA is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. We may modify, update, rate-limit, or discontinue experimental studio features or model endpoints at any time. We reserve the right to suspend or terminate access for accounts that violate these Terms or threaten platform security.
               </p>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">7. Limitation of Liability</h2>
+              <h2 className="typo-card-title">8. Limitation of Liability</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                To the maximum extent permitted by applicable law, VIZRA and its operators shall not be liable for any indirect, incidental, consequential, special, or exemplary damages, or for any loss of data, revenue, or business arising out of or connected with your use of the Platform or reliance on AI-generated outputs.
+                To the maximum extent permitted by applicable law, VIZRA and its operators shall not be liable for any indirect, incidental, consequential, special, or exemplary damages, or for any loss of data, revenue, or business arising out of or connected with your use of the Platform, reliance on AI-generated outputs, or third-party advertisements.
               </p>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">8. Contact Information &amp; Operator Configuration</h2>
+              <h2 className="typo-card-title">9. Contact Information &amp; Operator Configuration</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
                 For questions regarding these Terms &amp; Conditions, please reach out via our <Link to="/contact" className="text-white underline hover:text-[#EB3B2D]">Contact</Link> page.
               </p>
@@ -461,10 +520,18 @@ export const LegalPage: React.FC = () => {
         {activeDoc === 'cookies' && (
           <div className="space-y-6">
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">1. How VIZRA Uses Cookies &amp; Local Storage</h2>
+              <h2 className="typo-card-title">1. How VIZRA Uses Cookies, Browser Storage &amp; Advertising Technologies</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                VIZRA primarily uses browser `localStorage`, `sessionStorage`, and IndexedDB rather than traditional third-party tracking cookies. Optional categories (`Analytics`, `Functional`, and `Marketing`) are disabled by default for first-time visitors and are only activated if you explicitly choose <strong>Accept All</strong> or enable specific toggles via <strong>Customize Preferences</strong>.
+                VIZRA separates first-party application storage from third-party advertising technologies:
               </p>
+              <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                <li>
+                  <strong>First-Party Browser Storage:</strong> VIZRA uses `localStorage`, `sessionStorage`, and IndexedDB for strictly necessary security/authentication records and optional categories (`Analytics`, `Functional`, and `Marketing`), which default to OFF until explicit user opt-in.
+                </li>
+                <li>
+                  <strong>Advertising Technologies (Google AdSense):</strong> On eligible public pages, VIZRA loads Google AdSense (`ca-pub-2808034055890408`). Google and its ad partners may set or read advertising, measurement, and CMP consent cookies depending on your region and Google Privacy &amp; Messaging choices. Advertising technologies are never strictly necessary and are never loaded inside private AI routes (`/ai`, `/workspace`, `/history`, `/settings`).
+                </li>
+              </ul>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
@@ -476,7 +543,7 @@ export const LegalPage: React.FC = () => {
 
             {/* Complete Storage & Cookie Inventory Table */}
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4 overflow-x-auto">
-              <h2 className="typo-card-title">3. Storage &amp; Technology Inventory</h2>
+              <h2 className="typo-card-title">3. Storage, Cookie &amp; Advertising Technology Inventory</h2>
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-white/[0.1] text-neutral-400 font-mono">
@@ -492,7 +559,7 @@ export const LegalPage: React.FC = () => {
                     <td className="py-3 pr-4 font-mono text-white">vizra_cookie_consent_v1</td>
                     <td className="py-3 pr-4 text-[#EB3B2D] font-mono">Strictly Necessary</td>
                     <td className="py-3 pr-4">localStorage</td>
-                    <td className="py-3 pr-4">Stores your versioned cookie consent preferences (`v{CURRENT_CONSENT_VERSION}`).</td>
+                    <td className="py-3 pr-4">Stores your versioned first-party consent preferences (`v{CURRENT_CONSENT_VERSION}`).</td>
                     <td className="py-3 font-mono">Persistent</td>
                   </tr>
                   <tr>
@@ -544,14 +611,42 @@ export const LegalPage: React.FC = () => {
                     <td className="py-3 pr-4">Remembers dismissed contextual studio tips in VIZRA Engage. Purged upon withdrawal.</td>
                     <td className="py-3 font-mono">Session</td>
                   </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-mono text-white">Google AdSense (`__gads`, `__gpi`, `IDE`, `FCCDCF`, `FCNEC`)</td>
+                    <td className="py-3 pr-4 text-neutral-300 font-mono">Advertising (Third-Party)</td>
+                    <td className="py-3 pr-4">Third-Party Cookies / Storage</td>
+                    <td className="py-3 pr-4">Public-page ad delivery, frequency capping, fraud detection, measurement, and Google Privacy &amp; Messaging CMP state (governed by Google&apos;s policies and active regional CMP choices).</td>
+                    <td className="py-3 font-mono">Varies per Google Policy</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
 
             <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-3">
-              <h2 className="typo-card-title">4. How to Change or Withdraw Consent</h2>
+              <h2 className="typo-card-title">4. How to Change Preferences, Withdraw Consent &amp; Manage Ad Settings</h2>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                You may review, customize, or withdraw your consent at any time using the <strong>Manage Cookie Preferences</strong> button at the top of this page or in the website footer. Withdrawing consent immediately disables optional Analytics, Functional, and Marketing categories, purges optional marketing session storage, and appends a `WITHDRAW` event to the consent audit log.
+                You may review, customize, or withdraw your first-party consent at any time using the <strong>Manage Cookie Preferences</strong> button at the top of this page or in the website footer. Withdrawing consent immediately disables optional Analytics, Functional, and Marketing categories, purges optional marketing session storage, and appends a `WITHDRAW` event to the consent audit log.
+              </p>
+              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                To manage personalized Google advertising across websites or inspect Google&apos;s ad technologies, visit{' '}
+                <a
+                  href="https://adssettings.google.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white underline hover:text-[#EB3B2D]"
+                >
+                  Google Ad Settings
+                </a>{' '}
+                and{' '}
+                <a
+                  href="https://policies.google.com/technologies/ads"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white underline hover:text-[#EB3B2D]"
+                >
+                  Google Advertising Privacy &amp; Terms
+                </a>
+                . Note that rejecting personalized advertising cookies reduces interest-based profiling and does not necessarily remove non-personalized or contextual ads.
               </p>
             </div>
           </div>

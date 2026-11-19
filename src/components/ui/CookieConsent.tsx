@@ -161,6 +161,37 @@ export function openCookiePreferencesModal(source: ConsentSourceType = 'Footer S
 }
 
 /**
+ * Triggers Google AdSense Privacy & Messaging (Funding Choices) consent revocation
+ * dialog if active in the current production runtime. Returns true if invoked.
+ */
+export function openGoogleAdConsentIfAvailable(): boolean {
+  if (typeof window === 'undefined') return false;
+  const w = window as unknown as {
+    googlefc?: {
+      callbackQueue?: Array<Record<string, unknown>>;
+      showRevocationMessage?: () => void;
+    };
+  };
+  try {
+    if (typeof w.googlefc?.showRevocationMessage === 'function') {
+      w.googlefc.showRevocationMessage();
+      return true;
+    }
+    if (Array.isArray(w.googlefc?.callbackQueue)) {
+      w.googlefc.callbackQueue.push({
+        INITIAL_CCPA_DATA_READY: () => {
+          w.googlefc?.showRevocationMessage?.();
+        },
+      });
+      return true;
+    }
+  } catch {
+    // Ignore if Funding Choices script is blocked or inactive
+  }
+  return false;
+}
+
+/**
  * Synchronizes consent decision with the backend API (/api/privacy/consent)
  * and optional Google Sheets audit log. Fails gracefully without blocking the user.
  */
@@ -295,7 +326,13 @@ export const CookieConsent: React.FC<{
       setFunctionalEnabled(prev.functional);
       setMarketingEnabled(prev.marketing);
       setHasExistingConsent(false);
-      setIsBannerVisible(true);
+      // Avoid displaying two simultaneous overlapping consent dialogs if Google Funding Choices CMP is open
+      const googleCmpActive =
+        typeof document !== 'undefined' &&
+        Boolean(document.querySelector('.fc-consent-root'));
+      if (!googleCmpActive) {
+        setIsBannerVisible(true);
+      }
     }
   }, [onConsentChange]);
 
@@ -393,7 +430,7 @@ export const CookieConsent: React.FC<{
             </div>
 
             <p className="text-xs text-neutral-300 mt-3 leading-relaxed">
-              VIZRA uses strictly necessary storage for security, authentication, and saving your consent choices. With your explicit permission, we also support optional Analytics, Functional preferences, and Marketing discovery controls. Read our{' '}
+              VIZRA uses strictly necessary storage for security, authentication, and saving your consent choices. With your explicit permission, we also support optional Analytics, Functional preferences, and Marketing controls. Public informational pages also integrate Google AdSense, whose regional ad consent is managed via Google Privacy &amp; Messaging when active. Read our{' '}
               <Link
                 to="/privacy-policy"
                 className="text-white underline underline-offset-4 hover:text-[#EB3B2D] transition-colors"
@@ -555,14 +592,23 @@ export const CookieConsent: React.FC<{
             />
           </label>
 
-          {/* Category 4: Marketing */}
+          {/* Category 4: Marketing & Advertising */}
           <label className="p-3.5 rounded-xl bg-[#090909] border border-white/[0.08] flex items-start justify-between gap-4 cursor-pointer hover:border-white/[0.16] transition-colors">
             <div>
               <div className="text-xs font-semibold text-white">
-                4. Marketing
+                4. Marketing &amp; Advertising Disclosures
               </div>
               <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
-                Allows VIZRA Engage contextual discovery cards to remember dismissed tips and apply frequency caps across sessions. VIZRA does not load third-party behavioural ad networks by default.
+                Controls first-party VIZRA Engage storage (`vizra_engage_dismissed_cards`) for dismissed contextual tips and frequency caps. Eligible public pages also load Google AdSense (`pub-2808034055890408`), which may use third-party advertising cookies subject to Google Privacy &amp; Messaging regional CMP choices; disabling marketing preferences here affects first-party marketing storage and does not replace regional ad personalization controls in Google&apos;s CMP or{' '}
+                <a
+                  href="https://adssettings.google.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-200 underline hover:text-white"
+                >
+                  Google Ad Settings
+                </a>
+                .
               </p>
             </div>
             <input

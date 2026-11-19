@@ -144,10 +144,10 @@ async function runTests() {
   );
   record(
     'Sitemap.xml',
-    'Returns valid XML with strictly 12 canonical public URLs',
+    `Returns valid XML with strictly ${PUBLIC_INDEXABLE_ROUTES.length} canonical public URLs`,
     sitemapRes.status === 200 &&
       String(sitemapRes.headers['content-type']).includes('application/xml') &&
-      locs.length === 12 &&
+      locs.length === PUBLIC_INDEXABLE_ROUTES.length &&
       !locs.some((u) => u.includes('/ai') || u.includes('/workspace') || u.includes('localhost')),
     `HTTP ${sitemapRes.status} | Count=${locs.length}`
   );
@@ -177,6 +177,7 @@ async function runTests() {
     '/about': ['Don’t just ask AI. Work with it', 'Zero Fabricated Citations'],
     '/contact': ['Under 4 Hours', 'Under 24 Hours', '/api/contact'],
     '/docs': ['Sections A–H', '50,000', '10 MB', '169.254.169.254', 'UNAVAILABLE'],
+    '/blog': ['No articles published yet', 'Blog', 'Browse Documentation'],
     '/terms-and-conditions': ['STRICT_18_PLUS', 'USCO', '17 U.S.C.', '50(2)'],
     '/privacy-policy': ['DELETE /api/account/data', 'Google Cloud', 'DPDP'],
     '/cookie-policy': ['vizra_cookie_consent_v1', '@vercel/analytics', 'Cookieless'],
@@ -306,11 +307,13 @@ async function runTests() {
   const vercelCfg = JSON.parse(vercelRaw);
   const rewritesOk =
     vercelCfg.trailingSlash === false &&
+    vercelCfg.rewrites.some((r: any) => r.source === '/ads.txt' && r.destination === '/ads.txt') &&
     vercelCfg.rewrites.some((r: any) => r.source === '/llms.txt' && r.destination === '/llms.txt') &&
     vercelCfg.rewrites.some((r: any) => r.source === '/llms-full.txt' && r.destination === '/llms-full.txt') &&
     vercelCfg.headers.some((h: any) => h.source === '/api/(.*)' && h.headers?.some((kv: any) => kv.key === 'X-Robots-Tag' && kv.value === 'noindex, nofollow'));
   const distDir = path.join(rootDir, 'dist');
   const distFilesOk =
+    fs.existsSync(path.join(distDir, 'ads.txt')) &&
     fs.existsSync(path.join(distDir, 'llms.txt')) &&
     fs.existsSync(path.join(distDir, 'llms-full.txt')) &&
     fs.existsSync(path.join(distDir, 'robots.txt')) &&
@@ -318,12 +321,14 @@ async function runTests() {
     fs.existsSync(path.join(distDir, 'BingSiteAuth.xml')) &&
     fs.existsSync(path.join(distDir, 'pricing', 'index.html')) &&
     fs.existsSync(path.join(distDir, 'docs', 'index.html')) &&
+    fs.existsSync(path.join(distDir, 'blog', 'index.html')) &&
     extractReadableBodyText(fs.readFileSync(path.join(distDir, 'pricing', 'index.html'), 'utf-8')).includes('Creator Free') &&
-    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'docs', 'index.html'), 'utf-8')).includes('VIZRA Documentation');
+    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'docs', 'index.html'), 'utf-8')).includes('VIZRA Documentation') &&
+    extractReadableBodyText(fs.readFileSync(path.join(distDir, 'blog', 'index.html'), 'utf-8')).includes('No articles published yet');
 
   record(
     'Vercel & Build Artifacts',
-    'vercel.json configures llms/noindex/trailingSlash & dist/ includes static TXT/XML + rich prerendered HTML',
+    'vercel.json configures ads.txt/llms/noindex/trailingSlash & dist/ includes static TXT/XML + rich prerendered HTML',
     rewritesOk && distFilesOk,
     `vercel.json=${rewritesOk} | dist/ artifacts=${distFilesOk}`
   );
