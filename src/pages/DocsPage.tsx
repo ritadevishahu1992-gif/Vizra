@@ -274,7 +274,7 @@ export const DocsPage: React.FC = () => {
                       className="mx-auto text-neutral-400"
                     />
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      No documentation topics matched “{searchQuery}”. Try searching for “OMNIA”, “file upload”, “privacy”, “music”, or “API”.
+                      No documentation topics matched “{searchQuery}”. Try searching for “OMNIA”, “file upload”, “privacy”, “music”, or “workflows”.
                     </p>
                   </div>
                 ) : (

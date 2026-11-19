@@ -84,7 +84,7 @@ export const ContactPage: React.FC = () => {
             Connect with the Vizra team.
           </h1>
           <p className="typo-body-lg">
-            Whether you are scaling a creative studio, integrating with our developer API, or requesting private beta access for upcoming engines, our team is ready to help.
+            Whether you are scaling a creative studio, exploring team onboarding, or requesting private beta access for upcoming engines, our team is ready to help.
           </p>
         </div>
       </section>
@@ -290,7 +290,7 @@ export const ContactPage: React.FC = () => {
                         Platform Documentation
                       </div>
                       <div className="text-[11px] text-neutral-400">
-                        API reference, 10-stage workflows & security
+                        Studio guides, 10-stage workflows & security
                       </div>
                     </div>
                   </div>
@@ -305,10 +305,10 @@ export const ContactPage: React.FC = () => {
                     <LayoutDashboard size={16} className="text-[#EB3B2D]" />
                     <div>
                       <div className="text-xs font-display font-semibold text-white group-hover:text-[#EB3B2D] transition-colors">
-                        Workspace & Developer Console
+                        Studio Workspace
                       </div>
                       <div className="text-[11px] text-neutral-400">
-                        Manage projects, usage analytics & API keys
+                        Manage 10-stage projects, assets & usage analytics
                       </div>
                     </div>
                   </div>

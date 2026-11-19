@@ -56,8 +56,8 @@ export const EarlyAccessForm: React.FC = () => {
         </h2>
 
         <p className="text-neutral-400 text-sm md:text-base max-w-lg mx-auto mb-10 leading-relaxed">
-          We are granting access to select motion studios, independent animators, and creative
-          developers shaping the next era of intelligent digital art.
+          We are granting access to select motion studios, independent animators, and digital
+          creators shaping the next era of intelligent digital art.
         </p>
 
         {submitted ? (
@@ -83,8 +83,8 @@ export const EarlyAccessForm: React.FC = () => {
               {[
                 { id: 'motion_designer', label: 'Motion' },
                 { id: 'animator', label: 'Animator' },
-                { id: 'developer', label: 'Developer' },
                 { id: 'creator', label: 'Creator' },
+                { id: 'beginner', label: 'Beginner' },
               ].map((r) => (
                 <button
                   key={r.id}
@@ -125,7 +125,7 @@ export const EarlyAccessForm: React.FC = () => {
             {error && <p className="text-xs text-[#eb3b2d] text-left">{error}</p>}
 
             <p className="text-[11px] text-neutral-500 text-center pt-1">
-              Zero spam. Direct SDK and Studio access invites only.
+              Zero spam. Direct Studio access invites only.
             </p>
           </form>
         )}

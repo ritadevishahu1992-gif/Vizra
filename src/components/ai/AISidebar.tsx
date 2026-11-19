@@ -362,11 +362,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
         <Link
           to="/workspace"
           className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-300 hover:text-white transition-colors"
-          title="Open Workspace & Developer Console"
+          title="Open Studio Workspace"
         >
           <div className="flex items-center gap-1.5">
             <LayoutDashboard size={12} className="text-[#eb3b2d]" />
-            <span>Workspace Console</span>
+            <span>Studio Workspace</span>
           </div>
           <span className="text-[9px] font-mono text-neutral-500">Dashboard →</span>
         </Link>
@@ -418,8 +418,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
         <Link
           to="/workspace"
           className="w-9 h-9 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
-          title="Workspace & Developer Console"
-          aria-label="Workspace & Developer Console"
+          title="Studio Workspace"
+          aria-label="Studio Workspace"
         >
           <LayoutDashboard size={15} />
         </Link>

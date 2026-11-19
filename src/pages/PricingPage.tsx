@@ -43,10 +43,10 @@ const COMPARISON_MATRIX: ComparisonRow[] = [
     studio: 'Multi-Seat Studio Access',
   },
   {
-    capability: 'Developer API & SEO Diagnostics',
-    starter: 'Workspace View',
-    pro: 'API Key Generation',
-    studio: 'Full Admin & Audit Suite',
+    capability: 'Workspace Governance & Team Support',
+    starter: 'Self-Service Studio Docs',
+    pro: 'Priority Studio Support',
+    studio: 'Shared Team Roles & Dedicated SLA',
   },
 ];
 

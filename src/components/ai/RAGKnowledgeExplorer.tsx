@@ -1078,7 +1078,7 @@ Vizra UI interactions use custom Bezier cubic easing curves:
                   <div className="p-4 rounded-lg bg-black border border-neutral-850 text-xs font-mono text-neutral-300 space-y-1.5">
                     <p className="text-white font-bold">Knowledge Base Root</p>
                     <p className="pl-4 text-emerald-400">├── Global Knowledge (System identity, core policies) [Public Read]</p>
-                    <p className="pl-4 text-emerald-400">├── Vizra Knowledge (Platform docs, features, SDKs) [Public Read]</p>
+                    <p className="pl-4 text-emerald-400">├── Vizra Knowledge (Platform docs, features, workflows) [Public Read]</p>
                     <p className="pl-4 text-purple-400">├── OMNIA Knowledge (Architecture, workflows, prompts) [System Read-Only]</p>
                     <p className="pl-4 text-neutral-400">└── Tenant Isolation Tier</p>
                     <p className="pl-8 text-neutral-300">├── Workspace Knowledge (Shared team files) [Workspace Required]</p>

@@ -26,7 +26,7 @@ Core Operating Principles (from `/about`):
 4. `/studio` — Creative Studio & R&D Roadmap: 4 Studio Engines and 6 Interactive R&D Roadmap Prototypes.
 5. `/explore` — Explore 3D Creative Showcase: Interactive 3D perspective tunnel of curated AI visual prompts and 6 discipline starter profiles.
 6. `/pricing` — Pricing & Compute Tiers: Creator Free, Omnia Pro, VIZRA Studio & Team, full entitlement comparison table, and 4 billing FAQs.
-7. `/docs` — Public Documentation Centre (Sections A–H): 50 topics and 17 dedicated feature guides covering getting started, platform architecture, OMNIA prompting, security/privacy, troubleshooting, feature availability matrix, and Public API status.
+7. `/docs` — Public Documentation Centre (Sections A–H): 49 topics and 17 dedicated feature guides covering getting started, platform architecture, OMNIA prompting, security/privacy, troubleshooting, and feature availability matrix.
 8. `/blog` — Blog & Studio Updates: Official editorial hub (`No articles published yet.` until articles are authored).
 9. `/about` — About VIZRA: Philosophy creed, core engineering principles, and target creator disciplines.
 10. `/contact` — Contact & Studio Inquiries: Direct studio inquiry form, early-access beta request form, and response SLAs.
@@ -114,9 +114,8 @@ Data & Connector Disclosures:
   - Dedicated enterprise compute & custom concurrency SLA
   - Shared team workspaces & role-based permissions
   - Private RAG corpus indexing & custom vector search
-  - Workspace governance tokens (for authorized interactive studio sessions; external public API remains `UNAVAILABLE`)
-  - VIZRA Engage & Technical SEO Diagnostic Suite
-  - Dedicated onboarding & priority SLA support
+  - VIZRA Engage & workspace governance controls
+  - Dedicated studio onboarding & priority SLA support
 
 Frequently Asked Questions (verbatim summary):
 - **Credit Calculation**: Quick and Think turns consume 1 credit per turn; Deep Web Research, high-resolution synthesis, and audio generation consume compute-proportional credits tracked in the header Credit Usage Indicator.
@@ -126,9 +125,9 @@ Frequently Asked Questions (verbatim summary):
 
 ---
 
-## 7. Operational Limits, Public API Status & Private Boundaries (`/docs`)
+## 7. Operational Limits & Private Boundaries (`/docs`)
 
-- **Public External REST API**: `UNAVAILABLE` (`/docs?doc=public-api-status`) — VIZRA does not currently offer an external public REST API, SDK, or webhook platform for third-party applications.
+- **Web-First Studio Delivery**: Interactive creation, grounded research, and 10-stage project workflows operate directly inside the VIZRA web workspace (`/ai` and `/workspace`).
 - **Prompt Character Cap**: Maximum `50,000` characters per prompt.
 - **Multimodal Attachments**: Up to `5` files per prompt turn (`10 MB` max per file; binary video uploads are not supported in chat); Knowledge Base Explorer local index accepts up to `25 MB`.
 - **Interactive Abuse Protection**: Sliding-window rate limiting across server endpoints, plus authenticated 18+ account checks and concurrency caps (`max 2` concurrent sessions, `10-minute` session cap) on interactive Live Voice Mode.

@@ -34,7 +34,6 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     links: [
       { label: 'Documentation', to: '/docs' },
       { label: 'Blog & Updates', to: '/blog' },
-      { label: 'Developer API Reference', to: '/docs?section=api' },
       { label: 'Security & Governance', to: '/docs?section=security' },
     ],
   },

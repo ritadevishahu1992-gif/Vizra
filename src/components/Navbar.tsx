@@ -98,8 +98,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
       tag: 'Showcase',
     },
     {
-      label: 'Technical Documentation',
-      desc: 'Omnia 1.0 intent routing, 10-stage workflows, REST APIs, and security guides.',
+      label: 'Platform Documentation',
+      desc: 'Omnia 1.0 intent routing, 10-stage workflows, studio guides, and security.',
       href: '/docs',
       icon: BookOpen,
       tag: 'Reference',

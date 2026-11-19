@@ -494,7 +494,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
           bullets: [
             'Creator Free ($0 / forever): Omnia 1.0 Quick, Think & Research modes, grounded Google Search citations, up to 3 active 10-stage projects, 60 requests/min rate quota, 10 MB multimodal attachments, and local history JSON export.',
             'Omnia Pro ($19/mo billed yearly — Save 20%, or $24/mo billed monthly): Unlimited 10-stage workspaces, 240 requests/min quota, 15 MB multimodal attachments, Lyria 3 AI Music Studio & Gemini Live Voice, DeepMind Science Hub, cross-device Firestore project sync, and personal memory bank.',
-            'VIZRA Studio & Team ($64/mo billed yearly — Save 20%, or $79/mo billed monthly): Custom enterprise concurrency SLA, shared team workspaces with role permissions, private RAG corpus indexing, Developer Console API keys, VIZRA Engage & Technical SEO Diagnostic Suite, and priority onboarding.',
+            'VIZRA Studio & Team ($64/mo billed yearly — Save 20%, or $79/mo billed monthly): Custom enterprise concurrency SLA, shared team workspaces with role permissions, private RAG corpus indexing, VIZRA Engage governance controls, and priority studio onboarding.',
           ],
         },
         {
@@ -511,7 +511,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
               ['Grounded Web Search Citations', 'Included', 'Included', 'Included + Domain Filters'],
               ['Lyria 3 & Gemini Live Voice', 'Standard Preview', 'Unlimited Studio', 'Unlimited + Team Access'],
               ['DeepMind Science Hub (AlphaFold / PubChem)', 'Included', 'Included', 'Included'],
-              ['Developer API Keys & VIZRA Engage', '—', '—', 'Included'],
+              ['Team Roles & Dedicated Studio Support', '—', 'Priority Support', 'Included + SLA'],
             ],
           },
         },
@@ -591,7 +591,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     prehydration: {
       eyebrow: 'CONTACT & STUDIO ONBOARDING',
       h1: 'Connect with the Vizra team.',
-      lead: 'Whether you are scaling a creative studio, integrating with our developer API, or requesting private beta access for upcoming engines, reach our team directly at /contact.',
+      lead: 'Whether you are scaling a creative studio, exploring team onboarding, or requesting private beta access for upcoming engines, reach our team directly at /contact.',
       sections: [
         {
           heading: 'Direct Support Channels & Response SLAs',
@@ -640,20 +640,20 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       sections: [
         {
           heading: '1. Complete Documentation Structure (Sections A–H)',
-          body: 'Browse 50 public reference topics and 17 dedicated feature guides organized across eight clear sections:',
+          body: 'Browse 49 public reference topics and 17 dedicated feature guides organized across eight clear sections:',
           bullets: [
             'Section A — Introduction (Topics 01–08): What VIZRA is, core philosophy, 18+ adult studio eligibility, getting started, and terminology.',
             'Section B — Understanding the Platform (Topics 09–15): Platform overview, how Omnia 1.0 assists users, project workflows, navigation, and device compatibility.',
             'Section C — Features & Tools (17 Feature Guides): Clear availability statuses (AVAILABLE, LIMITED, UNAVAILABLE, COMING SOON) across Chat, Live Web Research, Design, Code, Visual Canvas, AI Music Studio, Science Hub, Live Voice, and Knowledge Base.',
             'Section D & E — OMNIA Prompting & User Guides (Topics 16–29): Effective prompting habits, multimodal file workflows, citations, and 10-stage studio walkthroughs.',
-            'Section F, G & H — Security, Troubleshooting & Technical Info (Topics 30–50): Privacy controls, 18+ safety safeguards, FAQs, system limits, and Public API status.',
+            'Section F, G & H — Security, Troubleshooting & Technical Info (Topics 30–49): Privacy controls, 18+ safety safeguards, FAQs, compatibility, system limits, and version history.',
           ],
         },
         {
-          heading: '2. Verified Availability, Operational Limits & Public API Status',
+          heading: '2. Verified Availability & Operational Limits',
           body: 'VIZRA operates transparently by separating production features from staged concepts:',
           bullets: [
-            'Public External API Status (UNAVAILABLE — Topic 48): VIZRA does not currently offer a public external REST API, SDK, or webhook platform; interactive creation operates inside /ai and /workspace.',
+            'Web-First Creative Studio: Interactive AI generation, grounded search, and 10-stage project workflows operate directly inside the VIZRA web workspace (/ai and /workspace).',
             'Prompt & File Bounds: Up to 50,000 characters per prompt; up to 5 file attachments per turn (10 MB max per file in chat); Knowledge Base Explorer local index up to 25 MB.',
             'Staged Features Disclosed Clearly: Temporal Video & Scene Synthesis (COMING SOON) and external OAuth cloud connectors (Drive, GitHub, Figma, Canva, YouTube, Notion, Dropbox) remain UNAVAILABLE / In Staging.',
           ],
@@ -697,7 +697,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
           heading: 'Editorial Archive Status',
           body: 'No articles published yet. Verified product releases, technical essays, and Omnia 1.0 creative workflow guides will be indexed here and at /blog/:slug as they are released.',
           bullets: [
-            'Browse Documentation (/docs): Explore complete A–Z user and developer reference guides across Sections A–H.',
+            'Browse Documentation (/docs): Explore complete A–Z user and studio reference guides across Sections A–H.',
             'Platform Features (/features): Review the 4 Core Pillars, 5-step Idea-to-Finish pipeline, and 10-stage workflow architecture.',
             'Creative Studio (/studio): Inspect production 60fps engines and R&D roadmap prototypes.',
           ],
@@ -889,17 +889,17 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
   },
   '/workspace': {
     canonicalPath: '/workspace',
-    title: 'Workspace & Developer Console — Vizra AI Studio',
+    title: 'Studio Workspace — Vizra AI Studio',
     description:
-      'Manage your 10-stage creative projects, uploaded multimodal assets, D3 credit usage analytics, and developer API tokens.',
+      'Manage your 10-stage creative projects, uploaded multimodal assets, and D3 credit usage analytics.',
     isIndexable: false,
     robots: 'noindex, nofollow',
     ogType: 'website',
     jsonLd: [],
     prehydration: {
-      eyebrow: 'WORKSPACE & DEVELOPER CONSOLE · NOINDEX',
-      h1: 'Workspace & Developer Console',
-      lead: 'Private user console for 10-stage creative projects, usage telemetry, and workspace tools.',
+      eyebrow: 'STUDIO WORKSPACE · NOINDEX',
+      h1: 'Studio Workspace',
+      lead: 'Private user workspace for 10-stage creative projects, usage telemetry, and creative assets.',
       sections: [],
     },
   },

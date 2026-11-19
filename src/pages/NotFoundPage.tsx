@@ -27,7 +27,7 @@ export const NotFoundPage: React.FC = () => {
     },
     {
       label: 'Platform Documentation',
-      desc: 'Read technical guides on model routing, workflows, and APIs.',
+      desc: 'Read platform guides on Omnia 1.0, workflows, and studio tools.',
       to: '/docs',
       icon: BookOpen,
     },

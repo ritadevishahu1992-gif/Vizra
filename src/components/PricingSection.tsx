@@ -66,14 +66,14 @@ const PRICING_TIERS: PricingTier[] = [
     monthlyPrice: 79,
     yearlyPrice: 64,
     description:
-      'Shared team workspaces, custom RAG knowledge bases, VIZRA Engage governance console, and dedicated API rate limits.',
+      'Shared team workspaces, custom RAG knowledge bases, VIZRA Engage governance console, and dedicated studio compute capacity.',
     creditsLabel: 'Custom concurrency · Dedicated SLA',
     features: [
       'Everything in Omnia Pro, plus:',
       'Collaborative team workspaces & role permissions',
       'Private RAG Knowledge Base & custom corpus indexing',
-      'Developer Console & programmatic API access',
-      'VIZRA Engage & Technical SEO Diagnostic Suite',
+      'Priority studio onboarding & dedicated SLA support',
+      'VIZRA Engage & workspace governance controls',
       'Zero-retention enterprise privacy governance',
     ],
     ctaLabel: 'Activate Studio Plan',

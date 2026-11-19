@@ -561,7 +561,6 @@ export const GUIDES_TRUST_TECH_DOCS: DocArticle[] = [
             ['Can anyone under 18 use VIZRA?', 'No. VIZRA currently operates strictly as an 18+ adult creative studio.'],
             ['Are Google Drive, GitHub, and Figma live?', 'Not yet—cloud workspace connectors are visibly marked In Staging / External OAuth Approval Required. Upload exported local files instead.'],
             ['Can VIZRA generate finished MP4 videos right now?', 'Not yet. Temporal Video Synthesis is marked Coming Soon; you can write scripts, camera plans, and soundtracks today.'],
-            ['Is there a public developer REST API for external apps?', 'No external public API is currently offered. Visit /docs?doc=public-api-status or /contact for team inquiries.'],
             ['How do I delete my data?', 'Go to /settings and use "Clear Local Cache" or "Delete Account & Data", or use /contact for formal privacy requests.'],
           ],
         },
@@ -675,7 +674,6 @@ export const GUIDES_TRUST_TECH_DOCS: DocArticle[] = [
             ['Omnia Live Voice Mode', 'LIMITED', 'Requires authenticated 18+ account & microphone'],
             ['Paid Billing Checkout', 'LIMITED', 'Preview tier selection only; no live card billing yet'],
             ['Third-Party Cloud Connectors', 'UNAVAILABLE', 'In staging; requires external OAuth approvals'],
-            ['Public External REST API', 'UNAVAILABLE', 'No third-party public API currently offered'],
             ['Temporal Video & Scene Synthesis', 'COMING SOON', 'In staged development; no fixed launch date'],
           ],
         },
@@ -718,45 +716,8 @@ export const GUIDES_TRUST_TECH_DOCS: DocArticle[] = [
     ],
   },
   {
-    slug: 'public-api-status',
-    code: '48',
-    sectionId: 'H',
-    sectionTitle: 'Section H · Technical Information',
-    title: 'Public API Information',
-    status: 'UNAVAILABLE',
-    statusNote: 'No officially supported external public developer API is currently published.',
-    summary:
-      'Transparent status on programmatic access: VIZRA currently operates as an interactive web studio without a public third-party API.',
-    blocks: [
-      {
-        id: 'public-api-truth',
-        heading: 'Current Public API Status: UNAVAILABLE',
-        paragraphs: [
-          'VIZRA does not currently offer an officially supported public REST API, SDK, or external developer webhook platform for third-party applications.',
-          'All interactive AI capabilities, research tools, and 10-stage project workflows are designed for direct use inside the VIZRA web interface (/ai and /workspace). Note that workspace token controls inside /workspace are scoped solely for authorized interactive studio session governance—not for external public API consumption.',
-        ],
-        callout: {
-          variant: 'limitation',
-          title: 'Do Not Rely on Undocumented Web Endpoints',
-          body: 'Internal browser-to-server application requests are not public APIs, carry no external stability guarantees, and reject unauthorized third-party requests.',
-        },
-      },
-      {
-        id: 'studio-inquiries',
-        heading: 'Interested in Future API or Studio Integrations?',
-        paragraphs: [
-          'Teams or partners exploring dedicated studio integrations or future API availability can submit an inquiry through the Contact page (/contact).',
-        ],
-      },
-    ],
-    relatedLinks: [
-      { label: 'Contact Studio Team', to: '/contact' },
-      { label: 'Workspace Dashboard', to: '/workspace' },
-    ],
-  },
-  {
     slug: 'known-limitations',
-    code: '49',
+    code: '48',
     sectionId: 'H',
     sectionTitle: 'Section H · Technical Information',
     title: 'Known Limitations',
@@ -771,7 +732,7 @@ export const GUIDES_TRUST_TECH_DOCS: DocArticle[] = [
           'No Video File Analysis in Chat: Binary video uploads cannot be inspected inside chat attachments; attach still image frames, audio, or text transcripts instead.',
           'Live Voice Authentication & Age Rules: Unavailable to signed-out guests or under-18 flagged sessions.',
           'Anonymous Browser Persistence: Signed-out users’ threads and 10-stage projects live only in the active browser and are lost if browser site data is wiped.',
-          'Staged Features Remain Inactive: Cloud workspace OAuth connectors (Drive, GitHub, Figma, Notion, etc.), Temporal Video generation, commercial credit card checkout, and a public external API are not live.',
+          'Staged Features Remain Inactive: Cloud workspace OAuth connectors (Drive, GitHub, Figma, Notion, etc.), Temporal Video generation, and commercial credit card checkout are not live yet.',
           'Probabilistic AI Output: Even grounded citations require creator review; VIZRA never provides medical, legal, or financial advice.',
         ],
       },
@@ -779,7 +740,7 @@ export const GUIDES_TRUST_TECH_DOCS: DocArticle[] = [
   },
   {
     slug: 'documentation-version-history',
-    code: '50',
+    code: '49',
     sectionId: 'H',
     sectionTitle: 'Section H · Technical Information',
     title: 'Documentation Version History',

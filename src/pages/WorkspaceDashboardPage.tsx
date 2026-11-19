@@ -612,8 +612,8 @@ export const WorkspaceDashboardPage: React.FC = () => {
     <DashboardShell
       activeSection={activeSection}
       onSelectSection={handleSelectSection}
-      title="VIZRA Workspace & Developer Console"
-      subtitle="Real-time project pipelines, multimodal assets, telemetry charts, and API governance"
+      title="VIZRA Studio Workspace"
+      subtitle="Real-time project pipelines, multimodal assets, telemetry charts, and team governance"
       planName={activePlanName}
       headerActions={
         <div className="flex items-center gap-2">
@@ -880,9 +880,10 @@ export const WorkspaceDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* SECTION: DEVELOPER & API KEYS */}
+      {/* SECTION: TEAM GOVERNANCE & INTERNAL WORKSPACE TOKENS (tokens only shown on internal ?tab=developer) */}
       {(activeSection === 'developer' || activeSection === 'team' || activeSection === 'settings') && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 select-none">
+          {activeSection === 'developer' && (
           <div className="lg:col-span-7 rounded-2xl bg-[#111111] border border-white/[0.08] p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <div className="flex items-center gap-2">
@@ -1004,8 +1005,9 @@ export const WorkspaceDashboardPage: React.FC = () => {
               ))}
             </div>
           </div>
+          )}
 
-          <div className="lg:col-span-5 rounded-2xl bg-[#111111] border border-white/[0.08] p-5 space-y-4">
+          <div className={`${activeSection === 'developer' ? 'lg:col-span-5' : 'lg:col-span-12'} rounded-2xl bg-[#111111] border border-white/[0.08] p-5 space-y-4`}>
             <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
               <Users size={15} className="text-[#EB3B2D]" />
               <div>

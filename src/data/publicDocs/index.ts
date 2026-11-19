@@ -64,9 +64,9 @@ export const DOC_SECTION_GROUPS: DocSectionGroup[] = [
     id: 'H',
     letter: 'H',
     title: 'Technical Information',
-    subtitle: 'Topics 44–50',
+    subtitle: 'Topics 44–49',
     description:
-      'Compatibility matrix, browser requirements, live availability table, API status, and version history.',
+      'Compatibility matrix, browser requirements, live availability table, limitations, and version history.',
   },
 ];
 
@@ -80,7 +80,6 @@ export const LEGACY_SECTION_REDIRECTS: Record<string, string> = {
   overview: 'what-is-vizra',
   routing: 'understanding-omnia',
   workflows: 'feature-project-workflows',
-  api: 'public-api-status',
   security: 'security-overview',
 };
 

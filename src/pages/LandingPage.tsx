@@ -106,8 +106,8 @@ export const LandingPage: React.FC = () => {
       icon: CreditCard,
     },
     {
-      title: 'Technical Documentation',
-      desc: 'Intent routing, API endpoints, and SSRF security guides.',
+      title: 'Platform Documentation',
+      desc: 'Omnia 1.0 guides, 10-stage workflows, and platform security.',
       to: '/docs',
       icon: BookOpen,
     },
