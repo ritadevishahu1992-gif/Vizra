@@ -416,9 +416,9 @@ async function runVerification() {
       Boolean(ogDesc && ogDesc.length > 30) &&
       (ogType === 'website' || ogType === 'article') &&
       ogUrl === expected.canonicalUrl &&
-      ogImage === 'https://vizra.vercel.app/og-image.png' &&
-      ogWidth === '1200' &&
-      ogHeight === '630' &&
+      ogImage === expected.ogImage &&
+      ogWidth === expected.ogImageWidth &&
+      ogHeight === expected.ogImageHeight &&
       Boolean(ogAlt && ogAlt.length > 10) &&
       ogSiteName === 'VIZRA — AI Creative Studio' &&
       ogLocale === 'en_US';
@@ -427,7 +427,7 @@ async function runVerification() {
       twCard === 'summary_large_image' &&
       twTitle === ogTitle &&
       twDesc === ogDesc &&
-      twImage === 'https://vizra.vercel.app/og-image.png' &&
+      twImage === expected.twitterImage &&
       twAlt === ogAlt;
 
     const adSenseMatches = countTag(
@@ -588,7 +588,7 @@ async function runVerification() {
         !distHtml.includes(`href="${expected.canonicalUrl}"`) ||
         extractMetaContent(distHtml, 'property', 'og:url') !== expected.canonicalUrl ||
         extractMetaContent(distHtml, 'property', 'og:image') !==
-          'https://vizra.vercel.app/og-image.png' ||
+          expected.ogImage ||
         extractMetaContent(distHtml, 'name', 'twitter:card') !== 'summary_large_image' ||
         countTag(distHtml, /adsbygoogle\.js/gi) !== 1
       ) {
