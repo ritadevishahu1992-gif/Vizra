@@ -1,4 +1,4 @@
-import { track } from '@vercel/analytics';
+const track = (..._args: unknown[]): void => {};
 import { AIMode } from '../types/ai';
 import {
   EngageCoarseIntent,

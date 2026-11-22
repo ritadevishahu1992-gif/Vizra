@@ -6,8 +6,8 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+const Analytics = () => null;
+const SpeedInsights = () => null;
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
