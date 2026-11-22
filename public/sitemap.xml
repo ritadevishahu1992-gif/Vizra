@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://vizra.vercel.app/</loc>
-    <lastmod>2026-11-17</lastmod>
+    <lastmod>2026-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -44,9 +44,69 @@
   </url>
   <url>
     <loc>https://vizra.vercel.app/blog</loc>
-    <lastmod>2026-11-18</lastmod>
+    <lastmod>2026-11-21</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/evolution-of-artificial-intelligence-rules-to-generative-ai</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/what-is-artificial-intelligence-complete-guide</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/machine-learning-explained-how-machines-learn-from-data</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/deep-learning-understanding-modern-ai</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/neural-networks-explained-how-ai-processes-information</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/history-of-computing-and-role-in-artificial-intelligence</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/supervised-unsupervised-reinforcement-learning-explained</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/how-data-powers-modern-artificial-intelligence</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/natural-language-processing-how-machines-understand-human-language</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/computer-vision-how-ai-interprets-images-and-videos</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://vizra.vercel.app/about</loc>

@@ -1,4 +1,4 @@
-import { getPublishedBlogPost } from '../data/blogPosts';
+import { BLOG_POSTS, getPublishedBlogPost } from '../data/blogPosts';
 
 export const SITE_ORIGIN = 'https://vizra.vercel.app';
 export const SITE_NAME = 'VIZRA — AI Creative Studio';
@@ -20,7 +20,7 @@ export const REDIRECT_ALIASES: Record<string, string> = {
   '/crawler-audit': '/seo-diagnostics',
 };
 
-export const PUBLIC_INDEXABLE_ROUTES = [
+export const PUBLIC_INDEXABLE_ROUTES: readonly string[] = [
   '/',
   '/features',
   '/tools',
@@ -31,10 +31,11 @@ export const PUBLIC_INDEXABLE_ROUTES = [
   '/contact',
   '/docs',
   '/blog',
+  ...BLOG_POSTS.map((post) => `/blog/${post.slug}`),
   '/terms-and-conditions',
   '/privacy-policy',
   '/cookie-policy',
-] as const;
+];
 
 export const PRIVATE_OR_UTILITY_ROUTES = [
   '/ai',
@@ -667,9 +668,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
   },
   '/blog': {
     canonicalPath: '/blog',
-    title: 'Blog & Studio Updates — Vizra AI Creative Studio',
+    title: 'AI Foundations & Technical Editorial — Vizra Blog',
     description:
-      'Official blog and editorial updates for VIZRA AI Creative Studio and Omnia 1.0.',
+      'In-depth, fact-checked guides on artificial intelligence, machine learning, deep learning, neural networks, computing history, data engineering, NLP, and computer vision from VIZRA.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
@@ -679,28 +680,35 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       {
         '@context': 'https://schema.org',
         '@type': 'Blog',
-        name: 'VIZRA Blog & Studio Updates',
+        name: 'VIZRA Blog — AI Foundations Series',
         url: `${SITE_ORIGIN}/blog`,
         description:
-          'Official editorial announcements, product notes, and workflow guides from VIZRA AI Creative Studio.',
+          'Ten independently audited, source-verified long-form technical monographs covering artificial intelligence foundations from symbolic rules to modern generative models.',
         publisher: {
           '@id': `${SITE_ORIGIN}/#organization`,
         },
+        blogPost: BLOG_POSTS.map((post) => ({
+          '@type': 'BlogPosting',
+          headline: post.title,
+          url: `${SITE_ORIGIN}/blog/${post.slug}`,
+          datePublished: post.publishedAt,
+          dateModified: post.updatedAt || post.publishedAt,
+          image: `${SITE_ORIGIN}${post.featuredImage}`,
+        })),
       },
     ],
     prehydration: {
-      eyebrow: 'VIZRA EDITORIAL & STUDIO UPDATES',
-      h1: 'Blog',
-      lead: 'Product announcements, engineering notes, and creative workflow guides from VIZRA AI Creative Studio.',
+      eyebrow: 'VIZRA EDITORIAL · BATCH 1 · AI FOUNDATIONS SERIES',
+      h1: 'Technical Monographs on Modern Artificial Intelligence',
+      lead: 'Ten independently audited, source-verified long-form guides examining artificial intelligence—from symbolic rules and computing hardware to neural networks, learning paradigms, data engineering, NLP, and computer vision.',
       sections: [
         {
-          heading: 'Editorial Archive Status',
-          body: 'No articles published yet. Verified product releases, technical essays, and Omnia 1.0 creative workflow guides will be indexed here and at /blog/:slug as they are released.',
-          bullets: [
-            'Browse Documentation (/docs): Explore complete A–Z user and studio reference guides across Sections A–H.',
-            'Platform Features (/features): Review the 4 Core Pillars, 5-step Idea-to-Finish pipeline, and 10-stage workflow architecture.',
-            'Creative Studio (/studio): Inspect production 60fps engines and R&D roadmap prototypes.',
-          ],
+          heading: 'Published Articles — Batch 1 (AI Foundations, Articles 01–10)',
+          body: 'Each monograph includes KaTeX-rendered mathematical formulations, structured comparison tables, FAQs, and primary verified HTTPS references:',
+          bullets: BLOG_POSTS.map(
+            (post) =>
+              `Article ${String(post.number).padStart(2, '0')}: ${post.title} (/blog/${post.slug}) — ${post.description}`
+          ),
         },
       ],
     },
@@ -974,6 +982,111 @@ export function resolveRouteSeoPayload(
     if (publishedPost) {
       const canonicalPath = `/blog/${publishedPost.slug}`;
       const canonicalUrl = `${SITE_ORIGIN}${canonicalPath}`;
+      const articleOgImage = publishedPost.featuredImage.startsWith('http')
+        ? publishedPost.featuredImage
+        : `${SITE_ORIGIN}${publishedPost.featuredImage}`;
+      const resolvedTitle = publishedPost.seoTitle || `${publishedPost.title} — Vizra Blog`;
+
+      const prehydrationSections: RoutePrehydrationSection[] = publishedPost.sections
+        .filter((sec) => sec.level === 2)
+        .slice(0, 10)
+        .map((sec) => {
+          const firstParagraph = sec.blocks.find((b) => b.type === 'paragraph');
+          return {
+            heading: sec.heading,
+            body:
+              firstParagraph && firstParagraph.type === 'paragraph'
+                ? firstParagraph.text
+                : publishedPost.excerpt,
+          };
+        });
+
+      if (publishedPost.faqs.length > 0) {
+        prehydrationSections.push({
+          heading: 'Frequently Asked Questions',
+          body: `Key technical questions answered in ${publishedPost.title}:`,
+          faqs: publishedPost.faqs.map((f) => ({
+            q: f.question,
+            a: f.answer,
+          })),
+        });
+      }
+
+      if (publishedPost.sources.length > 0) {
+        prehydrationSections.push({
+          heading: 'Primary Sources',
+          body: `${publishedPost.sources.length} verified primary references cited in this monograph:`,
+          bullets: publishedPost.sources
+            .slice(0, 15)
+            .map((s) => `[${s.id}] ${s.title}${s.venue ? ` — ${s.venue}` : ''} (${s.url})`),
+        });
+      }
+
+      const articleJsonLd: Record<string, unknown>[] = [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: `${SITE_ORIGIN}/`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Blog',
+              item: `${SITE_ORIGIN}/blog`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: publishedPost.title,
+              item: canonicalUrl,
+            },
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: publishedPost.title,
+          description: publishedPost.description,
+          image: articleOgImage,
+          datePublished: publishedPost.publishedAt,
+          dateModified: publishedPost.updatedAt || publishedPost.publishedAt,
+          url: canonicalUrl,
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': canonicalUrl,
+          },
+          articleSection: publishedPost.category,
+          keywords: [publishedPost.primaryKeyword, ...publishedPost.secondaryKeywords].join(', '),
+          author: {
+            '@type': 'Organization',
+            name: publishedPost.author,
+          },
+          publisher: {
+            '@id': `${SITE_ORIGIN}/#organization`,
+          },
+        },
+      ];
+
+      if (publishedPost.faqs.length > 0) {
+        articleJsonLd.push({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: publishedPost.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        });
+      }
+
       return {
         requestedPath: normalizedPath,
         canonicalPath,
@@ -983,52 +1096,29 @@ export function resolveRouteSeoPayload(
         includeSocialPreview: true,
         robots: 'index, follow',
         xRobotsTag: 'index, follow',
-        title: `${publishedPost.title} — Vizra Blog`,
+        title: resolvedTitle,
         description: publishedPost.description,
-        ogTitle: `${publishedPost.title} — Vizra Blog`,
+        ogTitle: resolvedTitle,
         ogDescription: publishedPost.description,
         ogType: 'article',
         ogUrl: canonicalUrl,
-        ogImage: DEFAULT_OG_IMAGE,
-        ogImageWidth: OG_IMAGE_WIDTH,
-        ogImageHeight: OG_IMAGE_HEIGHT,
-        ogImageAlt: OG_IMAGE_ALT,
+        ogImage: articleOgImage,
+        ogImageWidth: '1280',
+        ogImageHeight: '720',
+        ogImageAlt: publishedPost.featuredImageAlt,
         ogSiteName: SITE_NAME,
         ogLocale: 'en_US',
         twitterCard: 'summary_large_image',
-        twitterTitle: `${publishedPost.title} — Vizra Blog`,
+        twitterTitle: resolvedTitle,
         twitterDescription: publishedPost.description,
-        twitterImage: DEFAULT_OG_IMAGE,
-        twitterImageAlt: OG_IMAGE_ALT,
-        jsonLd: [
-          buildBreadcrumbSchema(publishedPost.title, canonicalPath),
-          {
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: publishedPost.title,
-            description: publishedPost.description,
-            datePublished: publishedPost.publishedAt,
-            dateModified: publishedPost.updatedAt || publishedPost.publishedAt,
-            url: canonicalUrl,
-            author: {
-              '@type': 'Organization',
-              name: publishedPost.author,
-            },
-            publisher: {
-              '@id': `${SITE_ORIGIN}/#organization`,
-            },
-          },
-        ],
+        twitterImage: articleOgImage,
+        twitterImageAlt: publishedPost.featuredImageAlt,
+        jsonLd: articleJsonLd,
         prehydration: {
-          eyebrow: `VIZRA BLOG · ${publishedPost.category}`,
+          eyebrow: `VIZRA BLOG · ${publishedPost.series} · ARTICLE ${String(publishedPost.number).padStart(2, '0')} OF 10`,
           h1: publishedPost.title,
-          lead: publishedPost.description,
-          sections: [
-            {
-              heading: publishedPost.category,
-              body: publishedPost.body.join(' '),
-            },
-          ],
+          lead: publishedPost.excerpt,
+          sections: prehydrationSections,
         },
       };
     }

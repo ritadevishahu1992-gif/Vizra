@@ -4,6 +4,7 @@
 @import "@fontsource/inter/700.css";
 @import "@fontsource/instrument-serif/400.css";
 @import "@fontsource/instrument-serif/400-italic.css";
+@import "katex/dist/katex.min.css";
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -184,5 +185,40 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #404040;
+}
+
+/* KaTeX math rendering compatibility */
+.katex {
+  color: inherit;
+  font-size: 1.05em;
+  line-height: 1.4;
+}
+
+.katex-display {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  border-radius: 0.75rem;
+  background: rgba(12, 12, 12, 0.7);
+  border: 1px solid rgba(38, 38, 38, 0.8);
+}
+
+html.light .katex-display {
+  background: rgba(245, 245, 245, 0.9);
+  border-color: rgba(229, 229, 229, 1);
+}
+
+.katex-display > .katex {
+  display: inline-block;
+  text-align: center;
+  min-width: min-content;
+}
+
+.katex-error {
+  color: #eb3b2d !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
 }
 
