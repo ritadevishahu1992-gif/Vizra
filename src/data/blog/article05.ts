@@ -71,15 +71,11 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "misclassified an input pattern, it nudged its weights in the direction that reduced the error. Rosenblatt even built a physical realization—the Mark I Perceptron—using a grid of photocells wired to motor-driven potentiometers that mechanically rotated to store updated weight values."
         },
         {
           "type": "paragraph",
-          "text": "Early press coverage hailed the Perceptron as the embryo of an electronic consciousness, a wave of enthusiasm that met a sharp mathematical rebuke in 1969. In Perceptrons: An Introduction to Computational Geometry, MIT researchers Marvin Minsky and Seymour Papert analyzed what a single- layer Perceptron could and could not compute [3]. Because a single Perceptron partitions its input space with a single straight line (or, in higher dimensions, a flat hyperplane), it can only solve linearly separable problems. Simple Boolean functions like AND and OR are linearly separable; the exclusive-OR (XOR) function—which outputs 1 when its two inputs differ and 0 when they match—is not [3]. No single straight line can separate (0,1) and (1,0) from (0,0) and (1,1) on a two-dimensional plane."
+          "text": "Early press coverage hailed the Perceptron as the embryo of an electronic consciousness, a wave of enthusiasm that met a sharp mathematical rebuke in 1969. In Perceptrons: An Introduction to Computational Geometry, MIT researchers Marvin Minsky and Seymour Papert analyzed what a single-layer Perceptron could and could not compute [3]. Because a single Perceptron partitions its input space with a single straight line (or, in higher dimensions, a flat hyperplane), it can only solve linearly separable problems. Simple Boolean functions like AND and OR are linearly separable; the exclusive-OR (XOR) function—which outputs 1 when its two inputs differ and 0 when they match—is not [3]. No single straight line can separate (0,1) and (1,0) from (0,0) and (1,1) on a two-dimensional plane."
         },
         {
           "type": "paragraph",
@@ -117,10 +113,6 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "neural networks are best understood as high-dimensional differentiable programs rather than digital replicas of cortex."
         }
       ]
@@ -154,10 +146,6 @@ export const article05: BlogPost = {
         {
           "type": "paragraph",
           "text": "This formulation explains why modern artificial intelligence became inseparable from graphics processing units (GPUs) and specialized tensor accelerators—a hardware trajectory detailed further in The History of Computing and Its Role in Artificial Intelligence. General-purpose CPUs are optimized for branching logic and low-latency sequential instructions. GPUs and Tensor Processing Units (TPUs), by contrast, pack thousands of arithmetic logic units onto a single die specifically to perform fused multiply-accumulate operations on dense matrices in parallel. When an AI model processes a sentence or an image, the physical work happening inside the data center is overwhelmingly a cascade of matrix multiplications interleaved with element-wise nonlinearities."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -194,7 +182,7 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In 1989, mathematician George Cybenko proved in Mathematics of Control, Signals, and Systems that a feedforward neural network with just a single hidden layer containing a finite number of neurons and a continuous sigmoidal activation function can approximate any continuous function on a compact subset of ℝ^n to arbitrary precision [7]. Two years later, Kurt Hornik demonstrated in Neural Networks that this universal approximation capability is not tied to the specific shape of the sigmoid curve, but is an inherent property of the multilayer feedforward architecture itselffor any bounded, non-constant activation function [8]. In 1993, Moshe Leshno, Vladimir Ya. Lin, Allan Pinkus, and Shimon Schocken established the sharp necessary and sufficient condition: a standard multilayer feedforward network with a locally bounded, piecewise continuous activation function is a universal approximator if and only if its activation function is not a polynomial [9]."
+          "text": "In 1989, mathematician George Cybenko proved in Mathematics of Control, Signals, and Systems that a feedforward neural network with just a single hidden layer containing a finite number of neurons and a continuous sigmoidal activation function can approximate any continuous function on a compact subset of $\\mathbb{R}^n$ to arbitrary precision [7]. Two years later, Kurt Hornik demonstrated in Neural Networks that this universal approximation capability is not tied to the specific shape of the sigmoid curve, but is an inherent property of the multilayer feedforward architecture itselffor any bounded, non-constant activation function [8]. In 1993, Moshe Leshno, Vladimir Ya. Lin, Allan Pinkus, and Shimon Schocken established the sharp necessary and sufficient condition: a standard multilayer feedforward network with a locally bounded, piecewise continuous activation function is a universal approximator if and only if its activation function is not a polynomial [9]."
         },
         {
           "type": "paragraph",
@@ -213,22 +201,11 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page Early networks relied on the logistic sigmoid, σ(z) =_-z, and the hyperbolic tangent, tanh(z) = e^z - e^-z"
-        },
-        {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            ". Both squash inputs into bounded intervals, which is useful for interpreting outputs as"
-          ]
+          "text": "Early networks relied on the logistic sigmoid, $\\sigma(z) = \\frac{1}{1 + e^{-z}}$, and the hyperbolic tangent, $\\tanh(z) = \\frac{e^z - e^{-z}}{e^z + e^{-z}}$. Both squash inputs into bounded intervals, which is useful for interpreting outputs as probabilities, but both suffer from severe saturation. When $|z|$ becomes large, the curves flatten out and their derivatives approach zero—starving earlier layers of learning signals during backpropagation. Moreover, as Xavier Glorot and Yoshua Bengio showed in 2010, the logistic sigmoid's non-zero mean (centered at 0.5 rather than 0) systematically drives top hidden layers into saturation under standard random initialization [10]."
         },
         {
           "type": "paragraph",
-          "text": "e^z + e^-z probabilities, but both suffer from severe saturation. When |z| becomes large, the curves flatten out and their derivatives approach zero—starving earlier layers of learning signals during backpropagation. Moreover, as Xavier Glorot and Yoshua Bengio showed in 2010, the logistic sigmoid's non-zero mean (centered at 0.5 rather than 0) systematically drives top hidden layers into saturation under standard random initialization [10]."
-        },
-        {
-          "type": "paragraph",
-          "text": "The modern deep learning boom accelerated with the adoption of the Rectified Linear Unit (ReLU), defined simply as ReLU (z) = max(0, z). For any positive pre-activation, ReLU has a constant derivative of 1, eliminating positive-side saturation and dramatically speeding up convergence. Its primary flaw is the \"dying ReLU\" problem: if a neuron's weights shift so that z ≤ 0 across all training examples, its gradient becomes permanently zero and the unit stops updating. Variants such as Leaky ReLU and Kaiming He et al.'s Parametric ReLU (PReLU), which introduces a small learnable slope for negative inputs, mitigated this dead-zone behavior and helped a rectified convolutional architecture reach 4.94% top-5 error on ImageNet in 2015 [11]."
+          "text": "The modern deep learning boom accelerated with the adoption of the Rectified Linear Unit (ReLU), defined simply as $\\text{ReLU}(z) = \\max(0, z)$. For any positive pre-activation, ReLU has a constant derivative of 1, eliminating positive-side saturation and dramatically speeding up convergence. Its primary flaw is the \"dying ReLU\" problem: if a neuron's weights shift so that $z \\le 0$ across all training examples, its gradient becomes permanently zero and the unit stops updating. Variants such as Leaky ReLU and Kaiming He et al.'s Parametric ReLU (PReLU), which introduces a small learnable slope for negative inputs, mitigated this dead-zone behavior and helped a rectified convolutional architecture reach 4.94% top-5 error on ImageNet in 2015 [11]."
         },
         {
           "type": "paragraph",
@@ -242,13 +219,6 @@ export const article05: BlogPost = {
           "type": "math",
           "latex": "\\text{SwiGLU}(\\mathbf{x}, W, V, \\mathbf{b}, \\mathbf{c}) = \\text{Swish}(\\mathbf{x}W + \\mathbf{b}) \\odot (\\mathbf{x}V + \\mathbf{c}), \\qquad \\text{Swish}(z) = z \\cdot \\sigma(z)",
           "caption": "SwiGLU gated feed-forward activation widely used in modern frontier LLMs"
-        },
-        {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            "SwiGLU (x, W, V, b, c) = Swish_1 (x W + b) ⊗ (x V + c), where Swish_1 (z) = z · σ(z)"
-          ]
         },
         {
           "type": "paragraph",
@@ -324,15 +294,11 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Every possible setting of the network's weights $\\theta$ corresponds to a point on a vast, high-dimensional surface called the loss landscape, where elevation represents error. Training is the process of descending this surface toward a low-error valley. Unlike simple convex optimization problems (which resemble a smooth bowl with one global bottom), neural network loss landscapes are highly non-convex, riddled with saddle points, flat plateaus, and countless local minima."
         },
         {
           "type": "paragraph",
-          "text": "Every possible setting of the network's weights θ corresponds to a point on a vast, high-dimensional surface called the loss landscape, where elevation represents error. Training is the process of descending this surface toward a low-error valley. Unlike simple convex optimization problems (which resemble a smooth bowl with one global bottom), neural network loss landscapes are highly non-convex, riddled with saddle points, flat plateaus, and countless local minima."
-        },
-        {
-          "type": "paragraph",
-          "text": "Visualizing these surfaces directly is impossible in millions of dimensions, but filter-normalized two- dimensional projections introduced by Hao Li, Zheng Xu, Gavin Taylor, Christoph Studer, and Tom Goldstein at NeurIPS 2018 revealed striking structural patterns [14]. As networks grow very deep without architectural safeguards, their loss landscapes shift from nearly convex bowls into chaotic, jagged terrain where gradient descent easily stalls. Introducing skip connections (as in Residual Networks, where a layer's input is added directly to its output) dramatically smooths those chaotic ridges back into navigable valleys [14]. Equally important, Li et al. confirmed a relationship between valley geometry and generalization: wide, flat minima tend to generalize far better to unseen test data than sharp, narrow canyons, because small shifts between training and real-world distributions do not immediately push the model up a steep wall of error [14]."
+          "text": "Visualizing these surfaces directly is impossible in millions of dimensions, but filter-normalized two-dimensional projections introduced by Hao Li, Zheng Xu, Gavin Taylor, Christoph Studer, and Tom Goldstein at NeurIPS 2018 revealed striking structural patterns [14]. As networks grow very deep without architectural safeguards, their loss landscapes shift from nearly convex bowls into chaotic, jagged terrain where gradient descent easily stalls. Introducing skip connections (as in Residual Networks, where a layer's input is added directly to its output) dramatically smooths those chaotic ridges back into navigable valleys [14]. Equally important, Li et al. confirmed a relationship between valley geometry and generalization: wide, flat minima tend to generalize far better to unseen test data than sharp, narrow canyons, because small shifts between training and real-world distributions do not immediately push the model up a steep wall of error [14]."
         }
       ]
     },
@@ -343,7 +309,7 @@ export const article05: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "To move downhill on a surface with billions of coordinates, the optimizer needs the gradient ∇_θ ℒ —the vector of partial derivatives telling each individual weight whether nudging it upward or downward will increase or decrease the loss."
+          "text": "To move downhill on a surface with billions of coordinates, the optimizer needs the gradient $\\nabla_\\theta \\mathcal{L}$ —the vector of partial derivatives telling each individual weight whether nudging it upward or downward will increase or decrease the loss."
         },
         {
           "type": "paragraph",
@@ -357,10 +323,6 @@ export const article05: BlogPost = {
           "type": "math",
           "latex": "\\frac{\\partial \\mathcal{L}}{\\partial w_{ij}} = \\frac{\\partial \\mathcal{L}}{\\partial a_j} \\cdot \\frac{\\partial a_j}{\\partial z_j} \\cdot \\frac{\\partial z_j}{\\partial w_{ij}} = \\delta_j \\, a_i, \\qquad \\boldsymbol{\\delta}^{(l)} = \\left(\\left(W^{(l+1)}\\right)^\\top \\boldsymbol{\\delta}^{(l+1)}\\right) \\odot \\phi'\\!\\left(\\mathbf{z}^{(l)}\\right)",
           "caption": "Backpropagation gradient attribution and recursive error-signal propagation"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -380,7 +342,7 @@ export const article05: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Look closely at the recursive backpropagation formula above and a fundamental instability jumps out. To propagate an error signal backward through L layers, the network repeatedly multiplies it by weight matrices W^(l) and activation derivatives φ'(z^(l)). If the typical scaling factor across each layer is slightly less than 1 (say, \\$0.8), then after 50 layers the gradient shrinks by 0.8^50 ≈ 1.4 × 10^- ^5: a vanishing gradient, leaving early layers effectively frozen. If the scaling factor is slightly greater than 1 (say, $1.2$), the signal balloons by $1.2^{50} \u0007pprox 9{,}100$: an exploding gradient, causing weight updates to overflow into numerical chaos (NaN)."
+          "text": "Look closely at the recursive backpropagation formula above and a fundamental instability jumps out. To propagate an error signal backward through L layers, the network repeatedly multiplies it by weight matrices $W^{(l)}$ and activation derivatives φ'(z^(l)). If the typical scaling factor across each layer is slightly less than 1 (say, \\$0.8), then after 50 layers the gradient shrinks by $0.8^{50} \\approx 1.4 \\times 10^{-5}$: a vanishing gradient, leaving early layers effectively frozen. If the scaling factor is slightly greater than 1 (say, $1.2$), the signal balloons by $1.2^{50} \\approx 9{,}100$: an exploding gradient, causing weight updates to overflow into numerical chaos (NaN)."
         },
         {
           "type": "paragraph",
@@ -407,10 +369,6 @@ export const article05: BlogPost = {
         {
           "type": "paragraph",
           "text": "Paired with residual skip connections, gradient clipping, and normalization layers (such as Batch Normalization, Layer Normalization, and RMSNorm, which recenter and rescale activations inside every block), variance-preserving initialization transformed deep network training from a delicate black art into a repeatable industrial process capable of scaling to hundreds of layers."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -425,7 +383,7 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "The power of geometric representation became unmistakable in 2013, when Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean at Google introduced Word2V ec (\"Efficient Estimation of Word Representations in Vector Space\") [16]. Trained solely to predict neighboring words across a 1.6-billion- word corpus in less than a day, the network spontaneously organized semantic and syntactic relationships into linear directions [16]. Subtracting the vector for \"man\" from \"king\" and adding \"woman\" landed close to \"queen\"; country-capital pairs aligned along nearly parallel displacements."
+          "text": "The power of geometric representation became unmistakable in 2013, when Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean at Google introduced Word2Vec (\"Efficient Estimation of Word Representations in Vector Space\") [16]. Trained solely to predict neighboring words across a 1.6-billion-word corpus in less than a day, the network spontaneously organized semantic and syntactic relationships into linear directions [16]. Subtracting the vector for \"man\" from \"king\" and adding \"woman\" landed close to \"queen\"; country-capital pairs aligned along nearly parallel displacements."
         },
         {
           "type": "paragraph",
@@ -449,10 +407,6 @@ export const article05: BlogPost = {
         {
           "type": "paragraph",
           "text": "Superposition solves a deep puzzle about why neural networks are simultaneously so capable and so opaque: the true units of computation are rarely individual neurons aligned with the coordinate axes, but rather overlapping linear directions scattered across populations of neurons."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -480,10 +434,6 @@ export const article05: BlogPost = {
         {
           "type": "paragraph",
           "text": "Interpretability remains far from complete—replacement models still leave substantial fractions of computation unexplained, and tracing circuits across long reasoning chains is computationally expensive —but the era of treating neural networks as impenetrable black boxes is visibly receding."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -549,14 +499,10 @@ export const article05: BlogPost = {
           ]
         },
         {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
           "type": "list",
           "ordered": false,
           "items": [
-            "shallow networks were reasonably well calibrated, deeper modern architectures are systematically overconfident—emitting high-probability scores even when they are wrong [27]. Increasing model capacity, depth, and Batch Normalization improved accuracy while degrading calibration, though a simple post-processing adjustment called temperature scaling (dividing output logits by a single learned scalar $T > 1$ before applying softmax) proved remarkably effective at restoring honest probability estimates [27]."
+            "shallow networks were reasonably well calibrated, deeper modern architectures are systematically overconfident—emitting high-probability scores even when they are wrong [27]. Increasing model capacity, depth, and Batch Normalization improved accuracy while degrading calibration, though a simple post-processing adjustment called temperature scaling (dividing output logits by a single learned scalar $$T > 1$$ before applying softmax) proved remarkably effective at restoring honest probability estimates [27]."
           ]
         }
       ]
@@ -587,25 +533,17 @@ export const article05: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "**Spiking Neural Networks and Neuromorphic Hardware:** To confront the mounting energy footprint of synchronous GPU clusters, neuromorphic engineering returns closer to biological principles. Spiking Neural Networks (SNNs) transmit information via sparse, asynchronous binary spikes; a neuron consumes dynamic energy only when its membrane potential crosses a threshold. In April 2024, Intel unveiled Hala Point, deploying it initially at Sandia National Laboratories [29]. Packing 1,152 second- generation Loihi 2 neuromorphic processors, Hala Point integrates 1.15 billion artificial neurons and 128 billion synapses, achieving over 10 times the neuron capacity and up to 12 times higher performance than Intel's previous-generation neuromorphic system [30]. Running event-driven workloads, neuromorphic architectures demonstrate dramatic energy efficiency gains on streaming sensor data, optimization problems, and sparse inference—though training deep SNNs remains harder than training continuous networks because discrete spikes lack smooth derivatives, requiring surrogate gradient approximations."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "**Spiking Neural Networks and Neuromorphic Hardware:** To confront the mounting energy footprint of synchronous GPU clusters, neuromorphic engineering returns closer to biological principles. Spiking Neural Networks (SNNs) transmit information via sparse, asynchronous binary spikes; a neuron consumes dynamic energy only when its membrane potential crosses a threshold. In April 2024, Intel unveiled Hala Point, deploying it initially at Sandia National Laboratories [29]. Packing 1,152 second-generation Loihi 2 neuromorphic processors, Hala Point integrates 1.15 billion artificial neurons and 128 billion synapses, achieving over 10 times the neuron capacity and up to 12 times higher performance than Intel's previous-generation neuromorphic system [30]. Running event-driven workloads, neuromorphic architectures demonstrate dramatic energy efficiency gains on streaming sensor data, optimization problems, and sparse inference—though training deep SNNs remains harder than training continuous networks because discrete spikes lack smooth derivatives, requiring surrogate gradient approximations."
         },
         {
           "type": "paragraph",
           "text": "**Mechanistic Interpretability at Scale:** As detailed earlier, sparse autoencoders and cross-layer transcoders have matured from single-layer toy demonstrations into open-source toolkits capable of mapping computational graphs in multi-billion-parameter language models [18] [20] [22]."
         },
         {
-          "type": "paragraph",
-          "text": "Signal"
-        },
-        {
           "type": "table",
           "headers": [
             "Paradigm / Architecture",
-            "Representatio n",
+            "Signal Representation",
             "Learnable Components",
             "Hardware Fit (2026)",
             "Interpretability Profile",
@@ -634,7 +572,7 @@ export const article05: BlogPost = {
               "Synaptic weights, delays, and membrane thresholds",
               "Optimal on neuromorphic silicon (e.g., Intel Loihi 2 / Hala Point) [29]",
               "Moderate; spike timing adds temporal complexity",
-              "Research & niche ultra-low- power edge/sensor workloads"
+              "Research & niche ultra-low-power edge/sensor workloads"
             ]
           ]
         }
@@ -656,10 +594,6 @@ export const article05: BlogPost = {
         {
           "type": "paragraph",
           "text": "Second, will hardware-algorithm co-design fragment the dominant neural blueprint? For fifteen years, neural network design evolved to fit the \"hardware lottery\" of dense GPU matrix multiplication. If neuromorphic processors, photonic interconnects, or analog in-memory compute chips achieve commercial manufacturing scale, architectures that look inefficient on today's GPUs—including sparse"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -702,11 +636,11 @@ export const article05: BlogPost = {
     },
     {
       "question": "What causes vanishing and exploding gradients during training?",
-      "answer": "During backpropagation, gradients are multiplied repeatedly by layer weight matrices and activation derivatives as they travel from the output layer back toward the input layer. If those repeated factors ARTICLES 01–10 VIZRA Editorial Research & Publication System Page average less than 1, the gradient shrinks exponentially toward zero (vanishing), stalling learning in early layers; if they average greater than 1, it grows exponentially until values overflow (exploding). Variance- preserving weight initialization (Xavier/Glorot for symmetric activations, He/Kaiming for ReLU), normalization layers, and residual skip connections keep these signals stable [10] [11]."
+      "answer": "During backpropagation, gradients are multiplied repeatedly by layer weight matrices and activation derivatives as they travel from the output layer back toward the input layer. If those repeated factors average less than 1, the gradient shrinks exponentially toward zero (vanishing), stalling learning in early layers; if they average greater than 1, it grows exponentially until values overflow (exploding). Variance-preserving weight initialization (Xavier/Glorot for symmetric activations, He/Kaiming for ReLU), normalization layers, and residual skip connections keep these signals stable [10] [11]."
     },
     {
       "question": "What is superposition in a neural network?",
-      "answer": "Superposition is the phenomenon by which a neural network represents far more independent concepts than it has neurons or hidden dimensions [17]. Because most real-world features are sparse (only a few are active in any given input), the network arranges concepts as nearly orthogonal directions in high- dimensional space, using nonlinear activations to filter out the resulting minor interference [17]. This compression explains why individual neurons often respond to multiple unrelated concepts."
+      "answer": "Superposition is the phenomenon by which a neural network represents far more independent concepts than it has neurons or hidden dimensions [17]. Because most real-world features are sparse (only a few are active in any given input), the network arranges concepts as nearly orthogonal directions in high-dimensional space, using nonlinear activations to filter out the resulting minor interference [17]. This compression explains why individual neurons often respond to multiple unrelated concepts."
     },
     {
       "question": "Why are modern deep neural networks often overconfident when they are wrong?",
@@ -928,8 +862,6 @@ export const article05: BlogPost = {
     "By wiring these idealized units together, McCulloch and Pitts proved that networks of simple threshold elements could implement any propositional logic function—AND, OR, NOT—and, when equipped with feedback loops, could model finite-state computation [1]. Their model was purely deductive, however. Its weights and thresholds were hand-crafted rather than learned from experience. It demonstrated that neuron-like units could compute, not that they could adapt.",
     "Adaptation arrived fifteen years later. In November 1958, psychologist Frank Rosenblatt introduced the Perceptron in Psychological Review, framing it as a probabilistic model for information storage and organization in the brain [2]. Unlike the rigid McCulloch-Pitts unit, Rosenblatt's Perceptron assigned adjustable numerical weights to its inputs and included an explicit learning rule. When the Perceptron",
     "misclassified an input pattern, it nudged its weights in the direction that reduced the error. Rosenblatt even built a physical realization—the Mark I Perceptron—using a grid of photocells wired to motor-driven potentiometers that mechanically rotated to store updated weight values.",
-    "Early press coverage hailed the Perceptron as the embryo of an electronic consciousness, a wave of enthusiasm that met a sharp mathematical rebuke in 1969. In Perceptrons: An Introduction to Computational Geometry, MIT researchers Marvin Minsky and Seymour Papert analyzed what a single- layer Perceptron could and could not compute [3]. Because a single Perceptron partitions its input space with a single straight line (or, in higher dimensions, a flat hyperplane), it can only solve linearly separable problems. Simple Boolean functions like AND and OR are linearly separable; the exclusive-OR (XOR) function—which outputs 1 when its two inputs differ and 0 when they match—is not [3]. No single straight line can separate (0,1) and (1,0) from (0,0) and (1,1) on a two-dimensional plane.",
-    "Minsky and Papert knew that stacking multiple layers of Perceptrons could solve XOR, but they noted that no effective algorithm existed at the time to train the intermediate, or \"hidden,\" layers [3]. Their critique cooled institutional funding for neural network research for more than a decade, redirecting the field toward rule-based symbolic AI—a transition explored more broadly in The Evolution of Artificial Intelligence: From Rules to Generative AI.",
-    "The logjam broke in October 1986 when David E. Rumelhart, Geoffrey E. Hinton, and Ronald J. Williams published \"Learning representations by back-propagating errors\" in Nature [4]. While the underlying calculus—reverse-mode automatic differentiation—had been discovered independently in control theory and applied mathematics years earlier, Rumelhart, Hinton, and Williams demonstrated its decisive consequence for neural networks. By replacing the Perceptron's sharp step threshold with a smooth, differentiable activation curve, they could compute exactly how much each weight in every hidden layer contributed to the final output error, and adjust all weights simultaneously [4]."
+    "Early press coverage hailed the Perceptron as the embryo of an electronic consciousness, a wave of enthusiasm that met a sharp mathematical rebuke in 1969. In Perceptrons: An Introduction to Computational Geometry, MIT researchers Marvin Minsky and Seymour Papert analyzed what a single-layer Perceptron could and could not compute [3]. Because a single Perceptron partitions its input space with a single straight line (or, in higher dimensions, a flat hyperplane), it can only solve linearly separable problems. Simple Boolean functions like AND and OR are linearly separable; the exclusive-OR (XOR) function—which outputs 1 when its two inputs differ and 0 when they match—is not [3]. No single straight line can separate (0,1) and (1,0) from (0,0) and (1,1) on a two-dimensional plane."
   ]
 };

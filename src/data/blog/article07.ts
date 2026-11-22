@@ -41,11 +41,7 @@ export const article07: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Supervised learning is the workhorse of applied machine learning. In this paradigm, the algorithm is given a training dataset of n paired observations, 𝒟 = {(x_1, y_1), (x_2, y_2), …, (x_n, y_n)}, where each x_i ∈ g is an input feature vector (such as an image's pixel grid, a patient's electronic health record, or a borrower's financial history) and each y_i ∈ h is the corresponding ground-truth label. The goal is to learn a parameterized function f_θ: g → h that accurately predicts y for unseen inputs drawn from the same underlying data distribution P(X, Y) [1]. y R"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Supervised learning is the workhorse of applied machine learning. In this paradigm, the algorithm is given a training dataset of n paired observations, $\\mathcal{D} = \\{(x_1, y_1), (x_2, y_2), \\dots, (x_n, y_n)\\}$, where each $x_i \\in \\mathcal{X}$ is an input feature vector (such as an image's pixel grid, a patient's electronic health record, or a borrower's financial history) and each $y_i \\in \\mathcal{Y}$ is the corresponding ground-truth label. The goal is to learn a parameterized function $f_\\theta : \\mathcal{X} \\to \\mathcal{Y}$ that accurately predicts y for unseen inputs drawn from the same underlying data distribution P(X, Y) [1]. y R"
         }
       ]
     },
@@ -69,7 +65,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "The second term, λ Ω(θ), is a regularization penalty (such as L_2 weight decay or tree-depth constraints) controlled by the hyperparameter λ. Without regularization, a sufficiently expressive model can memorize every quirk and labeling error in the training set, driving empirical risk toward zero while failing badly on new data. That tension—between a model too simple to capture the underlying signal (high bias, or underfitting) and a model too sensitive to finite-sample noise (high variance, or overfitting)—governs supervised model selection across every algorithm family [1]."
+          "text": "The second term, $\\lambda \\Omega(\\theta)$, is a regularization penalty (such as $L_2$ weight decay or tree-depth constraints) controlled by the hyperparameter $\\lambda$. Without regularization, a sufficiently expressive model can memorize every quirk and labeling error in the training set, driving empirical risk toward zero while failing badly on new data. That tension—between a model too simple to capture the underlying signal (high bias, or underfitting) and a model too sensitive to finite-sample noise (high variance, or overfitting)—governs supervised model selection across every algorithm family [1]."
         }
       ]
     },
@@ -84,7 +80,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Classification predicts discrete class membership, where y ∈ {1, 2, …, K}. Binary classification separates two outcomes (spam versus legitimate email, malignant versus benign lesion), whereas multiclass classification assigns inputs across many mutually exclusive categories. Most modern classifiers output a probability distribution over classes and minimize cross-entropy loss, which heavily penalizes confident wrong predictions:"
+          "text": "Classification predicts discrete class membership, where $y \\in \\{1, 2, \\dots, K\\}$. Binary classification separates two outcomes (spam versus legitimate email, malignant versus benign lesion), whereas multiclass classification assigns inputs across many mutually exclusive categories. Most modern classifiers output a probability distribution over classes and minimize cross-entropy loss, which heavily penalizes confident wrong predictions:"
         },
         {
           "type": "math",
@@ -93,15 +89,11 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Regression predicts continuous numerical values, where y ∈ ℝ —for example, forecasting next-quarter energy demand, estimating residential property values, or predicting battery degradation over charge cycles. Standard objectives include Mean Squared Error (MSE), L_MSE = ∑_i=1 (y_i - ·ŷ_i), which amplifies large errors and corresponds to maximum likelihood estimation under Gaussian noise, and Mean Absolute Error (MAE), which is more robust when outliers contaminate the dataset."
+          "text": "Regression predicts continuous numerical values, where $y \\in \\mathbb{R}$ —for example, forecasting next-quarter energy demand, estimating residential property values, or predicting battery degradation over charge cycles. Standard objectives include Mean Squared Error (MSE), $\\mathcal{L}_{\\text{MSE}} = \\frac{1}{n}\\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2$, which amplifies large errors and corresponds to maximum likelihood estimation under Gaussian noise, and Mean Absolute Error (MAE), which is more robust when outliers contaminate the dataset."
         },
         {
           "type": "paragraph",
           "text": "Across both tasks, algorithm choice depends heavily on data modality. On structured tabular datasets— financial ledgers, insurance underwriting tables, industrial telemetry—gradient-boosted decision trees and ensembles implemented in standard libraries such as scikit-learn [2] remain remarkably competitive because they handle heterogeneous feature scales, missing values, and non-monotonic thresholds with minimal preprocessing. On unstructured perceptual data such as images, audio, and text, deep neural networks dominate because their layered representations learn hierarchical features directly from raw inputs (explored in depth in our companion articles on deep learning and neural networks)."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -116,7 +108,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "When evaluated on biopsy-proven clinical images against 21 board-certified dermatologists across two critical binary classification tasks—keratinocyte carcinomas versus benign seborrheic keratoses, and malignant melanomas versus benign nevi—the supervised model achieved diagnostic sensitivity and specificity on par with the tested specialists [3]. The result demonstrated that when high-precision, biopsy- verified labels exist at scale, empirical risk minimization can match expert human pattern recognition."
+          "text": "When evaluated on biopsy-proven clinical images against 21 board-certified dermatologists across two critical binary classification tasks—keratinocyte carcinomas versus benign seborrheic keratoses, and malignant melanomas versus benign nevi—the supervised model achieved diagnostic sensitivity and specificity on par with the tested specialists [3]. The result demonstrated that when high-precision, biopsy-verified labels exist at scale, empirical risk minimization can match expert human pattern recognition."
         },
         {
           "type": "paragraph",
@@ -154,10 +146,6 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "structure\" looks like: compactness around centroids, maximum variance along orthogonal axes, preservation of local neighborhoods, or high data likelihood under a generative model."
         }
       ]
@@ -169,7 +157,7 @@ export const article07: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Clustering algorithms group observations so that points within the same cluster are more similar to each other than to points in other clusters [1]. The classic workhorse is k -means, which partitions data into k clusters by minimizing the within-cluster sum of squared Euclidean distances to cluster centroids μ_c:"
+          "text": "Clustering algorithms group observations so that points within the same cluster are more similar to each other than to points in other clusters [1]. The classic workhorse is $k$-means, which partitions data into k clusters by minimizing the within-cluster sum of squared Euclidean distances to cluster centroids $\\mu_c$:"
         },
         {
           "type": "math",
@@ -178,7 +166,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "k -means is fast and scales cleanly to large datasets, yet its geometry imposes strict assumptions: clusters are assumed to be roughly spherical, similarly sized, and linearly separable, and the practitioner must specify k in advance. When data forms elongated bands, concentric rings, or clusters of wildly varying density, density-based methods like DBSCAN (Density-Based Spatial Clustering of Applications with Noise) perform far better, identifying arbitrarily shaped dense regions while flagging isolated points as noise. Hierarchical clustering builds a nested tree (dendrogram) of merges or splits without requiring a fixed cluster count up front, while Gaussian Mixture Models (GMMs) offer a probabilistic alternative, assigning each point soft membership probabilities across overlapping elliptical distributions fitted via Expectation-Maximization [1]."
+          "text": "$k$-means is fast and scales cleanly to large datasets, yet its geometry imposes strict assumptions: clusters are assumed to be roughly spherical, similarly sized, and linearly separable, and the practitioner must specify k in advance. When data forms elongated bands, concentric rings, or clusters of wildly varying density, density-based methods like DBSCAN (Density-Based Spatial Clustering of Applications with Noise) perform far better, identifying arbitrarily shaped dense regions while flagging isolated points as noise. Hierarchical clustering builds a nested tree (dendrogram) of merges or splits without requiring a fixed cluster count up front, while Gaussian Mixture Models (GMMs) offer a probabilistic alternative, assigning each point soft membership probabilities across overlapping elliptical distributions fitted via Expectation-Maximization [1]."
         }
       ]
     },
@@ -203,12 +191,8 @@ export const article07: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "t-SNE (t-Distributed Stochastic Neighbor Embedding), introduced by Laurens van der Maaten and Geoffrey Hinton in 2008, converts high-dimensional Euclidean distances into conditional probabilities representing pairwise similarity, then minimizes the Kullback–Leibler divergence between those high- dimensional probabilities and a heavy-tailed Student-t distribution in low-dimensional space [4]. That heavy tail prevents distant points from crowding together, producing crisp visual separation of local clusters, though t-SNE is computationally heavy on large datasets and does not reliably preserve global distances between far-apart clusters [4]."
+            "t-SNE (t-Distributed Stochastic Neighbor Embedding), introduced by Laurens van der Maaten and Geoffrey Hinton in 2008, converts high-dimensional Euclidean distances into conditional probabilities representing pairwise similarity, then minimizes the Kullback–Leibler divergence between those high-dimensional probabilities and a heavy-tailed Student-t distribution in low-dimensional space [4]. That heavy tail prevents distant points from crowding together, producing crisp visual separation of local clusters, though t-SNE is computationally heavy on large datasets and does not reliably preserve global distances between far-apart clusters [4]."
           ]
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "list",
@@ -245,7 +229,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "To close that gap, risk engineering teams pair supervised classifiers with unsupervised pipelines. Dimensionality reduction and clustering segment accounts into behavioral cohorts (commuter micro- spenders, cross-border corporate travelers, seasonal high-ticket buyers) without imposing rigid marketing assumptions. Within each cohort, Isolation Forests and density estimators score transactions in real time for anomalous velocity, merchant-category jumps, or device-graph irregularities. Flagged anomalies are routed to human investigators; once confirmed, those newly labeled cases feed back into the supervised fraud model, turning unsupervised discovery into a continuous label-generation engine."
+          "text": "To close that gap, risk engineering teams pair supervised classifiers with unsupervised pipelines. Dimensionality reduction and clustering segment accounts into behavioral cohorts (commuter micro-spenders, cross-border corporate travelers, seasonal high-ticket buyers) without imposing rigid marketing assumptions. Within each cohort, Isolation Forests and density estimators score transactions in real time for anomalous velocity, merchant-category jumps, or device-graph irregularities. Flagged anomalies are routed to human investigators; once confirmed, those newly labeled cases feed back into the supervised fraud model, turning unsupervised discovery into a continuous label-generation engine."
         }
       ]
     },
@@ -257,10 +241,6 @@ export const article07: BlogPost = {
         {
           "type": "paragraph",
           "text": "Unsupervised learning shines wherever labels are unavailable, prohibitively expensive, or conceptually premature. It uncovers hidden subpopulations, compresses noisy features, and detects emerging"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -290,7 +270,7 @@ export const article07: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The mathematical backbone of reinforcement learning is the Markov Decision Process (MDP), formally defined as a five-tuple (𝒮, 𝒜, P, R, γ) [7]:"
+          "text": "The mathematical backbone of reinforcement learning is the Markov Decision Process (MDP), formally defined as a five-tuple $(\\mathcal{S}, \\mathcal{A}, P, R, \\gamma)$ [7]:"
         },
         {
           "type": "math",
@@ -301,19 +281,19 @@ export const article07: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "𝒮 is the set of possible environment states.",
-            "𝒜 is the set of actions available to the agent. P(s' | s, a) = Pr(S_t+1 = s' | S_t = s, A_t = a) is the state-transition probability kernel, satisfying the Markov property (the next state depends only on the current state and action, not the entire prior history).",
-            "R(s, a, s') is the reward function emitting a scalar signal R_t+1 ∈ ℝ.",
-            "γ ∈ [0, 1) is the discount factor, balancing immediate rewards against future returns."
+            "$\\mathcal{S}$ is the set of possible environment states.",
+            "$\\mathcal{A}$ is the set of actions available to the agent. $P(s' \\mid s, a) = \\Pr(S_{t+1} = s' \\mid S_t = s, A_t = a)$ is the state-transition probability kernel, satisfying the Markov property (the next state depends only on the current state and action, not the entire prior history).",
+            "$R(s, a, s')$ is the reward function emitting a scalar signal $R_{t+1} \\in \\mathbb{R}$.",
+            "$\\gamma \\in [0, 1)$ is the discount factor, balancing immediate rewards against future returns."
           ]
         },
         {
           "type": "paragraph",
-          "text": "The agent's behavior is governed by a policy π(a | s), a probability distribution over actions given the current state. Its objective is to discover an optimal policy π^* that maximizes the expected discounted cumulative return G_t = ∑_k=0^∞ γ^k R_t+k+1 [7]."
+          "text": "The agent's behavior is governed by a policy $\\pi(a \\mid s)$, a probability distribution over actions given the current state. Its objective is to discover an optimal policy $\\pi^*$ that maximizes the expected discounted cumulative return $G_t = \\sum_{k=0}^{\\infty} \\gamma^k R_{t+k+1}$ [7]."
         },
         {
           "type": "paragraph",
-          "text": "To evaluate states and actions over long horizons, RL defines two value functions: the state-value function V^π (s) = 𝔼_π [G_t | S_t = s] and the action-value function Q^π (s, a) = 𝔼_π [G_t | S_t = s, A_t = a]. Their recursive structure is captured by the Bellman optimality equations, which express the value of an optimal decision today in terms of immediate reward plus the discounted optimal value of the successor state [7]: A"
+          "text": "To evaluate states and actions over long horizons, RL defines two value functions: the state-value function $V^\\pi(s) = \\mathbb{E}_\\pi[G_t \\mid S_t = s]$ and the action-value function $Q^\\pi(s, a) = \\mathbb{E}_\\pi[G_t \\mid S_t = s, A_t = a]$. Their recursive structure is captured by the Bellman optimality equations, which express the value of an optimal decision today in terms of immediate reward plus the discounted optimal value of the successor state [7]:"
         },
         {
           "type": "math",
@@ -324,10 +304,6 @@ export const article07: BlogPost = {
           "type": "math",
           "latex": "Q^*(s, a) = \\sum_{s' \\in \\mathcal{S}} P(s' \\mid s, a)\\!\\left[R(s, a, s') + \\gamma \\max_{a' \\in \\mathcal{A}} Q^*(s', a')\\right]",
           "caption": "Bellman optimality equation for the optimal action-value function $Q^*$"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -350,7 +326,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Policy gradient and actor-critic methods bypass explicit value maximization over discrete actions—a major advantage in continuous control domains such as robotic joint torques or high-dimensional token generation—by parameterizing the policy π_θ (a | s) directly and ascending the gradient of expected return. Vanilla policy gradients suffer from high variance and catastrophic collapse when a single large parameter update ruins the policy. In 2017, John Schulman and colleagues at OpenAI introduced Proximal Policy Optimization (PPO), which stabilizes updates through a clipped surrogate objective [11]: where r_t (θ) = is the probability ratio between the new and old policies and Â_t is the estimated advantage (how much better action a_t performed than the baseline state value V(s_t)). By clipping the incentive to move r_t (θ) outside [1-ε, 1+ε], PPO captures much of the stability of trust-region methods while remaining far simpler to implement and permitting multiple epochs of minibatch updates [11]."
+          "text": "Policy gradient and actor-critic methods bypass explicit value maximization over discrete actions—a major advantage in continuous control domains such as robotic joint torques or high-dimensional token generation—by parameterizing the policy $\\pi_\\theta(a \\mid s)$ directly and ascending the gradient of expected return. Vanilla policy gradients suffer from high variance and catastrophic collapse when a single large parameter update ruins the policy. In 2017, John Schulman and colleagues at OpenAI introduced Proximal Policy Optimization (PPO), which stabilizes updates through a clipped surrogate objective [11]: where $r_t(\\theta) = \\frac{\\pi_\\theta(a_t \\mid s_t)}{\\pi_{\\theta_{\\text{old}}}(a_t \\mid s_t)}$ is the probability ratio between the new and old policies and $\\hat{A}_t$ is the estimated advantage (how much better action $a_t$ performed than the baseline state value $V(s_t)$). By clipping the incentive to move $r_t(\\theta)$ outside $[1-\\varepsilon, 1+\\varepsilon]$, PPO captures much of the stability of trust-region methods while remaining far simpler to implement and permitting multiple epochs of minibatch updates [11]."
         },
         {
           "type": "math",
@@ -360,10 +336,6 @@ export const article07: BlogPost = {
         {
           "type": "paragraph",
           "text": "In 2024, Zhihong Shao and colleagues at DeepSeek introduced Group Relative Policy Optimization (GRPO) in the DeepSeekMath paper, adapting PPO specifically for large language models [23]. Standard PPO requires training and holding in memory a separate critic (value) network roughly the size of the policy model itself. GRPO eliminates the critic entirely: for each prompt, it samples a group of G candidate outputs from the current policy, scores them, and normalizes each output's reward relative to the group's mean and standard deviation to compute its advantage [23]. That architectural simplification slashes memory overhead and proved pivotal in scaling RL for reasoning models in 2025 and 2026 [25]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -398,10 +370,6 @@ export const article07: BlogPost = {
         {
           "type": "paragraph",
           "text": "Outside board games and video benchmarks, reinforcement learning's most compelling industrial wins occur in high-dimensional control loops with well-instrumented telemetry. In 2016, DeepMind researchers Richard Evans and Jim Gao demonstrated an AI control framework deployed across Google's hyperscale data centers, using neural networks trained on thousands of sensor streams—temperatures, power draw, pump speeds, and setpoints—to optimize cooling operations [12]. The system cut the energy required for data center cooling by 40 percent, translating to a 15 percent reduction in overall Power Usage Effectiveness (PUE) overhead [12]. Crucially, subsequent autonomous deployments incorporated strict safety-first constraints so the system could never push physical chillers outside engineered operating envelopes."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -450,29 +418,18 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "1. Masked modeling hides portions of an input and trains the network to reconstruct the missing pieces"
         },
         {
           "type": "list",
           "ordered": false,
           "items": [
-            "from surrounding context. Google's BERT (Jacob Devlin et al., 2018) popularized masked language modeling by masking tokens in unlabeled text and conditioning on bidirectional context across all Transformer layers, pushing the GLUE benchmark score to 80.5 percent and SQuAD v1.1 question- answering F1 to 93.2 upon lightweight supervised fine-tuning [16]. Masked autoencoders later brought the same principle to computer vision."
+            "from surrounding context. Google's BERT (Jacob Devlin et al., 2018) popularized masked language modeling by masking tokens in unlabeled text and conditioning on bidirectional context across all Transformer layers, pushing the GLUE benchmark score to 80.5 percent and SQuAD v1.1 question-answering F1 to 93.2 upon lightweight supervised fine-tuning [16]. Masked autoencoders later brought the same principle to computer vision."
           ]
         },
         {
           "type": "paragraph",
-          "text": "2. Autoregressive next-token prediction trains a model to predict each token x_t given only preceding"
-        },
-        {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            "tokens x, minimizing -∑_t log P_θ (x_t | x_). As Tom Brown and colleagues demonstrated with GPT -3 in 2020, scaling this simple self-supervised objective across massive text corpora and model parameters yields emergent zero-shot and few-shot generalization across translation, arithmetic, and question answering without task-specific gradient updates [17]."
-          ]
+          "text": "2. Autoregressive next-token prediction trains a model to predict each token $x_t$ given only preceding tokens $x_{<t}$, minimizing $-\\sum_t \\log P_\\theta(x_t \\mid x_{<t})$. As Tom Brown and colleagues demonstrated with GPT-3 in 2020, scaling this simple self-supervised objective across massive text corpora and model parameters yields emergent zero-shot and few-shot generalization across translation, arithmetic, and question answering without task-specific gradient updates [17]."
         },
         {
           "type": "paragraph",
@@ -498,7 +455,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In 2022, Long Ouyang and colleagues at OpenAI codified Reinforcement Learning from Human Feedback (RLHF) in the InstructGPT paper [20]. The pipeline unfolds in three stages: first, supervised fine-tuning (SFT) on human-written demonstrations; second, training a scalar reward model r_φ (x, y) on human pairwise preference rankings (which of two model completions is better); and third, optimizing the language model policy π_θ against that reward model using PPO, constrained by a Kullback–Leibler (KL) divergence penalty that prevents the policy from drifting too far from the reference SFT model π_ref [20]:"
+          "text": "In 2022, Long Ouyang and colleagues at OpenAI codified Reinforcement Learning from Human Feedback (RLHF) in the InstructGPT paper [20]. The pipeline unfolds in three stages: first, supervised fine-tuning (SFT) on human-written demonstrations; second, training a scalar reward model $r_\\phi(x, y)$ on human pairwise preference rankings (which of two model completions is better); and third, optimizing the language model policy $\\pi_\\theta$ against that reward model using PPO, constrained by a Kullback–Leibler (KL) divergence penalty that prevents the policy from drifting too far from the reference SFT model $\\pi_{\\text{ref}}$ [20]:"
         },
         {
           "type": "math",
@@ -511,10 +468,6 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Because online RLHF with PPO is notoriously complex to tune—requiring four models in memory simultaneously (policy, reference, reward, and critic)—Rafael Rafailov and colleagues at Stanford proposed Direct Preference Optimization (DPO) in 2023 [22]. DPO exploits a closed-form mathematical relationship between the optimal RLHF policy and the implicit reward function, collapsing reward modeling and policy optimization into a single supervised-style binary cross-entropy loss directly over preferred (y_w) and rejected (y_l) response pairs [22]:"
         },
         {
@@ -523,23 +476,16 @@ export const article07: BlogPost = {
           "caption": "Direct Preference Optimization (DPO) closed-form preference objective"
         },
         {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            "L_DPO (π_θ; π_ref) = -𝔼_(x, y_, y_) [log σ(β log - β log)]"
-          ]
-        },
-        {
           "type": "paragraph",
           "text": "DPO rapidly became a staple for open-weight alignment because of its stability and low compute footprint. Yet offline preference optimization has a ceiling: when tasks require deep multi-step problem solving, learning from static human preferences struggles to surpass the reasoning quality of the demonstrations themselves."
         },
         {
           "type": "paragraph",
-          "text": "That realization sparked the defining paradigm shift of 2024–2026: Reinforcement Learning with Verifiable Rewards (RLVR). Named and systematized in the Allen Institute for AI's Tülu 3 open post- training recipe (Nathan Lambert et al., November 2024), RLVR replaces learned neural reward models with deterministic, rule-based verifiers—checking whether a mathematical derivation yields the exact ground-truth answer, whether generated code passes a unit-test suite, or whether an output obeys strict formatting constraints [24]. In Tülu 3, adding RLVR after SFT and DPO lifted 8B-parameter GSM8K math accuracy from 84.3 to 87.6 [24]."
+          "text": "That realization sparked the defining paradigm shift of 2024–2026: Reinforcement Learning with Verifiable Rewards (RLVR). Named and systematized in the Allen Institute for AI's Tülu 3 open post-training recipe (Nathan Lambert et al., November 2024), RLVR replaces learned neural reward models with deterministic, rule-based verifiers—checking whether a mathematical derivation yields the exact ground-truth answer, whether generated code passes a unit-test suite, or whether an output obeys strict formatting constraints [24]. In Tülu 3, adding RLVR after SFT and DPO lifted 8B-parameter GSM8K math accuracy from 84.3 to 87.6 [24]."
         },
         {
           "type": "paragraph",
-          "text": "Two months later, in January 2025, DeepSeek-AI demonstrated the full scale of this paradigm with DeepSeek-R1 [25]. Using GRPO with rule-based accuracy and format rewards—and zero supervised reasoning demonstrations in its experimental DeepSeek-R1-Zero variant—pure reinforcement learning lifted pass@1 accuracy on the AIME 2024 competition math benchmark from 15.6 percent to 71.0 percent (and 86.7 percent with majority voting), spontaneously eliciting emergent behaviors such as self- verification, backtracking, and extended chain-of-thought allocation [25]. Combining cold-start supervised data with multi-stage RLVR and preference alignment, the full DeepSeek-R1 model reached 79.8 percent pass@1 on AIME 2024, 97.3 percent on MA TH-500, and a 2,029 Elo rating on Codeforces— outperforming 96.3 percent of human competitive programmers [25]."
+          "text": "Two months later, in January 2025, DeepSeek-AI demonstrated the full scale of this paradigm with DeepSeek-R1 [25]. Using GRPO with rule-based accuracy and format rewards—and zero supervised reasoning demonstrations in its experimental DeepSeek-R1-Zero variant—pure reinforcement learning lifted pass@1 accuracy on the AIME 2024 competition math benchmark from 15.6 percent to 71.0 percent (and 86.7 percent with majority voting), spontaneously eliciting emergent behaviors such as self-verification, backtracking, and extended chain-of-thought allocation [25]. Combining cold-start supervised data with multi-stage RLVR and preference alignment, the full DeepSeek-R1 model reached 79.8 percent pass@1 on AIME 2024, 97.3 percent on MA TH-500, and a 2,029 Elo rating on Codeforces— outperforming 96.3 percent of human competitive programmers [25]."
         }
       ]
     },
@@ -551,10 +497,6 @@ export const article07: BlogPost = {
         {
           "type": "paragraph",
           "text": "For engineering leaders and applied researchers, the practical question is rarely \"which paradigm is most advanced?\" It is \"which feedback structure matches our data, budget, and risk tolerance?\" The two comparative frameworks below synthesize the mathematical and operational trade-offs across classical and hybrid paradigms."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -648,25 +590,19 @@ export const article07: BlogPost = {
             [
               "Diagnosing medical scans or predicting loan defaults",
               "Supervised Learning (often initialized from SSL)",
-              "Pre-trained vision backbone or gradient- boosted trees + calibrated cross-entropy",
-              "Acquiring unbiased, gold- standard expert labels and monitoring post- deployment drift"
+              "Pre-trained vision backbone or gradient-boosted trees + calibrated cross-entropy",
+              "Acquiring unbiased, gold-standard expert labels and monitoring post-deployment drift"
             ],
             [
               "Discovering customer cohorts or flagging novel network intrusions",
               "Unsupervised Learning",
               "UMAP/PCA + HDBSCAN or Isolation Forest, feeding human triage",
-              "Translating geometric clusters or outlier scores into actionable business thresholds ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Translating geometric clusters or outlier scores into actionable business thresholds"
             ],
             [
               "Classifying millions of proprietary documents with a small labeling budget",
               "Semi-Supervised or SSL + Few-Shot SFT",
-              "Self-supervised encoder + FixMatch pseudo- labeling or lightweight fine-tuning",
+              "Self-supervised encoder + FixMatch pseudo-labeling or lightweight fine-tuning",
               "Preventing confirmation bias on rare edge-case categories"
             ],
             [
@@ -685,7 +621,7 @@ export const article07: BlogPost = {
               "Building a coding, mathematical, or formal-verification reasoning agent",
               "Self-Supervised Pre- Training + RLVR",
               "Autoregressive Transformer + GRPO/PPO against executable unit tests or proof checkers",
-              "Designing tamper- resistant sandboxes and verifiable environments that generalize beyond tests"
+              "Designing tamper-resistant sandboxes and verifiable environments that generalize beyond tests"
             ]
           ]
         },
@@ -717,11 +653,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
-          "text": "constraint checks—has been adopted across major open-weight and frontier model families, including the DeepSeek, Claude, Gemini, and Qwen lines. Theoretical and empirical studies published in 2025 and 2026 have also clarified why RLVR works: rather than inventing wholly alien knowledge from scratch, verifiable RL implicitly incentivizes and sharpens latent reasoning pathways already present in self- supervised base models, dramatically improving pass@1 reliability and test-time compute allocation [27]."
+          "text": "constraint checks—has been adopted across major open-weight and frontier model families, including the DeepSeek, Claude, Gemini, and Qwen lines. Theoretical and empirical studies published in 2025 and 2026 have also clarified why RLVR works: rather than inventing wholly alien knowledge from scratch, verifiable RL implicitly incentivizes and sharpens latent reasoning pathways already present in self-supervised base models, dramatically improving pass@1 reliability and test-time compute allocation [27]."
         },
         {
           "type": "paragraph",
@@ -752,14 +684,10 @@ export const article07: BlogPost = {
           ]
         },
         {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
           "type": "list",
           "ordered": false,
           "items": [
-            "**Data efficiency over raw scale:** As high-quality public web text approaches saturation, competitive advantage is shifting from sheer dataset volume toward feedback efficiency—combining semi- supervised curation, synthetic verifiable environments, and active learning so models extract more generalization from each watt of compute and each hour of human expertise."
+            "**Data efficiency over raw scale:** As high-quality public web text approaches saturation, competitive advantage is shifting from sheer dataset volume toward feedback efficiency—combining semi-supervised curation, synthetic verifiable environments, and active learning so models extract more generalization from each watt of compute and each hour of human expertise."
           ]
         }
       ]
@@ -775,7 +703,7 @@ export const article07: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "The most capable systems of 2026 do not choose among these paradigms—they orchestrate them. Self- supervised pre-training absorbs the statistical fabric of language, code, and perception; supervised fine- tuning anchors that knowledge in human conventions; and reinforcement learning—guided by preferences, constitutions, or verifiable environments—teaches models to reason, verify, and act. Mastering where each paradigm excels, where its mathematical assumptions break, and how its failure modes compound is the real craft of modern AI engineering."
+          "text": "The most capable systems of 2026 do not choose among these paradigms—they orchestrate them. Self-supervised pre-training absorbs the statistical fabric of language, code, and perception; supervised fine-tuning anchors that knowledge in human conventions; and reinforcement learning—guided by preferences, constitutions, or verifiable environments—teaches models to reason, verify, and act. Mastering where each paradigm excels, where its mathematical assumptions break, and how its failure modes compound is the real craft of modern AI engineering."
         }
       ]
     }
@@ -799,7 +727,7 @@ export const article07: BlogPost = {
     },
     {
       "question": "5. What is the difference between RLHF, DPO, and RLVR in modern AI?",
-      "answer": "RLHF (Reinforcement Learning from Human Feedback) trains a separate neural reward model from human preference rankings and optimizes the language model using PPO [20]. DPO (Direct Preference Optimization) achieves a mathematically related objective in closed form directly from preference pairs, eliminating the reward model and online RL loop [22]. RLVR (Reinforcement Learning with Verifiable ARTICLES 01–10 VIZRA Editorial Research & Publication System Page Rewards) replaces subjective human preferences with deterministic, rule-based verifiers—such as math answer checks or code unit tests—often optimized with critic-free algorithms like GRPO [23], [24], [25]."
+      "answer": "RLHF (Reinforcement Learning from Human Feedback) trains a separate neural reward model from human preference rankings and optimizes the language model using PPO [20]. DPO (Direct Preference Optimization) achieves a mathematically related objective in closed form directly from preference pairs, eliminating the reward model and online RL loop [22]. RLVR (Reinforcement Learning with Verifiable Rewards) replaces subjective human preferences with deterministic, rule-based verifiers—such as math answer checks or code unit tests—often optimized with critic-free algorithms like GRPO [23], [24], [25]."
     },
     {
       "question": "6. Why does GRPO matter compared to standard PPO?",
@@ -1011,13 +939,11 @@ export const article07: BlogPost = {
     }
   ],
   "body": [
-    "Supervised learning is the workhorse of applied machine learning. In this paradigm, the algorithm is given a training dataset of n paired observations, 𝒟 = {(x_1, y_1), (x_2, y_2), …, (x_n, y_n)}, where each x_i ∈ g is an input feature vector (such as an image's pixel grid, a patient's electronic health record, or a borrower's financial history) and each y_i ∈ h is the corresponding ground-truth label. The goal is to learn a parameterized function f_θ: g → h that accurately predicts y for unseen inputs drawn from the same underlying data distribution P(X, Y) [1]. y R",
+    "Supervised learning is the workhorse of applied machine learning. In this paradigm, the algorithm is given a training dataset of n paired observations, $\\mathcal{D} = \\{(x_1, y_1), (x_2, y_2), \\dots, (x_n, y_n)\\}$, where each $x_i \\in \\mathcal{X}$ is an input feature vector (such as an image's pixel grid, a patient's electronic health record, or a borrower's financial history) and each $y_i \\in \\mathcal{Y}$ is the corresponding ground-truth label. The goal is to learn a parameterized function $f_\\theta : \\mathcal{X} \\to \\mathcal{Y}$ that accurately predicts y for unseen inputs drawn from the same underlying data distribution P(X, Y) [1]. y R",
     "Because the true joint distribution P(X, Y) is unknown, a supervised learner cannot directly minimize its expected error across all possible future inputs—a quantity known as the true risk:",
     "Here, L(·ŷ, y) is a non-negative loss function that measures how severely a prediction ŷ = f(x) deviates from the true label y. Instead of minimizing R(f) directly, supervised learning relies on Empirical Risk Minimization (ERM), minimizing the average loss over the observed training set [1]:",
-    "The second term, λ Ω(θ), is a regularization penalty (such as L_2 weight decay or tree-depth constraints) controlled by the hyperparameter λ. Without regularization, a sufficiently expressive model can memorize every quirk and labeling error in the training set, driving empirical risk toward zero while failing badly on new data. That tension—between a model too simple to capture the underlying signal (high bias, or underfitting) and a model too sensitive to finite-sample noise (high variance, or overfitting)—governs supervised model selection across every algorithm family [1].",
-    "Classification predicts discrete class membership, where y ∈ {1, 2, …, K}. Binary classification separates two outcomes (spam versus legitimate email, malignant versus benign lesion), whereas multiclass classification assigns inputs across many mutually exclusive categories. Most modern classifiers output a probability distribution over classes and minimize cross-entropy loss, which heavily penalizes confident wrong predictions:",
-    "Regression predicts continuous numerical values, where y ∈ ℝ —for example, forecasting next-quarter energy demand, estimating residential property values, or predicting battery degradation over charge cycles. Standard objectives include Mean Squared Error (MSE), L_MSE = ∑_i=1 (y_i - ·ŷ_i), which amplifies large errors and corresponds to maximum likelihood estimation under Gaussian noise, and Mean Absolute Error (MAE), which is more robust when outliers contaminate the dataset.",
-    "Across both tasks, algorithm choice depends heavily on data modality. On structured tabular datasets— financial ledgers, insurance underwriting tables, industrial telemetry—gradient-boosted decision trees and ensembles implemented in standard libraries such as scikit-learn [2] remain remarkably competitive because they handle heterogeneous feature scales, missing values, and non-monotonic thresholds with minimal preprocessing. On unstructured perceptual data such as images, audio, and text, deep neural networks dominate because their layered representations learn hierarchical features directly from raw inputs (explored in depth in our companion articles on deep learning and neural networks).",
-    "Few applications illustrate both the power and the boundary conditions of supervised learning better than medical imaging. In a landmark 2017 Nature study, Andre Esteva, Sebastian Thrun, and colleagues at Stanford University trained a single convolutional neural network end-to-end on 129,450 clinical images spanning 2,032 distinct skin diseases, feeding the network only raw pixels and disease labels [3]. Rather than crafting hand-engineered visual features for border irregularity or pigment asymmetry, the team initialized a deep vision architecture pre-trained on general object recognition and fine-tuned it directly on the dermatological taxonomy [3]."
+    "The second term, $\\lambda \\Omega(\\theta)$, is a regularization penalty (such as $L_2$ weight decay or tree-depth constraints) controlled by the hyperparameter $\\lambda$. Without regularization, a sufficiently expressive model can memorize every quirk and labeling error in the training set, driving empirical risk toward zero while failing badly on new data. That tension—between a model too simple to capture the underlying signal (high bias, or underfitting) and a model too sensitive to finite-sample noise (high variance, or overfitting)—governs supervised model selection across every algorithm family [1].",
+    "Supervised tasks divide cleanly according to the structure of the target variable y:",
+    "Classification predicts discrete class membership, where $y \\in \\{1, 2, \\dots, K\\}$. Binary classification separates two outcomes (spam versus legitimate email, malignant versus benign lesion), whereas multiclass classification assigns inputs across many mutually exclusive categories. Most modern classifiers output a probability distribution over classes and minimize cross-entropy loss, which heavily penalizes confident wrong predictions:"
   ]
 };

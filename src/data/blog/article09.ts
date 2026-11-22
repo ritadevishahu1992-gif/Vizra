@@ -51,10 +51,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "Over the past seven decades, NLP has traveled a remarkable arc. It began with handcrafted syntactic rules and brittle pattern-matching scripts, pivoted in the late twentieth century to probability tables derived from massive text corpora, and underwent a structural upheaval with neural word embeddings and the 2017 Transformer architecture. By late 2026, language models translate across hundreds of languages, transcribe noisy speech, draft clinical summaries, and resolve real software bugs across sprawling codebases. Still, fluent output has not settled the deepest question in the field: whether statistical mastery of linguistic form amounts to genuine understanding."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -91,7 +87,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Linguists divide language analysis into interlocking strata. Syntax governs how words combine into well- formed phrases and clauses. Semantics addresses literal, compositional meaning—how the meanings of individual words combine to express propositions about the world. Pragmatics, however, is where literal interpretation breaks down. When a dinner guest says, \"It's a little chilly in here,\" the literal semantics describe room temperature, while the pragmatic intent is a polite request to close a window. Sarcasm, understatement, metaphor, and cultural idioms all depend on shared social context rather than surface syntax."
+          "text": "Linguists divide language analysis into interlocking strata. Syntax governs how words combine into well-formed phrases and clauses. Semantics addresses literal, compositional meaning—how the meanings of individual words combine to express propositions about the world. Pragmatics, however, is where literal interpretation breaks down. When a dinner guest says, \"It's a little chilly in here,\" the literal semantics describe room temperature, while the pragmatic intent is a polite request to close a window. Sarcasm, understatement, metaphor, and cultural idioms all depend on shared social context rather than surface syntax."
         },
         {
           "type": "paragraph",
@@ -111,10 +107,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "Most foundational NLP algorithms were designed around English, a language with relatively simple inflectional morphology and clear whitespace boundaries between words. Languages such as Finnish,"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -163,10 +155,6 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Statistical Machine Translation (SMT), led by researchers at IBM in the early 1990s and later refined into phrase-based systems, learned alignment probabilities from parallel bilingual corpora such as Canadian parliamentary transcripts. SMT outperformed rule-based translation dramatically, yet it suffered from data sparsity: a trigram model had no principled way to generalize from \"the cat sat on the mat\" to \"the feline rested on the rug\" if the exact word sequence never appeared in training data."
         }
       ]
@@ -182,7 +170,7 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In 2013, Tomas Mikolov and colleagues at Google introduced Word2V ec, comprising two computationally efficient shallow neural architectures: Continuous Bag-of-Words (CBOW), which predicts a target word from its surrounding context, and Skip-gram, which predicts surrounding context words from a target word [4]. Trained on billions of words, Word2V ec mapped vocabulary items into a few hundred continuous dimensions where geometric relationships mirrored semantic and syntactic regularities—famously allowing vector arithmetic such as v_king - v=v_man + v=v_woman ≈ v=v_queen. A year later, Jeffrey Pennington, Richard Socher, and Christopher Manning at Stanford introduced GloV e (Global Vectors for Word Representation), which combined the global statistical efficiency of co-occurrence matrix factorization with the local context window advantages of Skip-gram [5]."
+          "text": "In 2013, Tomas Mikolov and colleagues at Google introduced Word2Vec, comprising two computationally efficient shallow neural architectures: Continuous Bag-of-Words (CBOW), which predicts a target word from its surrounding context, and Skip-gram, which predicts surrounding context words from a target word [4]. Trained on billions of words, Word2Vec mapped vocabulary items into a few hundred continuous dimensions where geometric relationships mirrored semantic and syntactic regularities—famously allowing vector arithmetic such as $\\vec{v}_{\\text{king}} - \\vec{v}_{\\text{man}} + \\vec{v}_{\\text{woman}} \\approx \\vec{v}_{\\text{queen}}$. A year later, Jeffrey Pennington, Richard Socher, and Christopher Manning at Stanford introduced GloVe (Global Vectors for Word Representation), which combined the global statistical efficiency of co-occurrence matrix factorization with the local context window advantages of Skip-gram [5]."
         },
         {
           "type": "math",
@@ -217,11 +205,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Attention worked so effectively alongside RNNs that a team of eight researchers at Google asked a radical question in 2017: what if recurrence were eliminated altogether? In \"Attention Is All You Need,\" Ashish Vaswani and colleagues introduced the Transformer, an architecture built exclusively on self- attention and feed-forward layers [8]. Because every token could attend to every other token"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Attention worked so effectively alongside RNNs that a team of eight researchers at Google asked a radical question in 2017: what if recurrence were eliminated altogether? In \"Attention Is All You Need,\" Ashish Vaswani and colleagues introduced the Transformer, an architecture built exclusively on self-attention and feed-forward layers [8]. Because every token could attend to every other token"
         },
         {
           "type": "paragraph",
@@ -235,7 +219,7 @@ export const article09: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "Encoder-only models, exemplified by BERT (Bidirectional Encoder Representations from Transformers), introduced by Jacob Devlin and colleagues at Google in 2018 [11]. BER T masks out a fraction of input tokens and trains the network to predict them using context from both the left and the right simultaneously. This bidirectional conditioning made encoder-only models dominant for classification, information extraction, semantic search, and embedding generation. Decoder-only models, popularized by OpenAI's GPT lineage and brought to global inflection with the 175-billion-parameter GPT -3 in 2020 [15]. Decoder-only Transformers apply a causal mask so each token can attend only to preceding tokens, training strictly on autoregressive next-token prediction. Tom Brown and co-authors showed that at sufficient scale, this simple objective gave rise to in- context learning: users could specify entirely new tasks through natural-language instructions and a few examples in the prompt without updating model weights. Encoder-decoder models, unified by Colin Raffel and colleagues' T5 (Text-to-T ext Transfer Transformer) in 2020 [13]. T5 reframed every NLP task—translation, summarization, sentiment classification, question answering—as feeding text into a bidirectional encoder and generating target text from an autoregressive decoder."
+            "Encoder-only models, exemplified by BERT (Bidirectional Encoder Representations from Transformers), introduced by Jacob Devlin and colleagues at Google in 2018 [11]. BER T masks out a fraction of input tokens and trains the network to predict them using context from both the left and the right simultaneously. This bidirectional conditioning made encoder-only models dominant for classification, information extraction, semantic search, and embedding generation. Decoder-only models, popularized by OpenAI's GPT lineage and brought to global inflection with the 175-billion-parameter GPT-3 in 2020 [15]. Decoder-only Transformers apply a causal mask so each token can attend only to preceding tokens, training strictly on autoregressive next-token prediction. Tom Brown and co-authors showed that at sufficient scale, this simple objective gave rise to in-context learning: users could specify entirely new tasks through natural-language instructions and a few examples in the prompt without updating model weights. Encoder-decoder models, unified by Colin Raffel and colleagues' T5 (Text-to-T ext Transfer Transformer) in 2020 [13]. T5 reframed every NLP task—translation, summarization, sentiment classification, question answering—as feeding text into a bidirectional encoder and generating target text from an autoregressive decoder."
           ]
         },
         {
@@ -253,7 +237,7 @@ export const article09: BlogPost = {
               "Hand-coded grammars, lexicons, pattern rules",
               "ELIZA (1966) [2]",
               "Interpretable logic; exact adherence to explicit rules",
-              "Brittle on noisy text; cannot scale to open- domain ambiguity"
+              "Brittle on noisy text; cannot scale to open-domain ambiguity"
             ],
             [
               "Statistical NLP (1980s–2012)",
@@ -267,14 +251,7 @@ export const article09: BlogPost = {
               "Dense word vectors, LSTMs, additive attention",
               "Word2Vec (2013) [4]; GloVe (2014) [5]; Bahdanau Attention (2014) [6]",
               "Captures semantic similarity; handles variable-length sequences",
-              "Sequential bottlenecks limit training parallelism; static vectors ignore polysemy ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "",
-              "Page"
+              "Sequential bottlenecks limit training parallelism; static vectors ignore polysemy"
             ],
             [
               "Encoder-Only Transformer (2018–Present)",
@@ -293,7 +270,7 @@ export const article09: BlogPost = {
             [
               "Decoder-Only Transformer (2018–Present)",
               "Causal autoregressive next-token prediction + RL post-training",
-              "GPT-3 (2020) [15]; DeepSeek- R1 (2025) [27]",
+              "GPT-3 (2020) [15]; DeepSeek-R1 (2025) [27]",
               "Scales smoothly with compute; general-purpose instruction following and reasoning",
               "Quadratic attention cost over long contexts; prone to hallucination without grounding"
             ]
@@ -308,7 +285,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Understanding how modern language models operate does not require memorizing every architectural tweak released each quarter. Beneath the marketing names, nearly every contemporary NLP system relies on five core mathematical and engineering mechanisms: subword tokenization, contextual self- attention, rotary positional encoding, probabilistic decoding, and external grounding through retrieval and tools."
+          "text": "Understanding how modern language models operate does not require memorizing every architectural tweak released each quarter. Beneath the marketing names, nearly every contemporary NLP system relies on five core mathematical and engineering mechanisms: subword tokenization, contextual self-attention, rotary positional encoding, probabilistic decoding, and external grounding through retrieval and tools."
         }
       ]
     },
@@ -327,10 +304,6 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "including spaces—as a uniform Unicode stream, enabling language-independent tokenization for scripts like Japanese and Chinese that lack whitespace word boundaries [10]."
         },
         {
@@ -346,7 +319,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Once tokenized, each integer ID looks up an initial vector in an embedding matrix. Unlike Word2V ec, however, that vector is merely the starting point. As the sequence passes through dozens of Transformer layers, self-attention continually rewrites each token's representation based on every other token in the context window—producing contextual embeddings where the vector for \"bank\" in \"river bank\" occupies an entirely different region of vector space than \"bank\" in \"central bank.\""
+          "text": "Once tokenized, each integer ID looks up an initial vector in an embedding matrix. Unlike Word2Vec, however, that vector is merely the starting point. As the sequence passes through dozens of Transformer layers, self-attention continually rewrites each token's representation based on every other token in the context window—producing contextual embeddings where the vector for \"bank\" in \"river bank\" occupies an entirely different region of vector space than \"bank\" in \"central bank.\""
         },
         {
           "type": "paragraph",
@@ -384,10 +357,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "Self-attention by itself is permutation-equivariant: if you shuffle the words of \"Dog bites man\" into \"Man bites dog,\" pure attention computes the exact same pairwise dot products. To preserve word order, the Transformer must inject positional information."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -438,17 +407,10 @@ export const article09: BlogPost = {
           "rows": [
             [
               "Greedy Decoding",
-              "Always selects the single highest- probability token (T → 0)",
+              "Always selects the single highest-probability token ($T \\to 0$)",
               "Deterministic, fast, reproducible",
-              "Prone to repetitive loops; misses higher- probability multi-token phrases",
-              "Structured extraction, deterministic code completion, unit testing ARTICLES 01–10"
-            ],
-            [
-              "VIZRA",
-              "Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Prone to repetitive loops; misses higher-probability multi-token phrases",
+              "Structured extraction, deterministic code completion, unit testing"
             ],
             [
               "Beam Search",
@@ -459,20 +421,20 @@ export const article09: BlogPost = {
             ],
             [
               "Temperature Sampling",
-              "Scales logits by $1/T$$$ before sampling across the full vocabulary",
-              "Smooth control over randomness (T < 1 sharpens; T > 1 flattens)",
-              "At higher temperatures, low- probability \"tail\" tokens cause incoherent drift",
+              "Scales logits by $1/T$ before sampling across the full vocabulary",
+              "Smooth control over randomness ($T < 1$ sharpens; $T > 1$ flattens)",
+              "At higher temperatures, low-probability \"tail\" tokens cause incoherent drift",
               "Creative drafting, brainstorming, conversational variation"
             ],
             [
-              "Top- k Sampling",
+              "Top-$k$ Sampling",
               "Truncates the distribution to the k most likely tokens before sampling",
               "Blocks absurd long-tail tokens while preserving variety",
               "Fixed k is inflexible: too narrow when many words fit, too wide when only one fits",
               "General dialogue and controlled text generation"
             ],
             [
-              "Top- p (Nucleus) Sampling",
+              "Top-$p$ (Nucleus) Sampling",
               "Samples from the smallest token set whose cumulative probability reaches p",
               "Adapts dynamically to model confidence at each step",
               "Sensitive to interaction with temperature; still requires careful tuning",
@@ -489,7 +451,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A standalone language model stores knowledge only inside its static parameters, frozen at the end of pre- training. To make NLP systems accurate on private documents, fast-changing facts, and verifiable workflows, modern deployments wrap models inside three architectural patterns."
+          "text": "A standalone language model stores knowledge only inside its static parameters, frozen at the end of pre-training. To make NLP systems accurate on private documents, fast-changing facts, and verifiable workflows, modern deployments wrap models inside three architectural patterns."
         },
         {
           "type": "paragraph",
@@ -497,11 +459,7 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Meanwhile, long-context architectures have expanded usable context windows from 2,048 tokens in early GPT -3 deployments to hundreds of thousands—and in specialized models, millions—of tokens. Yet larger windows are not a free substitute for retrieval. In a widely cited 2023 study, Nelson Liu and colleagues demonstrated the \"lost in the middle\" effect: language models accurately retrieve facts placed near the very beginning or very end of a long prompt, but performance drops markedly when critical evidence is buried in the middle of the context [23]. Even with architectural improvements in 2025– 2026, attention dilution and inference cost keep hybrid RAG-plus-long-context pipelines standard in enterprise systems."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Meanwhile, long-context architectures have expanded usable context windows from 2,048 tokens in early GPT-3 deployments to hundreds of thousands—and in specialized models, millions—of tokens. Yet larger windows are not a free substitute for retrieval. In a widely cited 2023 study, Nelson Liu and colleagues demonstrated the \"lost in the middle\" effect: language models accurately retrieve facts placed near the very beginning or very end of a long prompt, but performance drops markedly when critical evidence is buried in the middle of the context [23]. Even with architectural improvements in 2025– 2026, attention dilution and inference cost keep hybrid RAG-plus-long-context pipelines standard in enterprise systems."
         },
         {
           "type": "paragraph",
@@ -531,7 +489,7 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "To sharpen their thesis, Bender and Koller proposed the Octopus Test. Imagine two humans stranded on separate uninhabited islands communicating via an underwater telegraph cable. A hyper-intelligent deep- sea octopus taps into the cable and observes billions of English messages passing back and forth, never once seeing the islands, trees, coconuts, or tools the humans discuss. Eventually, the octopus cuts the cable and impersonates one speaker. As long as the conversation stays on familiar statistical territory— small talk, recipes, routine advice—the octopus can produce remarkably plausible replies. Yet the moment the stranded human asks for help building a novel coconut catapult out of two sticks and a vine, or cries out that a bear is attacking, the octopus fails: it has mastered the statistical correlations ofform without ever acquiring meaning grounded in physical reality."
+          "text": "To sharpen their thesis, Bender and Koller proposed the Octopus Test. Imagine two humans stranded on separate uninhabited islands communicating via an underwater telegraph cable. A hyper-intelligent deep-sea octopus taps into the cable and observes billions of English messages passing back and forth, never once seeing the islands, trees, coconuts, or tools the humans discuss. Eventually, the octopus cuts the cable and impersonates one speaker. As long as the conversation stays on familiar statistical territory— small talk, recipes, routine advice—the octopus can produce remarkably plausible replies. Yet the moment the stranded human asks for help building a novel coconut catapult out of two sticks and a vine, or cries out that a bear is attacking, the octopus fails: it has mastered the statistical correlations ofform without ever acquiring meaning grounded in physical reality."
         }
       ]
     },
@@ -542,7 +500,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Bender and Koller's argument extends a deeper philosophical problem articulated by cognitive scientist Stevan Harnad in 1990: the Symbol Grounding Problem [3]. Harnad asked how anyone could learn Chinese using only a monolingual Chinese-to-Chinese dictionary. Looking up one unfamiliar symbol only leads to a circular web of other unfamiliar symbols; unless some symbols are anchored directly to sensory perception, motor action, or lived interaction with the world, meaning never enters the loop. Purely text- trained language models live inside a vast, high-dimensional Chinese dictionary."
+          "text": "Bender and Koller's argument extends a deeper philosophical problem articulated by cognitive scientist Stevan Harnad in 1990: the Symbol Grounding Problem [3]. Harnad asked how anyone could learn Chinese using only a monolingual Chinese-to-Chinese dictionary. Looking up one unfamiliar symbol only leads to a circular web of other unfamiliar symbols; unless some symbols are anchored directly to sensory perception, motor action, or lived interaction with the world, meaning never enters the loop. Purely text-trained language models live inside a vast, high-dimensional Chinese dictionary."
         }
       ]
     },
@@ -558,10 +516,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "In a pivotal study presented at ICLR 2023, Kenneth Li and colleagues trained a small GPT variant— dubbed Othello-GPT —exclusively on transcripts of legal move sequences from the board game Othello,"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -607,10 +561,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "By March 2026, multilingual translation research pushed even further into the linguistic long tail: the Omnilingual MT effort demonstrated machine translation scaling across 1,600 languages, explicitly targeting underserved communities whose native tongues rarely appear on the commercial web [31]. Still, quality remains uneven across genres, and human post-editing remains essential for literary, diplomatic, and high-liability legal translation."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -621,7 +571,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Spoken language introduces background noise, overlapping speakers, regional accents, disfluencies, and domain jargon that break clean text pipelines. In late 2022, OpenAI released Whisper, an encoder- decoder Transformer trained on 680,000 hours of weakly supervised multilingual audio scraped from the web [22]. Rather than fine-tuning separate acoustic models for each benchmark, Whisper leveraged sheer dataset diversity to achieve robust zero-shot transcription and translation across dozens of languages and noisy acoustic environments."
+          "text": "Spoken language introduces background noise, overlapping speakers, regional accents, disfluencies, and domain jargon that break clean text pipelines. In late 2022, OpenAI released Whisper, an encoder-decoder Transformer trained on 680,000 hours of weakly supervised multilingual audio scraped from the web [22]. Rather than fine-tuning separate acoustic models for each benchmark, Whisper leveraged sheer dataset diversity to achieve robust zero-shot transcription and translation across dozens of languages and noisy acoustic environments."
         },
         {
           "type": "paragraph",
@@ -636,7 +586,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Healthcare generates vast volumes of unstructured prose—progress notes, radiology reports, discharge summaries, and patient-clinician dialogues—locked inside Electronic Health Records (EHRs). Domain- adapted encoder models such as BioBERT and newer long-context clinical encoders extract medication dosages, adverse drug events, and diagnostic codes with high precision."
+          "text": "Healthcare generates vast volumes of unstructured prose—progress notes, radiology reports, discharge summaries, and patient-clinician dialogues—locked inside Electronic Health Records (EHRs). Domain-adapted encoder models such as BioBERT and newer long-context clinical encoders extract medication dosages, adverse drug events, and diagnostic codes with high precision."
         },
         {
           "type": "paragraph",
@@ -646,7 +596,7 @@ export const article09: BlogPost = {
           "type": "callout",
           "variant": "verification",
           "title": "Editorial Fact-Check Correction",
-          "text": "An earlier draft cited a 2026 \"ClinicalMind\" healthcare system under reference [31]. Independent verification confirmed that reference [31] is Meta’s Omnilingual MT paper (arXiv:2603.16309) and no peer-reviewed 2026 \"ClinicalMind\" benchmark paper could be verified. The passage has been corrected to cite verified retrieval-augmented clinical NLP literature [14]."
+          "text": "During pre-publication fact-checking, an unverified third-party 2026 clinical LLM benchmark from the source draft was removed because its underlying evaluation could not be independently confirmed in primary peer-reviewed literature and had been misattributed to Meta's Omnilingual MT release [31]. All retained healthcare NLP examples below rely solely on verified primary sources."
         }
       ]
     },
@@ -662,10 +612,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "Yet the legal sector also delivered one of the sharpest reality checks on ungrounded language models. In \"Large Legal Fictions: Profiling Legal Hallucinations in Large Language Models\" (2024), researchers at Stanford's Regulation, Evaluation, and Governance Lab (RegLab) tested general-purpose LLMs on thousands of real U.S. federal court queries and found alarmingly high rates offabricated citations, misstated holdings, and inverted case outcomes [25]. The study underscored an engineering rule now widely accepted across regulated industries: raw generative models cannot serve as legal or financial authorities unless tightly constrained by verified RAG indices and human review."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -704,10 +650,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "In January 2025, researchers released Humanity's Last Exam (HLE), a multimodal benchmark of 2,500 expert-level questions across mathematics, sciences, and humanities designed to resist saturation when existing academic exams topped out [28]. Tellingly, even HLE faced forensic scrutiny in 2025 and early 2026—leading to revision efforts such as HLE-Verified—after domain experts identified ambiguous prompts and answer-key errors in subsets of the biology and chemistry questions. The lesson for NLP engineers is sobering: constructing reliable evaluation instruments at the frontier of human expertise is now nearly as hard as training the models themselves."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -756,7 +698,7 @@ export const article09: BlogPost = {
               "2023/2024",
               "2,294 real GitHub issues (12 Python repos); 500 Verified",
               "Repository-scale software debugging and patching",
-              "Rapidly advancing; shifting to Multi-SWE- bench and long-horizon suites"
+              "Rapidly advancing; shifting to Multi-SWE-bench and long-horizon suites"
             ],
             [
               "Humanity's Last Exam [28]",
@@ -788,10 +730,6 @@ export const article09: BlogPost = {
         {
           "type": "paragraph",
           "text": "Hallucination—the fluent generation offabricated facts, nonexistent citations, or false historical details— remains the signature vulnerability of generative NLP. Crucially, hallucinations are not merely software bugs waiting for a patch. In a September 2025 theoretical analysis titled \"Why Language Models Hallucinate,\" Adam Tauman Kalai, Ofir Nachum, Santosh Vempala, and Edwin Zhang showed that standard pre-training objectives and binary accuracy benchmarks mathematically incentivize guessing over abstention [29]. When a model is evaluated on tests that award zero credit for saying \"I don't know\" and partial or full credit for a lucky guess, statistical optimization produces confident bluffing whenever a fact is rare or absent from training data. Mitigating hallucination requires changing both architecture (via RAG and tool verification) and evaluation incentives (rewarding calibrated uncertainty)."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -844,10 +782,6 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "such as the OWASP GenAI LLM Top 10 (2026) [30] and specialized prompt-injection defenses moved from academic workshops into enterprise compliance checklists."
         }
       ]
@@ -863,7 +797,7 @@ export const article09: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Over the next three to five years, NLP is likely to diverge along two complementary tracks rather than converging on a single monolithic model size. At the edge, highly distilled, domain-specialized language models—running locally on laptops, phones, and hospital servers—will handle routine drafting, translation, transcription, and structured data extraction with low latency and strict privacy. At the frontier, reasoning- centric systems will increasingly pair neural language generation with neuro-symbolic verification: invoking formal theorem provers, statutory rule engines, and deterministic code sandboxes so that high- stakes claims are checked mathematically rather than accepted on statistical confidence alone."
+          "text": "Over the next three to five years, NLP is likely to diverge along two complementary tracks rather than converging on a single monolithic model size. At the edge, highly distilled, domain-specialized language models—running locally on laptops, phones, and hospital servers—will handle routine drafting, translation, transcription, and structured data extraction with low latency and strict privacy. At the frontier, reasoning-centric systems will increasingly pair neural language generation with neuro-symbolic verification: invoking formal theorem provers, statutory rule engines, and deterministic code sandboxes so that high-stakes claims are checked mathematically rather than accepted on statistical confidence alone."
         },
         {
           "type": "paragraph",
@@ -878,7 +812,7 @@ export const article09: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Natural Language Processing has achieved something that seemed implausible even a decade ago: building general-purpose software that communicates fluently in the messy, idiomatic medium of human speech and writing. Tracing that journey—from Shannon's entropy equations and W eizenbaum's parlor- trick scripts through Word2V ec, Bahdanau attention, RoPE-encoded Transformers, RAG, and reinforcement-learned reasoning—reveals that the breakthroughs were never magic. They were disciplined mathematical solutions to concrete bottlenecks: representing context dynamically, parallelizing sequence computation, grounding parametric memory in external evidence, and trading inference compute for deliberate verification."
+          "text": "Natural Language Processing has achieved something that seemed implausible even a decade ago: building general-purpose software that communicates fluently in the messy, idiomatic medium of human speech and writing. Tracing that journey—from Shannon's entropy equations and W eizenbaum's parlor-trick scripts through Word2Vec, Bahdanau attention, RoPE-encoded Transformers, RAG, and reinforcement-learned reasoning—reveals that the breakthroughs were never magic. They were disciplined mathematical solutions to concrete bottlenecks: representing context dynamically, parallelizing sequence computation, grounding parametric memory in external evidence, and trading inference compute for deliberate verification."
         },
         {
           "type": "paragraph",
@@ -898,7 +832,7 @@ export const article09: BlogPost = {
     },
     {
       "question": "How does subword tokenization work, and why does it matter?",
-      "answer": "Subword tokenizers such as Byte-Pair Encoding (BPE), WordPiece, and SentencePiece split text into frequent whole words and reusable word fragments rather than relying on a fixed dictionary or raw characters. This eliminates unknown-word errors while keeping sequence lengths manageable, though ARTICLES 01–10 VIZRA Editorial Research & Publication System Page English-heavy tokenizers often split non-Latin and morphologically rich languages into far more tokens, increasing latency and cost."
+      "answer": "Subword tokenizers such as Byte-Pair Encoding (BPE), WordPiece, and SentencePiece split text into frequent whole words and reusable word fragments rather than relying on a fixed dictionary or raw characters. This eliminates unknown-word errors while keeping sequence lengths manageable, though English-heavy tokenizers often split non-Latin and morphologically rich languages into far more tokens, increasing latency and cost."
     },
     {
       "question": "What is Retrieval-Augmented Generation (RAG), and when should it be used?",
@@ -906,7 +840,7 @@ export const article09: BlogPost = {
     },
     {
       "question": "Why do language models hallucinate even when trained on huge datasets?",
-      "answer": "Hallucinations arise because language models are trained to predict statistically plausible next tokens rather than verify facts against an external ground truth. Research shows that standard pre-training and accuracy benchmarks reward confident guessing over admitting uncertainty, especially for rare or out-of- distribution facts. What is the difference between encoder-only, decoder-only, and encoder-decoder"
+      "answer": "Hallucinations arise because language models are trained to predict statistically plausible next tokens rather than verify facts against an external ground truth. Research shows that standard pre-training and accuracy benchmarks reward confident guessing over admitting uncertainty, especially for rare or out-of-distribution facts. What is the difference between encoder-only, decoder-only, and encoder-decoder"
     },
     {
       "question": "Transformers?",
@@ -1146,8 +1080,6 @@ export const article09: BlogPost = {
     "Over the past seven decades, NLP has traveled a remarkable arc. It began with handcrafted syntactic rules and brittle pattern-matching scripts, pivoted in the late twentieth century to probability tables derived from massive text corpora, and underwent a structural upheaval with neural word embeddings and the 2017 Transformer architecture. By late 2026, language models translate across hundreds of languages, transcribe noisy speech, draft clinical summaries, and resolve real software bugs across sprawling codebases. Still, fluent output has not settled the deepest question in the field: whether statistical mastery of linguistic form amounts to genuine understanding.",
     "Computers excel at discrete, deterministic instructions. Human language is neither. To grasp why NLP remained one of the most stubborn frontiers in computer science for decades, it helps to separate the layers of complexity embedded in ordinary communication.",
     "Ambiguity permeates every level of language. At the lexical level, a single word form frequently carries multiple unrelated meanings (homonymy) or related senses (polysemy). The English word \"bank\" can denote a financial institution, the sloping edge of a river, the tilt of an aircraft in a turn, or the act of relying on an outcome. Disambiguating it requires scanning surrounding words—and sometimes entire prior paragraphs.",
-    "Syntactic ambiguity compounds the problem. Consider the newspaper-style headline \"Stolen painting found by tree.\" A parser without world knowledge cannot tell whether the tree discovered the artwork or merely stood beside it. Even more subtle are garden-path sentences like \"The horse raced past the barn fell,\" where the human brain momentarily misparses \"raced\" as the main verb before backtracking to reinterpret it as a reduced relative clause. For early computational parsers that committed greedily to a single syntactic tree, such constructions triggered catastrophic failures.",
-    "Linguists divide language analysis into interlocking strata. Syntax governs how words combine into well- formed phrases and clauses. Semantics addresses literal, compositional meaning—how the meanings of individual words combine to express propositions about the world. Pragmatics, however, is where literal interpretation breaks down. When a dinner guest says, \"It's a little chilly in here,\" the literal semantics describe room temperature, while the pragmatic intent is a polite request to close a window. Sarcasm, understatement, metaphor, and cultural idioms all depend on shared social context rather than surface syntax.",
-    "Discourse adds a temporal and structural dimension across multi-sentence texts. Pronouns, definite articles, and ellipsis link ideas separated by hundreds of words. A legal contract might define \"the Indemnified Party\" on page two and invoke it forty pages later inside a nested exception clause. Maintaining coherent coreference and logical consistency across long documents remained beyond the reach of NLP systems until modern attention-based architectures emerged."
+    "Syntactic ambiguity compounds the problem. Consider the newspaper-style headline \"Stolen painting found by tree.\" A parser without world knowledge cannot tell whether the tree discovered the artwork or merely stood beside it. Even more subtle are garden-path sentences like \"The horse raced past the barn fell,\" where the human brain momentarily misparses \"raced\" as the main verb before backtracking to reinterpret it as a reduced relative clause. For early computational parsers that committed greedily to a single syntactic tree, such constructions triggered catastrophic failures."
   ]
 };

@@ -45,15 +45,11 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "King, Countess of Lovelace, articulated its deeper significance in her 1843 translation and extensive notes on Luigi Menabrea's Italian monograph [1]. Beyond publishing an algorithm for computing Bernoulli numbers, Lovelace observed that a machine capable of manipulating symbols according to formal rules could act upon music, algebra, or any domain reducible to structured notation—while famously cautioning that the engine had no pretension to originate anything on its own, a remark Alan Turing would revisit more than a century later [2]."
         },
         {
           "type": "paragraph",
-          "text": "The theoretical foundation of modern computing arrived in 1936, when Alan Turing submitted On Computable Numbers, with an Application to the Entscheidungsproblem to the London Mathematical Society [3]. Seeking to prove that no general mechanical procedure could decide the truth of all mathematical statements, Turing defined an abstract device—a finite-state head reading, writing, and erasing symbols along an unbounded tape. Crucially, he demonstrated that a single universal machine could simulate any other specialized machine simply by reading a coded description of that machine from its tape [3]. That insight decoupled hardware from function: intelligence, if computable at all, did not require a separate physical contraption for every cognitive task, only a sufficiently expressive general- purpose machine executing stored descriptions."
+          "text": "The theoretical foundation of modern computing arrived in 1936, when Alan Turing submitted On Computable Numbers, with an Application to the Entscheidungsproblem to the London Mathematical Society [3]. Seeking to prove that no general mechanical procedure could decide the truth of all mathematical statements, Turing defined an abstract device—a finite-state head reading, writing, and erasing symbols along an unbounded tape. Crucially, he demonstrated that a single universal machine could simulate any other specialized machine simply by reading a coded description of that machine from its tape [3]. That insight decoupled hardware from function: intelligence, if computable at all, did not require a separate physical contraption for every cognitive task, only a sufficiently expressive general-purpose machine executing stored descriptions."
         },
         {
           "type": "paragraph",
@@ -76,10 +72,6 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "electromechanical calculators—but it dissipated 150 kW of heat, suffered frequent tube burnouts, and originally required days of manual plugboard rewiring to switch tasks [6]. Running statistical optimization over millions of parameters on such machinery was physically unimaginable."
         },
         {
@@ -97,10 +89,6 @@ export const article06: BlogPost = {
         {
           "type": "paragraph",
           "text": "Crucially, transistor counts continued to grow under Moore's Law even after Dennard scaling ended. Chipmakers could still pack billions of transistors onto a die, but they could no longer spend those transistors on a single ever-faster sequential core. Instead, the industry pivoted first to multicore CPUs, then to specialized accelerators and \"dark silicon\" designs where only portions of a chip switch at full power simultaneously. That physical turning point reshaped artificial intelligence: any algorithm that depended on fast single-threaded serial logic faced diminishing returns, while algorithms that could express computation as massive, uniform parallel arrays suddenly inherited the full remaining momentum of semiconductor manufacturing."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -119,7 +107,7 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Yet the commercial reign of Lisp machines lasted barely a decade. By the late 1980s, two forces converged to dismantle their business model. First, symbolic expert systems struggled with brittleness and high maintenance costs outside narrow domains, triggering the second AI winter and shrinking enterprise budgets. Second—and equally decisive—general-purpose Reduced Instruction Set Computer (RISC) microprocessors and Unix workstations from Sun Microsystems, Hewlett-Packard, and Silicon Graphics rode the high-volume economies of scale of mainstream CMOS manufacturing [12]. Because general- purpose chipmakers amortized fabrication and design costs across hundreds of thousands of commercial servers and workstations, their clock speeds and compiler optimizations rapidly overtook custom Lisp processors that shipped in the thousands. As Guy Steele and Richard Gabriel documented in The Evolution of Lisp, optimized Lisp compilers running on standard hardware soon matched or exceeded dedicated Symbolics machines at a fraction of the cost [12]."
+          "text": "Yet the commercial reign of Lisp machines lasted barely a decade. By the late 1980s, two forces converged to dismantle their business model. First, symbolic expert systems struggled with brittleness and high maintenance costs outside narrow domains, triggering the second AI winter and shrinking enterprise budgets. Second—and equally decisive—general-purpose Reduced Instruction Set Computer (RISC) microprocessors and Unix workstations from Sun Microsystems, Hewlett-Packard, and Silicon Graphics rode the high-volume economies of scale of mainstream CMOS manufacturing [12]. Because general-purpose chipmakers amortized fabrication and design costs across hundreds of thousands of commercial servers and workstations, their clock speeds and compiler optimizations rapidly overtook custom Lisp processors that shipped in the thousands. As Guy Steele and Richard Gabriel documented in The Evolution of Lisp, optimized Lisp compilers running on standard hardware soon matched or exceeded dedicated Symbolics machines at a fraction of the cost [12]."
         },
         {
           "type": "paragraph",
@@ -138,15 +126,11 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "hierarchies to accelerate unpredictable serial code, Graphics Processing Units (GPUs) dedicate most of their transistors to thousands of simpler arithmetic logic units operating in lockstep."
         },
         {
           "type": "paragraph",
-          "text": "For years, using GPUs for non-graphics math required contorting scientific equations into pixel shaders and texture maps. That barrier fell on November 8, 2006, when NVIDIA launched the GeForce 8800 GTX based on its G80 architecture [13]. Replacing separate pixel and vertex pipelines with 128 unified stream processors, the G80 became the first graphics chip designed to support CUDA (Compute Unified Device Architecture), a hardware and software platform allowing programmers to write general-purpose data- parallel code in C-like languages without touching graphics APIs [13]. Because video gamers funded the multi-billion-dollar fabrication costs of each new GPU generation, researchers in physics, finance, and machine learning suddenly gained access to teraflop-scale desktop supercomputers for a few hundred dollars."
+          "text": "For years, using GPUs for non-graphics math required contorting scientific equations into pixel shaders and texture maps. That barrier fell on November 8, 2006, when NVIDIA launched the GeForce 8800 GTX based on its G80 architecture [13]. Replacing separate pixel and vertex pipelines with 128 unified stream processors, the G80 became the first graphics chip designed to support CUDA (Compute Unified Device Architecture), a hardware and software platform allowing programmers to write general-purpose data-parallel code in C-like languages without touching graphics APIs [13]. Because video gamers funded the multi-billion-dollar fabrication costs of each new GPU generation, researchers in physics, finance, and machine learning suddenly gained access to teraflop-scale desktop supercomputers for a few hundred dollars."
         }
       ]
     },
@@ -157,7 +141,7 @@ export const article06: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The watershed moment linking parallel silicon to modern artificial intelligence occurred in 2012. For years, computer vision benchmarks such as the ImageNet Large Scale Visual Recognition Challenge— comprising more than 1.2 million labeled images across 1,000 categories—had been dominated by hand- engineered feature extractors paired with shallow statistical classifiers. Deep convolutional neural networks (CNNs) had existed since the 1980s and 1990s, but training them on high-resolution datasets at scale remained prohibitively slow on CPUs."
+          "text": "The watershed moment linking parallel silicon to modern artificial intelligence occurred in 2012. For years, computer vision benchmarks such as the ImageNet Large Scale Visual Recognition Challenge— comprising more than 1.2 million labeled images across 1,000 categories—had been dominated by hand-engineered feature extractors paired with shallow statistical classifiers. Deep convolutional neural networks (CNNs) had existed since the 1980s and 1990s, but training them on high-resolution datasets at scale remained prohibitively slow on CPUs."
         },
         {
           "type": "paragraph",
@@ -180,10 +164,6 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Empirical data compiled by the research institute Epoch AI confirms how aggressively the industry internalized that lesson. Tracking more than 3,700 machine learning systems, Epoch AI reports that training compute for frontier language models has grown at approximately 5× per year since 2020—a doubling time of just 5.2 months [17]. Over the same period, the aggregate computing power of AI chips sold each quarter has expanded by roughly 2.5× per year (doubling every nine months), while AI chip performance per dollar has improved by about 49% per year since 2023 [17]. Because frontier training demand outpaced classic Moore's Law transistor scaling by a wide margin, the hardware industry could no longer rely on general-purpose GPUs alone. It had to redesign silicon from first principles around matrix algebra, reduced numerical precision, and cluster-scale networking."
         }
       ]
@@ -195,7 +175,7 @@ export const article06: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "When neural networks moved from university desktops to planetary-scale data centers, hardware architects noticed a profound mismatch between traditional IEEE 754 floating-point arithmetic and deep learning workloads. Scientific simulations offluid dynamics or orbital mechanics require 64-bit double- precision (FP64) accuracy to prevent rounding errors from compounding. Neural network weights and activations, by contrast, are remarkably resilient to noise; they train reliably in 16-bit brain floating point (BF16) or 8-bit floating point (FP8), and often serve inference accurately in 8-bit integers (INT8) or 4-bit floating point (FP4). Halving bit width reduces silicon area and energy per multiply-accumulate (MAC) operation super-linearly, freeing engineers to pack orders of magnitude more arithmetic units onto every die."
+          "text": "When neural networks moved from university desktops to planetary-scale data centers, hardware architects noticed a profound mismatch between traditional IEEE 754 floating-point arithmetic and deep learning workloads. Scientific simulations offluid dynamics or orbital mechanics require 64-bit double-precision (FP64) accuracy to prevent rounding errors from compounding. Neural network weights and activations, by contrast, are remarkably resilient to noise; they train reliably in 16-bit brain floating point (BF16) or 8-bit floating point (FP8), and often serve inference accurately in 8-bit integers (INT8) or 4-bit floating point (FP4). Halving bit width reduces silicon area and energy per multiply-accumulate (MAC) operation super-linearly, freeing engineers to pack orders of magnitude more arithmetic units onto every die."
         }
       ]
     },
@@ -206,15 +186,11 @@ export const article06: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The first large-scale hyperscaler bet on custom AI silicon came from Google. In 2013, internal projections showed that if users spent just three minutes a day using deep neural networks for voice search, Google would need to double its global data center footprint if it relied solely on CPUs. In response, Google designed the first Tensor Processing Unit (TPU v1) in roughly fifteen months and deployed it in production data centers in 2015. In a landmark ISCA 2017 paper, Norman Jouppi and colleagues revealed the chip's architecture: at its core sat a 256 × 256 systolic array of 65,536 8-bit MAC units delivering 92 tera- operations per second (T OPS), backed by 28 MiB of software-managed on-chip memory [18]. By stripping away CPU branch predictors, caches, and speculative execution—features that improve average throughput on irregular code but add latency jitter and power overhead—TPU v1 ran production neural network inference workloads 15× to 30× faster than contemporary Intel Haswell CPUs and NVIDIA K80 GPUs, with 30× to 80× higher TOPS per watt [18]."
+          "text": "The first large-scale hyperscaler bet on custom AI silicon came from Google. In 2013, internal projections showed that if users spent just three minutes a day using deep neural networks for voice search, Google would need to double its global data center footprint if it relied solely on CPUs. In response, Google designed the first Tensor Processing Unit (TPU v1) in roughly fifteen months and deployed it in production data centers in 2015. In a landmark ISCA 2017 paper, Norman Jouppi and colleagues revealed the chip's architecture: at its core sat a 256 × 256 systolic array of 65,536 8-bit MAC units delivering 92 tera-operations per second (T OPS), backed by 28 MiB of software-managed on-chip memory [18]. By stripping away CPU branch predictors, caches, and speculative execution—features that improve average throughput on irregular code but add latency jitter and power overhead—TPU v1 ran production neural network inference workloads 15× to 30× faster than contemporary Intel Haswell CPUs and NVIDIA K80 GPUs, with 30× to 80× higher TOPS per watt [18]."
         },
         {
           "type": "paragraph",
           "text": "Subsequent TPU generations expanded from inference into massive-scale distributed training, replacing PCIe cards with liquid-cooled, multi-thousand-chip \"Pods\" linked by high-speed, optical-circuit-switched inter-chip interconnects (ICI). TPU v5p scaled to 8,960 chips per Pod with 459 TFLOPS of BF16 compute and 95 GiB of High-Bandwidth Memory (HBM) at 2,765 GB/s per chip [19]. Sixth-generation TPU v6e (Trillium) doubled peak chip compute to 918 TFLOPS (BF16) and 1,836 TOPS (INT8) with 1,638 GB/s of HBM bandwidth and 800 GB/s of bidirectional ICI [20]. By 2025–2026, Google's seventh-generation TPU7x (Ironwood)—engineered explicitly for the reasoning and inference era—pushed single-chip performance to 2,307 TFLOPS in BF16 and 4,614 TFLOPS in native FP8, paired with 192 GiB of HBM delivering 7,380 GB/s (7.38 TB/s) of bandwidth across Pods scaling up to 9,216 chips [21] [22]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -229,11 +205,11 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Because a single monolithic silicon die cannot exceed the physical reticle limit of modern extreme ultraviolet (EUV) lithography scanners (~858 mm²), NVIDIA's Blackwell architecture (B200, introduced in 2024 and ramping through 2025–2026) stitched two reticle-limited dies together across a 10 TB/s chip-to- chip interconnect, presenting 208 billion transistors to software as one unified GPU [24]. Equipped with 180–192 GB of HBM3E memory at up to 8 TB/s bandwidth, fifth-generation NVLink at 1.8 TB/s per GPU, and native FP4 Tensor Cores delivering up to 9 PFLOPS dense (18 PFLOPS sparse) per chip—or 144 PFLOPS sparse across an eight-GPU DGX B200 node—Blackwell pushed individual accelerator power envelopes to 1,000 W [25] [26]."
+          "text": "Because a single monolithic silicon die cannot exceed the physical reticle limit of modern extreme ultraviolet (EUV) lithography scanners (~858 mm²), NVIDIA's Blackwell architecture (B200, introduced in 2024 and ramping through 2025–2026) stitched two reticle-limited dies together across a 10 TB/s chip-to-chip interconnect, presenting 208 billion transistors to software as one unified GPU [24]. Equipped with 180–192 GB of HBM3E memory at up to 8 TB/s bandwidth, fifth-generation NVLink at 1.8 TB/s per GPU, and native FP4 Tensor Cores delivering up to 9 PFLOPS dense (18 PFLOPS sparse) per chip—or 144 PFLOPS sparse across an eight-GPU DGX B200 node—Blackwell pushed individual accelerator power envelopes to 1,000 W [25] [26]."
         },
         {
           "type": "paragraph",
-          "text": "By late 2026, rack-scale co-design had replaced the individual server as the fundamental unit of AI computing. NVIDIA's Vera Rubin platform, entering production in 2026 as a 72-GPU, 36-CPU liquid- cooled NVL72 rack, exemplifies this shift [27]. Each Rubin GPU integrates 288 GB of HBM4 memory and targets up to 50 PFLOPS of FP4 inference throughput, with first shipping production silicon delivering 19.2 TB/s of HBM4 bandwidth and 3.0 TB/s of NVLink 6 scale-up bandwidth (modestly adjusted from preliminary 22 TB/s and 3.6 TB/s targets as physical production hardware arrived) [28]."
+          "text": "By late 2026, rack-scale co-design had replaced the individual server as the fundamental unit of AI computing. NVIDIA's Vera Rubin platform, entering production in 2026 as a 72-GPU, 36-CPU liquid-cooled NVL72 rack, exemplifies this shift [27]. Each Rubin GPU integrates 288 GB of HBM4 memory and targets up to 50 PFLOPS of FP4 inference throughput, with first shipping production silicon delivering 19.2 TB/s of HBM4 bandwidth and 3.0 TB/s of NVLink 6 scale-up bandwidth (modestly adjusted from preliminary 22 TB/s and 3.6 TB/s targets as physical production hardware arrived) [28]."
         },
         {
           "type": "paragraph",
@@ -253,10 +229,6 @@ export const article06: BlogPost = {
         {
           "type": "paragraph",
           "text": "At the opposite end of the power spectrum, AI acceleration migrated into billions of smartphones, laptops, and edge sensors through integrated Neural Processing Units (NPUs). Apple's M4 system-on-a-chip (May"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -371,10 +343,6 @@ export const article06: BlogPost = {
         {
           "type": "paragraph",
           "text": "To widen that tube, AI accelerators abandoned conventional planar GDDR memory in favor of High- Bandwidth Memory (HBM): vertical stacks of DRAM dies punctured by thousands of microscopic copper through-silicon vias (TSVs) and mounted directly beside the processor on a silicon interposer. In April 2025, the JEDEC Solid State Technology Association ratified the HBM4 standard (JESD270-4), doubling the interface width per stack from 1,024 bits to 2,048 bits [36]. Operating at up to 8 Gb/s per pin, each HBM4 stack can deliver up to 2 TB/s of bandwidth and scale to 64 GB in capacity, allowing eight-stack accelerators like NVIDIA's Rubin GPU to approach 20 TB/s of aggregate memory bandwidth [36] [28]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -395,7 +363,7 @@ export const article06: BlogPost = {
             [
               "Memory Wall",
               "Off-chip DRAM bandwidth and latency lag far behind arithmetic FLOPS scaling",
-              "Vertical HBM3E/HBM4 stacks (2,048-bit bus, up to 2 TB/s per stack) [36]; on- chip SRAM (WSE-3) [31]",
+              "Vertical HBM3E/HBM4 stacks (2,048-bit bus, up to 2 TB/s per stack) [36]; on-chip SRAM (WSE-3) [31]",
               "Packaging yield limits, high cost per GB, and thermal stacking limits"
             ],
             [
@@ -439,11 +407,7 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
-          "text": "investment in CUDA created a deep software moat that rivals—even those fielding competitive or superior raw memory bandwidth—must work relentlessly to bridge through frameworks such as ROCm, XLA, OpenAI Triton, and PyT orch compiler backends. At the same time, global AI compute relies on an extraordinarily concentrated physical supply chain spanning extreme ultraviolet lithography tools, leading- edge foundry capacity, advanced 2.5D/3D packaging, and HBM fabrication, making geopolitical shocks or fabrication bottlenecks systemic risks for the entire AI economy."
+          "text": "investment in CUDA created a deep software moat that rivals—even those fielding competitive or superior raw memory bandwidth—must work relentlessly to bridge through frameworks such as ROCm, XLA, OpenAI Triton, and PyT orch compiler backends. At the same time, global AI compute relies on an extraordinarily concentrated physical supply chain spanning extreme ultraviolet lithography tools, leading-edge foundry capacity, advanced 2.5D/3D packaging, and HBM fabrication, making geopolitical shocks or fabrication bottlenecks systemic risks for the entire AI economy."
         }
       ]
     },
@@ -465,7 +429,7 @@ export const article06: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Neuromorphic Computing. Biological brains perform continuous perception, motor control, and reasoning on roughly 20 W of power—five orders of magnitude less than a megawatt AI training cluster— in part because neurons and synapses are physically co-located and fire asynchronously only when information changes. Neuromorphic chips attempt to emulate this event-driven, non-von Neumann organization in silicon. Intel's Loihi 2 research processor, fabricated on a 7 nm-class EUV process with 2.3 billion transistors across a 31 mm² die, integrates 128 programmable neuromorphic cores simulating up to 1 million spiking neurons and 120 million synapses while drawing roughly 1 W [43] [44]. Scaling that architecture further, Intel's Hala Point system links Loihi 2 chips into a 1.15-billion-neuron, 128-billion- synapse research platform [45]. In controlled benchmarks for event-based vision, robotic control, and combinatorial optimization, neuromorphic hardware achieves striking milliwatt-level efficiency. However, spiking neural networks still lag behind standard transformer architectures on broad language and multimodal tasks, and their software toolchains remain specialized research environments rather than drop-in replacements for mainstream deep learning frameworks."
+          "text": "Neuromorphic Computing. Biological brains perform continuous perception, motor control, and reasoning on roughly 20 W of power—five orders of magnitude less than a megawatt AI training cluster— in part because neurons and synapses are physically co-located and fire asynchronously only when information changes. Neuromorphic chips attempt to emulate this event-driven, non-von Neumann organization in silicon. Intel's Loihi 2 research processor, fabricated on a 7 nm-class EUV process with 2.3 billion transistors across a 31 mm² die, integrates 128 programmable neuromorphic cores simulating up to 1 million spiking neurons and 120 million synapses while drawing roughly 1 W [43] [44]. Scaling that architecture further, Intel's Hala Point system links Loihi 2 chips into a 1.15-billion-neuron, 128-billion-synapse research platform [45]. In controlled benchmarks for event-based vision, robotic control, and combinatorial optimization, neuromorphic hardware achieves striking milliwatt-level efficiency. However, spiking neural networks still lag behind standard transformer architectures on broad language and multimodal tasks, and their software toolchains remain specialized research environments rather than drop-in replacements for mainstream deep learning frameworks."
         },
         {
           "type": "paragraph",
@@ -477,11 +441,7 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
-          "text": "Google Quantum AI's Willow superconducting processor achieved a three-decade milestone: below- threshold quantum error correction, showing that increasing the size of a surface-code qubit grid suppressed logical error rates exponentially (by a factor Λ = 2.14 per distance step, reaching a 0.143% error per cycle at distance 7) [48] [49]. Even with that breakthrough, the Willow authors explicitly noted that orders of magnitude still separate today's logical error rates from practical, large-scale fault-tolerant quantum computation [48]. For artificial intelligence specifically, quantum computing faces an additional theoretical constraint: while quantum algorithms promise exponential speedups for simulating quantum chemistry and materials, loading massive classical datasets (such as internet-scale text or video) into quantum states can erase theoretical speedups unless specialized quantum memory structures materialize. Today's most productive quantum-AI intersection actually runs in the opposite direction— using classical deep learning models to decode quantum error-correction syndromes in real time."
+          "text": "Google Quantum AI's Willow superconducting processor achieved a three-decade milestone: below-threshold quantum error correction, showing that increasing the size of a surface-code qubit grid suppressed logical error rates exponentially (by a factor Λ = 2.14 per distance step, reaching a 0.143% error per cycle at distance 7) [48] [49]. Even with that breakthrough, the Willow authors explicitly noted that orders of magnitude still separate today's logical error rates from practical, large-scale fault-tolerant quantum computation [48]. For artificial intelligence specifically, quantum computing faces an additional theoretical constraint: while quantum algorithms promise exponential speedups for simulating quantum chemistry and materials, loading massive classical datasets (such as internet-scale text or video) into quantum states can erase theoretical speedups unless specialized quantum memory structures materialize. Today's most productive quantum-AI intersection actually runs in the opposite direction— using classical deep learning models to decode quantum error-correction syndromes in real time."
         }
       ]
     },
@@ -523,10 +483,6 @@ export const article06: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "coded symbolic rules toward data-hungry, compute-scalable neural networks—validating Sutton's observation that general methods aligned with rising compute eventually prevail. Now, as artificial intelligence confronts the memory wall, copper interconnect limits, and gigawatt-scale energy demands, the next chapter of machine intelligence will once again be decided not in software alone, but in how ingeniously engineers reshape silicon, light, memory, and power to carry it."
         }
       ]
@@ -535,7 +491,7 @@ export const article06: BlogPost = {
   "faqs": [
     {
       "question": "How did Alan Turing and John von Neumann influence modern AI?",
-      "answer": "Alan Turing's 1936 paper formalized the concept of a universal computing machine capable of simulating any computable procedure from stored instructions, establishing the theoretical basis for programmable software [3]. John von Neumann's 1945 EDV AC report translated that concept into a practical electronic architecture storing both programs and data in shared memory—enabling modern software and machine learning while introducing the memory-transfer bottleneck that AI hardware still fights today [5]. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page"
+      "answer": "Alan Turing's 1936 paper formalized the concept of a universal computing machine capable of simulating any computable procedure from stored instructions, establishing the theoretical basis for programmable software [3]. John von Neumann's 1945 EDV AC report translated that concept into a practical electronic architecture storing both programs and data in shared memory—enabling modern software and machine learning while introducing the memory-transfer bottleneck that AI hardware still fights today [5]."
     },
     {
       "question": "What was Dennard scaling, and why did its breakdown matter for AI?",
@@ -543,7 +499,7 @@ export const article06: BlogPost = {
     },
     {
       "question": "Why did 1980s Lisp machines fail while modern AI accelerators succeeded?",
-      "answer": "Lisp machines like the Symbolics 3600 served a niche symbolic-AI market that lacked the sales volume to keep pace with mainstream CMOS microprocessor scaling; general-purpose RISC workstations soon matched their performance at lower cost [12]. Modern AI accelerators, by contrast, began atop a massive consumer GPU market and now command hyperscale data center budgets large enough to fund leading- edge 3 nm fabrication, HBM4 memory, and custom rack-scale systems."
+      "answer": "Lisp machines like the Symbolics 3600 served a niche symbolic-AI market that lacked the sales volume to keep pace with mainstream CMOS microprocessor scaling; general-purpose RISC workstations soon matched their performance at lower cost [12]. Modern AI accelerators, by contrast, began atop a massive consumer GPU market and now command hyperscale data center budgets large enough to fund leading-edge 3 nm fabrication, HBM4 memory, and custom rack-scale systems."
     },
     {
       "question": "Why are GPUs so much better than CPUs for training neural networks?",
@@ -563,7 +519,7 @@ export const article06: BlogPost = {
     },
     {
       "question": "Will quantum or neuromorphic computers replace AI GPUs soon?",
-      "answer": "Not in the near term. Neuromorphic chips such as Intel's Loihi 2 excel at ultra-low-power, event-driven edge tasks (~1 W) but do not yet match GPUs or TPUs on mainstream foundation models [43] [44]. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page Quantum processors like Google's Willow have demonstrated below-threshold error correction, yet fault- tolerant quantum machines remain years away and face fundamental data-loading bottlenecks for classical machine learning [48]."
+      "answer": "Not in the near term. Neuromorphic chips such as Intel's Loihi 2 excel at ultra-low-power, event-driven edge tasks (~1 W) but do not yet match GPUs or TPUs on mainstream foundation models [43] [44]. Quantum processors like Google's Willow have demonstrated below-threshold error correction, yet fault-tolerant quantum machines remain years away and face fundamental data-loading bottlenecks for classical machine learning [48]."
     }
   ],
   "sources": [
@@ -886,11 +842,9 @@ export const article06: BlogPost = {
   "body": [
     "Long before electricity powered logic gates, nineteenth-century mathematicians recognized that calculation could be mechanized and generalized beyond arithmetic. In the 1830s, the English mathematician Charles Babbage conceived the Analytical Engine, a steam-powered mechanical computer designed with a \"store\" for holding numbers, a \"mill\" for performing operations, and punched cards adapted from Jacquard looms to supply instructions and conditional branching [1]. Although Babbage never secured the precision machining or funding to complete the device, his collaborator Augusta Ada",
     "King, Countess of Lovelace, articulated its deeper significance in her 1843 translation and extensive notes on Luigi Menabrea's Italian monograph [1]. Beyond publishing an algorithm for computing Bernoulli numbers, Lovelace observed that a machine capable of manipulating symbols according to formal rules could act upon music, algebra, or any domain reducible to structured notation—while famously cautioning that the engine had no pretension to originate anything on its own, a remark Alan Turing would revisit more than a century later [2].",
-    "The theoretical foundation of modern computing arrived in 1936, when Alan Turing submitted On Computable Numbers, with an Application to the Entscheidungsproblem to the London Mathematical Society [3]. Seeking to prove that no general mechanical procedure could decide the truth of all mathematical statements, Turing defined an abstract device—a finite-state head reading, writing, and erasing symbols along an unbounded tape. Crucially, he demonstrated that a single universal machine could simulate any other specialized machine simply by reading a coded description of that machine from its tape [3]. That insight decoupled hardware from function: intelligence, if computable at all, did not require a separate physical contraption for every cognitive task, only a sufficiently expressive general- purpose machine executing stored descriptions.",
+    "The theoretical foundation of modern computing arrived in 1936, when Alan Turing submitted On Computable Numbers, with an Application to the Entscheidungsproblem to the London Mathematical Society [3]. Seeking to prove that no general mechanical procedure could decide the truth of all mathematical statements, Turing defined an abstract device—a finite-state head reading, writing, and erasing symbols along an unbounded tape. Crucially, he demonstrated that a single universal machine could simulate any other specialized machine simply by reading a coded description of that machine from its tape [3]. That insight decoupled hardware from function: intelligence, if computable at all, did not require a separate physical contraption for every cognitive task, only a sufficiently expressive general-purpose machine executing stored descriptions.",
     "A year later, in August 1937, a twenty-one-year-old master's student at the Massachusetts Institute of Technology bridged abstract logic and physical electronics. In his thesis A Symbolic Analysis of Relay and Switching Circuits (published in 1938), Claude Shannon proved that electrical circuits composed of relays and switches could directly implement the two-valued Boolean algebra formulated by George Boole in the nineteenth century [4]. Open and closed switches mapped cleanly to true and false, series connections to logical AND, and parallel paths to logical OR. Shannon turned circuit design from an artisanal craft of trial and error into a rigorous mathematical discipline, establishing the binary logic layer upon which every digital processor still operates [4].",
     "The architectural blueprint that unified Turing's universality with Shannon's electronic switching emerged in June 1945, when John von Neumann circulated his First Draft of a Report on the EDV AC [5]. Drawing on wartime engineering work by J. Presper Eckert and John Mauchly at the University of Pennsylvania's Moore School of Electrical Engineering, the report outlined a stored-program computer divided into an arithmetic unit, a central control organ, input-output mechanisms, and a unified high-speed memory holding both data and executable instructions [5]. Storing programs in memory meant a computer could be repurposed in seconds rather than physically rewired, and it allowed programs to modify or generate other programs—a prerequisite for compilers, operating systems, and machine learning. Yet von Neumann's clean separation between a central processing unit and a shared memory bank also introduced a structural constraint that would haunt computer architects eighty years later: every instruction and operand had to cross a narrow channel between memory and compute.",
-    "The first generation of electronic digital computers demonstrated both the speed of electronic switching and the punishing physical limits of vacuum tubes. Completed in February 1946 at the Moore School, the Electronic Numerical Integrator and Computer (ENIAC) filled a 15-by-9-meter basement with 40 panels housing approximately 18,000 vacuum tubes, 70,000 resistors, 10,000 capacitors, and 1,500 relays [6]. ENIAC could execute up to 5,000 additions per second—orders of magnitude faster than",
-    "electromechanical calculators—but it dissipated 150 kW of heat, suffered frequent tube burnouts, and originally required days of manual plugboard rewiring to switch tasks [6]. Running statistical optimization over millions of parameters on such machinery was physically unimaginable.",
-    "The escape from vacuum tubes began on December 16, 1947, at Bell Telephone Laboratories in Murray Hill, New Jersey, where physicists John Bardeen and W alter Brattain, working under William Shockley's direction, pressed two closely spaced gold contacts onto a slab of high-purity germanium and achieved solid-state signal amplification [7]. Within months, Shockley conceived the more manufacturable bipolar junction transistor, work that earned all three the 1956 Nobel Prize in Physics [8]. In 1959, Bell Labs engineers Mohamed (Martin) Atalla and Dawon Kahng built the first working metal-oxide-semiconductor field-effect transistor (MOSFET), a compact, low-power switch that proved ideal for dense silicon integration [9]. Combined with the invention of the monolithic integrated circuit at Texas Instruments and Fairchild Semiconductor in the late 1950s, transistors replaced fragile glass bulbs with planar silicon patterns etched by photolithography."
+    "The first generation of electronic digital computers demonstrated both the speed of electronic switching and the punishing physical limits of vacuum tubes. Completed in February 1946 at the Moore School, the Electronic Numerical Integrator and Computer (ENIAC) filled a 15-by-9-meter basement with 40 panels housing approximately 18,000 vacuum tubes, 70,000 resistors, 10,000 capacitors, and 1,500 relays [6]. ENIAC could execute up to 5,000 additions per second—orders of magnitude faster than"
   ]
 };

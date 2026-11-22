@@ -53,7 +53,7 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "The empirical turning point arrived in 2012, when Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton trained a deep convolutional neural network—later known as AlexNet—on graphics processing units for the ImageNet Large Scale Visual Recognition Challenge, a benchmark spanning more than 1.2 million labeled images across 1,000 categories [2]. AlexNet cut the top-5 error rate by more than ten percentage points over the best hand-engineered computer vision pipelines of the era [2]. Within three years, hand- crafted visual descriptors had largely vanished from competitive benchmarks, and the representation- learning paradigm had begun migrating across speech recognition, machine translation, and scientific computing."
+          "text": "The empirical turning point arrived in 2012, when Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton trained a deep convolutional neural network—later known as AlexNet—on graphics processing units for the ImageNet Large Scale Visual Recognition Challenge, a benchmark spanning more than 1.2 million labeled images across 1,000 categories [2]. AlexNet cut the top-5 error rate by more than ten percentage points over the best hand-engineered computer vision pipelines of the era [2]. Within three years, hand-crafted visual descriptors had largely vanished from competitive benchmarks, and the representation-learning paradigm had begun migrating across speech recognition, machine translation, and scientific computing."
         }
       ]
     },
@@ -65,10 +65,6 @@ export const article04: BlogPost = {
         {
           "type": "paragraph",
           "text": "Depth alone is not enough. A raw stack offully connected layers treats every input coordinate as equally related to every other coordinate, wasting parameters and struggling to generalize. Much of deep learning's progress has come from designing inductive biases—structural priors baked into network wiring —that match the geometry of a problem, and then discovering which priors scale cleanly as datasets and compute grow."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -108,10 +104,6 @@ export const article04: BlogPost = {
         {
           "type": "paragraph",
           "text": "Sepp Hochreiter and Jürgen Schmidhuber addressed this pathology in 1997 with Long Short-T erm Memory (LSTM) networks, introducing an explicit memory cell regulated by learned multiplicative gates that control what information is written, preserved, or read out at each step [4]. LSTMs powered the first wave of neural machine translation and modern speech recognition during the mid-2010s. Still, recurrence carried a fatal hardware limitation: because computing state h_t strictly depends on h_t-1, training could not be parallelized across sequence positions on massively parallel GPUs, bottlenecking both context length and model scale [9]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -162,10 +154,6 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "[9]. On the WMT 2014 English-to-German translation benchmark, the original Transformer reached 28.4 BLEU—improving over prior ensembles by more than 2 BLEU—and achieved 41.8 BLEU on English-to- French after training for just 3.5 days on eight GPUs, a small fraction of previous training costs [9]. Because self-attention operates across all tokens simultaneously as dense matrix multiplications, it aligned almost seamlessly with modern GPU and TPU tensor cores, enabling an unprecedented explosion in model size and multimodal generality—from language models to Vision Transformers and audio encoders."
         },
         {
@@ -174,11 +162,11 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "First, sparse Mixture-of-Experts (MoE) architectures decouple a model's total knowledge capacity from its per-token computational cost. Instead of routing every token through the same massive feed-forward network, an MoE layer maintains a pool of specialized expert sub-networks and uses a learned router to activate only a small subset—often one or two, or a handful offine-grained experts—per token [10]. William Fedus, Barret Zoph, and Noam Shazeer demonstrated with Switch Transformers that simplified top-1 routing could scale models past a trillion parameters while keeping per-token FLOPs constant [10]. By late 2024 and 2025, MoE had become a dominant blueprint for frontier open-weight and proprietary systems alike: DeepSeek-V3, for example, contains 671 billion total parameters while activating only 37 billion per token, pairing fine-grained experts with Multi-head Latent Attention (MLA) to compress key- value caches and an auxiliary-loss-free load-balancing scheme [27]."
+          "text": "First, sparse Mixture-of-Experts (MoE) architectures decouple a model's total knowledge capacity from its per-token computational cost. Instead of routing every token through the same massive feed-forward network, an MoE layer maintains a pool of specialized expert sub-networks and uses a learned router to activate only a small subset—often one or two, or a handful offine-grained experts—per token [10]. William Fedus, Barret Zoph, and Noam Shazeer demonstrated with Switch Transformers that simplified top-1 routing could scale models past a trillion parameters while keeping per-token FLOPs constant [10]. By late 2024 and 2025, MoE had become a dominant blueprint for frontier open-weight and proprietary systems alike: DeepSeek-V3, for example, contains 671 billion total parameters while activating only 37 billion per token, pairing fine-grained experts with Multi-head Latent Attention (MLA) to compress key-value caches and an auxiliary-loss-free load-balancing scheme [27]."
         },
         {
           "type": "paragraph",
-          "text": "Second, State Space Models (SSMs) reimagined recurrence for modern hardware. In December 2023, Albert Gu and Tri Dao introduced Mamba, a selective state space architecture that makes its continuous- time state transition parameters input-dependent—enabling content-based filtering similar to attention while maintaining linear O(L) scaling in sequence length and constant memory during autoregressive decoding [11]. Continued refinement has narrowed the quality gap with attention on retrieval and state- tracking tasks: in March 2026, Lahoti and collaborators introduced Mamba-3, combining exponential- trapezoidal discretization, complex-valued state updates for richer state tracking, and a multi-input multi- output (MIMO) formulation that matches Mamba-2's perplexity using half the state size while improving downstream accuracy by 1.8 points at the 1.5B scale [12]. Increasingly, production systems blend both paradigms into hybrid architectures that interleave linear-time SSM layers with periodic attention layers to get long-context efficiency without sacrificing exact recall."
+          "text": "Second, State Space Models (SSMs) reimagined recurrence for modern hardware. In December 2023, Albert Gu and Tri Dao introduced Mamba, a selective state space architecture that makes its continuous-time state transition parameters input-dependent—enabling content-based filtering similar to attention while maintaining linear O(L) scaling in sequence length and constant memory during autoregressive decoding [11]. Continued refinement has narrowed the quality gap with attention on retrieval and state-tracking tasks: in March 2026, Lahoti and collaborators introduced Mamba-3, combining exponential-trapezoidal discretization, complex-valued state updates for richer state tracking, and a multi-input multi-output (MIMO) formulation that matches Mamba-2's perplexity using half the state size while improving downstream accuracy by 1.8 points at the 1.5B scale [12]. Increasingly, production systems blend both paradigms into hybrid architectures that interleave linear-time SSM layers with periodic attention layers to get long-context efficiency without sacrificing exact recall."
         },
         {
           "type": "table",
@@ -193,29 +181,15 @@ export const article04: BlogPost = {
             [
               "CNN & ResNet [1] [3]",
               "Local sliding filters with shared weights; residual skip connections",
-              "Linear in pixels (O(N))",
+              "Linear in pixels (O(N)) Sequence /",
               "High sample efficiency on grids; strong spatial locality; fast edge inference",
-              "Limited global receptive field without deep stacking; less flexible for unstructured text ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "",
-              "Page"
-            ],
-            [
-              "",
-              "",
-              "Sequence /",
-              "",
-              ""
+              "Limited global receptive field without deep stacking; less flexible for unstructured text"
             ],
             [
               "RNN / LSTM [4]",
               "Sequential hidden state updated via learned memory gates",
               "Linear time (O(L)), constant state",
-              "Natural fit for streaming time- series; low memory footprint at inference",
+              "Natural fit for streaming time-series; low memory footprint at inference",
               "Non-parallelizable across sequence steps during training; struggles on very long contexts"
             ],
             [
@@ -241,21 +215,21 @@ export const article04: BlogPost = {
             ],
             [
               "[9]",
-              "residual feed- forward blocks",
+              "residual feed-forward blocks",
               "compute, linear KV cache",
               "context recall and cross-modal generality",
-              "caches; expensive quadratic cost at ultra- long contexts"
+              "caches; expensive quadratic cost at ultra-long contexts"
             ],
             [
               "Sparse MoE [10] [27]",
               "Learned router activates a small subset of expert MLPs per token",
               "Sublinear active FLOPs vs. total parameters",
-              "Decouples model capacity from inference compute; superior cost- performance at frontier scale",
+              "Decouples model capacity from inference compute; superior cost-performance at frontier scale",
               "High total VRAM footprint; all-to-all communication overhead and router load-balancing complexity"
             ],
             [
               "Selective SSM (Mamba) [11] [12]",
-              "Input-dependent discretized state- space recurrence with parallel scans",
+              "Input-dependent discretized state-space recurrence with parallel scans",
               "Linear (O(L)) time, constant decode state",
               "Fast long-context throughput; constant memory during generation; strong state tracking (Mamba-3)",
               "Historically weaker than full attention on exact needle-in-a-haystack associative recall"
@@ -275,10 +249,6 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "numerical engineering, and distributed systems."
         }
       ]
@@ -290,11 +260,11 @@ export const article04: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "As signals propagate through dozens of nonlinear layers, activation magnitudes can drift wildly, destabilizing gradients and forcing tiny learning rates. In 2015, Sergey Ioffe and Christian Szegedy introduced Batch Normalization, standardizing layer inputs across each training mini-batch; in their experiments on image classification, it reached equivalent accuracy in 14 times fewer training steps and pushed an ImageNet ensemble to 4.8% top-5 test error [13]. Because Batch Normalization depends on mini-batch statistics and behaves awkwardly with variable-length sequences, Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey Hinton proposed Layer Normalization in 2016, computing mean and variance across all hidden units within a single training example—making training and inference identical and stabilizing sequence dynamics [14]. Modern large language models predominantly rely on RMSNorm, a streamlined variant that normalizes by root-mean-square magnitude without mean-centering, placed before each sub- layer (\"Pre-LN\") to keep residual paths smooth."
+          "text": "As signals propagate through dozens of nonlinear layers, activation magnitudes can drift wildly, destabilizing gradients and forcing tiny learning rates. In 2015, Sergey Ioffe and Christian Szegedy introduced Batch Normalization, standardizing layer inputs across each training mini-batch; in their experiments on image classification, it reached equivalent accuracy in 14 times fewer training steps and pushed an ImageNet ensemble to 4.8% top-5 test error [13]. Because Batch Normalization depends on mini-batch statistics and behaves awkwardly with variable-length sequences, Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey Hinton proposed Layer Normalization in 2016, computing mean and variance across all hidden units within a single training example—making training and inference identical and stabilizing sequence dynamics [14]. Modern large language models predominantly rely on RMSNorm, a streamlined variant that normalizes by root-mean-square magnitude without mean-centering, placed before each sub-layer (\"Pre-LN\") to keep residual paths smooth."
         },
         {
           "type": "paragraph",
-          "text": "Regularization and adaptive optimization matured alongside normalization. Dropout, formalized by Nitish Srivastava and colleagues in 2014, randomly zeroes out hidden units during training to prevent neurons from co-adapting, effectively sampling from an exponential ensemble of thinned sub-networks [17]. While heavily used in medium-scale supervised models, frontier pre-training runs trained on trillions of tokens often disable dropout in favor of weight decay and single-epoch data diversity. For parameter updates, Diederik Kingma and Jimmy Ba's Adam optimizer (2014) combined momentum with per-parameter adaptive second-moment scaling, dramatically speeding convergence on noisy, high-dimensional landscapes [15]. In 2017, Ilya Loshchilov and Frank Hutter demonstrated that standard L_2 regularization interacts poorly with Adam's adaptive scaling and introduced AdamW—decoupling weight decay directly from the gradient update—which became the default workhorse of large-scale Transformer training [16]. More recently, in 2025–2026, matrix-aware optimizers such as Muon (which orthogonalize whole weight- matrix updates rather than treating parameters as independent scalars) have gained traction in frontier training runs, though integrating them with sharded distributed layouts remains an active systems engineering challenge [21]."
+          "text": "Regularization and adaptive optimization matured alongside normalization. Dropout, formalized by Nitish Srivastava and colleagues in 2014, randomly zeroes out hidden units during training to prevent neurons from co-adapting, effectively sampling from an exponential ensemble of thinned sub-networks [17]. While heavily used in medium-scale supervised models, frontier pre-training runs trained on trillions of tokens often disable dropout in favor of weight decay and single-epoch data diversity. For parameter updates, Diederik Kingma and Jimmy Ba's Adam optimizer (2014) combined momentum with per-parameter adaptive second-moment scaling, dramatically speeding convergence on noisy, high-dimensional landscapes [15]. In 2017, Ilya Loshchilov and Frank Hutter demonstrated that standard L_2 regularization interacts poorly with Adam's adaptive scaling and introduced AdamW—decoupling weight decay directly from the gradient update—which became the default workhorse of large-scale Transformer training [16]. More recently, in 2025–2026, matrix-aware optimizers such as Muon (which orthogonalize whole weight-matrix updates rather than treating parameters as independent scalars) have gained traction in frontier training runs, though integrating them with sharded distributed layouts remains an active systems engineering challenge [21]."
         }
       ]
     },
@@ -309,11 +279,7 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Because FP16's narrow exponent range still caused overflow spikes in very large language models, the industry largely converged on Brain Floating Point (BF16), which preserves FP32's dynamic range at the expense of mantissa precision. Over 2024–2026, hardware and algorithmic co-design pushed lower still into 8-bit floating point (FP8). DeepSeek-V3 validated fine-grained FP8 mixed-precision training at 671- billion-parameter scale across 14.8 trillion tokens, completing its full pre-training and post-training pipeline in 2.788 million H800 GPU hours with zero irrecoverable loss spikes or rollbacks [27]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Because FP16's narrow exponent range still caused overflow spikes in very large language models, the industry largely converged on Brain Floating Point (BF16), which preserves FP32's dynamic range at the expense of mantissa precision. Over 2024–2026, hardware and algorithmic co-design pushed lower still into 8-bit floating point (FP8). DeepSeek-V3 validated fine-grained FP8 mixed-precision training at 671-billion-parameter scale across 14.8 trillion tokens, completing its full pre-training and post-training pipeline in 2.788 million H800 GPU hours with zero irrecoverable loss spikes or rollbacks [27]."
         }
       ]
     },
@@ -370,10 +336,6 @@ export const article04: BlogPost = {
         {
           "type": "paragraph",
           "text": "Microsoft's ZeRO framework (2019–2020) showed that partitioning optimizer states, gradients, and parameters across data-parallel GPUs removes redundant memory footprints, enabling trillion-parameter training on 1,024 GPUs [20]. That design was standardized across the open-source ecosystem in PyT orch Fully Sharded Data Parallel (FSDP) [21]. Meanwhile, NVIDIA's Megatron-LM (2019) demonstrated how to slice individual Transformer self-attention and MLP matrices cleanly across GPUs within a high-speed node using tensor parallelism, combined with pipeline parallelism across nodes [19]. Modern clusters routinely run \"3D\" or \"5D\" hybrid parallelism—tensor parallelism inside a server node, expert and context parallelism across local fabrics, and sharded data or pipeline parallelism across racks."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -384,7 +346,7 @@ export const article04: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "For much of deep learning's first decade, every new application meant assembling a large labeled dataset and training a network from scratch. That paradigm began to fracture in computer vision when practitioners realized that early layers trained on ImageNet could be reused for medical radiology or satellite imagery, and it shattered completely in natural language processing with the rise of self- supervised pre-training."
+          "text": "For much of deep learning's first decade, every new application meant assembling a large labeled dataset and training a network from scratch. That paradigm began to fracture in computer vision when practitioners realized that early layers trained on ImageNet could be reused for medical radiology or satellite imagery, and it shattered completely in natural language processing with the rise of self-supervised pre-training."
         },
         {
           "type": "paragraph",
@@ -392,11 +354,11 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Yet as base models grew into the tens and hundreds of billions of parameters, full fine-tuning—updating and storing a separate copy of every weight for every enterprise use case—became prohibitively expensive. In 2021, Edward Hu and collaborators at Microsoft introduced Low-Rank Adaptation (LoRA), an insight rooted in the observation that task-specific weight updates during adaptation have a low intrinsic dimensionality [23]. Rather than modifying a frozen pre-trained weight matrix W_0 ∈ ℝ^d × k, LoRA"
+          "text": "Yet as base models grew into the tens and hundreds of billions of parameters, full fine-tuning—updating and storing a separate copy of every weight for every enterprise use case—became prohibitively expensive. In 2021, Edward Hu and collaborators at Microsoft introduced Low-Rank Adaptation (LoRA), an insight rooted in the observation that task-specific weight updates during adaptation have a low intrinsic dimensionality [23]. Rather than modifying a frozen pre-trained weight matrix $W_0 \\in \\mathbb{R}^{d \\times k}$, LoRA"
         },
         {
           "type": "paragraph",
-          "text": "injects two much smaller trainable matrices B ∈ ℝ^d × r and A ∈ ℝ^r × k with rank $r \\ll \\min(d, k)$, representing the adapted weight as:"
+          "text": "injects two much smaller trainable matrices $B \\in \\mathbb{R}^{d \\times r}$ and $A \\in \\mathbb{R}^{r \\times k}$ with rank $r \\ll \\min(d, k)$, representing the adapted weight as:"
         },
         {
           "type": "math",
@@ -405,7 +367,7 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Because only A and B receive gradient updates, trainable parameter counts and optimizer memory drop by orders of magnitude—often to well under 1% of the base model [23]. Crucially, unlike earlier adapter layers that inserted extra sequential operations, LoRA's BA product can be explicitly merged back into W_0 before deployment, adding zero inference latency and allowing a single hosted base model to hot-swap between hundreds of specialized customer or domain adapters in milliseconds [23]. Together with quantized variants and broader Parameter-Ef ficient Fine-T uning (PEFT) methods, LoRA democratized customization, allowing small engineering teams to specialize frontier open-weight models on modest hardware."
+          "text": "Because only A and B receive gradient updates, trainable parameter counts and optimizer memory drop by orders of magnitude—often to well under 1% of the base model [23]. Crucially, unlike earlier adapter layers that inserted extra sequential operations, LoRA's BA product can be explicitly merged back into W_0 before deployment, adding zero inference latency and allowing a single hosted base model to hot-swap between hundreds of specialized customer or domain adapters in milliseconds [23]. Together with quantized variants and broader Parameter-Efficient Fine-T uning (PEFT) methods, LoRA democratized customization, allowing small engineering teams to specialize frontier open-weight models on modest hardware."
         }
       ]
     },
@@ -420,11 +382,7 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In January 2020, Jared Kaplan, Sam McCandlish, and colleagues at OpenAI demonstrated that cross- entropy language modeling loss scales cleanly as a power law with three variables: non-embedding parameter count (N), dataset size (D), and training compute (C ≈ 6ND), holding across more than seven"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "In January 2020, Jared Kaplan, Sam McCandlish, and colleagues at OpenAI demonstrated that cross-entropy language modeling loss scales cleanly as a power law with three variables: non-embedding parameter count (N), dataset size (D), and training compute ($C \\approx 6ND$), holding across more than seven"
         },
         {
           "type": "paragraph",
@@ -451,7 +409,7 @@ export const article04: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "While consumer chatbots captured public attention, deep learning's most durable scientific validation has occurred in domains governed by rigorous physical benchmarks, where predictions are tested against X- ray crystallography, meteorological sensors, and real-world road safety."
+          "text": "While consumer chatbots captured public attention, deep learning's most durable scientific validation has occurred in domains governed by rigorous physical benchmarks, where predictions are tested against X-ray crystallography, meteorological sensors, and real-world road safety."
         }
       ]
     },
@@ -462,11 +420,7 @@ export const article04: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "For more than fifty years, predicting a protein's three-dimensional atomic structure directly from its one- dimensional amino acid sequence stood as one of biology's grandest unsolved challenges. In 2021, John Jumper and the DeepMind team published AlphaFold 2 in Nature, introducing an attention-based"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "For more than fifty years, predicting a protein's three-dimensional atomic structure directly from its one-dimensional amino acid sequence stood as one of biology's grandest unsolved challenges. In 2021, John Jumper and the DeepMind team published AlphaFold 2 in Nature, introducing an attention-based"
         },
         {
           "type": "paragraph",
@@ -508,10 +462,6 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "clinical-note generation tools saw widespread hospital deployment in 2025, with physicians across multiple health systems reporting up to 83% less time spent writing notes [40]. Yet the same report highlights a sobering evidentiary gap: a review of more than 500 clinical AI studies found that nearly half relied on exam-style questions rather than real patient records, and only 5% used real clinical data— underscoring why benchmark scores cannot substitute for prospective clinical validation [40]."
         }
       ]
@@ -538,7 +488,7 @@ export const article04: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "At the same time, deep learning exhibits a sharp economic paradox: frontier training costs are concentrating among a handful of well-capitalized firms, while per-task inference costs are plummeting. Stanford HAI's 2026 AI Index Report notes that global corporate AI investment surged to \\$581.7 billion in 2025 (up 130% year-over-year), with industry producing over 90% of notable AI models—even as the most capable frontier systems became the least transparent about their training data, weights, and code [40]. Conversely, Stanford's 2025 AI Index documented that the inference cost for a system matching GPT -3.5-level capability fell more than 280-fold between November 2022 and October 2024, aided by 30% annual hardware cost declines, 40% annual hardware energy-efficiency gains, and rapid distillation into smaller models [39]."
+          "text": "At the same time, deep learning exhibits a sharp economic paradox: frontier training costs are concentrating among a handful of well-capitalized firms, while per-task inference costs are plummeting. Stanford HAI's 2026 AI Index Report notes that global corporate AI investment surged to \\$581.7 billion in 2025 (up 130% year-over-year), with industry producing over 90% of notable AI models—even as the most capable frontier systems became the least transparent about their training data, weights, and code [40]. Conversely, Stanford's 2025 AI Index documented that the inference cost for a system matching GPT-3.5-level capability fell more than 280-fold between November 2022 and October 2024, aided by 30% annual hardware cost declines, 40% annual hardware energy-efficiency gains, and rapid distillation into smaller models [39]."
         }
       ]
     },
@@ -561,10 +511,6 @@ export const article04: BlogPost = {
         {
           "type": "paragraph",
           "text": "Because deep representations are distributed across billions offloating-point weights, individual neurons rarely correspond to clean, human-readable concepts; instead, networks exhibit polysemanticity, packing"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -652,16 +598,12 @@ export const article04: BlogPost = {
           "text": "Looking beyond late 2026, several active research fronts remain unproven at full industrial scale and should be viewed as hypotheses rather than guarantees:"
         },
         {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
           "type": "list",
           "ordered": false,
           "items": [
             "**World Models and Physical Grounding:** Whether deep networks trained primarily on video, robotics telemetry, and interactive simulations can acquire robust, sample-efficient intuitive physics—enabling general-purpose robotic manipulation in unstructured homes and factories—remains an open challenge.",
             "**Continual and Test-Time Learning:** Researchers are exploring architectures that update fast weights or persistent memory states safely during deployment without catastrophic forgetting, bridging the gap between static pre-trained weights and lifelong human learning.",
-            "**Beyond Pure Scaling Toward Algorithmic Efficiency:** As power-grid constraints tighten and high- quality human text saturates, future capability gains may depend less on brute-force parameter inflation and more on synthetic self-play data, low-bit quantization (such as FP4 hardware pipelines), matrix-aware optimizers, and hybrid neuro-symbolic verification.",
+            "**Beyond Pure Scaling Toward Algorithmic Efficiency:** As power-grid constraints tighten and high-quality human text saturates, future capability gains may depend less on brute-force parameter inflation and more on synthetic self-play data, low-bit quantization (such as FP4 hardware pipelines), matrix-aware optimizers, and hybrid neuro-symbolic verification.",
             "**Verifiable Interpretability and Auditing:** Whether circuit-tracing and sparse-feature diagnostics can scale to audit frontier reasoning models reliably—detecting deceptive alignment or hidden failure modes before deployment—will shape both enterprise trust and regulatory standards."
           ]
         },
@@ -675,7 +617,7 @@ export const article04: BlogPost = {
   "faqs": [
     {
       "question": "How is deep learning different from traditional machine learning?",
-      "answer": "Traditional machine learning algorithms—such as linear regression, support vector machines, or gradient- boosted trees—typically depend on human engineers to extract and select informative features from raw inputs beforehand. Deep learning automates feature extraction by stacking multiple nonlinear layers that learn hierarchical representations directly from raw pixels, audio waveforms, text tokens, or molecular coordinates [1]."
+      "answer": "Traditional machine learning algorithms—such as linear regression, support vector machines, or gradient-boosted trees—typically depend on human engineers to extract and select informative features from raw inputs beforehand. Deep learning automates feature extraction by stacking multiple nonlinear layers that learn hierarchical representations directly from raw pixels, audio waveforms, text tokens, or molecular coordinates [1]."
     },
     {
       "question": "Why are residual (skip) connections so important in deep networks?",
@@ -683,7 +625,7 @@ export const article04: BlogPost = {
     },
     {
       "question": "Why did Transformers largely replace RNNs and LSTMs for language and multimodal AI?",
-      "answer": "RNNs and LSTMs process sequences one step at a time, making it impossible to parallelize training across token positions within a sequence. Transformers use self-attention to compare all tokens simultaneously via dense matrix multiplications, unlocking massive GPU parallelism and superior long- range dependency modeling [9]."
+      "answer": "RNNs and LSTMs process sequences one step at a time, making it impossible to parallelize training across token positions within a sequence. Transformers use self-attention to compare all tokens simultaneously via dense matrix multiplications, unlocking massive GPU parallelism and superior long-range dependency modeling [9]."
     },
     {
       "question": "What is the advantage of a Mixture-of-Experts (MoE) architecture over a dense model?",
@@ -691,11 +633,11 @@ export const article04: BlogPost = {
     },
     {
       "question": "How do State Space Models like Mamba differ from Transformers?",
-      "answer": "Transformers compute pairwise interactions across all tokens, causing computational cost to grow quadratically (O(L^2)) with sequence length and memory caches to expand linearly during generation. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page Selective State Space Models such as Mamba and Mamba-3 compress context into a fixed-size recurrent state with input-dependent filtering, achieving linear O(L) scaling and constant-memory decoding [11] [12]."
+      "answer": "Transformers compute pairwise interactions across all tokens, causing computational cost to grow quadratically (O(L^2)) with sequence length and memory caches to expand linearly during generation. Selective State Space Models such as Mamba and Mamba-3 compress context into a fixed-size recurrent state with input-dependent filtering, achieving linear O(L) scaling and constant-memory decoding [11] [12]."
     },
     {
       "question": "What is LoRA, and why is it widely used for fine-tuning?",
-      "answer": "Low-Rank Adaptation (LoRA) freezes a large pre-trained model's weights and trains only tiny pairs of low- rank matrices (BA) that capture task-specific adjustments. It cuts training memory drastically and can be merged directly into the base weights before deployment, adding zero extra inference latency [23]."
+      "answer": "Low-Rank Adaptation (LoRA) freezes a large pre-trained model's weights and trains only tiny pairs of low-rank matrices (BA) that capture task-specific adjustments. It cuts training memory drastically and can be merged directly into the base weights before deployment, adding zero extra inference latency [23]."
     },
     {
       "question": "What changed between Chinchilla scaling laws and test-time compute scaling?",
@@ -879,7 +821,7 @@ export const article04: BlogPost = {
       "id": 29,
       "title": "Highly accurate protein structure prediction with AlphaFold",
       "venue": "John Jumper, Richard Evans, Alexander Pritzel, et al. (DeepMind /Nature, Vol. 596, pp. 583–589). Published July 15, 2021. URL: https:// pubmed.ncbi.nlm.nih.gov/34265844/| Source type: Peer-reviewed journal article.",
-      "url": ""
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34265844/"
     },
     {
       "id": 30,
@@ -970,10 +912,8 @@ export const article04: BlogPost = {
     "Classical pattern recognition relied on a rigid two-stage pipeline. First, human specialists constructed a feature extractor tailored to a specific domain—for instance, edge histograms for photographs or spectral coefficients for audio—converting messy sensory inputs into compact numerical vectors. Second, a relatively shallow statistical model learned a decision boundary over those hand-built features. As Yann LeCun, Yoshua Bengio, and Geoffrey Hinton observed in their landmark 2015 Nature review, this approach demanded considerable domain expertise and careful engineering, yet still broke down whenever real-world inputs shifted in lighting, accent, phrasing, or background clutter [1].",
     "Deep learning replaces that manual bottleneck with representation learning. A deep model consists of multiple processing layers, each transforming the representation at one level into a slightly more abstract representation at the next [1]. Crucially, these layers are not programmed by hand; they are optimized jointly from data using general-purpose learning procedures. Depth matters because it enables compositional abstraction. In an image recognition network, early layers typically detect localized brightness transitions and oriented edges; intermediate layers assemble those edges into motifs such as textures, corners, or wheels; deeper layers combine motifs into entire objects and scene relationships. Each layer amplifies aspects of the input relevant for discrimination while suppressing irrelevant variations such as minor shifts in pose or illumination [1].",
     "A shallow network with a single hidden layer can theoretically approximate any continuous function, yet doing so for complex, high-dimensional signals often requires an exponentially large number of hidden units. Composing functions across depth achieves vastly greater expressive efficiency for data generated by hierarchical natural processes—language built from characters, words, clauses, and discourse; molecules built from atoms, functional groups, secondary folds, and quaternary complexes; scenes built from surfaces, objects, and spatial layouts.",
-    "The empirical turning point arrived in 2012, when Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton trained a deep convolutional neural network—later known as AlexNet—on graphics processing units for the ImageNet Large Scale Visual Recognition Challenge, a benchmark spanning more than 1.2 million labeled images across 1,000 categories [2]. AlexNet cut the top-5 error rate by more than ten percentage points over the best hand-engineered computer vision pipelines of the era [2]. Within three years, hand- crafted visual descriptors had largely vanished from competitive benchmarks, and the representation- learning paradigm had begun migrating across speech recognition, machine translation, and scientific computing.",
+    "The empirical turning point arrived in 2012, when Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton trained a deep convolutional neural network—later known as AlexNet—on graphics processing units for the ImageNet Large Scale Visual Recognition Challenge, a benchmark spanning more than 1.2 million labeled images across 1,000 categories [2]. AlexNet cut the top-5 error rate by more than ten percentage points over the best hand-engineered computer vision pipelines of the era [2]. Within three years, hand-crafted visual descriptors had largely vanished from competitive benchmarks, and the representation-learning paradigm had begun migrating across speech recognition, machine translation, and scientific computing.",
     "Depth alone is not enough. A raw stack offully connected layers treats every input coordinate as equally related to every other coordinate, wasting parameters and struggling to generalize. Much of deep learning's progress has come from designing inductive biases—structural priors baked into network wiring —that match the geometry of a problem, and then discovering which priors scale cleanly as datasets and compute grow.",
-    "Convolutional Neural Networks (CNNs) encode two strong geometric assumptions about visual and spatial signals: locality and translation equivariance. Instead of connecting every pixel to every hidden unit, a convolutional layer slides small learnable filter banks across an image, reusing the same weights at every spatial position [1]. Weight sharing dramatically reduces parameter counts and guarantees that a detector learned in one corner of an image automatically recognizes the same pattern elsewhere.",
-    "For several years after 2012, vision researchers pushed CNNs deeper to capture richer hierarchies, only to hit a counterintuitive wall known as the degradation problem: beyond roughly twenty layers, deeper networks exhibited higher training error than shallower counterparts, not because of overfitting, but because optimization itself stalled [3]. In late 2015, Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun at Microsoft Research resolved this barrier with Deep Residual Networks (ResNets) [3]. Rather than forcing a stack of layers to learn an unreferenced mapping ℋ (x) directly, a residual block reformulates the task as learning a residual perturbation ℱ (x, {W_i}) added back to its own input through an identity skip connection:",
-    "If an additional layer is unnecessary, pushing its weights toward zero simply passes the identity signal straight through; more importantly, during optimization, gradients can flow unimpeded along the additive highway across dozens or hundreds of layers [3]. On ImageNet, He and colleagues scaled ResNets to 152 layers—eight times deeper than prior VGG networks yet with lower computational complexity— achieving a 3.57% top-5 test error and winning first place in the ILSVRC 2015 classification, detection, and localization challenges, alongside a 28% relative improvement on COCO object detection [3]. Residual connections proved so fundamental that virtually every modern deep architecture, including Transformers and state space models, relies on them as a structural backbone."
+    "Convolutional Neural Networks (CNNs) encode two strong geometric assumptions about visual and spatial signals: locality and translation equivariance. Instead of connecting every pixel to every hidden unit, a convolutional layer slides small learnable filter banks across an image, reusing the same weights at every spatial position [1]. Weight sharing dramatically reduces parameter counts and guarantees that a detector learned in one corner of an image automatically recognizes the same pattern elsewhere."
   ]
 };

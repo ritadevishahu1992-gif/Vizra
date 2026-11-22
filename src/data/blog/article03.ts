@@ -57,10 +57,6 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Within the broader field of artificial intelligence—whose historical arc is covered in The Evolution of Artificial Intelligence (Article 01) and What Is Artificial Intelligence? (Article 02)—machine learning occupies the statistical engine room. While Deep Learning (Article 04) and Neural Networks Explained (Article 05) explore multi-layered neural architectures that dominate vision and language, and Supervised, Unsupervised and Reinforcement Learning Explained (Article 07) maps the major learning paradigms, this article focuses on the underlying mathematical, statistical, and engineering mechanics that make learning from data possible in the first place."
         }
       ]
@@ -89,10 +85,6 @@ export const article03: BlogPost = {
         {
           "type": "paragraph",
           "text": "The final stages— evaluation, deployment, and continuous monitoring —bridge mathematics and software engineering. A model that passes offline testing against domain-specific metrics is packaged into a serving pipeline, exposed behind a low-latency API or batch job, and monitored continuously for shifting input distributions and decaying predictive accuracy. Because the external world never sits still, deployment is not the finish line; it is the start of an ongoing feedback loop. y y p p"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -103,7 +95,7 @@ export const article03: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "To understand how a machine learns without human-written rules, look at what happens inside a training loop. Every parametric machine learning algorithm rests on three mathematical pillars: a model family that maps input features x to predictions ŷ = f_θ (x) controlled by parameters θ; a loss function that quantifies prediction error; and an optimization algorithm that updates θ to drive that error down [3]."
+          "text": "To understand how a machine learns without human-written rules, look at what happens inside a training loop. Every parametric machine learning algorithm rests on three mathematical pillars: a model family that maps input features x to predictions $\\hat{y} = f_\\theta(x)$ controlled by parameters $\\theta$; a loss function that quantifies prediction error; and an optimization algorithm that updates $\\theta$ to drive that error down [3]."
         }
       ]
     },
@@ -123,7 +115,7 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Here, n is the number of training examples, y_i is the true observed value, and ŷ_i = f_θ (x_i) is the model's prediction. Squaring the residual (y_i - ·ŷ_i) ensures that positive and negative errors do not cancel out, while heavily penalizing large outliers. When outliers represent measurement glitches rather than critical business risks, practitioners often switch to Mean Absolute Error (MAE) or Huber loss, which grow linearly rather than quadratically for large errors."
+          "text": "Here, n is the number of training examples, y_i is the true observed value, and $\\hat{y}_i = f_\\theta(x_i)$ is the model's prediction. Squaring the residual (y_i - ·ŷ_i) ensures that positive and negative errors do not cancel out, while heavily penalizing large outliers. When outliers represent measurement glitches rather than critical business risks, practitioners often switch to Mean Absolute Error (MAE) or Huber loss, which grow linearly rather than quadratically for large errors."
         },
         {
           "type": "paragraph",
@@ -136,7 +128,7 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "where p̂_i ∈ (0, 1) is the model's predicted probability for the positive class. Log loss carries a steep penalty for confident arrogance: predicting p̂_i = 0.01 when the true label is y_i = 1 incurs a loss of - log(0.01) ≈ 4.61, forcing the optimizer to correct overconfident mistakes aggressively."
+          "text": "where $\\hat{p}_i \\in (0, 1)$ is the model's predicted probability for the positive class. Log loss carries a steep penalty for confident arrogance: predicting p̂_i = 0.01 when the true label is y_i = 1 incurs a loss of $-\\log(0.01) \\approx 4.61$, forcing the optimizer to correct overconfident mistakes aggressively."
         }
       ]
     },
@@ -151,16 +143,12 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "The gradient ∇_θ J(θ) is the vector of partial derivatives of the objective function J(θ) with respect to every parameter in θ. Calculus guarantees that the gradient points in the direction of steepest ascent; stepping in the opposite direction moves downhill. At iteration t, gradient descent updates parameters according to:"
+          "text": "The gradient $\\nabla_\\theta J(\\theta)$ is the vector of partial derivatives of the objective function $J(\\theta)$ with respect to every parameter in $\\theta$. Calculus guarantees that the gradient points in the direction of steepest ascent; stepping in the opposite direction moves downhill. At iteration t, gradient descent updates parameters according to:"
         },
         {
           "type": "math",
           "latex": "\\theta^{(t+1)} = \\theta^{(t)} - \\eta \\, \\nabla_\\theta J\\!\\left(\\theta^{(t)}\\right)",
           "caption": "Iterative gradient descent parameter update rule with learning rate $\\eta$"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -194,15 +182,14 @@ export const article03: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "𝔼[(y - f f (x)) \u0000^2] = (Bias [f f (x)]) \u0000^2 [Underfifitting error] + Var [f f (x)] [\u0000 Overfifitting sensitivity] + σ^2",
             "Bias reflects error from overly simplistic assumptions. Fitting a straight line to a quadratic physical trajectory introduces high bias: no matter how much data you collect, the model systematically underfits the true relationship.",
             "Variance measures how wildly the learned model changes if you retrain it on a different random sample of data from the same population. A deeply branched decision tree that isolates individual data points has low bias but extreme variance—it overfits the quirks of the training sample.",
-            "Irreducible noise (σ^2) represents inherent randomness or unmeasured variables in the data- generating process. No algorithm can eliminate it."
+            "Irreducible noise ($\\sigma^2$) represents inherent randomness or unmeasured variables in the data-generating process. No algorithm can eliminate it."
           ]
         },
         {
           "type": "paragraph",
-          "text": "In classical machine learning, increasing model complexity pushes bias down while pushing variance up, creating a U-shaped validation error curve. Ef fective engineering aims for the trough of that curve."
+          "text": "In classical machine learning, increasing model complexity pushes bias down while pushing variance up, creating a U-shaped validation error curve. Effective engineering aims for the trough of that curve."
         }
       ]
     },
@@ -216,6 +203,13 @@ export const article03: BlogPost = {
           "text": "Rather than relying solely on crude structural limits, practitioners control variance directly through regularization, adding a penalty term to the loss function that discourages extreme parameter weights. Two penalties anchor classical modeling:"
         },
         {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            "**L2 Regularization (Ridge):** Adds the squared Euclidean norm of the weights to the loss. L2 shrinks all coefficients smoothly toward zero, stabilizing models when input features are strongly correlated (multicollinear), though it rarely sets weights to exact zero."
+          ]
+        },
+        {
           "type": "math",
           "latex": "J_{\\text{Ridge}}(\\theta) = \\mathcal{L}(\\theta) + \\lambda \\sum_{j=1}^{p} \\theta_j^2",
           "caption": "L2 (Ridge) regularized objective shrinking weights smoothly toward zero"
@@ -224,25 +218,13 @@ export const article03: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "**L2 Regularization (Ridge):** Adds the squared Euclidean norm of the weights to the loss:"
+            "**L1 Regularization (Lasso):** Adds the sum of absolute weight magnitudes. Because the L1 constraint forms a sharp diamond geometry in parameter space, optimal solutions frequently land on coordinate axes, driving irrelevant feature weights to exact zero. L1 therefore performs automatic feature selection alongside variance control. Elastic Net combines both penalties to inherit L1's sparsity and L2's stability on correlated features."
           ]
         },
         {
-          "type": "paragraph",
-          "text": "y"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            "L2 shrinks all coefficients smoothly toward zero, stabilizing models when input features are strongly correlated (multicollinear), though it rarely sets weights to exact zero.",
-            "**L1 Regularization (Lasso):** Adds the sum of absolute weight magnitudes:",
-            "Because the L1 constraint forms a sharp diamond geometry in parameter space, optimal solutions frequently land on coordinate axes, driving irrelevant feature weights to exact zero. L1 therefore performs automatic feature selection alongside variance control. Elastic Net combines both penalties to inherit L1's sparsity and L2's stability on correlated features."
-          ]
+          "type": "math",
+          "latex": "J_{\\text{Lasso}}(\\theta) = \\mathcal{L}(\\theta) + \\lambda \\sum_{j=1}^{p} |\\theta_j|",
+          "caption": "L1 (Lasso) regularized objective inducing exact parameter sparsity"
         }
       ]
     },
@@ -279,16 +261,12 @@ export const article03: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Linear models assume that the target (or, in logistic regression, the log-odds of a binary outcome) is a weighted sum of input features: ŷ = θ_0 + ∑_j=1^p θ_j x_j. Logistic regression passes that linear combination through the sigmoid function σ(z) = to produce calibrated probabilities between 0 and 1. Linear models are fast, transparent, and remarkably competitive when domain experts engineer strong interaction terms. In regulated credit underwriting, where lenders must supply legally auditable adverse- action reasons to declined applicants, regularized logistic regression remains a staple precisely because each coefficient maps directly to a monotonic effect on risk."
+          "text": "Linear models assume that the target (or, in logistic regression, the log-odds of a binary outcome) is a weighted sum of input features: $\\hat{y} = \\theta_0 + \\sum_{j=1}^{p} \\theta_j x_j$. Logistic regression passes that linear combination through the sigmoid function $\\sigma(z) = \\frac{1}{1 + e^{-z}}$ to produce calibrated probabilities between 0 and 1. Linear models are fast, transparent, and remarkably competitive when domain experts engineer strong interaction terms. In regulated credit underwriting, where lenders must supply legally auditable adverse-action reasons to declined applicants, regularized logistic regression remains a staple precisely because each coefficient maps directly to a monotonic effect on risk."
         },
         {
           "type": "math",
           "latex": "\\hat{y} = \\theta_0 + \\sum_{j=1}^{p} \\theta_j x_j \\qquad\\text{and}\\qquad \\sigma(z) = \\frac{1}{1 + e^{-z}}",
           "caption": "Linear model prediction and logistic sigmoid probability squashing function"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -325,7 +303,7 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Two open-source engineering milestones elevated gradient boosting to industrial dominance. In 2016, Tianqi Chen and Carlos Guestrin introduced XGBoost (Extreme Gradient Boosting), combining second- order Taylor approximations of the loss, explicit L1/L2 leaf-weight regularization, sparsity-aware split finding for missing values, and cache-conscious block storage capable of scaling to billions of examples [7]. A year later, Guolin Ke and Microsoft Research colleagues published LightGBM, which introduced Gradient-based One-Side Sampling (GOSS), Exclusive Feature Bundling (EFB), and leaf-wise histogram splitting—accelerating training by up to more than 20 times over conventional gradient-boosted trees on large datasets while matching accuracy [8]."
+          "text": "Two open-source engineering milestones elevated gradient boosting to industrial dominance. In 2016, Tianqi Chen and Carlos Guestrin introduced XGBoost (Extreme Gradient Boosting), combining second-order Taylor approximations of the loss, explicit L1/L2 leaf-weight regularization, sparsity-aware split finding for missing values, and cache-conscious block storage capable of scaling to billions of examples [7]. A year later, Guolin Ke and Microsoft Research colleagues published LightGBM, which introduced Gradient-based One-Side Sampling (GOSS), Exclusive Feature Bundling (EFB), and leaf-wise histogram splitting—accelerating training by up to more than 20 times over conventional gradient-boosted trees on large datasets while matching accuracy [8]."
         },
         {
           "type": "paragraph",
@@ -341,10 +319,6 @@ export const article03: BlogPost = {
         {
           "type": "paragraph",
           "text": "Introduced in their modern soft-margin form by Corinna Cortes and Vladimir Vapnik in 1995, Support Vector Machines approach classification geometrically [9]. Rather than finding just any separating"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -398,22 +372,15 @@ export const article03: BlogPost = {
             ],
             [
               "Decision Trees",
-              "Recursive axis- aligned splits maximizing impurity reduction",
+              "Recursive axis-aligned splits maximizing impurity reduction",
               "Handles mixed data types, requires no scaling, visually auditable rules",
               "High variance; easily overfits without strict pruning",
-              "Simple triage rules, exploratory feature interaction discovery ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "",
-              "Page"
+              "Simple triage rules, exploratory feature interaction discovery"
             ],
             [
               "Random Forests [6]",
               "Parallel ensemble of bagged trees with random feature subsampling",
-              "Robust out-of-the- box, resistant to overfitting, handles noisy features",
+              "Robust out-of-the-box, resistant to overfitting, handles noisy features",
               "Larger memory footprint; slower inference than single linear models",
               "Tabular baselines, bioinformatics, remote-sensing classification"
             ],
@@ -426,10 +393,10 @@ export const article03: BlogPost = {
             ],
             [
               "Support Vector Machines (SVMs) [9]",
-              "Maximum- margin hyperplane in kernel-induced feature space",
-              "Effective in high- dimensional spaces; strong generalization on medium datasets",
+              "Maximum-margin hyperplane in kernel-induced feature space",
+              "Effective in high-dimensional spaces; strong generalization on medium datasets",
               "Poor scalability to millions of rows; requires careful scaling and kernel tuning",
-              "High-dimensional genomics, small- sample classification, fault diagnostics"
+              "High-dimensional genomics, small-sample classification, fault diagnostics"
             ],
             [
               "K-Means Clustering",
@@ -466,10 +433,6 @@ export const article03: BlogPost = {
           "type": "math",
           "latex": "\\text{Precision} = \\frac{\\text{TP}}{\\text{TP} + \\text{FP}}, \\qquad \\text{Recall} = \\frac{\\text{TP}}{\\text{TP} + \\text{FN}}, \\qquad F_1 = 2 \\cdot \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}",
           "caption": "Classification precision, recall, and harmonic mean $F_1$-score"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "list",
@@ -516,14 +479,7 @@ export const article03: BlogPost = {
               "Classification",
               "Share of actual positives correctly captured",
               "High cost of missed detections (cancer screening, sepsis alerts)",
-              "Can be gamed by flagging everything as positive ARTICLES 01–10"
-            ],
-            [
-              "VIZRA",
-              "Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Can be gamed by flagging everything as positive"
             ],
             [
               "F1-Score",
@@ -542,7 +498,7 @@ export const article03: BlogPost = {
             [
               "MSE / RMSE",
               "Regression",
-              "Magnitude of squared / root- squared prediction residuals",
+              "Magnitude of squared / root-squared prediction residuals",
               "Forecasting where large misses carry disproportionate risk",
               "Dominated by a few extreme outliers"
             ]
@@ -588,10 +544,6 @@ export const article03: BlogPost = {
           "items": [
             "Fraudsters invent new card-testing tactics; consumer purchasing habits pivot abruptly during a macroeconomic shock; borrowers with identical credit histories default at different rates after an interest-rate spike. Concept drift is harder to catch because ground-truth labels often arrive weeks or months late—chargebacks in payments, for instance, can take 30 to 60 days to settle."
           ]
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -643,10 +595,6 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "over two years [16]. Analyzing 6,877 patients with sepsis identified by the alert prior to antibiotic therapy, the team found that patients whose alerts were confirmed by a clinician within three hours experienced an adjusted absolute in-hospital mortality reduction of 3.3% (an 18.7% adjusted relative reduction), alongside lower organ failure and shorter hospital stays; among high-risk flagged patients, the adjusted absolute mortality reduction reached 4.5% [16]. A companion Nature Medicine study of provider adoption across 9,805 retrospectively identified sepsis cases reported 82% sensitivity, with clinicians evaluating 89% of all alerts [17]. The lesson for ML engineers was unmistakable: statistical accuracy matters, but seamless integration into clinical workflows and alert-fatigue control determine whether predictions save lives."
         }
       ]
@@ -669,7 +617,7 @@ export const article03: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Machine learning earns its place in modern engineering for clear reasons. It extracts subtle, high- dimensional statistical interactions that human analysts cannot enumerate manually; it scales decisions to millions of transactions per second at marginal cost; and when paired with automated retraining pipelines, it adapts as patterns evolve."
+          "text": "Machine learning earns its place in modern engineering for clear reasons. It extracts subtle, high-dimensional statistical interactions that human analysts cannot enumerate manually; it scales decisions to millions of transactions per second at marginal cost; and when paired with automated retraining pipelines, it adapts as patterns evolve."
         },
         {
           "type": "paragraph",
@@ -710,17 +658,13 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "4. Interpretability Versus Predictive Power: While linear models and shallow trees offer direct human"
         },
         {
           "type": "list",
           "ordered": false,
           "items": [
-            "auditability, ensembles of hundreds of boosted trees or kernel SVMs act as opaque predictors. Post- hoc explanation tools such as SHAP (SHapley Additive exPlanations) help attribute individual predictions to input features, yet explanations are approximations that can themselves be unstable when features are correlated."
+            "auditability, ensembles of hundreds of boosted trees or kernel SVMs act as opaque predictors. Post-hoc explanation tools such as SHAP (SHapley Additive exPlanations) help attribute individual predictions to input features, yet explanations are approximations that can themselves be unstable when features are correlated."
           ]
         },
         {
@@ -761,11 +705,7 @@ export const article03: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Third, hybrid ML and LLM pipelines have become standard architecture in industry. Rather than asking expensive generative language models to score structured numerical tables directly, engineering teams use LLMs upstream to parse unstructured text—clinical notes, customer support transcripts, invoice PDFs, or product descriptions—into clean structured features or dense embeddings, which then feed low- latency classical classifiers or gradient-boosted rankers. Simultaneously, coding and experimentation agents are accelerating the ML research loop itself, as seen in production fraud teams using agent- assisted workflows to propose features, run backtests, and audit regressions faster than manual iteration allows [14]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Third, hybrid ML and LLM pipelines have become standard architecture in industry. Rather than asking expensive generative language models to score structured numerical tables directly, engineering teams use LLMs upstream to parse unstructured text—clinical notes, customer support transcripts, invoice PDFs, or product descriptions—into clean structured features or dense embeddings, which then feed low-latency classical classifiers or gradient-boosted rankers. Simultaneously, coding and experimentation agents are accelerating the ML research loop itself, as seen in production fraud teams using agent-assisted workflows to propose features, run backtests, and audit regressions faster than manual iteration allows [14]."
         }
       ]
     },
@@ -809,11 +749,11 @@ export const article03: BlogPost = {
   "faqs": [
     {
       "question": "1. What is the difference between artificial intelligence, machine learning, and deep learning?",
-      "answer": "Artificial intelligence is the broadest umbrella covering any computational system designed to perform tasks associated with intelligent behavior, including rule-based expert systems and search algorithms. Machine learning is the subset of AI in which systems learn statistical patterns from data rather than following hard-coded rules [2]. Deep learning is a specialized subset of machine learning that uses multi- layered artificial neural networks to learn hierarchical representations directly from raw unstructured data such as images, audio, and text. 2. Why do tree-based models like XGBoost and LightGBM still outperform deep learning on"
+      "answer": "Artificial intelligence is the broadest umbrella covering any computational system designed to perform tasks associated with intelligent behavior, including rule-based expert systems and search algorithms. Machine learning is the subset of AI in which systems learn statistical patterns from data rather than following hard-coded rules [2]. Deep learning is a specialized subset of machine learning that uses multi-layered artificial neural networks to learn hierarchical representations directly from raw unstructured data such as images, audio, and text. 2. Why do tree-based models like XGBoost and LightGBM still outperform deep learning on"
     },
     {
       "question": "tabular data?",
-      "answer": "Structured tables—such as financial ledgers, medical records, and customer databases—typically contain heterogeneous features, uninformative columns, and irregular, non-smooth target relationships. Benchmark research across 45 tabular datasets showed that gradient-boosted trees naturally isolate informative axis-aligned splits and ignore irrelevant columns, whereas standard neural networks struggle with non-smooth boundaries and rotational invariance assumptions [10]. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page"
+      "answer": "Structured tables—such as financial ledgers, medical records, and customer databases—typically contain heterogeneous features, uninformative columns, and irregular, non-smooth target relationships. Benchmark research across 45 tabular datasets showed that gradient-boosted trees naturally isolate informative axis-aligned splits and ignore irrelevant columns, whereas standard neural networks struggle with non-smooth boundaries and rotational invariance assumptions [10]."
     },
     {
       "question": "3. What is the difference between overfitting and underfitting?",
@@ -851,7 +791,7 @@ export const article03: BlogPost = {
       "id": 2,
       "title": "Machine Learning",
       "venue": "Tom M. Mitchell, McGraw-Hill / Carnegie Mellon University, 1997. Direct URL: https:// www.cs.cmu.edu/~tom/files/MachineLearningTomMitchell.pdf (Academic textbook)",
-      "url": ""
+      "url": "https://www.cs.cmu.edu/~tom/files/MachineLearningTomMitchell.pdf"
     },
     {
       "id": 3,
@@ -934,7 +874,7 @@ export const article03: BlogPost = {
     {
       "id": 16,
       "title": "Prospective, multi-site study of patient outcomes after implementation of the TREWS machine learning-based early warning system for sepsis",
-      "venue": "Roy Adams, Katharine E. Henry, Anirudh Sridharan, ARTICLES 01–10 VIZRA Editorial Research & Publication System Page Suchi Saria et al., Nature Medicine (Vol. 28, pp. 1455–1460), July 21, 2022",
+      "venue": "Roy Adams, Katharine E. Henry, Anirudh Sridharan, Suchi Saria et al., Nature Medicine (Vol. 28, pp. 1455–1460), July 21, 2022",
       "url": "https://pubmed.nc"
     },
     {
@@ -992,8 +932,6 @@ export const article03: BlogPost = {
     "Nearly four decades later, Carnegie Mellon computer scientist Tom Mitchell gave the field its enduring operational definition in his 1997 textbook Machine Learning: \"A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E\" [2]. That single sentence strips away anthropomorphic mystique. Machine learning is not comprehension, intuition, or consciousness. It is measurable statistical improvement on a bounded task driven by data.",
     "Consider a hospital triage system estimating a patient's probability of developing sepsis within the next six hours. Under Mitchell's framework, the Task (T) is assigning a calibrated risk score to each patient chart; the Performance measure (P) is the area under the precision-recall curve or sensitivity at a clinically tolerable false-alarm rate; and the Experience (E) consists of hundreds of thousands of historical electronic health records pairing vital-sign trajectories and lab values with confirmed sepsis diagnoses. If exposing the algorithm to more historical trajectories yields higher sensitivity without flooding nurses with false alerts, the system has learned.",
     "Within the broader field of artificial intelligence—whose historical arc is covered in The Evolution of Artificial Intelligence (Article 01) and What Is Artificial Intelligence? (Article 02)—machine learning occupies the statistical engine room. While Deep Learning (Article 04) and Neural Networks Explained (Article 05) explore multi-layered neural architectures that dominate vision and language, and Supervised, Unsupervised and Reinforcement Learning Explained (Article 07) maps the major learning paradigms, this article focuses on the underlying mathematical, statistical, and engineering mechanics that make learning from data possible in the first place.",
-    "A common misconception among newcomers is that machine learning begins when an engineer imports a modeling library and ends when a training script prints an accuracy score. In real engineering organizations, model fitting accounts for a modest fraction of total effort. Learning happens inside a tightly coupled lifecycle where upstream mistakes propagate silently into production.",
-    "The process begins with problem formulation. An engineering team must translate a messy business or scientific objective into a mathematically tractable target. \"Reduce customer churn\" is a business wish; \"predict the probability that an active subscriber cancels within 30 days of their billing date, given their prior 90 days of usage logs\" is a machine learning task. Poor formulation destroys projects before a single model trains. If a retailer trains a model to predict whether a shopper will buy a product using features recorded after the checkout page loads, the model will achieve near-perfect scores in development and fail completely in deployment—a classic form of target leakage.",
-    "Next comes data collection, splitting, and feature engineering. Raw operational records—timestamps, transaction logs, sensor streams, categorical IDs—rarely arrive in a form that algorithms can digest directly. Feature engineering transforms raw inputs into informative numerical representations: converting a raw timestamp into cyclical hour-of-day encodings, computing a rolling seven-day spend velocity for a credit card, or deriving the spectral energy of a vibration sensor. Before inspecting summary statistics or fitting scalers, disciplined teams partition the dataset into training, validation, and held-out test sets (often split chronologically rather than randomly when time order matters) so that evaluation mirrors future reality [4]."
+    "A common misconception among newcomers is that machine learning begins when an engineer imports a modeling library and ends when a training script prints an accuracy score. In real engineering organizations, model fitting accounts for a modest fraction of total effort. Learning happens inside a tightly coupled lifecycle where upstream mistakes propagate silently into production."
   ]
 };

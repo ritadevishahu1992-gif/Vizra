@@ -927,6 +927,55 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       sections: [],
     },
   },
+  ...Object.fromEntries(
+    BLOG_POSTS.map((post) => {
+      const canonicalPath = `/blog/${post.slug}`;
+      const canonicalUrl = `${SITE_ORIGIN}${canonicalPath}`;
+      const resolvedTitle = post.seoTitle || `${post.title} — Vizra Blog`;
+      const prehydrationSections: RoutePrehydrationSection[] = post.sections
+        .filter((sec) => sec.level === 2)
+        .slice(0, 10)
+        .map((sec) => {
+          const firstParagraph = sec.blocks.find((b) => b.type === 'paragraph');
+          return {
+            heading: sec.heading,
+            body:
+              firstParagraph && firstParagraph.type === 'paragraph'
+                ? firstParagraph.text
+                : post.excerpt,
+          };
+        });
+      return [
+        canonicalPath,
+        {
+          canonicalPath,
+          title: resolvedTitle,
+          description: post.description,
+          isIndexable: true,
+          robots: 'index, follow' as const,
+          ogType: 'article' as const,
+          breadcrumbLabel: post.title,
+          jsonLd: [
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BlogPosting',
+              headline: post.title,
+              description: post.description,
+              url: canonicalUrl,
+              datePublished: post.publishedAt,
+              dateModified: post.updatedAt || post.publishedAt,
+            },
+          ],
+          prehydration: {
+            eyebrow: `VIZRA BLOG · ${post.series} · ARTICLE ${String(post.number).padStart(2, '0')} OF 10`,
+            h1: post.title,
+            lead: post.excerpt,
+            sections: prehydrationSections,
+          },
+        } satisfies RouteSeoDefinition,
+      ];
+    })
+  ),
 };
 
 const NOT_FOUND_DEFINITION: Omit<RouteSeoDefinition, 'canonicalPath'> = {
@@ -974,9 +1023,7 @@ export function resolveRouteSeoPayload(
   const redirectTarget = REDIRECT_ALIASES[normalizedPath];
   const effectivePath = redirectTarget || normalizedPath;
 
-  const matchedDef = ROUTE_DEFINITIONS[effectivePath];
-
-  if (!matchedDef && effectivePath.startsWith('/blog/')) {
+  if (effectivePath.startsWith('/blog/')) {
     const slug = effectivePath.slice('/blog/'.length);
     const publishedPost = getPublishedBlogPost(slug);
     if (publishedPost) {
@@ -1123,6 +1170,8 @@ export function resolveRouteSeoPayload(
       };
     }
   }
+
+  const matchedDef = ROUTE_DEFINITIONS[effectivePath];
 
   if (!matchedDef) {
     // Unknown 404 Route — must never receive a self-referencing canonical or misleading homepage social preview

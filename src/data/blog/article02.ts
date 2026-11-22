@@ -44,10 +44,6 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "engineering. The boundary keeps retreating because human intuition defines intelligence as whatever machines cannot yet do well."
         },
         {
@@ -119,10 +115,6 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "software that merely executes hand-coded deterministic rules without deriving models or relationships from inputs."
         },
         {
@@ -131,7 +123,7 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In the United States, the National Institute of Standards and Technology (NIST) adopted a similarly technology-neutral stance in its AI Risk Management Framework (AI RMF 1.0), released in January 2023 [7]. Grounded in U.S. statutory language and aligned with the OECD framing, NIST treats AI as an engineered or machine-based system capable of generating outputs that influence real or virtual environments for human-defined objectives, emphasizing lifecycle risk management across socio- technical contexts rather than narrow algorithmic labels [7]."
+          "text": "In the United States, the National Institute of Standards and Technology (NIST) adopted a similarly technology-neutral stance in its AI Risk Management Framework (AI RMF 1.0), released in January 2023 [7]. Grounded in U.S. statutory language and aligned with the OECD framing, NIST treats AI as an engineered or machine-based system capable of generating outputs that influence real or virtual environments for human-defined objectives, emphasizing lifecycle risk management across socio-technical contexts rather than narrow algorithmic labels [7]."
         },
         {
           "type": "paragraph",
@@ -166,15 +158,9 @@ export const article02: BlogPost = {
             ],
             [
               "NIST AI RMF 1.0 (2023) [7]",
-              "Socio-technical machine-based system operating for human- defined objectives",
+              "Socio-technical machine-based system operating for human-defined objectives",
               "Lifecycle trustworthiness: validity, reliability, safety, security, fairness",
-              "Voluntary enterprise and public-sector risk management ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Voluntary enterprise and public-sector risk management"
             ],
             [
               "UNESCO Ethics Recommendation (2021) [9]",
@@ -216,15 +202,11 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Artificial General Intelligence (AGI) denotes a hypothetical system capable of matching or exceeding skilled human performance across the full breadth of cognitive tasks—including novel reasoning, cross- domain transfer, autonomous learning, and adaptation to unfamiliar environments. Because the term has attracted intense marketing hype, researchers have worked to make it measurable. In a widely cited framework, Google DeepMind researchers Meredith Ringel Morris, Jascha Sohl-Dickstein, and colleagues proposed evaluating progress along a matrix separating breadth (narrow versus general) from depth of performance (emerging, competent, expert, virtuoso, and superhuman) [10]. Under that lens, contemporary frontier language models exhibit \"emerging\" generality across text, code, and visual tasks while remaining far short of consistent, expert-level general competence across physical, strategic, and real-world domains."
+          "text": "Artificial General Intelligence (AGI) denotes a hypothetical system capable of matching or exceeding skilled human performance across the full breadth of cognitive tasks—including novel reasoning, cross-domain transfer, autonomous learning, and adaptation to unfamiliar environments. Because the term has attracted intense marketing hype, researchers have worked to make it measurable. In a widely cited framework, Google DeepMind researchers Meredith Ringel Morris, Jascha Sohl-Dickstein, and colleagues proposed evaluating progress along a matrix separating breadth (narrow versus general) from depth of performance (emerging, competent, expert, virtuoso, and superhuman) [10]. Under that lens, contemporary frontier language models exhibit \"emerging\" generality across text, code, and visual tasks while remaining far short of consistent, expert-level general competence across physical, strategic, and real-world domains."
         },
         {
           "type": "paragraph",
           "text": "Artificial Superintelligence (ASI) describes a purely theoretical threshold at which an AI system vastly outperforms the best human minds across virtually every cognitive, scientific, creative, and strategic endeavor. No empirical evidence places ASI within near-term engineering reach; it remains a subject of theoretical safety research and long-horizon scenario planning rather than an existing product category."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -239,7 +221,7 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Symbolic AI (sometimes called Good Old-Fashioned AI, or GOF AI) encodes human knowledge explicitly as symbols, ontologies, and logical rules. If a medical decision-support system checks drug interactions against a curated knowledge graph using deterministic inference rules, it is operating symbolically. Symbolic systems are transparent, auditable, and strong at formal verification, yet brittle whenever real- world inputs are noisy, ambiguous, or outside the rules engineers anticipated."
+          "text": "Symbolic AI (sometimes called Good Old-Fashioned AI, or GOF AI) encodes human knowledge explicitly as symbols, ontologies, and logical rules. If a medical decision-support system checks drug interactions against a curated knowledge graph using deterministic inference rules, it is operating symbolically. Symbolic systems are transparent, auditable, and strong at formal verification, yet brittle whenever real-world inputs are noisy, ambiguous, or outside the rules engineers anticipated."
         },
         {
           "type": "paragraph",
@@ -251,7 +233,7 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Agentic AI wraps foundation models—often paired with symbolic tools, memory stores, and external APIs —inside an iterative perception-planning-action loop. Instead of returning a single response to a prompt, an AI agent breaks a high-level goal into sub-tasks, queries databases, runs code, observes errors, revises its plan, and executes actions across digital or physical environments. Agentic systems are the closest practical realization of Russell and Norvig's rational agent model, yet their autonomy also magnifies reliability and security risks whenever an unchecked intermediate error cascades through real- world tools [12]."
+          "text": "Agentic AI wraps foundation models—often paired with symbolic tools, memory stores, and external APIs —inside an iterative perception-planning-action loop. Instead of returning a single response to a prompt, an AI agent breaks a high-level goal into sub-tasks, queries databases, runs code, observes errors, revises its plan, and executes actions across digital or physical environments. Agentic systems are the closest practical realization of Russell and Norvig's rational agent model, yet their autonomy also magnifies reliability and security risks whenever an unchecked intermediate error cascades through real-world tools [12]."
         },
         {
           "type": "table",
@@ -275,26 +257,12 @@ export const article02: BlogPost = {
               "Supervised, unsupervised, or tabular pattern learning from data",
               "High precision on structured tasks, low inference cost, mature validation",
               "Requires quality domain data; limited transfer outside trained task",
-              "Credit fraud classifiers, demand forecasting, predictive maintenance ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "",
-              "Page"
-            ],
-            [
-              "",
-              "",
-              "Primary",
-              "",
-              "Representative"
+              "Credit fraud classifiers, demand forecasting, predictive maintenance"
             ],
             [
               "Generative AI",
               "Deep probabilistic models (transformers, diffusion) synthesizing new outputs",
-              "Flexible natural- language interface, multimodal synthesis, broad adaptability",
+              "Flexible natural-language interface, multimodal synthesis, broad adaptability",
               "Confabulation, high compute cost, opaque internal representations",
               "Large language models, image/video generators, AlphaFold 3"
             ],
@@ -302,7 +270,7 @@ export const article02: BlogPost = {
               "Agentic AI",
               "Foundation models coupled with planning loops, memory, and external tools",
               "Multi-step task execution, dynamic tool use, iterative self-correction",
-              "Compounding error rates, security/prompt- injection risks, oversight gaps",
+              "Compounding error rates, security/prompt-injection risks, oversight gaps",
               "Autonomous coding agents, IT triage agents, robotic navigation stacks"
             ]
           ]
@@ -329,10 +297,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Data science does not sit neatly inside that Russian-doll hierarchy; it overlaps with it. Data science is an interdisciplinary practice dedicated to extracting actionable insight from data through statistics, experimental design, data engineering, visualization, and domain analysis. A data scientist might build a machine learning model on Tuesday and run a classical randomized A/B test or build an SQL revenue cohort dashboard on W ednesday—work that relies on statistical rigor rather than AI."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -364,14 +328,14 @@ export const article02: BlogPost = {
             ],
             [
               "Deep Learning (DL)",
-              "Learn hierarchical features via multi- layer neural networks",
+              "Learn hierarchical features via multi-layer neural networks",
               "Yes, typically at large data and compute scale",
               "Embeddings, vision detections, generated text/audio",
               "A transformer model translating spoken languages in real time"
             ],
             [
               "Data Science",
-              "Extract human- interpretable insight and causal evidence from data",
+              "Extract human-interpretable insight and causal evidence from data",
               "Uses data for analysis, not always adaptive models",
               "Statistical reports, experiments, dashboards, models",
               "An econometric analysis measuring pricing elasticity"
@@ -399,10 +363,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Beneath the surface diversity of medical imaging models, warehouse robots, and conversational assistants lies a shared functional anatomy. Whether an AI system operates in a purely digital environment or steers a physical machine, its architecture draws from six core technical building blocks."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -458,10 +418,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Learning is the mechanism by which an AI system improves its internal parameters or policies from experience rather than relying exclusively on manual programmer updates. Depending on the problem, learning occurs through supervised training on labeled examples, unsupervised or self-supervised discovery of structure in vast unlabeled corpora, or reinforcement learning from trial-and-error feedback signals (examined in detail in Supervised, Unsupervised and Reinforcement Learning Explained). Importantly, most deployed commercial models do not continuously rewrite their own weights in live production; they are trained offline, audited, frozen for deployment, and updated on controlled release cycles to prevent unpredictable drift."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -472,7 +428,7 @@ export const article02: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Finally, an AI system must translate internal decisions into external effects through actuation. In physical AI—autonomous vehicles, surgical assistants, industrial manipulators—actuation means sending torque, steering, or braking commands to electromechanical hardware under strict millisecond latency budgets. In digital environments, actuation means rendering a clinical alert on a physician's screen, executing a database query, opening a pull request in a code repository, or routing a customer refund. It is at the actuation boundary that computational errors become real-world consequences, which is why human-in- the-loop approvals, permission sandboxes, and fallback interlocks are concentrated here."
+          "text": "Finally, an AI system must translate internal decisions into external effects through actuation. In physical AI—autonomous vehicles, surgical assistants, industrial manipulators—actuation means sending torque, steering, or braking commands to electromechanical hardware under strict millisecond latency budgets. In digital environments, actuation means rendering a clinical alert on a physician's screen, executing a database query, opening a pull request in a code repository, or routing a customer refund. It is at the actuation boundary that computational errors become real-world consequences, which is why human-in-the-loop approvals, permission sandboxes, and fallback interlocks are concentrated here."
         }
       ]
     },
@@ -523,10 +479,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Even rigorous benchmarks reveal a counterintuitive pattern that Stanford HAI's 2026 AI Index highlighted starkly: modern AI capability is deeply uneven [2]. Frontier models in 2026 meet or exceed human"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -587,10 +539,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Away from imaging hardware, ambient clinical documentation tools saw rapid hospital adoption in 2025 and 2026. By transcribing and structuring patient-physician encounters into draft clinical notes, these systems helped physicians across multiple hospital networks report up to 83% less time spent on documentation and meaningful reductions in burnout [2]. Yet clinical leaders remain rightly cautious about autonomous diagnosis: a systematic review cited in the 2026 Stanford AI Index examining more than 500 clinical AI studies found that nearly half evaluated models on exam-style questions rather than real patient records, and only 5% used real clinical data [2]. Passing a medical licensing exam is not the same as safely managing a complex patient with comorbidities."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -616,7 +564,7 @@ export const article02: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Financial institutions were among the earliest industrial adopters of statistical machine learning, and their deployment remains grounded in strict latency and audit requirements. Payment processors and retail banks rely on real-time anomaly detection and graph-based classifiers to score millions of transactions per second for fraud while minimizing false declines that frustrate legitimate cardholders. In institutional finance, quantitative models assist with liquidity forecasting, portfolio risk stress-testing, and anti-money- laundering (AML) alert triage."
+          "text": "Financial institutions were among the earliest industrial adopters of statistical machine learning, and their deployment remains grounded in strict latency and audit requirements. Payment processors and retail banks rely on real-time anomaly detection and graph-based classifiers to score millions of transactions per second for fraud while minimizing false declines that frustrate legitimate cardholders. In institutional finance, quantitative models assist with liquidity forecasting, portfolio risk stress-testing, and anti-money-laundering (AML) alert triage."
         },
         {
           "type": "paragraph",
@@ -632,10 +580,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "On factory floors and public roads, AI meets the unforgiving physics of the real world. In discrete and process manufacturing, computer vision cameras inspect circuit boards, welds, and pharmaceutical packaging at line speeds no human inspector could sustain, while time-series sensors feed predictive maintenance models that detect bearing wear or thermal anomalies days before an unplanned shutdown. According to the International Energy Agency (IEA), proven AI applications in energy-intensive industrial sectors can cut firms' energy costs by 3 to 10 percentage points through process optimization and scheduling [21]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -674,10 +618,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Public sentiment reflects that dual reality. Global survey data in the 2026 AI Index shows optimism rising to 59% of respondents seeing more benefits than drawbacks, yet nervousness simultaneously edged up"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -737,10 +677,6 @@ export const article02: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "jumped 17% in 2025 (following roughly 415 terawatt-hours, or 1.5% of global electricity, in 2024)—far outpacing the 3% growth in overall global electricity demand [21] [30]. Even though energy consumption per individual AI query is falling rapidly through hardware and algorithmic efficiency gains, surging adoption and compute-intensive agentic workloads are driving a classic rebound effect: the IEA projects global data center power demand will roughly double by 2030 to around 950 TWh (about 3% of global electricity), while electricity use by AI-focused data centers is poised to triple [21] [31]."
         },
         {
@@ -776,10 +712,6 @@ export const article02: BlogPost = {
           "text": "In contrast, the United States has relied primarily on sectoral enforcement (such as FDA medical device clearance and financial fair-lending statutes) paired with voluntary technical standards like NIST's AI RMF 1.0, its Generative AI Profile (NIST AI 600-1), and its April 2026 concept note for an AI RMF Profile on Trustworthy AI in Critical Infrastructure [7] [32]. Internationally, UNESCO's Recommendation and the OECD AI Principles continue to serve as diplomatic bridges across regions with very different industrial priorities."
         },
         {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
           "type": "table",
           "headers": [
             "Risk Domain",
@@ -808,7 +740,7 @@ export const article02: BlogPost = {
             ],
             [
               "Energy & Water Footprint",
-              "Hyperscale training clusters and high- volume agentic inference",
+              "Hyperscale training clusters and high-volume agentic inference",
               "Data center power up 17% in 2025; projected to double to ~950 TWh by 2030 [21]",
               "Model quantization/distillation, flexible grid integration, clean firm power (SMRs, geothermal) [21]"
             ],
@@ -838,10 +770,6 @@ export const article02: BlogPost = {
         {
           "type": "paragraph",
           "text": "Second, the geopolitical performance gap has narrowed dramatically. For years, U.S. laboratories held a commanding lead on frontier benchmarks. Following open-weight and reasoning releases from Chinese labs—most notably DeepSeek-R1 briefly matching the top U.S. model in February 2025—U.S. and Chinese models traded top leaderboard positions repeatedly, with the top U.S. model leading by just 2.7% as of March 2026 [2]. The U.S. still leads in total private investment (\\$285.9 billion versus China's \\$12.4 billion in 2025, excluding state guidance funds) and top-tier model count (59 notable models released in 2025 versus China's 35 and South Korea's 8), while China leads in research publication volume, citations, patent output, and industrial robot installations [2] [33]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -879,7 +807,7 @@ export const article02: BlogPost = {
           "items": [
             "**Hybrid neuro-symbolic and verified workflows:** Rather than relying on monolithic neural networks to do everything, production systems will increasingly pair foundation models with formal verifiers, deterministic code interpreters, and structured databases to suppress confabulation in regulated industries.",
             "**Domain-specialized small models at the edge:** Aggressive quantization, distillation, and hardware co-design will continue pushing capable language and vision models onto smartphones, laptops, vehicles, and factory controllers—reducing inference latency, energy per task, and cloud dependency.",
-            "**Standardized third-party evaluation:** As the EU AI Act's high-risk deadlines approach in December 2027 and national safety institutes mature, independent pre-deployment auditing and continuous post- market monitoring will become routine compliance steps rather than voluntary press releases [6].",
+            "**Standardized third-party evaluation:** As the EU AI Act's high-risk deadlines approach in December 2027 and national safety institutes mature, independent pre-deployment auditing and continuous post-market monitoring will become routine compliance steps rather than voluntary press releases [6].",
             "**Energy-compute co-design:** Data center developers will increasingly pair AI clusters with onsite battery storage, flexible load-shedding contracts, and long-term clean firm power commitments to navigate grid bottlenecks [21]."
           ]
         }
@@ -901,10 +829,6 @@ export const article02: BlogPost = {
             "**Whether current scaling paradigms yield AGI:** Some researchers argue that combining multimodal pre-training, reinforcement learning, and test-time reasoning will steadily bridge remaining gaps in planning, causal world modeling, and physical dexterity. Others contend that autoregressive statistical models lack fundamental mechanisms for grounded causal reasoning and continual learning, meaning genuine AGI may require architectural breakthroughs not yet invented.",
             "**Long-run labor equilibrium:** While early entry-level compression in software and customer support is already measurable [2], economists remain divided on whether AI will ultimately resemble past"
           ]
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "list",
@@ -934,7 +858,7 @@ export const article02: BlogPost = {
   "faqs": [
     {
       "question": "What is the simplest accurate definition of artificial intelligence?",
-      "answer": "According to the updated OECD and EU AI Act definitions, an artificial intelligence system is a machine- based system that infers from input data how to generate outputs—such as predictions, content, recommendations, or decisions—that can influence physical or virtual environments [1] [5]. Unlike conventional software that follows rigid, programmer-written rules, AI derives patterns or actions dynamically from inputs."
+      "answer": "According to the updated OECD and EU AI Act definitions, an artificial intelligence system is a machine-based system that infers from input data how to generate outputs—such as predictions, content, recommendations, or decisions—that can influence physical or virtual environments [1] [5]. Unlike conventional software that follows rigid, programmer-written rules, AI derives patterns or actions dynamically from inputs."
     },
     {
       "question": "How is artificial intelligence different from machine learning and deep learning?",
@@ -946,7 +870,7 @@ export const article02: BlogPost = {
     },
     {
       "question": "What is the difference between generative AI and agentic AI?",
-      "answer": "Generative AI produces new outputs—such as text, images, code, or molecular structures—in response to a prompt. Agentic AI embeds generative or predictive models inside an iterative loop equipped with ARTICLES 01–10 VIZRA Editorial Research & Publication System Page planning, memory, and external software or physical tools, allowing the system to break down goals, take multi-step actions, observe results, and adjust its plan with varying degrees of autonomy."
+      "answer": "Generative AI produces new outputs—such as text, images, code, or molecular structures—in response to a prompt. Agentic AI embeds generative or predictive models inside an iterative loop equipped with planning, memory, and external software or physical tools, allowing the system to break down goals, take multi-step actions, observe results, and adjust its plan with varying degrees of autonomy."
     },
     {
       "question": "Why do AI systems \"hallucinate\" or confabulate false information?",
@@ -1188,9 +1112,7 @@ export const article02: BlogPost = {
     "engineering. The boundary keeps retreating because human intuition defines intelligence as whatever machines cannot yet do well.",
     "A second obstacle is that intelligence itself is not a single scalar quantity. Biological intelligence bundles perception, memory, motor control, social reasoning, and long-horizon planning into one organism. Engineered systems decouple those faculties. A model can win a gold-medal score on competition mathematics while failing to read an analog clock reliably or fold a shirt [2]. Defining AI strictly by human likeness therefore leads to endless confusion.",
     "In computer science education, the most durable conceptual anchor comes from Stuart Russell and Peter Norvig's canonical textbook Artificial Intelligence: A Modern Approach [3]. Rather than forcing a single philosophical definition, Russell and Norvig organize the field along two axes—thought versus behavior, and human fidelity versus ideal rationality—yielding four distinct traditions:",
-    "3. Thinking rationally codifies valid inference through formal logic and probability theory. 4. Acting rationally builds rational agents: systems that perceive their environment through sensors,",
-    "Russell and Norvig adopt the rational agent approach as the unifying framework of modern AI because it is both mathematically tractable and general enough to cover symbolic planners, reinforcement-learning controllers, and language models alike. Crucially, in the fourth edition of their text, they added a vital qualification under the heading of \"beneficial machines\": defining intelligence strictly as maximizing a fixed, pre-specified objective breaks down when human designers cannot specify every nuance of what they actually want [3]. A rational agent that optimizes a flawed proxy metric can behave with impeccable mathematical logic while producing harmful outcomes.",
-    "As AI moved from academic laboratories into hospitals, banks, and public agencies, governments needed definitions sharp enough to write into law and technical standards without becoming obsolete every time a new model architecture appeared. Between 2021 and 2024, four major international frameworks converged on remarkably compatible language.",
-    "In November 2023, member countries of the Organisation for Economic Co-operation and Development (OECD) updated their landmark 2019 definition, publishing an explanatory memorandum in March 2024 [1]. The OECD defines an AI system as a machine-based system that, for explicit or implicit objectives, infers from the input it receives how to generate outputs—such as predictions, content, recommendations, or decisions—that can influence physical or virtual environments, noting that systems vary in autonomy and adaptiveness after deployment [4]. The word infers is the linchpin: it distinguishes AI from traditional"
+    "1. Thinking humanly models internal cognitive processes, overlapping heavily with cognitive science",
+    "2. Acting humanly focuses on externally indistinguishable human behavior, famously associated with"
   ]
 };

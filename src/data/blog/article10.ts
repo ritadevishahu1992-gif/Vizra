@@ -70,10 +70,6 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "cut memory bandwidth without visibly degrading structural edges. Scientific and medical cameras push in the opposite direction, abandoning 8-bit integers for 12-bit or 16-bit grayscale intensities—as in DICOM radiographs and CT slices—or capturing dozens of narrow spectral bands beyond human sight in multispectral and hyperspectral satellite imagery."
         },
         {
@@ -120,21 +116,14 @@ export const article10: BlogPost = {
               "Sparse 3D point cloud (N × 4: x, y, z, I)",
               "Pulsed laser time- of-flight",
               "High-precision 3D geometry in darkness; robust to lighting shifts",
-              "Sparse at long distances; lacks fine texture/color; higher hardware cost ARTICLES 01–10"
-            ],
-            [
-              "VIZRA",
-              "Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Sparse at long distances; lacks fine texture/color; higher hardware cost"
             ],
             [
               "Event Camera",
               "Asynchronous stream (x, y, t, p)",
               "Per-pixel brightness changes",
               "Microsecond latency, extreme dynamic range, zero motion blur",
-              "Little signal on static scenes; requires specialized event- based algorithms"
+              "Little signal on static scenes; requires specialized event-based algorithms"
             ]
           ]
         },
@@ -161,7 +150,7 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Two decades later, neuroscientist and vision theorist David Marr gave the field a lasting conceptual architecture in his posthumously published 1982 monograph Vision: A Computational Investigation into the Human Representation and Processing of Visual Information [2]. Marr proposed that visual processing unfolds across three distinct representational stages. First, the primal sketch extracts low-level two- dimensional primitives—edges, intensity zero-crossings, blobs, and contours—directly from the image. Second, the 2.5D sketch integrates shading, texture gradients, motion, and binocular disparity to estimate local surface orientation and depth relative to the viewer. Third, the 3D model representation organizes those surfaces into object-centered volumetric shapes independent of camera viewpoint. Marr's insistence on separating what a visual system computes from how an algorithm implements it shaped decades of research in both biological and machine vision."
+          "text": "Two decades later, neuroscientist and vision theorist David Marr gave the field a lasting conceptual architecture in his posthumously published 1982 monograph Vision: A Computational Investigation into the Human Representation and Processing of Visual Information [2]. Marr proposed that visual processing unfolds across three distinct representational stages. First, the primal sketch extracts low-level two-dimensional primitives—edges, intensity zero-crossings, blobs, and contours—directly from the image. Second, the 2.5D sketch integrates shading, texture gradients, motion, and binocular disparity to estimate local surface orientation and depth relative to the viewer. Third, the 3D model representation organizes those surfaces into object-centered volumetric shapes independent of camera viewpoint. Marr's insistence on separating what a visual system computes from how an algorithm implements it shaped decades of research in both biological and machine vision."
         }
       ]
     },
@@ -177,10 +166,6 @@ export const article10: BlogPost = {
         {
           "type": "paragraph",
           "text": "A parallel thread explored whether visual features could be learned directly from data rather than engineered by hand. In 1998, Yann LeCun, Léon Bottou, Yoshua Bengio, and Patrick Haffner introduced LeNet-5, a convolutional neural network trained end-to-end with backpropagation to recognize handwritten"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -219,19 +204,8 @@ export const article10: BlogPost = {
           "caption": "Multi-channel 2D spatial cross-correlation/convolution operator in CNNs"
         },
         {
-          "type": "list",
-          "ordered": false,
-          "items": [
-            "S(i, j, o) = b_o + ∑_c=1^C^in ∑_m=0^k^h^- 1 ∑_n=0^k^w^- 1 I(i · s + m, j · s + n, c) · K(m, n, c, o)"
-          ]
-        },
-        {
           "type": "paragraph",
           "text": "Here s is the stride (step size of the sliding window) and b_o is a learnable bias term. Sliding the same small kernel across the entire spatial grid encodes two powerful inductive biases: locality (nearby pixels"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -271,10 +245,6 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "oriented bounding boxes (x, y, w, h) plus a confidence score. Image segmentation pushes localization down to individual pixels and splits into three flavors: semantic segmentation labels every pixel by category (e.g., all pixels belonging to \"car\" share one class ID), instance segmentation separates individual countable objects (\"car 1\" versus \"car 2\"), and panoptic segmentation unifies both, assigning every pixel either an amorphous background \"stuf f\" label (sky, road) or a distinct countable \"thing\" instance."
         },
         {
@@ -296,7 +266,7 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "An IoU of $1.0$ denotes perfect alignment; a detection is typically counted as a true positive only if its IoU exceeds a chosen threshold \\$\tau\\$ (commonly $0.50$ or $0.75$). By sweeping the model's confidence threshold from $1.0$ down to $0$, evaluators trace a Precision–Recall curve $p(r)$ for each object class $c$ and integrate its area to obtain Average Precision ($\\text{AP}_c$). Averaging across all $N$ object classes yields mean Average Precision (mAP):"
+          "text": "An IoU of $1.0$ denotes perfect alignment; a detection is typically counted as a true positive only if its IoU exceeds a chosen threshold $\\tau$ (commonly $0.50$ or $0.75$). By sweeping the model's confidence threshold from $1.0$ down to $0$, evaluators trace a Precision–Recall curve $p(r)$ for each object class $c$ and integrate its area to obtain Average Precision ($\\text{AP}_c$). Averaging across all $N$ object classes yields mean Average Precision (mAP):"
         },
         {
           "type": "math",
@@ -305,7 +275,7 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Modern benchmarks such as COCO report mAP_@[0.50:0.95], averaging mAP across ten IoU thresholds from $0.50$ to $0.95$ in steps of $0.05$ to reward tight spatial precision rather than sloppy boxes."
+          "text": "Modern benchmarks such as COCO report $\\text{mAP}_{@[0.50:0.95]}$, averaging mAP across ten IoU thresholds from $0.50$ to $0.95$ in steps of $0.05$ to reward tight spatial precision rather than sloppy boxes."
         },
         {
           "type": "table",
@@ -320,24 +290,12 @@ export const article10: BlogPost = {
               "Image Classification",
               "Class label(s) & probabilities",
               "Top-1 / Top-5 Accuracy, AUC-ROC, F1",
-              "Content moderation, medical triage, species identification ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
-            ],
-            [
-              "",
-              "Output",
-              "Primary Evaluation",
-              "Representative"
+              "Content moderation, medical triage, species identification"
             ],
             [
               "Object Detection",
               "Bounding boxes + class + score",
-              "mAP (e.g., mAP_@[0.50:0.95]), FPS / latency",
+              "mAP (e.g., $\\text{mAP}_{@[0.50:0.95]}$), FPS / latency",
               "Autonomous driving perception, retail checkout, security"
             ],
             [
@@ -355,12 +313,12 @@ export const article10: BlogPost = {
             [
               "Optical Flow",
               "Per-pixel 2D velocity vectors",
-              "End-Point Error (EPE), Fl- all",
+              "End-Point Error (EPE), Fl-all",
               "Video frame interpolation, action recognition, drone stabilization"
             ],
             [
               "Depth Estimation & SLAM",
-              "Dense depth map + 6- DoF camera trajectory",
+              "Dense depth map + 6-DoF camera trajectory",
               "AbsRel, RMSE, Absolute Trajectory Error (ATE)",
               "Warehouse robotics, AR headset tracking, autonomous navigation"
             ],
@@ -387,7 +345,7 @@ export const article10: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "For nearly a decade after AlexNet, convolutional networks dominated computer vision. That hegemony cracked in October 2020, when Alexey Dosovitskiy and colleagues at Google Research published An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale [20]. Rather than convolving local kernels across a grid, the Vision Transformer (ViT) slices an input image into a sequence of non- overlapping $16 \\times 16$ pixel patches, flattens and linearly projects each patch into a vector embedding, attaches positional encodings, and passes the sequence through a standard Transformer encoder built on global multi-head self-attention [20]."
+          "text": "For nearly a decade after AlexNet, convolutional networks dominated computer vision. That hegemony cracked in October 2020, when Alexey Dosovitskiy and colleagues at Google Research published An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale [20]. Rather than convolving local kernels across a grid, the Vision Transformer (ViT) slices an input image into a sequence of non-overlapping $16 \\times 16$ pixel patches, flattens and linearly projects each patch into a vector embedding, attaches positional encodings, and passes the sequence through a standard Transformer encoder built on global multi-head self-attention [20]."
         },
         {
           "type": "paragraph",
@@ -395,15 +353,11 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Just four months later, in February 2021, Alec Radford and colleagues at OpenAI demonstrated how to free vision models from rigid, pre-defined label taxonomies altogether. CLIP (Contrastive Language-Image Pre-training) trained an image encoder and a text encoder jointly on 400 million web-sourced image-text pairs [21]. Using a contrastive objective, CLIP pulled matching image and caption embeddings together in a shared vector space while pushing mismatched pairs apart. Once trained, CLIP could perform zero-shot classification on virtually any visual concept simply by comparing an image's embedding against text prompts such as \"a photo of a cracked solar panel\"—bridging computer vision and natural language processing into a single semantic geometry [21]. (For the language side of this convergence, see Natural Language Processing: How Machines Understand Human Language.)"
         },
         {
           "type": "paragraph",
-          "text": "Yet text captions are notoriously sparse: a photograph of a kitchen counter contains dozens of spatial relationships, textures, and lighting cues that no caption bothers to mention. Self-supervised visual learning addressed that gap by training vision backbones directly on raw pixels without human labels or text. In April 2023, Maxime Oquab and colleagues at Meta AI released DINOv2, showing that self- distillation across a curated corpus of 142 million images produces general-purpose visual features strong enough to power depth estimation, fine-grained retrieval, and dense semantic segmentation with frozen backbones and lightweight linear heads [23]."
+          "text": "Yet text captions are notoriously sparse: a photograph of a kitchen counter contains dozens of spatial relationships, textures, and lighting cues that no caption bothers to mention. Self-supervised visual learning addressed that gap by training vision backbones directly on raw pixels without human labels or text. In April 2023, Maxime Oquab and colleagues at Meta AI released DINOv2, showing that self-distillation across a curated corpus of 142 million images produces general-purpose visual features strong enough to power depth estimation, fine-grained retrieval, and dense semantic segmentation with frozen backbones and lightweight linear heads [23]."
         }
       ]
     },
@@ -429,11 +383,7 @@ export const article10: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "While 2D foundation models conquered semantic recognition, a parallel revolution reshaped 3D scene reconstruction. In 2020, Ben Mildenhall and colleagues introduced Neural Radiance Fields (NeRFs), representing a continuous 3D scene inside the weights of a multilayer perceptron that maps any 3D coordinate (x, y, z) and viewing direction (θ, φ) to volume density and view-dependent color [19]. By marching rays through this neural volume and optimizing against multi-view photographs, NeRFs synthesized photorealistic novel views—complete with reflections and thin geometry—from sparse input cameras [19]. Their chief drawback was rendering speed: querying a neural network hundreds of times per pixel made interactive frame rates difficult."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "While 2D foundation models conquered semantic recognition, a parallel revolution reshaped 3D scene reconstruction. In 2020, Ben Mildenhall and colleagues introduced Neural Radiance Fields (NeRFs), representing a continuous 3D scene inside the weights of a multilayer perceptron that maps any 3D coordinate $(x, y, z)$ and viewing direction $(\\theta, \\phi)$ to volume density and view-dependent color [19]. By marching rays through this neural volume and optimizing against multi-view photographs, NeRFs synthesized photorealistic novel views—complete with reflections and thin geometry—from sparse input cameras [19]. Their chief drawback was rendering speed: querying a neural network hundreds of times per pixel made interactive frame rates difficult."
         },
         {
           "type": "paragraph",
@@ -472,14 +422,14 @@ export const article10: BlogPost = {
             ],
             [
               "3D Radiance Fields & Splatting",
-              "Differentiable volumetric ray- marching or Gaussian rasterization",
-              "Photorealistic novel- view synthesis and continuous 3D geometry",
+              "Differentiable volumetric ray-marching or Gaussian rasterization",
+              "Photorealistic novel-view synthesis and continuous 3D geometry",
               "High memory footprint for large scenes; dynamic motion remains complex",
               "NeRF [19], 3D Gaussian Splatting [24]"
             ],
             [
               "Video & World Models",
-              "Spatiotemporal latent prediction or diffusion over action- conditioned video",
+              "Spatiotemporal latent prediction or diffusion over action-conditioned video",
               "Learns physical dynamics, object permanence, and counterfactual rollouts",
               "Compute-intensive; still prone to physical hallucinations on rare events",
               "V-JEPA 2 [26], NVIDIA Cosmos 3 [28]"
@@ -499,15 +449,11 @@ export const article10: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Medical Radiology and Digital Pathology. Healthcare is the most tightly regulated proving ground for machine perception, and imaging dominates clinical AI adoption. According to the U.S. Food and Drug Administration's List of Artificial Intelligence-Enabled Medical Devices and a March 2026 analysis by The Imaging W ire, the FDA had authorized 1,451 AI-enabled medical devices authorized through the end of 2025 (a cumulative total that reached 1,614 by mid-2026 [29]) through the end of 2025, of which 1,104—or 76%—were radiology devices [29] [30]. In 2025 alone, radiology accounted for 75% of all AI medical device clearances [30]. Clinical evidence underpins that momentum: in a landmark 2020 Nature study across UK and US mammography cohorts, Scott Mayer McKinney and colleagues demonstrated an AI breast-cancer screening system that reduced false positives by an absolute 5.7% in the US and 1.2% in the UK, while cutting false negatives by 9.4% in the US and 2.7% in the UK [18]. In a simulated UK double-reading workflow, the model maintained non-inferior diagnostic accuracy while reducing the second radiologist's workload by 88% [18]. Beyond mammography, vision pipelines triage intracranial hemorrhages on head CT s within minutes, segment cardiac ventricles on MRI, and scan gigapixel whole-slide pathology biopsies for micro-metastases."
         },
         {
           "type": "paragraph",
-          "text": "Autonomous Vehicles and Advanced Driver Assistance. Self-driving stacks illustrate the hardest real- time perception problem in engineering: converting multi-sensor streams into a unified 3D occupancy and trajectory map at 10 to 30 Hz with safety-critical reliability. Industry architectures remain split along a philosophical fault line. Camera-first approaches project surround-view RGB streams into a shared bird's- eye-view (BEV) feature grid using learned cross-attention, betting on low sensor cost and massive fleet video scale. Multi-modal sensor-fusion stacks—favored by commercial robotaxi operators—fuse surround cameras with spinning LiDAR and 4D imaging radar so that geometric measurements directly verify visual detections in heavy rain, low sun glare, or nighttime occlusion. Regardless of hardware philosophy, modern vehicle stacks increasingly replace hand-engineered post-processing rules with end-to-end neural planners conditioned on 3D occupancy networks."
+          "text": "Autonomous Vehicles and Advanced Driver Assistance. Self-driving stacks illustrate the hardest real-time perception problem in engineering: converting multi-sensor streams into a unified 3D occupancy and trajectory map at 10 to 30 Hz with safety-critical reliability. Industry architectures remain split along a philosophical fault line. Camera-first approaches project surround-view RGB streams into a shared bird's-eye-view (BEV) feature grid using learned cross-attention, betting on low sensor cost and massive fleet video scale. Multi-modal sensor-fusion stacks—favored by commercial robotaxi operators—fuse surround cameras with spinning LiDAR and 4D imaging radar so that geometric measurements directly verify visual detections in heavy rain, low sun glare, or nighttime occlusion. Regardless of hardware philosophy, modern vehicle stacks increasingly replace hand-engineered post-processing rules with end-to-end neural planners conditioned on 3D occupancy networks."
         },
         {
           "type": "paragraph",
@@ -520,10 +466,6 @@ export const article10: BlogPost = {
         {
           "type": "paragraph",
           "text": "Satellite and Earth Observation. Constellations of optical and synthetic-aperture radar (SAR) satellites image the entire landmass of Earth every few days. Foundation models fine-tuned on multi-spectral orbital imagery now map deforestation fronts in the Amazon, monitor methane plumes and wildfire perimeters, measure global shipping inventory in ports, and assess roof-by-roof hurricane or earthquake damage within hours of cloud clearance. Here, self-supervised models like DINOv3 excel because they extract"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -569,10 +511,6 @@ export const article10: BlogPost = {
         {
           "type": "paragraph",
           "text": "In December 2019, the U.S. National Institute of Standards and Technology (NIST) corroborated demographic differentials at massive scale in Face Recognition Vendor Test (FR VT) Part 3: Demographic Effects (NISTIR 8280) [17]. Evaluating 189 algorithms from 99 developers across 18.27 million images, NIST found that for one-to-one verification, false positive rates were higher for Asian and African American faces than for Caucasian faces—often by factors of 10 to over 100 times depending on the algorithm— while one-to-many identification showed elevated false positives for African American women [17]. Crucially, NIST also observed that demographic gaps varied dramatically across vendors, with the highest-accuracy algorithms exhibiting far smaller differentials, proving that architecture, data curation, and rigorous auditing materially change real-world equity."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -634,10 +572,6 @@ export const article10: BlogPost = {
           "items": [
             "perception pipelines began converging into unified physical world models. In June 2026, NVIDIA Research published Cosmos 3, an omnimodal world foundation model platform designed to unify visual perception, video generation, and physics-aware simulation for training and validating autonomous vehicles and humanoid robots [28]. Alongside these cloud-scale systems, quantized open-weight Vision-Language Models and open-vocabulary segmentation pipelines (including SAM 3 research extensions for text-grounded remote sensing and editing) have pushed sophisticated multimodal scene understanding directly onto edge GPUs and mobile NPUs."
           ]
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -680,10 +614,6 @@ export const article10: BlogPost = {
         {
           "type": "paragraph",
           "text": "The most important lesson of that trajectory is that seeing is never merely labeling. Recognizing a tumor on a mammogram, tracking a cyclist through rain, or guiding a robotic gripper onto an unfamiliar mug requires intertwining raw pixel statistics with 3D geometry, temporal continuity, and domain-grounded verification. Modern vision models are extraordinarily capable, yet their susceptibility to physical adversarial patches, distribution shift, and demographic bias proves that high benchmark accuracy never substitutes for rigorous real-world testing and clear legal guardrails. As computer vision merges with language reasoning and physical world models, its ultimate test will be whether machines can move from recognizing what appears in a frame to reliably understanding how the physical world actually works."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     }
@@ -695,7 +625,7 @@ export const article10: BlogPost = {
     },
     {
       "question": "How does a computer actually \"see\" a digital photograph?",
-      "answer": "A computer does not perceive shapes or objects directly; it reads a numerical array (tensor) storing light intensity values at every pixel coordinate. A standard 8-bit RGB image is an H × W × 3 grid of integers ARTICLES 01–10 VIZRA Editorial Research & Publication System Page from 0 to 255. Vision algorithms detect mathematical patterns across those numbers—such as brightness gradients, textures, and spatial relationships—and map them to learned representations of objects, scenes, or 3D geometry."
+      "answer": "A computer does not perceive shapes or objects directly; it reads a numerical array (tensor) storing light intensity values at every pixel coordinate. A standard 8-bit RGB image is an H × W × 3 grid of integers from 0 to 255. Vision algorithms detect mathematical patterns across those numbers—such as brightness gradients, textures, and spatial relationships—and map them to learned representations of objects, scenes, or 3D geometry."
     },
     {
       "question": "Are Vision Transformers completely replacing Convolutional Neural Networks (CNNs)?",
@@ -715,11 +645,11 @@ export const article10: BlogPost = {
     },
     {
       "question": "How is computer vision used in healthcare today?",
-      "answer": "Radiology is the largest clinical application of AI, accounting for roughly three-quarters of all FDA- authorized AI-enabled medical devices through 2025. Vision systems assist clinicians by triaging urgent CT scans for strokes or hemorrhages, flagging suspicious lesions on mammograms and chest X-rays, segmenting organs for radiation therapy planning, and analyzing digital pathology slides for cancerous cells—typically operating as decision-support tools alongside human specialists."
+      "answer": "Radiology is the largest clinical application of AI, accounting for roughly three-quarters of all FDA-authorized AI-enabled medical devices through 2025. Vision systems assist clinicians by triaging urgent CT scans for strokes or hemorrhages, flagging suspicious lesions on mammograms and chest X-rays, segmenting organs for radiation therapy planning, and analyzing digital pathology slides for cancerous cells—typically operating as decision-support tools alongside human specialists."
     },
     {
       "question": "What laws regulate facial recognition and computer vision surveillance?",
-      "answer": "Regulation varies by jurisdiction, but the European Union AI Act sets the strictest comprehensive framework: since February 2025, Article 5 bans untargeted facial image scraping from the internet or CCTV, bans workplace and school emotion recognition, and prohibits real-time remote biometric identification in public spaces for law enforcement except under narrow, judicially approved exceptions. In ARTICLES 01–10 VIZRA Editorial Research & Publication System Page the United States, state laws such as Illinois's BIP A govern private biometric collection and consent, alongside local municipal restrictions on police use."
+      "answer": "Regulation varies by jurisdiction, but the European Union AI Act sets the strictest comprehensive framework: since February 2025, Article 5 bans untargeted facial image scraping from the internet or CCTV, bans workplace and school emotion recognition, and prohibits real-time remote biometric identification in public spaces for law enforcement except under narrow, judicially approved exceptions. In the United States, state laws such as Illinois's BIP A govern private biometric collection and consent, alongside local municipal restrictions on police use."
     }
   ],
   "sources": [
@@ -934,8 +864,6 @@ export const article10: BlogPost = {
     "Understanding how modern vision systems work—and why they occasionally fail in ways no human ever would—starts at the sensor itself, before a single neural weight is multiplied.",
     "A camera does not capture objects; it samples electromagnetic radiation. When photons pass through a lens onto a CMOS or CCD sensor, each photosite accumulates an electrical charge proportional to light intensity during the exposure window. An analog-to-digital converter quantizes that voltage into discrete integers. In a standard 8-bit color photograph, every pixel holds three integers between 0 and 255 representing red, green, and blue intensity. Mathematically, a single RGB image is a third-order tensor of shape H × W × C, where H is height in pixels, W is width, and C = 3 is the number of color channels. A modest 1080p frame ($1920 \\times 1080 \\times 3$) contains 6,220,800 individual numbers.",
     "Color representation is not fixed to RGB. Broadcast television, video codecs, and many embedded vision pipelines use YUV or YCbCr color spaces, which separate luminance (Y, brightness) from chrominance (U and V, color difference). Because human vision is far more sensitive to luminance detail than to fine chromatic variation, engineers routinely subsample the chroma channels (such as 4:2:0 subsampling) to",
-    "cut memory bandwidth without visibly degrading structural edges. Scientific and medical cameras push in the opposite direction, abandoning 8-bit integers for 12-bit or 16-bit grayscale intensities—as in DICOM radiographs and CT slices—or capturing dozens of narrow spectral bands beyond human sight in multispectral and hyperspectral satellite imagery.",
-    "Video adds a fourth dimension: time. A video clip becomes a four-dimensional tensor of shape T × H × W × C, where T indexes sequential frames sampled at a fixed frame rate (commonly 24, 30, or 60 frames per second, or hundreds offrames per second in high-speed industrial inspection). That extra axis multiplies computational cost dramatically. A ten-second 1080p clip at 30 frames per second contains 300 frames and more than 1.86 billion raw channel values, forcing vision models to exploit temporal redundancy rather than treating every frame as an isolated still photograph.",
-    "Standard RGB cameras remain blind to direct distance, which is why robotics, mapping, and autonomous driving pair or replace them with alternative visual modalities. Stereo cameras triangulate depth from the horizontal disparity between two offset lenses, producing a dense depth map (H × W × 1) where each pixel encodes metric distance from the camera plane. Structured-light and time-of-flight (T oF) sensors project known infrared patterns or measure photon round-trip travel time to achieve similar RGB-D representations. LiDAR (Light Detection and Ranging) emits pulsed laser beams across a 360-degree sweep, returning sparse, irregular three-dimensional point clouds—unordered sets of (x, y, z, intensity) coordinates accurate to centimeters even in total darkness. At the frontier of high-speed sensing, neuromorphic event cameras abandon fixed frame rates altogether: each pixel operates asynchronously, firing a timestamped polarity event only when local log-intensity changes beyond a threshold. This yields microsecond temporal resolution with virtually no motion blur and minimal power consumption."
+    "cut memory bandwidth without visibly degrading structural edges. Scientific and medical cameras push in the opposite direction, abandoning 8-bit integers for 12-bit or 16-bit grayscale intensities—as in DICOM radiographs and CT slices—or capturing dozens of narrow spectral bands beyond human sight in multispectral and hyperspectral satellite imagery."
   ]
 };

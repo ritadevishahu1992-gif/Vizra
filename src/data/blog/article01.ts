@@ -46,15 +46,11 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "That arc—from deterministic rules to probabilistic learning, from narrow deep classifiers to general- purpose generative and reasoning systems—is not a smooth upward line of incremental upgrades. It is a sequence of distinct paradigms, each built to overcome the hard ceiling of the one before it. Symbolic programs proved mathematical theorems and configured enterprise hardware, yet collapsed under the weight of real-world ambiguity. Statistical machine learning conquered noisy structured data, yet stalled whenever engineers could not manually define the right features for images or speech. Deep learning automated feature extraction through layered neural networks, yet required task-specific datasets until the Transformer architecture and neural scaling laws turned raw internet-scale corpora into broadly adaptable foundation models."
+          "text": "That arc—from deterministic rules to probabilistic learning, from narrow deep classifiers to general-purpose generative and reasoning systems—is not a smooth upward line of incremental upgrades. It is a sequence of distinct paradigms, each built to overcome the hard ceiling of the one before it. Symbolic programs proved mathematical theorems and configured enterprise hardware, yet collapsed under the weight of real-world ambiguity. Statistical machine learning conquered noisy structured data, yet stalled whenever engineers could not manually define the right features for images or speech. Deep learning automated feature extraction through layered neural networks, yet required task-specific datasets until the Transformer architecture and neural scaling laws turned raw internet-scale corpora into broadly adaptable foundation models."
         },
         {
           "type": "paragraph",
           "text": "By 2025 and 2026, the frontier shifted once again. Pretraining larger models on more static text began running into economic and data constraints, pushing leading laboratories toward test-time compute, reinforcement learning for multi-step reasoning, and standardized protocols that connect models to live software environments. According to the Stanford Institute for Human-Centered Artificial Intelligence (HAI) 2026 AI Index Report, global corporate AI investment reached \\$581.7 billion in 2025—a 130 percent jump over the prior year—while organizational adoption climbed to 88 percent of surveyed enterprises [25] [26]. Tracing how the field traveled from a summer seminar in New Hampshire to that global footprint clarifies not only how modern AI works, but which structural weaknesses it has never fully escaped."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -96,10 +92,6 @@ export const article01: BlogPost = {
         {
           "type": "paragraph",
           "text": "Even in this first decade, an alternative tradition existed. Inspired by biological neurons, Frank Rosenblatt developed the Perceptron in the late 1950s—a trainable linear classifier that adjusted numerical weights from examples rather than following hand-written rules. For a brief period, symbolic reasoning and early connectionism coexisted. That balance broke in 1969 when Marvin Minsky and Seymour Papert published Perceptrons, a rigorous mathematical analysis proving that single-layer perceptrons could not solve simple non-linearly separable problems such as the exclusive-OR (XOR) function. Although Minsky and Papert recognized that multi-layer networks might overcome these limits, no practical algorithm existed at the time to train them. Funding and academic prestige swung decisively away from neural networks and toward symbolic systems for nearly two decades."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -148,10 +140,6 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "symbolic AI could deliver measurable enterprise returns. By the mid-1980s, Fortune 500 companies were investing heavily in in-house expert systems and specialized Lisp machines."
         },
         {
@@ -197,10 +185,6 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "web search results, and driving early recommendation engines. (For a structured breakdown of learning paradigms across this era, see Article 03, Machine Learning Explained, and Article 07, Supervised, Unsupervised and Reinforcement Learning Explained.)"
         },
         {
@@ -227,7 +211,7 @@ export const article01: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The first ingredient was catalyzed by Fei-Fei Li and collaborators, who introduced ImageNet in 2009—an annotated visual database of millions of images organized across thousands of object categories—and launched the annual ImageNet Large Scale Visual Recognition Challenge (ILSVRC) over roughly 1.2 million training images spanning 1,000 classes. In 2010 and 201 1, winning entries relied on hand- engineered visual features paired with shallow classifiers, posting top-5 error rates above 25 percent."
+          "text": "The first ingredient was catalyzed by Fei-Fei Li and collaborators, who introduced ImageNet in 2009—an annotated visual database of millions of images organized across thousands of object categories—and launched the annual ImageNet Large Scale Visual Recognition Challenge (ILSVRC) over roughly 1.2 million training images spanning 1,000 classes. In 2010 and 201 1, winning entries relied on hand-engineered visual features paired with shallow classifiers, posting top-5 error rates above 25 percent."
         },
         {
           "type": "paragraph",
@@ -250,15 +234,11 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "factor and sheer number of legal board states defeated classical tree-search algorithms, and human masters relied heavily on spatial intuition."
         },
         {
           "type": "paragraph",
-          "text": "In January 2016, Google DeepMind published its Nature paper introducing AlphaGo, which combined deep convolutional neural networks—a policy network to narrow candidate moves and a value network to evaluate board positions—with Monte Carlo tree search, trained first on human games and then improved through reinforcement learning via self-play [11]. Two months later, in March 2016, AlphaGo defeated 18- time world champion Lee Sedol four games to one in Seoul. Subsequent iterations eliminated human game data altogether, learning superhuman strategy from scratch solely through self-play."
+          "text": "In January 2016, Google DeepMind published its Nature paper introducing AlphaGo, which combined deep convolutional neural networks—a policy network to narrow candidate moves and a value network to evaluate board positions—with Monte Carlo tree search, trained first on human games and then improved through reinforcement learning via self-play [11]. Two months later, in March 2016, AlphaGo defeated 18-time world champion Lee Sedol four games to one in Seoul. Subsequent iterations eliminated human game data altogether, learning superhuman strategy from scratch solely through self-play."
         },
         {
           "type": "paragraph",
@@ -292,11 +272,7 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In January 2020, Jared Kaplan and colleagues at OpenAI published \"Scaling Laws for Neural Language Models,\" demonstrating that cross-entropy loss followed remarkably smooth power-law curves across more than seven orders of magnitude as a function of three variables: model parameter count, dataset size, and training compute [13]. Four months later, OpenAI released the GPT -3 paper, \"Language Models are Few-Shot Learners,\" showing that a 175-billion-parameter autoregressive Transformer could perform translation, question answering, and arithmetic simply from natural-language prompts and a handful of examples—without updating a single model weight [14]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "In January 2020, Jared Kaplan and colleagues at OpenAI published \"Scaling Laws for Neural Language Models,\" demonstrating that cross-entropy loss followed remarkably smooth power-law curves across more than seven orders of magnitude as a function of three variables: model parameter count, dataset size, and training compute [13]. Four months later, OpenAI released the GPT-3 paper, \"Language Models are Few-Shot Learners,\" showing that a 175-billion-parameter autoregressive Transformer could perform translation, question answering, and arithmetic simply from natural-language prompts and a handful of examples—without updating a single model weight [14]."
         },
         {
           "type": "paragraph",
@@ -311,7 +287,7 @@ export const article01: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Raw pretrained language models were powerful next-token predictors, not reliable assistants: left unconstrained, they mimicked internet noise, ignored user intent, or generated toxic text. In March 2022, Long Ouyang and colleagues at OpenAI detailed InstructGPT, showing that supervised fine-tuning followed by Reinforcement Learning from Human Feedback (RLHF) could steer a much smaller model to produce outputs human evaluators strongly preferred over a vastly larger unaligned GPT -3 baseline [15]."
+          "text": "Raw pretrained language models were powerful next-token predictors, not reliable assistants: left unconstrained, they mimicked internet noise, ignored user intent, or generated toxic text. In March 2022, Long Ouyang and colleagues at OpenAI detailed InstructGPT, showing that supervised fine-tuning followed by Reinforcement Learning from Human Feedback (RLHF) could steer a much smaller model to produce outputs human evaluators strongly preferred over a vastly larger unaligned GPT-3 baseline [15]."
         },
         {
           "type": "paragraph",
@@ -326,7 +302,7 @@ export const article01: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "If 2020–2023 was defined by pretraining scale—bigger dense Transformers fed ever larger web corpora— the years from 2024 through 2026 marked a structural pivot along three axes: native multimodality, test- time reasoning, and agentic tool execution."
+          "text": "If 2020–2023 was defined by pretraining scale—bigger dense Transformers fed ever larger web corpora— the years from 2024 through 2026 marked a structural pivot along three axes: native multimodality, test-time reasoning, and agentic tool execution."
         }
       ]
     },
@@ -341,11 +317,7 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Months earlier, in May 2024, Google DeepMind and Isomorphic Labs had already pushed structural biology into the generative era with AlphaFold 3, published in Nature [17]. Replacing AlphaFold2's specialized amino-acid reasoning module with a unified diffusion-based architecture that predicts raw atomic coordinates directly, AlphaFold 3 modeled joint complexes across proteins, DNA, RNA, small- molecule drug ligands, and ions within a single deep-learning framework [17]. Meanwhile, general- purpose foundation models converged on native multimodality—processing text, code, images, audio, and video within unified architectures rather than bolting separate vision encoders onto text models."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Months earlier, in May 2024, Google DeepMind and Isomorphic Labs had already pushed structural biology into the generative era with AlphaFold 3, published in Nature [17]. Replacing AlphaFold2's specialized amino-acid reasoning module with a unified diffusion-based architecture that predicts raw atomic coordinates directly, AlphaFold 3 modeled joint complexes across proteins, DNA, RNA, small-molecule drug ligands, and ions within a single deep-learning framework [17]. Meanwhile, general-purpose foundation models converged on native multimodality—processing text, code, images, audio, and video within unified architectures rather than bolting separate vision encoders onto text models."
         }
       ]
     },
@@ -356,7 +328,7 @@ export const article01: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A deeper paradigm shift arrived in September 2024 when OpenAI introduced o1, signaling that AI progress was no longer bounded solely by pretraining compute [19]. Trained with large-scale reinforcement learning to generate internal chains of thought before answering, o1 demonstrated a new scaling law: performance improved steadily not just with more training compute, but with more test-time compute —allowing the model to spend additional inference steps decomposing problems, testing hypotheses, and correcting its own mistakes [19]. On the 2024 American Invitational Mathematics Examination (AIME), GPT -4o solved 12 percent of problems on average, whereas o1 solved 74 percent with a single sample, 83 percent with consensus across 64 samples, and 93 percent when reranking 1,000 samples; on the PhD-level GPQA Diamond science benchmark, o1 became the first model to surpass recruited human PhD experts [19]."
+          "text": "A deeper paradigm shift arrived in September 2024 when OpenAI introduced o1, signaling that AI progress was no longer bounded solely by pretraining compute [19]. Trained with large-scale reinforcement learning to generate internal chains of thought before answering, o1 demonstrated a new scaling law: performance improved steadily not just with more training compute, but with more test-time compute —allowing the model to spend additional inference steps decomposing problems, testing hypotheses, and correcting its own mistakes [19]. On the 2024 American Invitational Mathematics Examination (AIME), GPT-4o solved 12 percent of problems on average, whereas o1 solved 74 percent with a single sample, 83 percent with consensus across 64 samples, and 93 percent when reranking 1,000 samples; on the PhD-level GPQA Diamond science benchmark, o1 became the first model to surpass recruited human PhD experts [19]."
         },
         {
           "type": "paragraph",
@@ -380,10 +352,6 @@ export const article01: BlogPost = {
         {
           "type": "paragraph",
           "text": "The economic footprint of this transition has been historically rapid, yet uneven. Stanford HAI's 2026 AI Index Report notes that generative AI reached 53 percent population adoption within three years—faster than either the personal computer or the internet—delivering an estimated \\$172 billion in annual value to U.S. consumers by early 2026 [25]. At the same time, Stanford's economy chapter cautions that while 88 percent of surveyed organizations report using AI in at least one function, enterprise deployment of autonomous AI agents remains in its early stages [26]."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -417,7 +385,7 @@ export const article01: BlogPost = {
               "Classical Statistical ML (1986– 2011)",
               "Probabilistic models, kernel hyperplanes, decision-tree ensembles trained on labeled features",
               "Strong generalization on noisy structured/tabular data; modest compute needs",
-              "Relies on labor- intensive manual feature engineering; weak on raw vision, audio, and language",
+              "Relies on labor-intensive manual feature engineering; weak on raw vision, audio, and language",
               "Backpropagation (1986), SVMs (1995), Random Forests (2001) [7] [8] [9]"
             ],
             [
@@ -432,19 +400,12 @@ export const article01: BlogPost = {
               "Self-attention Transformers, diffusion models, internet-scale pretraining, RLHF alignment",
               "Broad cross-task generalization, fluent generation, zero- and few-shot adaptability",
               "Hallucinations, shallow single-pass reasoning, massive training compute and energy costs",
-              "Transformer (2017), GPT-3 (2020), Chinchilla (2022), InstructGPT (2022) [12] [14] [15] [16] ARTICLES 01–10"
-            ],
-            [
-              "VIZRA",
-              "Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Transformer (2017), GPT-3 (2020), Chinchilla (2022), InstructGPT (2022) [12] [14] [15] [16]"
             ],
             [
               "Reasoning & Agentic AI (2024–2026)",
-              "RL-trained chain- of-thought, test- time compute scaling, multimodal perception, standardized tool protocols",
-              "Multi-step problem solving, self- verification, live interaction with external software and data",
+              "RL-trained chain- of-thought, test-time compute scaling, multimodal perception, standardized tool protocols",
+              "Multi-step problem solving, self-verification, live interaction with external software and data",
               "Higher inference latency/cost, compounding multi-step errors, security and oversight risks",
               "OpenAI o1 (2024), AlphaFold 3 (2024), MCP (2024), DeepSeek-R1 (2025) [17] [19] [20] [21]"
             ]
@@ -459,7 +420,7 @@ export const article01: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The practical test of every paradigm shift is whether it survives contact with real institutional workflows. Looking across healthcare, scientific discovery, and software engineering in 2026 reveals a striking pattern: where AI fits cleanly into verifiable, low-friction loops, productivity gains are dramatic; where real- world validation lags benchmark hype, adoption remains cautious."
+          "text": "The practical test of every paradigm shift is whether it survives contact with real institutional workflows. Looking across healthcare, scientific discovery, and software engineering in 2026 reveals a striking pattern: where AI fits cleanly into verifiable, low-friction loops, productivity gains are dramatic; where real-world validation lags benchmark hype, adoption remains cautious."
         }
       ]
     },
@@ -486,10 +447,6 @@ export const article01: BlogPost = {
         {
           "type": "paragraph",
           "text": "In fundamental science, deep learning and generative diffusion models have moved beyond summarizing papers to accelerating primary discovery. Following AlphaFold2's solution of static protein folding, AlphaFold 3's diffusion architecture expanded structural prediction to protein-ligand binding, nucleic acids, and antibody-antigen complexes, outperforming specialized physics-based docking tools on protein-drug interactions [17]. Made accessible to non-commercial academic researchers through the AlphaFold Server, these models compress months of experimental crystallography screening into minutes of computational hypothesis generation—allowing wet-lab biologists to focus scarce experimental resources on the most promising molecular candidates."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -569,10 +526,6 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "truth. When pushed outside their training distribution or asked to synthesize ambiguous evidence, they can still fabricate plausible-sounding citations, edge-case facts, or post-hoc rationalizations that do not faithfully reflect their internal computation."
         },
         {
@@ -600,7 +553,7 @@ export const article01: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "On the operational engineering side, the U.S. National Institute of Standards and Technology (NIST) published its voluntary AI Risk Management Framework (AI RMF 1.0) in January 2023—structured around four lifecycle functions: Govern, Map, Measure, and Manage—followed in July 2024 by a dedicated Generative AI Profile (NIST AI 600-1) addressing confabulation, data provenance, and content security [27] [28]. In Europe, the European Union enacted Regulation (EU) 2024/1689—the EU AI Act—the world's first comprehensive horizontal AI statute, which entered into force in August 2024 and applies tiered, risk- based obligations prohibiting unacceptable-risk practices while imposing strict conformity, transparency, and systemic-risk rules on high-risk applications and frontier general-purpose models [31]."
+          "text": "On the operational engineering side, the U.S. National Institute of Standards and Technology (NIST) published its voluntary AI Risk Management Framework (AI RMF 1.0) in January 2023—structured around four lifecycle functions: Govern, Map, Measure, and Manage—followed in July 2024 by a dedicated Generative AI Profile (NIST AI 600-1) addressing confabulation, data provenance, and content security [27] [28]. In Europe, the European Union enacted Regulation (EU) 2024/1689—the EU AI Act—the world's first comprehensive horizontal AI statute, which entered into force in August 2024 and applies tiered, risk-based obligations prohibiting unacceptable-risk practices while imposing strict conformity, transparency, and systemic-risk rules on high-risk applications and frontier general-purpose models [31]."
         }
       ]
     },
@@ -623,10 +576,6 @@ export const article01: BlogPost = {
         {
           "type": "paragraph",
           "text": "Several trends are no longer speculative—they are active engineering realities. First, hybrid inference budgets are replacing one-size-fits-all model calls: production systems increasingly route routine queries"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "paragraph",
@@ -668,7 +617,7 @@ export const article01: BlogPost = {
   "faqs": [
     {
       "question": "What was the main difference between symbolic AI and modern machine learning?",
-      "answer": "Symbolic AI relied on human experts and programmers to encode explicit facts and IF-THEN logical rules into a knowledge base, which an inference engine then followed step by step [6]. Modern machine learning reverses that workflow: instead of hand-coding rules, engineers provide algorithms and training data, allowing the system to infer statistical patterns and internal representations automatically [7]. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page"
+      "answer": "Symbolic AI relied on human experts and programmers to encode explicit facts and IF-THEN logical rules into a knowledge base, which an inference engine then followed step by step [6]. Modern machine learning reverses that workflow: instead of hand-coding rules, engineers provide algorithms and training data, allowing the system to infer statistical patterns and internal representations automatically [7]."
     },
     {
       "question": "Why did the two AI winters happen?",
@@ -684,7 +633,7 @@ export const article01: BlogPost = {
     },
     {
       "question": "What did the Chinchilla scaling law change about training large language models?",
-      "answer": "Before 2022, many labs scaled parameter counts much faster than training data. DeepMind's Chinchilla study demonstrated that for a fixed compute budget, model size and training tokens should scale together —proving that a 70-billion-parameter model trained on 1.4 trillion tokens could outperform a 280-billion- parameter model trained on 300 billion tokens [16]."
+      "answer": "Before 2022, many labs scaled parameter counts much faster than training data. DeepMind's Chinchilla study demonstrated that for a fixed compute budget, model size and training tokens should scale together —proving that a 70-billion-parameter model trained on 1.4 trillion tokens could outperform a 280-billion-parameter model trained on 300 billion tokens [16]."
     },
     {
       "question": "How do reasoning models like OpenAI o1 and DeepSeek-R1 differ from earlier chatbots?",
@@ -696,7 +645,7 @@ export const article01: BlogPost = {
     },
     {
       "question": "Have older AI paradigms like Random Forests or rule engines become obsolete?",
-      "answer": "No. Classical statistical algorithms such as Random Forests and gradient-boosted trees remain fast, cost- effective, and highly accurate for structured tabular business data like fraud detection and credit scoring ARTICLES 01–10 VIZRA Editorial Research & Publication System Page [9]. Deterministic rule engines also remain essential wherever strict legal compliance, auditable logic, or hard safety guardrails are required alongside probabilistic generative models."
+      "answer": "No. Classical statistical algorithms such as Random Forests and gradient-boosted trees remain fast, cost-effective, and highly accurate for structured tabular business data like fraud detection and credit scoring [9]. Deterministic rule engines also remain essential wherever strict legal compliance, auditable logic, or hard safety guardrails are required alongside probabilistic generative models."
     }
   ],
   "sources": [
@@ -806,7 +755,7 @@ export const article01: BlogPost = {
       "id": 18,
       "title": "All Nobel Prizes 2024",
       "venue": "The Nobel Prize / Royal Swedish Academy of Sciences (October 2024). https:// www.nobelprize.org/all-nobel-prizes-2024/— Official scientific award announcement",
-      "url": ""
+      "url": "https://www.nobelprize.org/all-nobel-prizes-2024/"
     },
     {
       "id": 19,
@@ -907,12 +856,10 @@ export const article01: BlogPost = {
   ],
   "body": [
     "Few fields in the history of engineering have undergone as many complete philosophical reversals as artificial intelligence. When software engineers, policymakers, and researchers speak of AI in late 2026, they usually mean generative foundation models, multimodal assistants, and autonomous software agents that write code, synthesize literature, and call external tools. Yet for the first three decades of the discipline's existence, the dominant orthodoxy looked almost nothing like this. Early pioneers did not train statistical engines on trillions of words; they wrote explicit logical rules, hand-crafted knowledge bases, and formal theorem provers, convinced that intelligence was fundamentally the manipulation of symbols.",
-    "That arc—from deterministic rules to probabilistic learning, from narrow deep classifiers to general- purpose generative and reasoning systems—is not a smooth upward line of incremental upgrades. It is a sequence of distinct paradigms, each built to overcome the hard ceiling of the one before it. Symbolic programs proved mathematical theorems and configured enterprise hardware, yet collapsed under the weight of real-world ambiguity. Statistical machine learning conquered noisy structured data, yet stalled whenever engineers could not manually define the right features for images or speech. Deep learning automated feature extraction through layered neural networks, yet required task-specific datasets until the Transformer architecture and neural scaling laws turned raw internet-scale corpora into broadly adaptable foundation models.",
+    "That arc—from deterministic rules to probabilistic learning, from narrow deep classifiers to general-purpose generative and reasoning systems—is not a smooth upward line of incremental upgrades. It is a sequence of distinct paradigms, each built to overcome the hard ceiling of the one before it. Symbolic programs proved mathematical theorems and configured enterprise hardware, yet collapsed under the weight of real-world ambiguity. Statistical machine learning conquered noisy structured data, yet stalled whenever engineers could not manually define the right features for images or speech. Deep learning automated feature extraction through layered neural networks, yet required task-specific datasets until the Transformer architecture and neural scaling laws turned raw internet-scale corpora into broadly adaptable foundation models.",
     "By 2025 and 2026, the frontier shifted once again. Pretraining larger models on more static text began running into economic and data constraints, pushing leading laboratories toward test-time compute, reinforcement learning for multi-step reasoning, and standardized protocols that connect models to live software environments. According to the Stanford Institute for Human-Centered Artificial Intelligence (HAI) 2026 AI Index Report, global corporate AI investment reached \\$581.7 billion in 2025—a 130 percent jump over the prior year—while organizational adoption climbed to 88 percent of surveyed enterprises [25] [26]. Tracing how the field traveled from a summer seminar in New Hampshire to that global footprint clarifies not only how modern AI works, but which structural weaknesses it has never fully escaped.",
     "The intellectual starting pistol for artificial intelligence fired six years before the field had a name. In October 1950, British mathematician Alan Turing published \"Computing Machinery and Intelligence\" in the philosophy journal Mind [1]. Rather than getting trapped in metaphysical debates over whether machines could \"think,\" Turing reframed the question operationally through the \"imitation game\"—now known as the Turing Test—in which a human interrogator communicates via text with a hidden human and a hidden machine to determine which is which [1]. Just as importantly, Turing anticipated both major futures of the discipline in the same paper: machines programmed with explicit logical rules, and \"child machines\" educated through experience, reward, and punishment.",
     "The discipline formally took shape in August 1955, when John McCarthy of Dartmouth College, Marvin Minsky of Harvard, Nathaniel Rochester of IBM, and Claude Shannon of Bell Telephone Laboratories drafted \"A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence\" [2]. Held at Dartmouth in the summer of 1956, the workshop coined the term \"artificial intelligence\" and articulated a bold working premise: that every aspect of learning or any other feature of intelligence could in principle be described so precisely that a machine could simulate it [3].",
-    "The most concrete proof of concept presented at Dartmouth came from Allen Newell, Herbert Simon, and Cliff Shaw. Their program, the Logic Theorist, used heuristic search over symbolic expressions to prove 38 of the first 52 theorems in Alfred North Whitehead and Bertrand Russell's Principia Mathematica [2]. For a generation of computer scientists, the message was electrifying: high-level human reasoning— abstract mathematics, formal logic, chess—seemed amenable to explicit symbol manipulation. Newell and Simon followed with the General Problem Solver (GPS), which separated a problem's domain facts from a general search procedure aimed at reducing the distance between a current state and a goal state.",
-    "Throughout the late 1950s and 1960s, symbolic AI—later dubbed Good Old-Fashioned AI (GOF AI)—set the research agenda. John McCarthy designed Lisp, a programming language tailored to symbolic list processing; J. Alan Robinson introduced the resolution method for automated theorem proving; and laboratories at MIT, Stanford, and Carnegie Tech built programs that solved calculus integrals, navigated simplified \"blocks worlds,\" and engaged in scripted text exchanges.",
-    "Even in this first decade, an alternative tradition existed. Inspired by biological neurons, Frank Rosenblatt developed the Perceptron in the late 1950s—a trainable linear classifier that adjusted numerical weights from examples rather than following hand-written rules. For a brief period, symbolic reasoning and early connectionism coexisted. That balance broke in 1969 when Marvin Minsky and Seymour Papert published Perceptrons, a rigorous mathematical analysis proving that single-layer perceptrons could not solve simple non-linearly separable problems such as the exclusive-OR (XOR) function. Although Minsky and Papert recognized that multi-layer networks might overcome these limits, no practical algorithm existed at the time to train them. Funding and academic prestige swung decisively away from neural networks and toward symbolic systems for nearly two decades."
+    "The most concrete proof of concept presented at Dartmouth came from Allen Newell, Herbert Simon, and Cliff Shaw. Their program, the Logic Theorist, used heuristic search over symbolic expressions to prove 38 of the first 52 theorems in Alfred North Whitehead and Bertrand Russell's Principia Mathematica [2]. For a generation of computer scientists, the message was electrifying: high-level human reasoning— abstract mathematics, formal logic, chess—seemed amenable to explicit symbol manipulation. Newell and Simon followed with the General Problem Solver (GPS), which separated a problem's domain facts from a general search procedure aimed at reducing the distance between a current state and a goal state."
   ]
 };

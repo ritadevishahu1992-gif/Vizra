@@ -49,15 +49,11 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "engineers hold a solid baseline architecture fixed and systematically improve the data—resolving inconsistent labels, closing edge-case coverage gaps, removing corrupted records, and aligning training distributions with real-world deployment conditions [3]. In industrial inspection, medical diagnostics, or document extraction, tightening labeling guidelines across a few thousand ambiguous examples often yields larger reliability gains than swapping in a vastly more expensive neural network."
         },
         {
           "type": "paragraph",
-          "text": "At the frontier offoundation models, empirical scaling research reinforced the same lesson from a different angle. In March 2022, DeepMind researchers Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, and colleagues published Training Compute-Optimal Large Language Models, widely known as the Chinchilla study [4]. Analyzing hundreds of training runs, they demonstrated that earlier giant language models were severely undertrained relative to their parameter counts. For a fixed compute budget, model size and training dataset size should scale in tandem—roughly 20 training tokens per parameter under compute- optimal regimes [4]. Subsequent industry practice pushed even further toward \"overtraining\": feeding smaller, inference-efficient models far more than 20 tokens per parameter so they remain cheap to serve at scale while retaining high capability [5]."
+          "text": "At the frontier offoundation models, empirical scaling research reinforced the same lesson from a different angle. In March 2022, DeepMind researchers Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, and colleagues published Training Compute-Optimal Large Language Models, widely known as the Chinchilla study [4]. Analyzing hundreds of training runs, they demonstrated that earlier giant language models were severely undertrained relative to their parameter counts. For a fixed compute budget, model size and training dataset size should scale in tandem—roughly 20 training tokens per parameter under compute-optimal regimes [4]. Subsequent industry practice pushed even further toward \"overtraining\": feeding smaller, inference-efficient models far more than 20 tokens per parameter so they remain cheap to serve at scale while retaining high capability [5]."
         },
         {
           "type": "paragraph",
@@ -84,11 +80,7 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Multimodal data binds two or more modalities into aligned examples: images paired with descriptive alt- text or structured scene graphs, video clips synchronized with audio tracks and transcripts, or code"
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
+          "text": "Multimodal data binds two or more modalities into aligned examples: images paired with descriptive alt-text or structured scene graphs, video clips synchronized with audio tracks and transcripts, or code"
         },
         {
           "type": "paragraph",
@@ -121,31 +113,25 @@ export const article08: BlogPost = {
               "Unstructured (Text, Audio, Image, Video)",
               "WARC/JSONL, JPEG/PNG, WAV, MP4",
               "LLMs, speech recognition, image/video generation",
-              "Noise, boilerplate, near- duplicates, copyright & PII"
+              "Noise, boilerplate, near-duplicates, copyright & PII"
             ],
             [
               "Multimodal Paired",
-              "Image-text pairs, video- transcript bundles",
+              "Image-text pairs, video-transcript bundles",
               "Vision-language models, text-to-image, embodied perception",
               "Cross-modal misalignment, shallow or noisy captions"
             ],
             [
               "Telemetry & Sensor Streams",
-              "LiDAR point clouds, time-series logs, multi- cam video",
+              "LiDAR point clouds, time-series logs, multi-cam video",
               "Autonomous driving, robotics, predictive maintenance",
-              "Petabyte ingestion, synchronization, rare edge- case mining"
+              "Petabyte ingestion, synchronization, rare edge-case mining"
             ],
             [
               "Human Preference & Feedback",
               "Prompt-response pairs, ranked completions, rubrics",
               "Instruction tuning, RLHF, DPO, safety alignment",
-              "Annotator disagreement, rubric ambiguity, high cost per example ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
+              "Annotator disagreement, rubric ambiguity, high cost per example"
             ]
           ]
         }
@@ -188,15 +174,11 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "To tame billions of documents without prohibitive pairwise comparisons, engineers combine exact hashing (catching identical URLs or paragraphs) with fuzzy deduplication algorithms such as MinHash paired with Locality-Sensitive Hashing (LSH). MinHash compresses each document's overlapping character or word shingles into a compact signature, while LSH hashes bands of those signatures into buckets so near-duplicate documents collide with high probability and can be pruned in near-linear time. Yet deduplication is not a blunt \"more is always better\" hammer. During the creation of Hugging Face's FineW eb corpus, researchers discovered a counterintuitive nuance: aggressively deduplicating across all 96 Common Crawl snapshots globally actually degraded downstream performance compared to deduplicating within individual snapshots, because global deduplication disproportionately stripped high- signal recurring reference material while leaving unique low-quality spam intact [10]."
+          "text": "To tame billions of documents without prohibitive pairwise comparisons, engineers combine exact hashing (catching identical URLs or paragraphs) with fuzzy deduplication algorithms such as MinHash paired with Locality-Sensitive Hashing (LSH). MinHash compresses each document's overlapping character or word shingles into a compact signature, while LSH hashes bands of those signatures into buckets so near-duplicate documents collide with high probability and can be pruned in near-linear time. Yet deduplication is not a blunt \"more is always better\" hammer. During the creation of Hugging Face's FineWeb corpus, researchers discovered a counterintuitive nuance: aggressively deduplicating across all 96 Common Crawl snapshots globally actually degraded downstream performance compared to deduplicating within individual snapshots, because global deduplication disproportionately stripped high-signal recurring reference material while leaving unique low-quality spam intact [10]."
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
-          "text": "After deduplication comes multi-tier quality filtering. Early pipelines relied primarily on fast heuristics— language identification thresholds, average word length, punctuation ratios, and stop-word density—to discard machine-generated gibberish and SEO link farms. By 2024–2026, heuristic rules became merely the first sieve. Modern pipelines layer model-based quality classifiers on top: lightweight encoders trained on synthetic or expert-scored rubrics to grade every web document for educational depth, coherence, or technical rigor. When Hugging Face built FineW eb-Edu, running its educational-value classifier across all 15 trillion tokens of FineW eb required 6,000 H100 GPU hours—a striking reminder that data curation now commands serious accelerator budgets of its own [10]."
+          "text": "After deduplication comes multi-tier quality filtering. Early pipelines relied primarily on fast heuristics— language identification thresholds, average word length, punctuation ratios, and stop-word density—to discard machine-generated gibberish and SEO link farms. By 2024–2026, heuristic rules became merely the first sieve. Modern pipelines layer model-based quality classifiers on top: lightweight encoders trained on synthetic or expert-scored rubrics to grade every web document for educational depth, coherence, or technical rigor. When Hugging Face built FineWeb-Edu, running its educational-value classifier across all 15 trillion tokens of FineWeb required 6,000 H100 GPU hours—a striking reminder that data curation now commands serious accelerator budgets of its own [10]."
         }
       ]
     },
@@ -222,7 +204,7 @@ export const article08: BlogPost = {
           "ordered": false,
           "items": [
             "**Dataset Versioning and Lineage:** Immutable snapshots, cryptographic content hashes, and lineage graphs track exactly which crawl dates, filter versions, and license tags produced a training mix— essential for debugging regressions and complying with regulatory audits.",
-            "**Data Lakehouses:** Open table formats sitting over cloud object storage unify cheap bulk storage with transactional ACID guarantees, letting engineering teams run distributed Spark or Ray curation jobs directly on Parquet files without duplicating terabytes across silos. Feature Stores: In tabular and real-time ML systems (such as fraud scoring or recommendations), feature stores compute and serve consistent feature definitions across offline training and millisecond- latency online inference, eliminating training-serving skew.",
+            "**Data Lakehouses:** Open table formats sitting over cloud object storage unify cheap bulk storage with transactional ACID guarantees, letting engineering teams run distributed Spark or Ray curation jobs directly on Parquet files without duplicating terabytes across silos. Feature Stores: In tabular and real-time ML systems (such as fraud scoring or recommendations), feature stores compute and serve consistent feature definitions across offline training and millisecond-latency online inference, eliminating training-serving skew.",
             "**Vector Databases:** For Retrieval-Augmented Generation (RAG) and semantic deduplication, vector indexes store dense neural embeddings and execute approximate nearest-neighbor search across millions or billions of chunks, allowing AI systems to ground answers in fresh enterprise knowledge without retraining base weights."
           ]
         },
@@ -238,20 +220,8 @@ export const article08: BlogPost = {
             [
               "1. Ingestion & Extraction",
               "Web crawling, HTML parsing, schema validation",
-              "Common Crawl WARC, trafilatura, streaming brokers",
-              "Preserves formatting, code, and domain coverage ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "Page"
-            ],
-            [
-              "",
-              "",
-              "Representative Algorithms",
-              "Primary Impact on Model"
+              "Common Crawl WARC, trafilatura, streaming brokers Representative Algorithms",
+              "Preserves formatting, code, and domain coverage Primary Impact on Model"
             ],
             [
               "2. Cleaning & PII Scrubbing",
@@ -261,7 +231,7 @@ export const article08: BlogPost = {
             ],
             [
               "3. Deduplication",
-              "Exact URL/paragraph hashing, fuzzy near- dedup",
+              "Exact URL/paragraph hashing, fuzzy near-dedup",
               "SHA-256, MinHash + LSH, suffix arrays",
               "Cuts memorization (~10x), speeds convergence, lowers contamination"
             ],
@@ -310,10 +280,6 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "language-agnostic [6] [15]. It underpinned early open text-to-image diffusion models, while also serving as a sobering case study in web-scale governance after audits surfaced harmful and non-consensual material embedded in uncurated crawl links [7]."
         },
         {
@@ -322,18 +288,14 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "Then in June 2024, Hugging Face's Guilherme Penedo and colleagues set a new methodological benchmark with FineW eb [10]. Spanning 15 trillion tokens (44 TB on disk) extracted from 96 Common Crawl snapshots, FineW eb systematically ablated every cleaning, extraction, and deduplication choice by training test models at scale and measuring downstream benchmarks. Its 1.3-trillion-token educational subset, FineW eb-Edu, delivered dramatic jumps on knowledge and reasoning evaluations, demonstrating that aggressive quality filtering can multiply token efficiency. A year later, in June 2025, the same team extended the methodology globally with FineW eb2, adapting automated curation pipelines across hundreds of non-English languages [18]."
-        },
-        {
-          "type": "paragraph",
-          "text": "Release Creator /"
+          "text": "Then in June 2024, Hugging Face's Guilherme Penedo and colleagues set a new methodological benchmark with FineWeb [10]. Spanning 15 trillion tokens (44 TB on disk) extracted from 96 Common Crawl snapshots, FineWeb systematically ablated every cleaning, extraction, and deduplication choice by training test models at scale and measuring downstream benchmarks. Its 1.3-trillion-token educational subset, FineWeb-Edu, delivered dramatic jumps on knowledge and reasoning evaluations, demonstrating that aggressive quality filtering can multiply token efficiency. A year later, in June 2025, the same team extended the methodology globally with FineWeb2, adapting automated curation pipelines across hundreds of non-English languages [18]."
         },
         {
           "type": "table",
           "headers": [
             "Dataset",
-            "Year",
-            "Organization",
+            "Release Year",
+            "Creator / Organization",
             "Modality & Scale",
             "Defining Contribution"
           ],
@@ -350,7 +312,7 @@ export const article08: BlogPost = {
               "2008– present",
               "Common Crawl Foundation",
               ">10 PB cumulative; ~2.14B pages/month (2026)",
-              "Open web archive underpinning nearly all web- scale LLM corpora"
+              "Open web archive underpinning nearly all web-scale LLM corpora"
             ],
             [
               "The Pile [14]",
@@ -367,25 +329,11 @@ export const article08: BlogPost = {
               "Enabled open multimodal & diffusion research; highlighted web-scrape risks"
             ],
             [
-              "RedPajama- Data-v2 [16]",
+              "RedPajama-Data-v2 [16]",
               "2023",
               "Together AI",
               "30T tokens (>100B docs, 84 CC snapshots)",
-              "Provided massive open web pool with precomputed quality & dedup signals ARTICLES 01–10"
-            ],
-            [
-              "VIZRA Editorial Research & Publication System",
-              "",
-              "",
-              "",
-              "Page"
-            ],
-            [
-              "",
-              "Release",
-              "Creator /",
-              "",
-              ""
+              "Provided massive open web pool with precomputed quality & dedup signals"
             ],
             [
               "Dolma [17]",
@@ -432,10 +380,6 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "candidate reasoning chains and solutions; an external compiler, unit-test suite, or symbolic solver deterministically checks whether each answer is right or wrong [22]. Only verified reasoning traces reinforce the model or feed subsequent distillation rounds. Because the verifier anchors training to external mathematical or computational truth rather than another model's statistical guesses, verifiable synthetic data bypasses the core mechanism of model collapse and unlocks capability gains even when fresh human text is scarce."
         }
       ]
@@ -471,10 +415,6 @@ export const article08: BlogPost = {
         {
           "type": "paragraph",
           "text": "As training corpora grew from academic curiosities into multibillion-dollar commercial assets, the legal and ethical rules governing data collection tightened dramatically. By late 2026, AI data teams operate inside a complex intersection of data protection statutes, statutory transparency mandates, cryptographic provenance standards, and shifting web-access norms."
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         }
       ]
     },
@@ -499,7 +439,7 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "In the United States and internationally, voluntary risk frameworks complement binding European statutes. The National Institute of Standards and Technology's AI Risk Management Framework (AI RMF 1.0) (January 2023) and its companion Generative AI Profile (NIST AI 600-1) (July 2024) map concrete data- governance controls—covering provenance tracking, data poisoning resilience, bias measurement, and third-party supply-chain transparency—across the full AI lifecycle [30]."
+          "text": "In the United States and internationally, voluntary risk frameworks complement binding European statutes. The National Institute of Standards and Technology's AI Risk Management Framework (AI RMF 1.0) (January 2023) and its companion Generative AI Profile (NIST AI 600-1) (July 2024) map concrete data-governance controls—covering provenance tracking, data poisoning resilience, bias measurement, and third-party supply-chain transparency—across the full AI lifecycle [30]."
         }
       ]
     },
@@ -516,12 +456,8 @@ export const article08: BlogPost = {
           "type": "list",
           "ordered": false,
           "items": [
-            "**Differential Privacy:** Pioneered for deep networks by Martín Abadi and colleagues in their 2016 ACM CCS paper introducing Differentially Private Stochastic Gradient Descent (DP-SGD), differential privacy clips individual per-example gradients and injects calibrated statistical noise during training [31]. This provides a formal mathematical bound (a privacy budget, ε) limiting how much any single person's record can influence the final model weights, dramatically curbing membership-inference and training-data extraction attacks—though often at a measurable trade-off in accuracy and compute. Federated Learning: Introduced by H. Brendan McMahan and colleagues at Google in 2017 via the Federated Averaging algorithm, federated learning keeps raw sensitive data localized on user devices or hospital servers [32]. Participating nodes compute model updates locally and transmit only aggregated weight deltas (often combined with secure aggregation and differential privacy) to a central coordinator, reducing communication overhead by 10 to 100 times while eliminating centralized raw- data honey pots [32]. Cryptographic Provenance (C2P A): On the media authenticity front, the Coalition for Content Provenance and Authenticity (C2P A) maintains the open Content Credentials technical specification"
+            "**Differential Privacy:** Pioneered for deep networks by Martín Abadi and colleagues in their 2016 ACM CCS paper introducing Differentially Private Stochastic Gradient Descent (DP-SGD), differential privacy clips individual per-example gradients and injects calibrated statistical noise during training [31]. This provides a formal mathematical bound (a privacy budget, ε) limiting how much any single person's record can influence the final model weights, dramatically curbing membership-inference and training-data extraction attacks—though often at a measurable trade-off in accuracy and compute. Federated Learning: Introduced by H. Brendan McMahan and colleagues at Google in 2017 via the Federated Averaging algorithm, federated learning keeps raw sensitive data localized on user devices or hospital servers [32]. Participating nodes compute model updates locally and transmit only aggregated weight deltas (often combined with secure aggregation and differential privacy) to a central coordinator, reducing communication overhead by 10 to 100 times while eliminating centralized raw-data honey pots [32]. Cryptographic Provenance (C2P A): On the media authenticity front, the Coalition for Content Provenance and Authenticity (C2P A) maintains the open Content Credentials technical specification"
           ]
-        },
-        {
-          "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
         },
         {
           "type": "list",
@@ -547,7 +483,7 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "**Autonomous Driving T elemetry:** The W aymo Open Dataset. Physical-world AI illustrates why raw volume alone never suffices. W aymo's autonomous fleet accumulates vast multimodal sensor logs— synchronized camera frames, LiDAR point clouds, radar returns, and vehicle kinematics—across diverse urban environments. To accelerate community research, W aymo released the Waymo Open Dataset, which by 2025 encompassed three specialized collections: a Perception Dataset with high-resolution sensor data and labels for 2,030 segments, a Motion Dataset containing object trajectories and 3D maps across 103,354 segments, and an End-to-End Driving Dataset (updated in March 2025) offering 360- degree coverage from eight cameras alongside routing instructions across 5,000 segments [35]. Used by more than 53,000 researchers and cited in over 4,000 academic papers [36], the dataset highlights how embodied AI depends on tightly synchronized multi-sensor curation and realistic scenario simulation rather than generic web scraping."
+          "text": "**Autonomous Driving T elemetry:** The W aymo Open Dataset. Physical-world AI illustrates why raw volume alone never suffices. W aymo's autonomous fleet accumulates vast multimodal sensor logs— synchronized camera frames, LiDAR point clouds, radar returns, and vehicle kinematics—across diverse urban environments. To accelerate community research, W aymo released the Waymo Open Dataset, which by 2025 encompassed three specialized collections: a Perception Dataset with high-resolution sensor data and labels for 2,030 segments, a Motion Dataset containing object trajectories and 3D maps across 103,354 segments, and an End-to-End Driving Dataset (updated in March 2025) offering 360-degree coverage from eight cameras alongside routing instructions across 5,000 segments [35]. Used by more than 53,000 researchers and cited in over 4,000 academic papers [36], the dataset highlights how embodied AI depends on tightly synchronized multi-sensor curation and realistic scenario simulation rather than generic web scraping."
         },
         {
           "type": "paragraph",
@@ -555,15 +491,11 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "**Open-Science Web Curation at Scale:** Hugging Face's FineW eb Ablations. In foundation model pretraining, the FineW eb project demonstrated that methodical data engineering can rival opaque proprietary pipelines. Rather than dumping raw Common Crawl snapshots into a training run, Hugging Face's team tested every extraction parser, heuristic filter, deduplication granularity, and educational classifier against controlled training benchmarks [10]. Their findings proved that a curated 1.3-trillion-token"
+          "text": "**Open-Science Web Curation at Scale:** Hugging Face's FineWeb Ablations. In foundation model pretraining, the FineWeb project demonstrated that methodical data engineering can rival opaque proprietary pipelines. Rather than dumping raw Common Crawl snapshots into a training run, Hugging Face's team tested every extraction parser, heuristic filter, deduplication granularity, and educational classifier against controlled training benchmarks [10]. Their findings proved that a curated 1.3-trillion-token"
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
-          "text": "educational subset (FineW eb-Edu) could dramatically accelerate learning on reasoning and STEM benchmarks compared to far larger unfiltered web dumps, cementing data-centric ablation as standard engineering discipline across open and commercial labs alike [10]."
+          "text": "educational subset (FineWeb-Edu) could dramatically accelerate learning on reasoning and STEM benchmarks compared to far larger unfiltered web dumps, cementing data-centric ablation as standard engineering discipline across open and commercial labs alike [10]."
         }
       ]
     },
@@ -608,7 +540,7 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "3. Multilingual Curation Catching Up: Projects like FineW eb2 (June 2025) moved open data"
+          "text": "3. Multilingual Curation Catching Up: Projects like FineWeb2 (June 2025) moved open data"
         },
         {
           "type": "list",
@@ -641,10 +573,6 @@ export const article08: BlogPost = {
         },
         {
           "type": "paragraph",
-          "text": "VIZRA Editorial Research & Publication System Page"
-        },
-        {
-          "type": "paragraph",
           "text": "Looking beyond 2026, the center of gravity in AI data is likely to shift away from static public web text toward three richer, harder-to-harvest frontiers. First, multimodal physical-world and video data — spanning egocentric video, robotics teleoperation, 3D spatial scans, and physics-grounded simulations— remains vastly less saturated than public text, making it the primary scaling runway for world models and embodied agents. Second, agentic interaction trajectories —multi-step logs of software agents writing code, querying databases, recovering from errors, and passing automated verification—will increasingly rival passive prose as the highest-leverage training signal for autonomous workflows."
         },
         {
@@ -660,7 +588,7 @@ export const article08: BlogPost = {
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Data is neither a passive commodity nor an infinite background resource; it is the active architecture through which modern artificial intelligence encounters the world. From ImageNet's structured taxonomy and Common Crawl's petabyte-scale web archives to FineW eb's classifier-filtered tokens and RLVR's verified reasoning traces, every major leap in machine capability has rested on deliberate choices about what to collect, what to discard, and how to validate truth."
+          "text": "Data is neither a passive commodity nor an infinite background resource; it is the active architecture through which modern artificial intelligence encounters the world. From ImageNet's structured taxonomy and Common Crawl's petabyte-scale web archives to FineWeb's classifier-filtered tokens and RLVR's verified reasoning traces, every major leap in machine capability has rested on deliberate choices about what to collect, what to discard, and how to validate truth."
         },
         {
           "type": "paragraph",
@@ -684,7 +612,7 @@ export const article08: BlogPost = {
     },
     {
       "question": "Does training on synthetic data always cause model collapse?",
-      "answer": "No. Shumailov et al. (2024) demonstrated in Nature that model collapse occurs when successive models train recursively on uncurated synthetic outputs that replace real human data [20]. Modern pipelines avoid collapse by combining synthetic data with preserved human corpora and anchoring generation to external programmatic verifiers—such as compilers, unit tests, and math solvers—via Reinforcement Learning with Verifiable Rewards (RLVR) [21]. ARTICLES 01–10 VIZRA Editorial Research & Publication System Page"
+      "answer": "No. Shumailov et al. (2024) demonstrated in Nature that model collapse occurs when successive models train recursively on uncurated synthetic outputs that replace real human data [20]. Modern pipelines avoid collapse by combining synthetic data with preserved human corpora and anchoring generation to external programmatic verifiers—such as compilers, unit tests, and math solvers—via Reinforcement Learning with Verifiable Rewards (RLVR) [21]."
     },
     {
       "question": "What are Datasheets for Datasets, and why do they matter?",
@@ -967,10 +895,8 @@ export const article08: BlogPost = {
     "For much of machine learning's academic history, progress followed a model-centric playbook. Researchers held a benchmark dataset fixed—whether handwritten digits, news wire articles, or curated object photographs—and competed to invent cleverer architectures, loss functions, or optimization tricks to squeeze out an extra percentage point of accuracy. That paradigm delivered extraordinary architectural advances, but it left a blind spot in production engineering, where datasets are rarely static, clean, or complete.",
     "In 2021, computer scientist Andrew Ng catalyzed a formal correction through a series of talks and the inaugural NeurIPS Data-Centric AI Workshop, co-organized with researchers including Lora Aroyo, Greg Diamos, Cody Coleman, Vijay Janapa Reddi, and Joaquin Vanschoren [2]. Data-centric AI flips the experimental constant: rather than holding the dataset fixed while iterating endlessly on model code,",
     "engineers hold a solid baseline architecture fixed and systematically improve the data—resolving inconsistent labels, closing edge-case coverage gaps, removing corrupted records, and aligning training distributions with real-world deployment conditions [3]. In industrial inspection, medical diagnostics, or document extraction, tightening labeling guidelines across a few thousand ambiguous examples often yields larger reliability gains than swapping in a vastly more expensive neural network.",
-    "At the frontier offoundation models, empirical scaling research reinforced the same lesson from a different angle. In March 2022, DeepMind researchers Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, and colleagues published Training Compute-Optimal Large Language Models, widely known as the Chinchilla study [4]. Analyzing hundreds of training runs, they demonstrated that earlier giant language models were severely undertrained relative to their parameter counts. For a fixed compute budget, model size and training dataset size should scale in tandem—roughly 20 training tokens per parameter under compute- optimal regimes [4]. Subsequent industry practice pushed even further toward \"overtraining\": feeding smaller, inference-efficient models far more than 20 tokens per parameter so they remain cheap to serve at scale while retaining high capability [5].",
+    "At the frontier offoundation models, empirical scaling research reinforced the same lesson from a different angle. In March 2022, DeepMind researchers Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, and colleagues published Training Compute-Optimal Large Language Models, widely known as the Chinchilla study [4]. Analyzing hundreds of training runs, they demonstrated that earlier giant language models were severely undertrained relative to their parameter counts. For a fixed compute budget, model size and training dataset size should scale in tandem—roughly 20 training tokens per parameter under compute-optimal regimes [4]. Subsequent industry practice pushed even further toward \"overtraining\": feeding smaller, inference-efficient models far more than 20 tokens per parameter so they remain cheap to serve at scale while retaining high capability [5].",
     "Together, data-centric engineering and Chinchilla-era scaling laws dismantled the myth that model architecture alone drives intelligence. Scale without curation wastes vast amounts of compute memorizing boilerplate and noise, while curation without sufficient scale leaves complex reasoning patterns unlearned. Modern AI sits squarely at the intersection of both.",
-    "Not all AI data behaves the same way, nor does it flow through identical infrastructure. Practitioners organize training and operational data across five major categories, each carrying distinct collection economics, preprocessing hurdles, and failure modes.",
-    "Structured and tabular data remains the workhorse of enterprise machine learning. Stored in relational databases, data warehouses, and spreadsheets, it consists of rows and typed columns—transaction histories, credit bureau attributes, inventory logs, electronic health record (EHR) tables, and manufacturing tolerances. Unlike free-form text, tabular data exhibits sharp feature interactions, missingness patterns that themselves carry signal, and strict schema constraints. Gradient-boosted decision trees and specialized tabular neural models still dominate this domain, where careful feature engineering, temporal leakage prevention, and domain-specific imputation matter more than sheer volume.",
-    "Unstructured data —encompassing natural language text, photographs, medical scans, speech recordings, music, and video—accounts for the overwhelming majority of digital information and the explosive rise of generative AI. As explored in Natural Language Processing: How Machines Understand Human Language and Computer Vision: How AI Interprets Images and Videos, unstructured inputs lack predefined rows or columns; neural networks must discover hierarchical representations directly from raw characters, pixels, or waveforms. Harvesting unstructured data is cheap at web scale, yet distilling factual, coherent, and legally usable subsets from it is extraordinarily expensive."
+    "Not all AI data behaves the same way, nor does it flow through identical infrastructure. Practitioners organize training and operational data across five major categories, each carrying distinct collection economics, preprocessing hurdles, and failure modes."
   ]
 };
