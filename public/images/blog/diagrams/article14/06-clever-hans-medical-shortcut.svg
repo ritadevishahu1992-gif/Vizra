@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Anatomy of a 'Clever Hans' Shortcut in Medical Imaging">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 14.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Anatomy of a 'Clever Hans' Shortcut in Medical Imaging</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">How spurious hospital scanner tokens inflate internal AUC while causing catastrophic external hospital collapse (Zech et al., 2018)</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="134" width="340" height="464" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="70" y="166" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">1. TRAINING HOSPITAL DATA</text>
+<rect x="76" y="192" width="284" height="210" rx="10" fill="#0b101b" stroke="#242c3e" stroke-width="1.4"/>
+<ellipse cx="218" cy="298" rx="64" ry="74" fill="#1b2538" stroke="#64748b" stroke-width="1.4"/>
+<ellipse cx="188" cy="298" rx="26" ry="54" fill="#0d1320" stroke="#38BDF8" stroke-opacity="0.4"/>
+<ellipse cx="248" cy="298" rx="26" ry="54" fill="#0d1320" stroke="#38BDF8" stroke-opacity="0.4"/>
+<rect x="88" y="206" width="84" height="30" rx="5" fill="#2f1517" stroke="#EB3B2D" stroke-width="1.5"/>
+<text x="130" y="225" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#EB3B2D">PORTABLE</text>
+<text x="218" y="390" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="10.5" font-weight="600" fill="#EB3B2D">Spurious metal marker correlates w/ ICU severity</text>
+<text x="70" y="434" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">CNN discovers a zero-effort</text>
+<text x="70" y="457" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">shortcut: predicting pneumonia</text>
+<text x="70" y="480" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">from portable X-ray tags and</text>
+<text x="70" y="503" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">scanner margins rather than</text>
+<text x="70" y="526" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">lung parenchymal pathology.</text>
+<line x1="392" y1="340" x2="424" y2="340" stroke="#F59E0B" stroke-width="2.4" marker-end="url(#arrAmber)"/>
+<rect x="430" y="134" width="340" height="464" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="452" y="166" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">2. INTERNAL vs. EXTERNAL AUC</text>
+<rect x="454" y="192" width="292" height="240" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="512" y="258" width="64" height="142" rx="6" fill="#34D399" fill-opacity="0.82"/>
+<text x="544" y="248" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">AUC 0.931</text>
+<text x="544" y="420" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Internal</text>
+<rect x="636" y="324" width="64" height="76" rx="6" fill="#EB3B2D" fill-opacity="0.82"/>
+<text x="668" y="314" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">AUC 0.731</text>
+<text x="668" y="420" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">External</text>
+<text x="600" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">−0.200 AUC Collapse!</text>
+<text x="452" y="462" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Random in-hospital train/test</text>
+<text x="452" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">splits leak the same scanner</text>
+<text x="452" y="508" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">artifact into both partitions,</text>
+<text x="452" y="531" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">masking severe overfitting</text>
+<text x="452" y="554" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">until real external testing.</text>
+<line x1="774" y1="340" x2="806" y2="340" stroke="#34D399" stroke-width="2.4" marker-end="url(#arrGreen)"/>
+<rect x="812" y="134" width="340" height="464" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="834" y="166" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">3. ANTI-SHORTCUT DEFENSES</text>
+<rect x="834" y="196" width="296" height="80" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="848" y="222" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">External Site Splits</text>
+<text x="848" y="244" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Always evaluate on held-out</text>
+<text x="848" y="261" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">hospitals, cohorts &amp; time periods.</text>
+<rect x="834" y="292" width="296" height="80" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="848" y="318" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">Saliency / Grad-CAM</text>
+<text x="848" y="340" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Audit attribution maps to confirm</text>
+<text x="848" y="357" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">focus on true anatomy.</text>
+<rect x="834" y="388" width="296" height="80" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="848" y="414" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">Domain Augmentation</text>
+<text x="848" y="436" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Mask borders, randomize contrast &amp;</text>
+<text x="848" y="453" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">apply scanner invariance.</text>
+<rect x="834" y="484" width="296" height="80" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="848" y="510" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">Temporal Validation</text>
+<text x="848" y="532" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Prevent future data leakage in</text>
+<text x="848" y="549" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">time-series &amp; clinical logs.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 14.6 — Shortcut learning and external validation defenses</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

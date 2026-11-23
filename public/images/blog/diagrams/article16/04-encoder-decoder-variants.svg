@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Transformer Architecture Families &amp; Attention Visibility Masks">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 16.4  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Transformer Architecture Families &amp; Attention Visibility Masks</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Comparing bidirectional Encoder-Only, causal Decoder-Only, and cross-attention Encoder-Decoder models</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="68" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#38BDF8">ENCODER-ONLY</text>
+<text x="68" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">BERT · RoBERTa · ViT · DeBERTa</text>
+<text x="68" y="200" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Pretraining: Masked Language Modeling (MLM)</text>
+<rect x="144" y="224" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="176" y="224" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="208" y="224" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="240" y="224" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="272" y="224" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="144" y="256" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="176" y="256" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="208" y="256" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="240" y="256" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="272" y="256" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="144" y="288" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="176" y="288" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="208" y="288" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="240" y="288" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="272" y="288" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="144" y="320" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="176" y="320" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="208" y="320" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="240" y="320" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="272" y="320" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="144" y="352" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="176" y="352" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="208" y="352" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="240" y="352" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<rect x="272" y="352" width="27" height="27" rx="4" fill="#38BDF8" fill-opacity="0.78" stroke="#38BDF8" stroke-width="1"/>
+<text x="224" y="404" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Full Bidirectional Visibility</text>
+<line x1="68" y1="422" x2="380" y2="422" stroke="#242c3e"/>
+<text x="68" y="448" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#64748b">PRIMARY WORKLOADS</text>
+<circle cx="74" cy="476" r="3.2" fill="#38BDF8"/>
+<text x="86" y="480" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Classification &amp; NER</text>
+<circle cx="74" cy="510" r="3.2" fill="#38BDF8"/>
+<text x="86" y="514" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Dense RAG embeddings</text>
+<circle cx="74" cy="544" r="3.2" fill="#38BDF8"/>
+<text x="86" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Vision backbones (ViT)</text>
+<rect x="424" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="444" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#EB3B2D">DECODER-ONLY</text>
+<text x="444" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">GPT-4 · Claude · Llama 3 · DeepSeek</text>
+<text x="444" y="200" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Pretraining: Autoregressive Next-Token (CLM)</text>
+<rect x="520" y="224" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="552" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="584" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="616" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="648" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="520" y="256" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="552" y="256" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="584" y="256" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="616" y="256" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="648" y="256" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="520" y="288" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="552" y="288" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="584" y="288" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="616" y="288" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="648" y="288" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="520" y="320" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="552" y="320" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="584" y="320" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="616" y="320" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="648" y="320" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="520" y="352" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="552" y="352" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="584" y="352" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="616" y="352" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<rect x="648" y="352" width="27" height="27" rx="4" fill="#EB3B2D" fill-opacity="0.78" stroke="#EB3B2D" stroke-width="1"/>
+<text x="600" y="404" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">Lower-Triangular Causal Mask</text>
+<line x1="444" y1="422" x2="756" y2="422" stroke="#242c3e"/>
+<text x="444" y="448" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#64748b">PRIMARY WORKLOADS</text>
+<circle cx="450" cy="476" r="3.2" fill="#EB3B2D"/>
+<text x="462" y="480" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Chat, reasoning &amp; code</text>
+<circle cx="450" cy="510" r="3.2" fill="#EB3B2D"/>
+<text x="462" y="514" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">In-context few-shot learning</text>
+<circle cx="450" cy="544" r="3.2" fill="#EB3B2D"/>
+<text x="462" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Dominant frontier LLM design</text>
+<rect x="800" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="820" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#A78BFA">ENCODER-DECODER</text>
+<text x="820" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">T5 · BART · Whisper · Original 2017</text>
+<text x="820" y="200" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Pretraining: Span Corruption / Seq2Seq</text>
+<rect x="896" y="224" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="928" y="224" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="960" y="224" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="992" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="1024" y="224" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="896" y="256" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="928" y="256" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="960" y="256" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="992" y="256" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="1024" y="256" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="896" y="288" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="928" y="288" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="960" y="288" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="992" y="288" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="1024" y="288" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="896" y="320" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="928" y="320" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="960" y="320" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="992" y="320" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="1024" y="320" width="27" height="27" rx="4" fill="#0e121c" fill-opacity="1.0" stroke="#242c3e" stroke-width="1"/>
+<rect x="896" y="352" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="928" y="352" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="960" y="352" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="992" y="352" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<rect x="1024" y="352" width="27" height="27" rx="4" fill="#A78BFA" fill-opacity="0.78" stroke="#A78BFA" stroke-width="1"/>
+<text x="976" y="404" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">Bidirectional Enc + Causal Dec</text>
+<line x1="820" y1="422" x2="1132" y2="422" stroke="#242c3e"/>
+<text x="820" y="448" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#64748b">PRIMARY WORKLOADS</text>
+<circle cx="826" cy="476" r="3.2" fill="#A78BFA"/>
+<text x="838" y="480" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Machine translation</text>
+<circle cx="826" cy="510" r="3.2" fill="#A78BFA"/>
+<text x="838" y="514" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Speech-to-text (Whisper)</text>
+<circle cx="826" cy="544" r="3.2" fill="#A78BFA"/>
+<text x="838" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Structured summarization</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 16.4 — Transformer architecture families &amp; attention masks</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

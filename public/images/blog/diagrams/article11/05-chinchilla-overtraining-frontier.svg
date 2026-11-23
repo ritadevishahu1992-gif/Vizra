@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Chinchilla Compute-Optimal Frontier vs. Inference Overtraining">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 11.5  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Chinchilla Compute-Optimal Frontier vs. Inference Overtraining</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Log-log plot of model parameters (N) vs. training tokens (D) with C ≈ 6ND iso-compute contours</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="120" y="145" width="720" height="420" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="120.0" y1="145" x2="120.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="120.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1B</text>
+<line x1="360.0" y1="145" x2="360.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="360.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10B</text>
+<line x1="600.0" y1="145" x2="600.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="600.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">100B</text>
+<line x1="840.0" y1="145" x2="840.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="840.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1T</text>
+<line x1="120" y1="565.0" x2="840" y2="565.0" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="569.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">100B</text>
+<line x1="120" y1="484.8" x2="840" y2="484.8" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="488.84362920709674" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">300B</text>
+<line x1="120" y1="397.0" x2="840" y2="397.0" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="401.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1T</text>
+<line x1="120" y1="316.8" x2="840" y2="316.8" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="320.8436292070967" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">3T</text>
+<line x1="120" y1="229.0" x2="840" y2="229.0" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="233.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10T</text>
+<line x1="120" y1="178.4" x2="840" y2="178.4" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="182.42696072845115" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">20T</text>
+<text x="480.0" y="613" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Model Parameters N (Log Scale)</text>
+<text x="58" y="355.0" transform="rotate(-90 58 355.0)" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Training Tokens D (Log Scale)</text>
+<polyline points="120.0,191.7 132.0,200.1 144.0,208.5 156.0,216.9 168.0,225.3 180.0,233.7 192.0,242.1 204.0,250.5 216.0,258.9 228.0,267.3 240.0,275.7 252.0,284.1 264.0,292.5 276.0,300.9 288.0,309.3 300.0,317.7 312.0,326.1 324.0,334.5 336.0,342.9 348.0,351.3 360.0,359.7 372.0,368.1 384.0,376.5 396.0,384.9 408.0,393.3 420.0,401.7 432.0,410.1 444.0,418.5 456.0,426.9 468.0,435.3 480.0,443.7 492.0,452.1 504.0,460.5 516.0,468.9 528.0,477.3 540.0,485.7 552.0,494.1 564.0,502.5 576.0,510.9 588.0,519.3 600.0,527.7 612.0,536.1 624.0,544.5 636.0,552.9 648.0,561.3" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,4"/>
+<text x="642.0" y="555.3" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#64748b">10²³ FLOPs</text>
+<polyline points="300.0,149.7 312.0,158.1 324.0,166.5 336.0,174.9 348.0,183.3 360.0,191.7 372.0,200.1 384.0,208.5 396.0,216.9 408.0,225.3 420.0,233.7 432.0,242.1 444.0,250.5 456.0,258.9 468.0,267.3 480.0,275.7 492.0,284.1 504.0,292.5 516.0,300.9 528.0,309.3 540.0,317.7 552.0,326.1 564.0,334.5 576.0,342.9 588.0,351.3 600.0,359.7 612.0,368.1 624.0,376.5 636.0,384.9 648.0,393.3 660.0,401.7 672.0,410.1 684.0,418.5 696.0,426.9 708.0,435.3 720.0,443.7 732.0,452.1 744.0,460.5 756.0,468.9 768.0,477.3 780.0,485.7 792.0,494.1 804.0,502.5 816.0,510.9 828.0,519.3 840.0,527.7" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,4"/>
+<text x="834.0" y="521.7" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#64748b">10²⁴ FLOPs</text>
+<polyline points="540.0,149.7 552.0,158.1 564.0,166.5 576.0,174.9 588.0,183.3 600.0,191.7 612.0,200.1 624.0,208.5 636.0,216.9 648.0,225.3 660.0,233.7 672.0,242.1 684.0,250.5 696.0,258.9 708.0,267.3 720.0,275.7 732.0,284.1 744.0,292.5 756.0,300.9 768.0,309.3 780.0,317.7 792.0,326.1 804.0,334.5 816.0,342.9 828.0,351.3 840.0,359.7" fill="none" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,4"/>
+<text x="834.0" y="353.7" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#64748b">10²⁵ FLOPs</text>
+<line x1="287.8" y1="565.0" x2="840.0" y2="178.4" stroke="#38BDF8" stroke-width="2.6"/>
+<text x="565" y="325" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Chinchilla Compute-Optimal (D ≈ 20N)</text>
+<polygon points="120,145 840.0,178.4 287.8,565.0 120,565" fill="#EB3B2D" fill-opacity="0.06"/>
+<text x="260" y="200" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">INFERENCE-AWARE OVERTRAINING ZONE</text>
+<text x="260" y="218" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">(D &gt;&gt; 20N for cheaper serving latency)</text>
+<circle cx="658.3" cy="484.8" r="6.5" fill="#F59E0B" stroke="#090b10" stroke-width="2"/>
+<text x="670.3291316847107" y="500.84362920709674" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#F59E0B">GPT-3 (175B / 300B)</text>
+<circle cx="707.3" cy="484.8" r="6.5" fill="#F59E0B" stroke="#090b10" stroke-width="2"/>
+<text x="719.3179275221327" y="474.84362920709674" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#F59E0B">Gopher (280B / 300B)</text>
+<circle cx="562.8" cy="372.5" r="6.5" fill="#38BDF8" stroke="#090b10" stroke-width="2"/>
+<text x="574.8235296034217" y="376.45049000605604" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#38BDF8">Chinchilla (70B / 1.4T)</text>
+<circle cx="336.7" cy="199.4" r="6.5" fill="#EB3B2D" stroke="#090b10" stroke-width="2"/>
+<text x="348.7415968780665" y="203.41666847864553" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#EB3B2D">Llama 3 8B (8B / 15T)</text>
+<circle cx="562.8" cy="199.4" r="6.5" fill="#EB3B2D" stroke="#090b10" stroke-width="2"/>
+<text x="574.8235296034217" y="213.41666847864553" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#EB3B2D">Llama 3 70B (70B / 15T)</text>
+<circle cx="745.8" cy="196.6" r="6.5" fill="#34D399" stroke="#090b10" stroke-width="2"/>
+<text x="733.7892055715205" y="182.5550674764504" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#34D399">Llama 3 405B (405B / 15.6T)</text>
+<circle cx="798.4" cy="200.4" r="6.5" fill="#A78BFA" stroke="#090b10" stroke-width="2"/>
+<text x="786.4134048405581" y="218.39603181364714" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#A78BFA">DeepSeek-V3 (671B / 14.8T)</text>
+<rect x="865" y="145" width="287" height="420" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="885" y="178" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">KEY SCALING INSIGHTS</text>
+<text x="885" y="208" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">1. Training-Optimal Ratio:</text>
+<text x="885" y="228" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Hoffmann et al. (2022) showed</text>
+<text x="885" y="248" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">equal scaling of N &amp; D at ~20</text>
+<text x="885" y="268" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">tokens/param minimizes loss</text>
+<text x="885" y="288" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">for a fixed training budget.</text>
+<text x="885" y="308" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="885" y="328" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">2. Inference Economics:</text>
+<text x="885" y="348" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Llama 3 8B trained on 15T</text>
+<text x="885" y="368" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">tokens (~1,875 tok/param —</text>
+<text x="885" y="388" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">94× overtrained) to slash</text>
+<text x="885" y="408" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">per-query serving costs.</text>
+<text x="885" y="428" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="885" y="448" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">3. Frontier Ceiling:</text>
+<text x="885" y="468" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Llama 3 405B reached ~3.8×10²⁵</text>
+<text x="885" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">FLOPs; DeepSeek-V3 used sparse</text>
+<text x="885" y="508" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">MoE (37B active) for 2.788M</text>
+<text x="885" y="528" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">H800 GPU hours (~$5.58M).</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 11.5 — Chinchilla compute-optimal frontier vs. overtraining</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

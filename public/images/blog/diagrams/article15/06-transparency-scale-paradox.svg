@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="The Scale &amp; Transparency Paradox (2020–2025)">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 15.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">The Scale &amp; Transparency Paradox (2020–2025)</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Left: Epoch AI frontier training compute growth (4×–5×/year)  ·  Right: Stanford CRFM FMTI average transparency scores</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="72" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A · FRONTIER TRAINING COMPUTE (LOG₁₀ FLOPs)</text>
+<rect x="112" y="196" width="444" height="320" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="112" y1="492.0" x2="556" y2="492.0" stroke="#1a2030"/>
+<text x="104" y="496.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">10^23</text>
+<line x1="112" y1="414.3" x2="556" y2="414.3" stroke="#1a2030"/>
+<text x="104" y="418.2857142857143" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">10^24</text>
+<line x1="112" y1="336.6" x2="556" y2="336.6" stroke="#1a2030"/>
+<text x="104" y="340.57142857142856" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">10^25</text>
+<line x1="112" y1="258.9" x2="556" y2="258.9" stroke="#1a2030"/>
+<text x="104" y="262.8571428571429" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">10^26</text>
+<text x="136.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2020</text>
+<text x="202.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2021</text>
+<text x="268.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2022</text>
+<text x="334.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2023</text>
+<text x="400.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2024</text>
+<text x="466.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2025</text>
+<text x="532.0" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">2026</text>
+<line x1="112" y1="336.6" x2="556" y2="336.6" stroke="#EB3B2D" stroke-width="1.8" stroke-dasharray="6,4"/>
+<text x="124" y="328.57142857142856" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#EB3B2D">EU AI Act Systemic-Risk Threshold (10²⁵ FLOPs)</text>
+<polyline points="162.4,453.1 281.2,433.7 347.2,313.3 433.0,291.5 485.8,251.1" fill="none" stroke="#38BDF8" stroke-width="2.8"/>
+<circle cx="162.4" cy="453.1" r="5.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.5"/>
+<text x="162.400000000006" y="441.14285714285717" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#f1f5f9">GPT-3</text>
+<circle cx="281.2" cy="433.7" r="5.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.5"/>
+<text x="281.200000000003" y="421.7142857142857" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#f1f5f9">Chinchilla</text>
+<circle cx="347.2" cy="313.3" r="5.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.5"/>
+<text x="347.200000000003" y="301.2571428571428" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#f1f5f9">GPT-4</text>
+<circle cx="433.0" cy="291.5" r="5.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.5"/>
+<text x="433.0" y="279.497142857143" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#f1f5f9">Llama 3 405B</text>
+<circle cx="485.8" cy="251.1" r="5.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.5"/>
+<text x="485.799999999997" y="239.08571428571418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#f1f5f9">2025 Frontier</text>
+<text x="334" y="574" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Compute doubles every ~5–6 months (4×–5×/yr, Epoch AI)</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="636" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">B · STANFORD CRFM TRANSPARENCY INDEX (FMTI)</text>
+<rect x="666" y="196" width="444" height="320" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="666" y1="488.0" x2="1110" y2="488.0" stroke="#1a2030"/>
+<text x="656" y="492.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">0</text>
+<line x1="666" y1="422.0" x2="1110" y2="422.0" stroke="#1a2030"/>
+<text x="656" y="426.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">25</text>
+<line x1="666" y1="356.0" x2="1110" y2="356.0" stroke="#1a2030"/>
+<text x="656" y="360.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">50</text>
+<line x1="666" y1="290.0" x2="1110" y2="290.0" stroke="#1a2030"/>
+<text x="656" y="294.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">75</text>
+<line x1="666" y1="224.0" x2="1110" y2="224.0" stroke="#1a2030"/>
+<text x="656" y="228.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#94a3b8">100</text>
+<rect x="730" y="391" width="72" height="97" rx="8" fill="#F59E0B" fill-opacity="0.85"/>
+<text x="766" y="379" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#F59E0B">37 / 100</text>
+<text x="766" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#f1f5f9">Oct 2023</text>
+<rect x="854" y="335" width="72" height="153" rx="8" fill="#34D399" fill-opacity="0.85"/>
+<text x="890" y="323" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#34D399">58 / 100</text>
+<text x="890" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#f1f5f9">May 2024</text>
+<rect x="978" y="383" width="72" height="105" rx="8" fill="#EB3B2D" fill-opacity="0.85"/>
+<text x="1014" y="371" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#EB3B2D">40 / 100</text>
+<text x="1014" y="536" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#f1f5f9">Dec 2025</text>
+<text x="888" y="574" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Open-weight transparency rose in 2024, then declined in 2025</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 15.6 — Frontier compute scale vs. transparency index</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

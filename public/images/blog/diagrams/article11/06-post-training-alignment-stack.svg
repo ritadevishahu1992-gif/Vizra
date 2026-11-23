@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Modern Post-Training &amp; Alignment Stack">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 11.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Modern Post-Training &amp; Alignment Stack</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Comparing RLHF (Reward Model + PPO), Direct Preference Optimization (DPO), and Verifier-Driven RLVR</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="126" width="1104" height="72" rx="10" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="72" y="154" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">PRETRAINED BASE MODEL  →  SUPERVISED FINE-TUNING (SFT)</text>
+<text x="72" y="178" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Instills conversational instruction formatting, tool schemas, and structured response templates before preference or verifier optimization.</text>
+<line x1="222" y1="198" x2="222" y2="228" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrMuted)"/>
+<rect x="48" y="234" width="348" height="374" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="68" y="266" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#F59E0B">TRACK A · RLHF (PPO)</text>
+<rect x="66" y="286" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="78" y="310" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">1. Human Preferences</text>
+<text x="78" y="332" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Pairwise rankings (y_w ≻ y_l)</text>
+<line x1="222" y1="350" x2="222" y2="362" stroke="#F59E0B" stroke-width="1.6"/>
+<rect x="66" y="364" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="78" y="388" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">2. Reward Model r_φ(x,y)</text>
+<text x="78" y="410" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Bradley-Terry scalar scorer</text>
+<line x1="222" y1="428" x2="222" y2="440" stroke="#F59E0B" stroke-width="1.6"/>
+<rect x="66" y="442" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="78" y="466" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">3. PPO Policy Update</text>
+<text x="78" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Clipped surrogate + KL penalty</text>
+<rect x="66" y="520" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="78" y="544" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">Strength / Trade-off</text>
+<text x="78" y="566" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">High nuance; complex 4-model GPU memory</text>
+<line x1="600" y1="198" x2="600" y2="228" stroke="#A78BFA" stroke-width="2" marker-end="url(#arrMuted)"/>
+<rect x="426" y="234" width="348" height="374" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="446" y="266" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#A78BFA">TRACK B · DPO</text>
+<rect x="444" y="286" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="456" y="310" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">1. Preference Dataset</text>
+<text x="456" y="332" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Static or online (x, y_w, y_l)</text>
+<line x1="600" y1="350" x2="600" y2="362" stroke="#A78BFA" stroke-width="1.6"/>
+<rect x="444" y="364" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="456" y="388" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">2. Closed-Form Reward</text>
+<text x="456" y="410" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Eliminates separate reward model</text>
+<line x1="600" y1="428" x2="600" y2="440" stroke="#A78BFA" stroke-width="1.6"/>
+<rect x="444" y="442" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="456" y="466" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">3. Binary Cross-Entropy</text>
+<text x="456" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Directly boosts log(π_θ / π_ref) margin</text>
+<rect x="444" y="520" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="456" y="544" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">Strength / Trade-off</text>
+<text x="456" y="566" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Simple &amp; stable; sensitive to off-policy drift</text>
+<line x1="978" y1="198" x2="978" y2="228" stroke="#34D399" stroke-width="2" marker-end="url(#arrMuted)"/>
+<rect x="804" y="234" width="348" height="374" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="824" y="266" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#34D399">TRACK C · RLVR (GRPO)</text>
+<rect x="822" y="286" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="834" y="310" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">1. Verifiable Prompts</text>
+<text x="834" y="332" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Math, unit-tested code, formal proofs</text>
+<line x1="978" y1="350" x2="978" y2="362" stroke="#34D399" stroke-width="1.6"/>
+<rect x="822" y="364" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="834" y="388" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">2. Deterministic Oracle</text>
+<text x="834" y="410" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Compiler / theorem prover gives {0, 1}</text>
+<line x1="978" y1="428" x2="978" y2="440" stroke="#34D399" stroke-width="1.6"/>
+<rect x="822" y="442" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="834" y="466" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">3. Group Relative RL</text>
+<text x="834" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Rewarding multi-step Chain-of-Thought</text>
+<rect x="822" y="520" width="312" height="64" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="834" y="544" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="700" fill="#f1f5f9">Strength / Trade-off</text>
+<text x="834" y="566" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Eliminates reward hacking; drives o1 &amp; R1</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 11.6 — Post-training alignment architectures</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

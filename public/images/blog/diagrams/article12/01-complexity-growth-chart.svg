@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Asymptotic Big-O Complexity Scaling (Log Operations)">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 12.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Asymptotic Big-O Complexity Scaling (Log Operations)</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">How polynomial and exponential operation counts cross real-time interactive latency budgets</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="120" y="140" width="740" height="425" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="120.0" y1="140" x2="120.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="120.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1</text>
+<line x1="262.0" y1="140" x2="262.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="262.020202020202" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">20</text>
+<line x1="411.5" y1="140" x2="411.5" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="411.5151515151515" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">40</text>
+<line x1="561.0" y1="140" x2="561.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="561.0101010101009" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">60</text>
+<line x1="710.5" y1="140" x2="710.5" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="710.5050505050506" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">80</text>
+<line x1="860.0" y1="140" x2="860.0" y2="565" stroke="#1a2030" stroke-width="1"/>
+<text x="860.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">100</text>
+<line x1="120" y1="565.0" x2="860" y2="565.0" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="569.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1</text>
+<line x1="120" y1="458.8" x2="860" y2="458.8" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="462.75" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10^3</text>
+<line x1="120" y1="352.5" x2="860" y2="352.5" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="356.5" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10^6</text>
+<line x1="120" y1="246.2" x2="860" y2="246.2" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="250.25" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10^9</text>
+<line x1="120" y1="140.0" x2="860" y2="140.0" stroke="#1a2030" stroke-width="1"/>
+<text x="108" y="144.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10^12</text>
+<line x1="120" y1="317.1" x2="860" y2="317.1" stroke="#EB3B2D" stroke-width="1.5" stroke-dasharray="6,4"/>
+<text x="850" y="309.0833333333333" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">≈ 10 ms Real-Time Budget (10⁷ ops)</text>
+<polyline points="120.0,565.0 127.5,565.0 134.9,565.0 142.4,565.0 149.9,565.0 157.4,565.0 164.8,565.0 172.3,565.0 179.8,565.0 187.3,565.0 194.7,565.0 202.2,565.0 209.7,565.0 217.2,565.0 224.6,565.0 232.1,565.0 239.6,565.0 247.1,565.0 254.5,565.0 262.0,565.0 269.5,565.0 277.0,565.0 284.4,565.0 291.9,565.0 299.4,565.0 306.9,565.0 314.3,565.0 321.8,565.0 329.3,565.0 336.8,565.0 344.2,565.0 351.7,565.0 359.2,565.0 366.7,565.0 374.1,565.0 381.6,565.0 389.1,565.0 396.6,565.0 404.0,565.0 411.5,565.0 419.0,565.0 426.5,565.0 433.9,565.0 441.4,565.0 448.9,565.0 456.4,565.0 463.8,565.0 471.3,565.0 478.8,565.0 486.3,565.0 493.7,565.0 501.2,565.0 508.7,565.0 516.2,565.0 523.6,565.0 531.1,565.0 538.6,565.0 546.1,565.0 553.5,565.0 561.0,565.0 568.5,565.0 576.0,565.0 583.4,565.0 590.9,565.0 598.4,565.0 605.9,565.0 613.3,565.0 620.8,565.0 628.3,565.0 635.8,565.0 643.2,565.0 650.7,565.0 658.2,565.0 665.7,565.0 673.1,565.0 680.6,565.0 688.1,565.0 695.6,565.0 703.0,565.0 710.5,565.0 718.0,565.0 725.5,565.0 732.9,565.0 740.4,565.0 747.9,565.0 755.4,565.0 762.8,565.0 770.3,565.0 777.8,565.0 785.3,565.0 792.7,565.0 800.2,565.0 807.7,565.0 815.2,565.0 822.6,565.0 830.1,565.0 837.6,565.0 845.1,565.0 852.5,565.0 860.0,565.0" fill="none" stroke="#34D399" stroke-width="2.6"/>
+<text x="854" y="559.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">O(1)</text>
+<polyline points="120.0,565.0 127.5,565.0 134.9,557.9 142.4,554.3 149.9,552.0 157.4,550.4 164.8,549.1 172.3,548.1 179.8,547.3 187.3,546.5 194.7,545.9 202.2,545.4 209.7,544.9 217.2,544.4 224.6,544.0 232.1,543.7 239.6,543.3 247.1,543.0 254.5,542.8 262.0,542.5 269.5,542.2 277.0,542.0 284.4,541.8 291.9,541.6 299.4,541.4 306.9,541.2 314.3,541.0 321.8,540.8 329.3,540.7 336.8,540.5 344.2,540.4 351.7,540.2 359.2,540.1 366.7,540.0 374.1,539.9 381.6,539.7 389.1,539.6 396.6,539.5 404.0,539.4 411.5,539.3 419.0,539.2 426.5,539.1 433.9,539.0 441.4,538.9 448.9,538.8 456.4,538.7 463.8,538.6 471.3,538.5 478.8,538.5 486.3,538.4 493.7,538.3 501.2,538.2 508.7,538.2 516.2,538.1 523.6,538.0 531.1,537.9 538.6,537.9 546.1,537.8 553.5,537.7 561.0,537.7 568.5,537.6 576.0,537.6 583.4,537.5 590.9,537.4 598.4,537.4 605.9,537.3 613.3,537.3 620.8,537.2 628.3,537.2 635.8,537.1 643.2,537.1 650.7,537.0 658.2,537.0 665.7,536.9 673.1,536.9 680.6,536.8 688.1,536.8 695.6,536.7 703.0,536.7 710.5,536.6 718.0,536.6 725.5,536.6 732.9,536.5 740.4,536.5 747.9,536.4 755.4,536.4 762.8,536.3 770.3,536.3 777.8,536.3 785.3,536.2 792.7,536.2 800.2,536.2 807.7,536.1 815.2,536.1 822.6,536.0 830.1,536.0 837.6,536.0 845.1,535.9 852.5,535.9 860.0,535.9" fill="none" stroke="#38BDF8" stroke-width="2.6"/>
+<text x="854" y="529.87261709081" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">O(log n)</text>
+<polyline points="120.0,565.0 127.5,554.3 134.9,548.1 142.4,543.7 149.9,540.2 157.4,537.4 164.8,535.1 172.3,533.0 179.8,531.2 187.3,529.6 194.7,528.1 202.2,526.8 209.7,525.5 217.2,524.4 224.6,523.3 232.1,522.4 239.6,521.4 247.1,520.5 254.5,519.7 262.0,518.9 269.5,518.2 277.0,517.5 284.4,516.8 291.9,516.1 299.4,515.5 306.9,514.9 314.3,514.3 321.8,513.7 329.3,513.2 336.8,512.7 344.2,512.2 351.7,511.7 359.2,511.2 366.7,510.8 374.1,510.3 381.6,509.9 389.1,509.5 396.6,509.0 404.0,508.6 411.5,508.3 419.0,507.9 426.5,507.5 433.9,507.1 441.4,506.8 448.9,506.4 456.4,506.1 463.8,505.8 471.3,505.5 478.8,505.1 486.3,504.8 493.7,504.5 501.2,504.2 508.7,503.9 516.2,503.6 523.6,503.4 531.1,503.1 538.6,502.8 546.1,502.5 553.5,502.3 561.0,502.0 568.5,501.8 576.0,501.5 583.4,501.3 590.9,501.0 598.4,500.8 605.9,500.6 613.3,500.3 620.8,500.1 628.3,499.9 635.8,499.7 643.2,499.4 650.7,499.2 658.2,499.0 665.7,498.8 673.1,498.6 680.6,498.4 688.1,498.2 695.6,498.0 703.0,497.8 710.5,497.6 718.0,497.4 725.5,497.2 732.9,497.0 740.4,496.8 747.9,496.7 755.4,496.5 762.8,496.3 770.3,496.1 777.8,496.0 785.3,495.8 792.7,495.6 800.2,495.4 807.7,495.3 815.2,495.1 822.6,495.0 830.1,494.8 837.6,494.6 845.1,494.5 852.5,494.3 860.0,494.2" fill="none" stroke="#60A5FA" stroke-width="2.6"/>
+<text x="854" y="488.1666666666667" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#60A5FA">O(n)</text>
+<polyline points="120.0,565.0 127.5,554.3 134.9,541.0 142.4,533.0 149.9,527.3 157.4,522.8 164.8,519.2 172.3,516.1 179.8,513.5 187.3,511.1 194.7,509.0 202.2,507.1 209.7,505.4 217.2,503.8 224.6,502.4 232.1,501.0 239.6,499.8 247.1,498.6 254.5,497.5 262.0,496.4 269.5,495.4 277.0,494.5 284.4,493.6 291.9,492.7 299.4,491.9 306.9,491.1 314.3,490.3 321.8,489.6 329.3,488.9 336.8,488.2 344.2,487.6 351.7,486.9 359.2,486.3 366.7,485.7 374.1,485.2 381.6,484.6 389.1,484.1 396.6,483.5 404.0,483.0 411.5,482.5 419.0,482.1 426.5,481.6 433.9,481.1 441.4,480.7 448.9,480.3 456.4,479.8 463.8,479.4 471.3,479.0 478.8,478.6 486.3,478.2 493.7,477.8 501.2,477.5 508.7,477.1 516.2,476.7 523.6,476.4 531.1,476.0 538.6,475.7 546.1,475.4 553.5,475.0 561.0,474.7 568.5,474.4 576.0,474.1 583.4,473.8 590.9,473.5 598.4,473.2 605.9,472.9 613.3,472.6 620.8,472.3 628.3,472.0 635.8,471.8 643.2,471.5 650.7,471.2 658.2,471.0 665.7,470.7 673.1,470.5 680.6,470.2 688.1,470.0 695.6,469.7 703.0,469.5 710.5,469.2 718.0,469.0 725.5,468.8 732.9,468.5 740.4,468.3 747.9,468.1 755.4,467.9 762.8,467.7 770.3,467.4 777.8,467.2 785.3,467.0 792.7,466.8 800.2,466.6 807.7,466.4 815.2,466.2 822.6,466.0 830.1,465.8 837.6,465.6 845.1,465.4 852.5,465.2 860.0,465.0" fill="none" stroke="#A78BFA" stroke-width="2.6"/>
+<text x="854" y="459.03928375747665" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#A78BFA">O(n log n)</text>
+<polyline points="120.0,565.0 127.5,543.7 134.9,531.2 142.4,522.4 149.9,515.5 157.4,509.9 164.8,505.1 172.3,501.0 179.8,497.4 187.3,494.2 194.7,491.2 202.2,488.6 209.7,486.1 217.2,483.8 224.6,481.7 232.1,479.7 239.6,477.8 247.1,476.1 254.5,474.4 262.0,472.8 269.5,471.3 277.0,469.9 284.4,468.5 291.9,467.2 299.4,466.0 306.9,464.8 314.3,463.6 321.8,462.5 329.3,461.4 336.8,460.4 344.2,459.4 351.7,458.4 359.2,457.4 366.7,456.5 374.1,455.6 381.6,454.8 389.1,453.9 396.6,453.1 404.0,452.3 411.5,451.5 419.0,450.8 426.5,450.0 433.9,449.3 441.4,448.6 448.9,447.9 456.4,447.2 463.8,446.6 471.3,445.9 478.8,445.3 486.3,444.7 493.7,444.0 501.2,443.4 508.7,442.9 516.2,442.3 523.6,441.7 531.1,441.2 538.6,440.6 546.1,440.1 553.5,439.6 561.0,439.0 568.5,438.5 576.0,438.0 583.4,437.5 590.9,437.1 598.4,436.6 605.9,436.1 613.3,435.7 620.8,435.2 628.3,434.7 635.8,434.3 643.2,433.9 650.7,433.4 658.2,433.0 665.7,432.6 673.1,432.2 680.6,431.8 688.1,431.4 695.6,431.0 703.0,430.6 710.5,430.2 718.0,429.8 725.5,429.4 732.9,429.1 740.4,428.7 747.9,428.3 755.4,428.0 762.8,427.6 770.3,427.3 777.8,426.9 785.3,426.6 792.7,426.2 800.2,425.9 807.7,425.6 815.2,425.2 822.6,424.9 830.1,424.6 837.6,424.3 845.1,424.0 852.5,423.6 860.0,423.3" fill="none" stroke="#F59E0B" stroke-width="2.6"/>
+<text x="854" y="417.33333333333337" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">O(n²)</text>
+<polyline points="120.0,565.0 127.5,533.0 134.9,514.3 142.4,501.0 149.9,490.7 157.4,482.3 164.8,475.2 172.3,469.0 179.8,463.6 187.3,458.8 194.7,454.4 202.2,450.3 209.7,446.6 217.2,443.2 224.6,440.0 232.1,437.1 239.6,434.3 247.1,431.6 254.5,429.1 262.0,426.8 269.5,424.5 277.0,422.4 284.4,420.3 291.9,418.4 299.4,416.5 306.9,414.7 314.3,412.9 321.8,411.2 329.3,409.6 336.8,408.1 344.2,406.5 351.7,405.1 359.2,403.7 366.7,402.3 374.1,400.9 381.6,399.6 389.1,398.4 396.6,397.1 404.0,395.9 411.5,394.8 419.0,393.6 426.5,392.5 433.9,391.4 441.4,390.4 448.9,389.3 456.4,388.3 463.8,387.3 471.3,386.4 478.8,385.4 486.3,384.5 493.7,383.6 501.2,382.7 508.7,381.8 516.2,380.9 523.6,380.1 531.1,379.3 538.6,378.4 546.1,377.6 553.5,376.8 561.0,376.1 568.5,375.3 576.0,374.6 583.4,373.8 590.9,373.1 598.4,372.4 605.9,371.7 613.3,371.0 620.8,370.3 628.3,369.6 635.8,369.0 643.2,368.3 650.7,367.7 658.2,367.0 665.7,366.4 673.1,365.8 680.6,365.2 688.1,364.6 695.6,364.0 703.0,363.4 710.5,362.8 718.0,362.2 725.5,361.7 732.9,361.1 740.4,360.5 747.9,360.0 755.4,359.5 762.8,358.9 770.3,358.4 777.8,357.9 785.3,357.4 792.7,356.9 800.2,356.3 807.7,355.8 815.2,355.4 822.6,354.9 830.1,354.4 837.6,353.9 845.1,353.4 852.5,353.0 860.0,352.5" fill="none" stroke="#F472B6" stroke-width="2.6"/>
+<text x="854" y="346.5" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F472B6">O(n³)</text>
+<polyline points="120.0,554.3 127.5,543.7 134.9,533.0 142.4,522.4 149.9,511.7 157.4,501.0 164.8,490.4 172.3,479.7 179.8,469.0 187.3,458.4 194.7,447.7 202.2,437.1 209.7,426.4 217.2,415.7 224.6,405.1 232.1,394.4 239.6,383.8 247.1,373.1 254.5,362.4 262.0,351.8 269.5,341.1 277.0,330.4 284.4,319.8 291.9,309.1 299.4,298.5 306.9,287.8 314.3,277.1 321.8,266.5 329.3,255.8 336.8,245.2 344.2,234.5 351.7,223.8 359.2,213.2 366.7,202.5 374.1,191.8 381.6,181.2 389.1,170.5 396.6,159.9 404.0,149.2" fill="none" stroke="#EB3B2D" stroke-width="2.6"/>
+<text x="410.04040404040404" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">O(2ⁿ)</text>
+<text x="490.0" y="611" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Input Size n</text>
+<text x="58" y="352.5" transform="rotate(-90 58 352.5)" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Operation Count (Log₁₀ Scale)</text>
+<rect x="884" y="140" width="268" height="425" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="904" y="174" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">COMPLEXITY CLASSES</text>
+<circle cx="910" cy="208" r="5" fill="#34D399"/>
+<text x="924" y="212" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">O(1)</text>
+<text x="924" y="229" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Hash lookup, array index</text>
+<circle cx="910" cy="256" r="5" fill="#38BDF8"/>
+<text x="924" y="260" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">O(log n)</text>
+<text x="924" y="277" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Binary search, B-tree</text>
+<circle cx="910" cy="304" r="5" fill="#60A5FA"/>
+<text x="924" y="308" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#60A5FA">O(n)</text>
+<text x="924" y="325" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Linear scan, counting</text>
+<circle cx="910" cy="352" r="5" fill="#A78BFA"/>
+<text x="924" y="356" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#A78BFA">O(n log n)</text>
+<text x="924" y="373" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Merge sort, FFT, Timsort</text>
+<circle cx="910" cy="400" r="5" fill="#F59E0B"/>
+<text x="924" y="404" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">O(n²)</text>
+<text x="924" y="421" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Dense self-attention</text>
+<circle cx="910" cy="448" r="5" fill="#F472B6"/>
+<text x="924" y="452" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F472B6">O(n³)</text>
+<text x="924" y="469" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Naive matmul, Floyd</text>
+<circle cx="910" cy="496" r="5" fill="#EB3B2D"/>
+<text x="924" y="500" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">O(2ⁿ)</text>
+<text x="924" y="517" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Exhaustive TSP / SAT</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 12.1 — Asymptotic Big-O growth curves</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

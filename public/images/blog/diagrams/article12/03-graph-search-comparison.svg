@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Shortest-Path Graph Search Efficiency">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 12.3  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Shortest-Path Graph Search Efficiency</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Explored search frontiers from Start (S) to Goal (G) across Dijkstra, A* Heuristic, and Contraction Hierarchies</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="130" width="352" height="475" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="68" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">DIJKSTRA'S ALGORITHM</text>
+<text x="68" y="182" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Uniform radial expansion — g(n) only</text>
+<rect x="74" y="212" width="300" height="300" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<circle cx="99" cy="237" r="2.2" fill="#293246"/>
+<circle cx="140" cy="237" r="2.2" fill="#293246"/>
+<circle cx="181" cy="237" r="2.2" fill="#293246"/>
+<circle cx="222" cy="237" r="2.2" fill="#293246"/>
+<circle cx="263" cy="237" r="2.2" fill="#293246"/>
+<circle cx="304" cy="237" r="2.2" fill="#293246"/>
+<circle cx="345" cy="237" r="2.2" fill="#293246"/>
+<circle cx="99" cy="278" r="2.2" fill="#293246"/>
+<circle cx="140" cy="278" r="2.2" fill="#293246"/>
+<circle cx="181" cy="278" r="2.2" fill="#293246"/>
+<circle cx="222" cy="278" r="2.2" fill="#293246"/>
+<circle cx="263" cy="278" r="2.2" fill="#293246"/>
+<circle cx="304" cy="278" r="2.2" fill="#293246"/>
+<circle cx="345" cy="278" r="2.2" fill="#293246"/>
+<circle cx="99" cy="319" r="2.2" fill="#293246"/>
+<circle cx="140" cy="319" r="2.2" fill="#293246"/>
+<circle cx="181" cy="319" r="2.2" fill="#293246"/>
+<circle cx="222" cy="319" r="2.2" fill="#293246"/>
+<circle cx="263" cy="319" r="2.2" fill="#293246"/>
+<circle cx="304" cy="319" r="2.2" fill="#293246"/>
+<circle cx="345" cy="319" r="2.2" fill="#293246"/>
+<circle cx="99" cy="360" r="2.2" fill="#293246"/>
+<circle cx="140" cy="360" r="2.2" fill="#293246"/>
+<circle cx="181" cy="360" r="2.2" fill="#293246"/>
+<circle cx="222" cy="360" r="2.2" fill="#293246"/>
+<circle cx="263" cy="360" r="2.2" fill="#293246"/>
+<circle cx="304" cy="360" r="2.2" fill="#293246"/>
+<circle cx="345" cy="360" r="2.2" fill="#293246"/>
+<circle cx="99" cy="401" r="2.2" fill="#293246"/>
+<circle cx="140" cy="401" r="2.2" fill="#293246"/>
+<circle cx="181" cy="401" r="2.2" fill="#293246"/>
+<circle cx="222" cy="401" r="2.2" fill="#293246"/>
+<circle cx="263" cy="401" r="2.2" fill="#293246"/>
+<circle cx="304" cy="401" r="2.2" fill="#293246"/>
+<circle cx="345" cy="401" r="2.2" fill="#293246"/>
+<circle cx="99" cy="442" r="2.2" fill="#293246"/>
+<circle cx="140" cy="442" r="2.2" fill="#293246"/>
+<circle cx="181" cy="442" r="2.2" fill="#293246"/>
+<circle cx="222" cy="442" r="2.2" fill="#293246"/>
+<circle cx="263" cy="442" r="2.2" fill="#293246"/>
+<circle cx="304" cy="442" r="2.2" fill="#293246"/>
+<circle cx="345" cy="442" r="2.2" fill="#293246"/>
+<circle cx="99" cy="483" r="2.2" fill="#293246"/>
+<circle cx="140" cy="483" r="2.2" fill="#293246"/>
+<circle cx="181" cy="483" r="2.2" fill="#293246"/>
+<circle cx="222" cy="483" r="2.2" fill="#293246"/>
+<circle cx="263" cy="483" r="2.2" fill="#293246"/>
+<circle cx="304" cy="483" r="2.2" fill="#293246"/>
+<circle cx="345" cy="483" r="2.2" fill="#293246"/>
+<circle cx="139" cy="437" r="150" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.45" stroke-width="1"/>
+<circle cx="139" cy="437" r="110" fill="#F59E0B" fill-opacity="0.14" stroke="#F59E0B" stroke-opacity="0.45" stroke-width="1"/>
+<circle cx="139" cy="437" r="70" fill="#F59E0B" fill-opacity="0.22" stroke="#F59E0B" stroke-opacity="0.45" stroke-width="1"/>
+<line x1="139" y1="437" x2="319" y2="287" stroke="#f1f5f9" stroke-width="1.8" stroke-dasharray="5,4"/>
+<circle cx="139" cy="437" r="11" fill="#38BDF8"/><text x="139" y="441" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#000">S</text>
+<circle cx="319" cy="287" r="11" fill="#EB3B2D"/><text x="319" y="291" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">G</text>
+<rect x="68" y="532" width="312" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="80" y="554" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">~100% disk explored</text>
+<text x="80" y="572" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Optimal, slow at continental scale</text>
+<rect x="424" y="130" width="352" height="475" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="444" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">A* HEURISTIC SEARCH</text>
+<text x="444" y="182" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Goal-directed ellipse — f(n) = g(n) + h(n)</text>
+<rect x="450" y="212" width="300" height="300" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<circle cx="475" cy="237" r="2.2" fill="#293246"/>
+<circle cx="516" cy="237" r="2.2" fill="#293246"/>
+<circle cx="557" cy="237" r="2.2" fill="#293246"/>
+<circle cx="598" cy="237" r="2.2" fill="#293246"/>
+<circle cx="639" cy="237" r="2.2" fill="#293246"/>
+<circle cx="680" cy="237" r="2.2" fill="#293246"/>
+<circle cx="721" cy="237" r="2.2" fill="#293246"/>
+<circle cx="475" cy="278" r="2.2" fill="#293246"/>
+<circle cx="516" cy="278" r="2.2" fill="#293246"/>
+<circle cx="557" cy="278" r="2.2" fill="#293246"/>
+<circle cx="598" cy="278" r="2.2" fill="#293246"/>
+<circle cx="639" cy="278" r="2.2" fill="#293246"/>
+<circle cx="680" cy="278" r="2.2" fill="#293246"/>
+<circle cx="721" cy="278" r="2.2" fill="#293246"/>
+<circle cx="475" cy="319" r="2.2" fill="#293246"/>
+<circle cx="516" cy="319" r="2.2" fill="#293246"/>
+<circle cx="557" cy="319" r="2.2" fill="#293246"/>
+<circle cx="598" cy="319" r="2.2" fill="#293246"/>
+<circle cx="639" cy="319" r="2.2" fill="#293246"/>
+<circle cx="680" cy="319" r="2.2" fill="#293246"/>
+<circle cx="721" cy="319" r="2.2" fill="#293246"/>
+<circle cx="475" cy="360" r="2.2" fill="#293246"/>
+<circle cx="516" cy="360" r="2.2" fill="#293246"/>
+<circle cx="557" cy="360" r="2.2" fill="#293246"/>
+<circle cx="598" cy="360" r="2.2" fill="#293246"/>
+<circle cx="639" cy="360" r="2.2" fill="#293246"/>
+<circle cx="680" cy="360" r="2.2" fill="#293246"/>
+<circle cx="721" cy="360" r="2.2" fill="#293246"/>
+<circle cx="475" cy="401" r="2.2" fill="#293246"/>
+<circle cx="516" cy="401" r="2.2" fill="#293246"/>
+<circle cx="557" cy="401" r="2.2" fill="#293246"/>
+<circle cx="598" cy="401" r="2.2" fill="#293246"/>
+<circle cx="639" cy="401" r="2.2" fill="#293246"/>
+<circle cx="680" cy="401" r="2.2" fill="#293246"/>
+<circle cx="721" cy="401" r="2.2" fill="#293246"/>
+<circle cx="475" cy="442" r="2.2" fill="#293246"/>
+<circle cx="516" cy="442" r="2.2" fill="#293246"/>
+<circle cx="557" cy="442" r="2.2" fill="#293246"/>
+<circle cx="598" cy="442" r="2.2" fill="#293246"/>
+<circle cx="639" cy="442" r="2.2" fill="#293246"/>
+<circle cx="680" cy="442" r="2.2" fill="#293246"/>
+<circle cx="721" cy="442" r="2.2" fill="#293246"/>
+<circle cx="475" cy="483" r="2.2" fill="#293246"/>
+<circle cx="516" cy="483" r="2.2" fill="#293246"/>
+<circle cx="557" cy="483" r="2.2" fill="#293246"/>
+<circle cx="598" cy="483" r="2.2" fill="#293246"/>
+<circle cx="639" cy="483" r="2.2" fill="#293246"/>
+<circle cx="680" cy="483" r="2.2" fill="#293246"/>
+<circle cx="721" cy="483" r="2.2" fill="#293246"/>
+<ellipse cx="605.0" cy="362.0" rx="122" ry="48" transform="rotate(-40 605.0 362.0)" fill="#38BDF8" fill-opacity="0.16" stroke="#38BDF8" stroke-width="1.5"/>
+<ellipse cx="605.0" cy="362.0" rx="88" ry="26" transform="rotate(-40 605.0 362.0)" fill="#38BDF8" fill-opacity="0.14" stroke="#38BDF8" stroke-dasharray="4,3"/>
+<line x1="515" y1="437" x2="695" y2="287" stroke="#f1f5f9" stroke-width="1.8" stroke-dasharray="5,4"/>
+<circle cx="515" cy="437" r="11" fill="#38BDF8"/><text x="515" y="441" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#000">S</text>
+<circle cx="695" cy="287" r="11" fill="#EB3B2D"/><text x="695" y="291" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">G</text>
+<rect x="444" y="532" width="312" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="456" y="554" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">~22% nodes visited</text>
+<text x="456" y="572" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Admissible heuristic prunes search</text>
+<rect x="800" y="130" width="352" height="475" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="820" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">CONTRACTION HIERARCHIES</text>
+<text x="820" y="182" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Precomputed highway shortcut hierarchy</text>
+<rect x="826" y="212" width="300" height="300" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<circle cx="851" cy="237" r="2.2" fill="#293246"/>
+<circle cx="892" cy="237" r="2.2" fill="#293246"/>
+<circle cx="933" cy="237" r="2.2" fill="#293246"/>
+<circle cx="974" cy="237" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="237" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="237" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="237" r="2.2" fill="#293246"/>
+<circle cx="851" cy="278" r="2.2" fill="#293246"/>
+<circle cx="892" cy="278" r="2.2" fill="#293246"/>
+<circle cx="933" cy="278" r="2.2" fill="#293246"/>
+<circle cx="974" cy="278" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="278" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="278" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="278" r="2.2" fill="#293246"/>
+<circle cx="851" cy="319" r="2.2" fill="#293246"/>
+<circle cx="892" cy="319" r="2.2" fill="#293246"/>
+<circle cx="933" cy="319" r="2.2" fill="#293246"/>
+<circle cx="974" cy="319" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="319" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="319" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="319" r="2.2" fill="#293246"/>
+<circle cx="851" cy="360" r="2.2" fill="#293246"/>
+<circle cx="892" cy="360" r="2.2" fill="#293246"/>
+<circle cx="933" cy="360" r="2.2" fill="#293246"/>
+<circle cx="974" cy="360" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="360" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="360" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="360" r="2.2" fill="#293246"/>
+<circle cx="851" cy="401" r="2.2" fill="#293246"/>
+<circle cx="892" cy="401" r="2.2" fill="#293246"/>
+<circle cx="933" cy="401" r="2.2" fill="#293246"/>
+<circle cx="974" cy="401" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="401" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="401" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="401" r="2.2" fill="#293246"/>
+<circle cx="851" cy="442" r="2.2" fill="#293246"/>
+<circle cx="892" cy="442" r="2.2" fill="#293246"/>
+<circle cx="933" cy="442" r="2.2" fill="#293246"/>
+<circle cx="974" cy="442" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="442" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="442" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="442" r="2.2" fill="#293246"/>
+<circle cx="851" cy="483" r="2.2" fill="#293246"/>
+<circle cx="892" cy="483" r="2.2" fill="#293246"/>
+<circle cx="933" cy="483" r="2.2" fill="#293246"/>
+<circle cx="974" cy="483" r="2.2" fill="#293246"/>
+<circle cx="1015" cy="483" r="2.2" fill="#293246"/>
+<circle cx="1056" cy="483" r="2.2" fill="#293246"/>
+<circle cx="1097" cy="483" r="2.2" fill="#293246"/>
+<path d="M 891 437 Q 896 372 951 362" fill="none" stroke="#34D399" stroke-width="2.2"/>
+<path d="M 951 362 Q 976 297 1021 312" fill="none" stroke="#34D399" stroke-width="3.2"/>
+<path d="M 1021 312 Q 1066 317 1071 287" fill="none" stroke="#34D399" stroke-width="2.2"/>
+<circle cx="951" cy="362" r="6" fill="#34D399"/>
+<circle cx="1021" cy="312" r="6" fill="#34D399"/>
+<text x="941" y="350" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#34D399">Hub 1</text>
+<text x="1011" y="300" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#34D399">Hub 2</text>
+<line x1="891" y1="437" x2="1071" y2="287" stroke="#f1f5f9" stroke-width="1.8" stroke-dasharray="5,4"/>
+<circle cx="891" cy="437" r="11" fill="#38BDF8"/><text x="891" y="441" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#000">S</text>
+<circle cx="1071" cy="287" r="11" fill="#EB3B2D"/><text x="1071" y="291" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">G</text>
+<rect x="820" y="532" width="312" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="832" y="554" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">&lt;0.1% nodes visited</text>
+<text x="832" y="572" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Sub-millisecond continental routing</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 12.3 — Shortest-path graph search frontiers</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

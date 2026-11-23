@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Underfitting vs. Balanced Generalization vs. Overfitting">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 14.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Underfitting vs. Balanced Generalization vs. Overfitting</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Three polynomial hypotheses fitted to identical noisy observations sampled from a smooth true function f(x)</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="68" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">UNDERFITTING (HIGH BIAS)</text>
+<text x="68" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="500" fill="#f1f5f9">Degree-1 Linear Model</text>
+<rect x="70" y="200" width="308" height="275" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<polyline points="88.0,337.5 92.5,328.3 97.1,319.1 101.6,310.1 106.1,301.4 110.7,293.0 115.2,284.9 119.7,277.3 124.3,270.3 128.8,263.8 133.3,257.9 137.9,252.8 142.4,248.4 146.9,244.8 151.5,241.9 156.0,239.9 160.5,238.8 165.1,238.5 169.6,239.1 174.1,240.5 178.7,242.8 183.2,245.9 187.7,249.8 192.3,254.5 196.8,259.9 201.3,265.9 205.9,272.6 210.4,279.8 214.9,287.6 219.5,295.8 224.0,304.3 228.5,313.2 233.1,322.2 237.6,331.4 242.1,340.6 246.7,349.9 251.2,359.0 255.7,367.9 260.3,376.5 264.8,384.8 269.3,392.7 273.9,400.1 278.4,407.0 282.9,413.3 287.5,418.9 292.0,423.8 296.5,427.9 301.1,431.3 305.6,433.8 310.1,435.5 314.7,436.4 319.2,436.4 323.7,435.5 328.3,433.8 332.8,431.2 337.3,427.9 341.9,423.7 346.4,418.8 350.9,413.2 355.5,406.9 360.0,400.0" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="5,4"/>
+<line x1="93.4" y1="283.1" x2="354.6" y2="398.9" stroke="#F59E0B" stroke-width="3"/>
+<circle cx="109.8" cy="307.8" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="137.0" cy="266.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="164.2" cy="242.5" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="191.4" cy="254.3" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="218.6" cy="292.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="245.8" cy="342.4" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="273.0" cy="394.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="300.2" cy="418.7" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="327.4" cy="398.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="346.4" cy="362.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<text x="84" y="463" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="400" fill="#64748b">Dashed: true f(x) · Dots: noisy samples</text>
+<text x="68" y="505" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Misses underlying curvature; both train</text>
+<text x="68" y="526" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">&amp; test error remain high.</text>
+<rect x="424" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="444" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">OPTIMAL FIT (GENERALIZES)</text>
+<text x="444" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="500" fill="#f1f5f9">Degree-3 Smooth Model</text>
+<rect x="446" y="200" width="308" height="275" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<polyline points="464.0,337.5 468.5,328.3 473.1,319.1 477.6,310.1 482.1,301.4 486.7,293.0 491.2,284.9 495.7,277.3 500.3,270.3 504.8,263.8 509.3,257.9 513.9,252.8 518.4,248.4 522.9,244.8 527.5,241.9 532.0,239.9 536.5,238.8 541.1,238.5 545.6,239.1 550.1,240.5 554.7,242.8 559.2,245.9 563.7,249.8 568.3,254.5 572.8,259.9 577.3,265.9 581.9,272.6 586.4,279.8 590.9,287.6 595.5,295.8 600.0,304.3 604.5,313.2 609.1,322.2 613.6,331.4 618.1,340.6 622.7,349.9 627.2,359.0 631.7,367.9 636.3,376.5 640.8,384.8 645.3,392.7 649.9,400.1 654.4,407.0 658.9,413.3 663.5,418.9 668.0,423.8 672.5,427.9 677.1,431.3 681.6,433.8 686.1,435.5 690.7,436.4 695.2,436.4 699.7,435.5 704.3,433.8 708.8,431.2 713.3,427.9 717.9,423.7 722.4,418.8 726.9,413.2 731.5,406.9 736.0,400.0" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="5,4"/>
+<polyline points="464.0,333.5 468.5,324.9 473.1,316.3 477.6,307.8 482.1,299.6 486.7,291.7 491.2,284.1 495.7,277.0 500.3,270.3 504.8,264.2 509.3,258.8 513.9,253.9 518.4,249.8 522.9,246.4 527.5,243.7 532.0,241.8 536.5,240.8 541.1,240.5 545.6,241.0 550.1,242.4 554.7,244.5 559.2,247.4 563.7,251.1 568.3,255.5 572.8,260.6 577.3,266.2 581.9,272.5 586.4,279.3 590.9,286.6 595.5,294.3 600.0,302.4 604.5,310.7 609.1,319.2 613.6,327.8 618.1,336.5 622.7,345.1 627.2,353.7 631.7,362.1 636.3,370.2 640.8,378.0 645.3,385.4 649.9,392.4 654.4,398.9 658.9,404.8 663.5,410.0 668.0,414.6 672.5,418.5 677.1,421.7 681.6,424.1 686.1,425.7 690.7,426.5 695.2,426.5 699.7,425.7 704.3,424.1 708.8,421.7 713.3,418.5 717.9,414.6 722.4,409.9 726.9,404.7 731.5,398.8 736.0,392.3" fill="none" stroke="#34D399" stroke-width="3"/>
+<circle cx="485.8" cy="307.8" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="513.0" cy="266.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="540.2" cy="242.5" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="567.4" cy="254.3" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="594.6" cy="292.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="621.8" cy="342.4" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="649.0" cy="394.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="676.2" cy="418.7" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="703.4" cy="398.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="722.4" cy="362.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<text x="460" y="463" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="400" fill="#64748b">Dashed: true f(x) · Dots: noisy samples</text>
+<text x="444" y="505" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Captures true signal f(x) while ignoring</text>
+<text x="444" y="526" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">random observation noise.</text>
+<rect x="800" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="820" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">OVERFITTING (HIGH VARIANCE)</text>
+<text x="820" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="500" fill="#f1f5f9">Degree-9 Oscillating Model</text>
+<rect x="822" y="200" width="308" height="275" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<polyline points="840.0,337.5 844.5,328.3 849.1,319.1 853.6,310.1 858.1,301.4 862.7,293.0 867.2,284.9 871.7,277.3 876.3,270.3 880.8,263.8 885.3,257.9 889.9,252.8 894.4,248.4 898.9,244.8 903.5,241.9 908.0,239.9 912.5,238.8 917.1,238.5 921.6,239.1 926.1,240.5 930.7,242.8 935.2,245.9 939.7,249.8 944.3,254.5 948.8,259.9 953.3,265.9 957.9,272.6 962.4,279.8 966.9,287.6 971.5,295.8 976.0,304.3 980.5,313.2 985.1,322.2 989.6,331.4 994.1,340.6 998.7,349.9 1003.2,359.0 1007.7,367.9 1012.3,376.5 1016.8,384.8 1021.3,392.7 1025.9,400.1 1030.4,407.0 1034.9,413.3 1039.5,418.9 1044.0,423.8 1048.5,427.9 1053.1,431.3 1057.6,433.8 1062.1,435.5 1066.7,436.4 1071.2,436.4 1075.7,435.5 1080.3,433.8 1084.8,431.2 1089.3,427.9 1093.9,423.7 1098.4,418.8 1102.9,413.2 1107.5,406.9 1112.0,400.0" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="5,4"/>
+<polyline points="861.8,307.8 865.2,288.2 868.6,270.8 872.0,257.5 875.4,249.4 878.8,247.1 882.2,250.0 885.6,257.0 889.0,266.2 892.4,279.9 895.8,291.1 899.2,297.6 902.6,297.9 906.0,291.6 909.4,279.2 912.8,262.1 916.2,242.5 919.6,229.5 923.0,220.7 926.4,220.7 929.8,220.7 933.2,220.7 936.6,224.8 940.0,238.5 943.4,254.3 946.8,275.8 950.2,294.8 953.6,309.1 957.0,317.2 960.4,318.7 963.8,314.1 967.2,304.8 970.6,292.9 974.0,284.7 977.4,278.7 980.8,276.8 984.2,280.1 987.6,289.1 991.0,303.5 994.4,321.9 997.8,342.4 1001.2,365.7 1004.6,386.4 1008.0,402.4 1011.4,412.2 1014.8,415.5 1018.2,412.6 1021.6,405.0 1025.0,394.9 1028.4,383.5 1031.8,374.3 1035.2,369.1 1038.6,369.2 1042.0,375.0 1045.4,386.1 1048.8,401.3 1052.2,418.7 1055.6,432.9 1059.0,444.5 1062.4,451.5 1065.8,452.3 1069.2,446.5 1072.6,434.6 1076.0,418.0 1079.4,398.9 1081.7,379.9 1084.1,363.1 1086.5,350.4 1088.9,342.9 1091.3,341.2 1093.6,344.8 1096.0,352.4 1098.4,362.2" fill="none" stroke="#EB3B2D" stroke-width="2.6"/>
+<circle cx="861.8" cy="307.8" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="889.0" cy="266.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="916.2" cy="242.5" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="943.4" cy="254.3" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="970.6" cy="292.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="997.8" cy="342.4" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="1025.0" cy="394.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="1052.2" cy="418.7" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="1079.4" cy="398.9" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<circle cx="1098.4" cy="362.2" r="4.5" fill="#38BDF8" stroke="#090b10" stroke-width="1.4"/>
+<text x="836" y="463" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="400" fill="#64748b">Dashed: true f(x) · Dots: noisy samples</text>
+<text x="820" y="505" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Memorizes every noisy sample (train ≈ 0)</text>
+<text x="820" y="526" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">but explodes between points.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 14.1 — Underfitting, balanced generalization, and overfitting</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

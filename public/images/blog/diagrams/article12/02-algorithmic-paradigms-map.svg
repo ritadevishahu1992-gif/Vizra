@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Five Classical Algorithmic Design Paradigms">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 12.2  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Five Classical Algorithmic Design Paradigms</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Core problem-decomposition blueprints powering databases, compilers, networks, and AI systems</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="130" width="352" height="232" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="68" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">01 · DIVIDE &amp; CONQUER</text>
+<text x="68" y="186" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">Split → Solve → Merge</text>
+<rect x="68" y="200" width="312" height="28" rx="6" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<text x="80" y="219" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#38BDF8">T(n) = aT(n/b) + f(n)</text>
+<circle cx="74" cy="252" r="3" fill="#38BDF8"/>
+<text x="86" y="256" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Merge Sort &amp; Quicksort</text>
+<circle cx="74" cy="280" r="3" fill="#38BDF8"/>
+<text x="86" y="284" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Fast Fourier Transform (FFT)</text>
+<circle cx="74" cy="308" r="3" fill="#38BDF8"/>
+<text x="86" y="312" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Strassen Matrix Multiply</text>
+<rect x="424" y="130" width="352" height="232" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="444" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#A78BFA">02 · DYNAMIC PROGRAMMING</text>
+<text x="444" y="186" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">Overlapping Subproblems</text>
+<rect x="444" y="200" width="312" height="28" rx="6" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<text x="456" y="219" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#A78BFA">Memoize / Tabulate DAG</text>
+<circle cx="450" cy="252" r="3" fill="#A78BFA"/>
+<text x="462" y="256" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Viterbi &amp; Sequence Alignment</text>
+<circle cx="450" cy="280" r="3" fill="#A78BFA"/>
+<text x="462" y="284" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Shortest Path (Bellman-Ford)</text>
+<circle cx="450" cy="308" r="3" fill="#A78BFA"/>
+<text x="462" y="312" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Transformer KV-Cache Reuse</text>
+<rect x="800" y="130" width="352" height="232" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="820" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">03 · GREEDY ALGORITHMS</text>
+<text x="820" y="186" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">Locally Optimal Choice</text>
+<rect x="820" y="200" width="312" height="28" rx="6" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<text x="832" y="219" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#34D399">Matroid / Cut Property</text>
+<circle cx="826" cy="252" r="3" fill="#34D399"/>
+<text x="838" y="256" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Huffman Entropy Coding</text>
+<circle cx="826" cy="280" r="3" fill="#34D399"/>
+<text x="838" y="284" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Dijkstra &amp; Prim MST</text>
+<circle cx="826" cy="308" r="3" fill="#34D399"/>
+<text x="838" y="312" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Greedy Token Decoding</text>
+<rect x="220" y="384" width="368" height="224" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="240" y="416" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">04 · GRAPH TRAVERSAL</text>
+<text x="240" y="440" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">State-Space Exploration</text>
+<rect x="240" y="454" width="328" height="28" rx="6" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<text x="252" y="473" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#F59E0B">V Vertices, E Edges</text>
+<circle cx="246" cy="506" r="3" fill="#F59E0B"/>
+<text x="258" y="510" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">BFS / DFS &amp; PageRank</text>
+<circle cx="246" cy="534" r="3" fill="#F59E0B"/>
+<text x="258" y="538" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">A* Heuristic Navigation</text>
+<circle cx="246" cy="562" r="3" fill="#F59E0B"/>
+<text x="258" y="566" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Backprop on Compute DAGs</text>
+<rect x="612" y="384" width="368" height="224" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="632" y="416" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">05 · RANDOMIZED / APPROX</text>
+<text x="632" y="440" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f1f5f9">Probabilistic Guarantees</text>
+<rect x="632" y="454" width="328" height="28" rx="6" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<text x="644" y="473" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#EB3B2D">Expected Time / Sketching</text>
+<circle cx="638" cy="506" r="3" fill="#EB3B2D"/>
+<text x="650" y="510" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">HyperLogLog &amp; Bloom Filters</text>
+<circle cx="638" cy="534" r="3" fill="#EB3B2D"/>
+<text x="650" y="538" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Monte Carlo Tree Search</text>
+<circle cx="638" cy="562" r="3" fill="#EB3B2D"/>
+<text x="650" y="566" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Stochastic Gradient Descent</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 12.2 — Classical algorithmic design paradigms</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

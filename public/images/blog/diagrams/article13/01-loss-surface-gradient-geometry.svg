@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Geometry of Gradient Descent on a Non-Convex Loss Surface">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 13.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Geometry of Gradient Descent on a Non-Convex Loss Surface</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Contour map illustrating orthogonal steepest-descent steps (-η∇L), local basins, and high-dimensional saddle points</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="720" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<ellipse cx="540" cy="390" rx="189.7" ry="118.8" fill="none" stroke="#38BDF8" stroke-opacity="0.17" stroke-width="1.3"/>
+<ellipse cx="540" cy="390" rx="149.5" ry="93.6" fill="none" stroke="#38BDF8" stroke-opacity="0.30" stroke-width="1.3"/>
+<ellipse cx="540" cy="390" rx="110.4" ry="69.1" fill="none" stroke="#38BDF8" stroke-opacity="0.43" stroke-width="1.3"/>
+<ellipse cx="540" cy="390" rx="74.8" ry="46.8" fill="none" stroke="#38BDF8" stroke-opacity="0.55" stroke-width="1.3"/>
+<ellipse cx="540" cy="390" rx="43.7" ry="27.4" fill="none" stroke="#38BDF8" stroke-opacity="0.66" stroke-width="1.3"/>
+<ellipse cx="540" cy="390" rx="18.4" ry="11.5" fill="none" stroke="#38BDF8" stroke-opacity="0.74" stroke-width="1.3"/>
+<ellipse cx="220" cy="290" rx="115.0" ry="86.2" fill="none" stroke="#A78BFA" stroke-opacity="0.17" stroke-width="1.2"/>
+<ellipse cx="220" cy="290" rx="85.0" ry="63.8" fill="none" stroke="#A78BFA" stroke-opacity="0.31" stroke-width="1.2"/>
+<ellipse cx="220" cy="290" rx="58.0" ry="43.5" fill="none" stroke="#A78BFA" stroke-opacity="0.43" stroke-width="1.2"/>
+<ellipse cx="220" cy="290" rx="34.0" ry="25.5" fill="none" stroke="#A78BFA" stroke-opacity="0.54" stroke-width="1.2"/>
+<ellipse cx="220" cy="290" rx="14.0" ry="10.5" fill="none" stroke="#A78BFA" stroke-opacity="0.63" stroke-width="1.2"/>
+<circle cx="365" cy="335" r="7" fill="#F59E0B" stroke="#090b10" stroke-width="2"/>
+<text x="365" y="314" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">Saddle Point (∇L = 0, indefinite Hessian)</text>
+<polyline points="140,480 205,440 285,395 355,352 425,355 485,372 538,390" fill="none" stroke="#EB3B2D" stroke-width="2.8" marker-end="url(#arrRed)"/>
+<circle cx="140" cy="480" r="4.5" fill="#EB3B2D"/>
+<circle cx="205" cy="440" r="4.5" fill="#EB3B2D"/>
+<circle cx="285" cy="395" r="4.5" fill="#EB3B2D"/>
+<circle cx="355" cy="352" r="4.5" fill="#EB3B2D"/>
+<circle cx="425" cy="355" r="4.5" fill="#EB3B2D"/>
+<circle cx="485" cy="372" r="4.5" fill="#EB3B2D"/>
+<line x1="205" y1="440" x2="150" y2="475" stroke="#34D399" stroke-width="2" marker-end="url(#arrGreen)"/>
+<text x="126" y="496" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#34D399">+∇L (Ascent)</text>
+<text x="245" y="435" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">−η∇L (Descent step)</text>
+<circle cx="540" cy="390" r="7" fill="#34D399" stroke="#090b10" stroke-width="2"/>
+<text x="540" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">Flat Wide Minimum (Good Generalization)</text>
+<circle cx="220" cy="290" r="6" fill="#A78BFA"/>
+<text x="220" y="272" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#A78BFA">Sharp Local Basin</text>
+<text x="408" y="592" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#94a3b8">Parameter θ₁  →</text>
+<rect x="792" y="128" width="360" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="814" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">OPTIMIZATION GEOMETRY</text>
+<rect x="814" y="186" width="316" height="120" rx="8" fill="#161b28" stroke="#38BDF8" stroke-width="1.1"/>
+<text x="828" y="212" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#38BDF8">Gradient Orthogonality</text>
+<text x="828" y="234" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">∇L(θ) always points perpendicular to</text>
+<text x="828" y="252" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">level-set contours in the direction of</text>
+<text x="828" y="270" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">steepest ascent; moving along −η∇L</text>
+<text x="828" y="288" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">decreases loss locally.</text>
+<rect x="814" y="322" width="316" height="120" rx="8" fill="#161b28" stroke="#F59E0B" stroke-width="1.1"/>
+<text x="828" y="348" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#F59E0B">Saddle Points Dominate</text>
+<text x="828" y="370" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">In million- or billion-parameter</text>
+<text x="828" y="388" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">spaces, true local minima are</text>
+<text x="828" y="406" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">exponentially rare; critical points are</text>
+<text x="828" y="424" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">overwhelmingly saddle points escaped</text>
+<text x="828" y="442" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">via SGD noise.</text>
+<rect x="814" y="458" width="316" height="120" rx="8" fill="#161b28" stroke="#34D399" stroke-width="1.1"/>
+<text x="828" y="484" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">Flat vs. Sharp Basins</text>
+<text x="828" y="506" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">Wide, low-curvature minima tolerate</text>
+<text x="828" y="524" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">small weight shifts between training</text>
+<text x="828" y="542" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">and test distributions far better than</text>
+<text x="828" y="560" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#94a3b8">narrow sharp valleys.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 13.1 — Non-convex loss landscape &amp; gradient descent geometry</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Classical U-Shaped Generalization vs. Modern Double Descent">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 14.4  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Classical U-Shaped Generalization vs. Modern Double Descent</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Reconciling classical bias–variance theory with overparameterized deep neural networks beyond the interpolation threshold</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="110" y="145" width="760" height="420" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="110" y="145" width="364.8" height="420" fill="#F59E0B" fill-opacity="0.04"/>
+<rect x="474.8" y="145" width="395.2" height="420" fill="#38BDF8" fill-opacity="0.05"/>
+<line x1="474.8" y1="145" x2="474.8" y2="565" stroke="#EB3B2D" stroke-width="2" stroke-dasharray="6,4"/>
+<text x="474.8" y="171" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">INTERPOLATION THRESHOLD (N ≈ P)</text>
+<text x="292.4" y="197" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">CLASSICAL REGIME</text>
+<text x="672.4" y="197" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">MODERN OVERPARAMETERIZED REGIME</text>
+<polyline points="130.0,303.4 137.2,311.8 144.4,320.0 151.6,328.1 158.8,336.1 166.0,343.9 173.2,351.7 180.4,359.3 187.6,366.7 194.8,374.1 202.0,381.3 209.2,388.4 216.4,395.3 223.6,402.1 230.8,408.8 238.0,415.3 245.2,421.7 252.4,428.0 259.6,434.1 266.8,440.1 274.0,446.0 281.2,451.7 288.4,457.2 295.6,462.6 302.8,467.9 310.0,473.0 317.2,477.9 324.4,482.7 331.6,487.4 338.8,491.8 346.0,496.2 353.2,500.3 360.4,504.3 367.6,508.1 374.8,511.7 382.0,515.2 389.2,518.5 396.4,521.6 403.6,524.5 410.8,527.2 418.0,529.7 425.2,532.0 432.4,534.1 439.6,535.9 446.8,536.0 454.0,536.0 461.2,536.0 468.4,536.0 475.6,536.0 482.8,536.0 490.0,536.0 497.2,536.0 504.4,536.0 511.6,536.0 518.8,536.0 526.0,536.0 533.2,536.0 540.4,536.0 547.6,536.0 554.8,536.0 562.0,536.0 569.2,536.0 576.4,536.0 583.6,536.0 590.8,536.0 598.0,536.0 605.2,536.0 612.4,536.0 619.6,536.0 626.8,536.0 634.0,536.0 641.2,536.0 648.4,536.0 655.6,536.0 662.8,536.0 670.0,536.0 677.2,536.0 684.4,536.0 691.6,536.0 698.8,536.0 706.0,536.0 713.2,536.0 720.4,536.0 727.6,536.0 734.8,536.0 742.0,536.0 749.2,536.0 756.4,536.0 763.6,536.0 770.8,536.0 778.0,536.0 785.2,536.0 792.4,536.0 799.6,536.0 806.8,536.0 814.0,536.0 821.2,536.0 828.4,536.0 835.6,536.0 842.8,536.0 850.0,536.0" fill="none" stroke="#34D399" stroke-width="2.6" stroke-dasharray="6,4"/>
+<polyline points="130.0,263.8 137.2,278.9 144.4,293.3 151.6,307.1 158.8,320.3 166.0,332.8 173.2,344.6 180.4,355.9 187.6,366.5 194.8,376.4 202.0,385.7 209.2,394.4 216.4,402.4 223.6,409.8 230.8,416.5 238.0,422.6 245.2,428.1 252.4,432.9 259.6,437.0 266.8,440.6 274.0,443.5 281.2,445.7 288.4,447.3 295.6,448.3 302.8,448.6 310.0,448.3 317.2,447.3 324.4,445.7 331.6,443.5 338.8,440.6 346.0,437.0 353.2,432.9 360.4,428.1 367.6,422.6 374.8,416.5 382.0,409.8 389.2,402.4 396.4,394.4 403.6,385.7 410.8,376.4 418.0,366.5 425.2,355.9 432.4,344.6 439.6,332.8 446.8,320.3 454.0,307.1 461.2,293.3 468.4,278.9 475.6,257.2 482.8,270.6 490.0,283.2 497.2,295.1 504.4,306.4 511.6,317.0 518.8,327.0 526.0,336.5 533.2,345.4 540.4,353.8 547.6,361.8 554.8,369.3 562.0,376.3 569.2,383.0 576.4,389.3 583.6,395.3 590.8,400.9 598.0,406.2 605.2,411.2 612.4,415.9 619.6,420.3 626.8,424.5 634.0,428.5 641.2,432.2 648.4,435.7 655.6,439.1 662.8,442.2 670.0,445.2 677.2,448.0 684.4,450.6 691.6,453.1 698.8,455.4 706.0,457.7 713.2,459.8 720.4,461.7 727.6,463.6 734.8,465.4 742.0,467.0 749.2,468.6 756.4,470.1 763.6,471.5 770.8,472.8 778.0,474.0 785.2,475.2 792.4,476.3 799.6,477.3 806.8,478.3 814.0,479.2 821.2,480.1 828.4,480.9 835.6,481.7 842.8,482.5 850.0,483.2" fill="none" stroke="#EB3B2D" stroke-width="3.2"/>
+<circle cx="302.8" cy="448.6" r="5.5" fill="#F59E0B"/>
+<text x="302.79999999999995" y="472.6" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#F59E0B">Classical Sweet Spot</text>
+<circle cx="792.4" cy="478.3" r="6" fill="#38BDF8"/>
+<text x="742.0" y="462.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#38BDF8">Minimum-Norm Smooth Interpolator</text>
+<text x="490.0" y="601" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Model Capacity / Effective Parameters (Increasing →)</text>
+<text x="56" y="355.0" transform="rotate(-90 56 355.0)" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Prediction Risk / Error</text>
+<rect x="892" y="145" width="260" height="420" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="912" y="178" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">WHY DOUBLE DESCENT?</text>
+<text x="912" y="208" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• Red solid: Test Risk</text>
+<text x="912" y="229" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• Green dashed: Train Risk</text>
+<text x="912" y="250" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="912" y="271" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">At the threshold (N ≈ P),</text>
+<text x="912" y="292" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">only ONE fragile function</text>
+<text x="912" y="313" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">fits training noise — causing</text>
+<text x="912" y="334" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">wild variance spikes.</text>
+<text x="912" y="355" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="912" y="376" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Far past threshold (P &gt;&gt; N),</text>
+<text x="912" y="397" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">countless solutions fit the</text>
+<text x="912" y="418" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">data; SGD + weight decay</text>
+<text x="912" y="439" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">implicitly select the</text>
+<text x="912" y="460" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">smoothest, minimum-norm</text>
+<text x="912" y="481" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">interpolator (Belkin 2019;</text>
+<text x="912" y="502" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Nakkiran et al. 2020).</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 14.4 — Classical U-curve vs. modern double descent</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

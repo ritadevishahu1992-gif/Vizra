@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Why Transformers Replaced Recurrence: O(n) Serial vs. O(1) Global Path">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 16.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Why Transformers Replaced Recurrence: O(n) Serial vs. O(1) Global Path</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Comparing sequential hidden-state bottlenecks in RNNs/LSTMs against full GPU sequence parallelism in Transformers</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="1104" height="212" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="72" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">RECURRENT NEURAL NETWORK (RNN / LSTM) — SEQUENTIAL O(n) BOTTLENECK</text>
+<rect x="96" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="155" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h1 (The)</text>
+<line x1="216" y1="222" x2="262" y2="222" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<text x="239" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">t=1</text>
+<rect x="268" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="327" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h2 (cat)</text>
+<line x1="388" y1="222" x2="434" y2="222" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<text x="411" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">t=2</text>
+<rect x="440" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="499" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h3 (sat)</text>
+<line x1="560" y1="222" x2="606" y2="222" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<text x="583" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">t=3</text>
+<rect x="612" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="671" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h4 (on)</text>
+<line x1="732" y1="222" x2="778" y2="222" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<text x="755" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">t=4</text>
+<rect x="784" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="843" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h5 (the)</text>
+<line x1="904" y1="222" x2="950" y2="222" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<text x="927" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">t=5</text>
+<rect x="956" y="196" width="118" height="52" rx="8" fill="#241b0d" stroke="#F59E0B" stroke-width="1.3"/>
+<text x="1015" y="227" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="600" fill="#f1f5f9">h6 (mat)</text>
+<text x="72" y="286" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">• Path length between token 1 and token n is O(n) → vanishing long-range memory &amp; fixed-vector bottleneck</text>
+<text x="72" y="312" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#F59E0B">• Token h₆ MUST wait for h₁→h₂→h₃→h₄→h₅ → cannot parallelize across sequence dimension on GPUs</text>
+<rect x="48" y="366" width="1104" height="242" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="72" y="398" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">TRANSFORMER SELF-ATTENTION — FULL PARALLELISM &amp; O(1) DIRECT PATH LENGTH</text>
+<path d="M 155 495 Q 241.0 459 327 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 155 495 Q 327.0 445 499 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 155 495 Q 413.0 431 671 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 155 495 Q 499.0 417 843 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 155 495 Q 585.0 403 1015 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 327 495 Q 413.0 459 499 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 327 495 Q 499.0 445 671 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 327 495 Q 585.0 431 843 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 327 495 Q 671.0 417 1015 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 499 495 Q 585.0 459 671 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 499 495 Q 671.0 445 843 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 499 495 Q 757.0 431 1015 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 671 495 Q 757.0 459 843 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 671 495 Q 843.0 445 1015 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<path d="M 843 495 Q 929.0 459 1015 495" fill="none" stroke="#38BDF8" stroke-opacity="0.32" stroke-width="1.4"/>
+<rect x="96" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="155" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x1 (The)</text>
+<rect x="268" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="327" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x2 (cat)</text>
+<rect x="440" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="499" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x3 (sat)</text>
+<rect x="612" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="671" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x4 (on)</text>
+<rect x="784" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="843" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x5 (the)</text>
+<rect x="956" y="495" width="118" height="48" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="1015" y="524" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">x6 (mat)</text>
+<text x="72" y="578" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#34D399">• Every token attends directly to every prior token in O(1) hops via single batched GEMM (QKᵀ) — saturates GPU tensor cores</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 16.1 — RNN serial bottleneck vs. Transformer parallel attention</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

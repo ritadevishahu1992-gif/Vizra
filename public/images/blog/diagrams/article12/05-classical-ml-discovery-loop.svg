@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="From Classical Algorithms to AI-Discovered Algorithms">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 12.5  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">From Classical Algorithms to AI-Discovered Algorithms</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Closed-loop evolutionary synthesis paired with deterministic mathematical verification (AlphaTensor, AlphaDev, AlphaEvolve)</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="70" y="155" width="480" height="175" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.5"/>
+<text x="92" y="191" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">01 · CANDIDATE GENERATOR (RL / LLM)</text>
+<line x1="92" y1="205" x2="528" y2="205" stroke="#242c3e" stroke-width="1"/>
+<text x="92" y="235" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Proposes assembly instructions (AlphaDev)</text>
+<text x="92" y="261" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">or full code diffs &amp; matrix factorizations</text>
+<text x="92" y="287" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">(AlphaTensor / AlphaEvolve)</text>
+<rect x="650" y="155" width="480" height="175" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<text x="672" y="191" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">02 · FORMAL VERIFICATION ORACLE</text>
+<line x1="672" y1="205" x2="1108" y2="205" stroke="#242c3e" stroke-width="1"/>
+<text x="672" y="235" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Executes exhaustive unit tests &amp; equivalence checks</text>
+<text x="672" y="261" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Rejects ANY candidate with edge-case bugs</text>
+<text x="672" y="287" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">100% deterministic correctness guarantee</text>
+<rect x="650" y="405" width="480" height="175" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.5"/>
+<text x="672" y="441" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">03 · HARDWARE LATENCY &amp; COST PROFILER</text>
+<line x1="672" y1="455" x2="1108" y2="455" stroke="#242c3e" stroke-width="1"/>
+<text x="672" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Benchmarks real CPU cycle latency, rank</text>
+<text x="672" y="511" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">reduction, or cluster scheduling throughput</text>
+<text x="672" y="537" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Outputs continuous reward scalar r(c)</text>
+<rect x="70" y="405" width="480" height="175" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.5"/>
+<text x="92" y="441" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#A78BFA">04 · EVOLUTIONARY ARCHIVE &amp; DEPLOYMENT</text>
+<line x1="92" y1="455" x2="528" y2="455" stroke="#242c3e" stroke-width="1"/>
+<text x="92" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Retains Pareto-optimal verified algorithms</text>
+<text x="92" y="511" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">Merged into LLVM libc++ sort (70% faster sort3)</text>
+<text x="92" y="537" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="400" fill="#94a3b8">4×4 complex matmul reduced from 49 → 48 mults</text>
+<line x1="550" y1="242" x2="642" y2="242" stroke="#38BDF8" stroke-width="2.4" marker-end="url(#arrCyan)"/>
+<text x="596" y="232" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">Candidate</text>
+<line x1="890" y1="330" x2="890" y2="397" stroke="#34D399" stroke-width="2.4" marker-end="url(#arrGreen)"/>
+<text x="904" y="368" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#34D399">Verified Valid</text>
+<line x1="650" y1="492" x2="558" y2="492" stroke="#F59E0B" stroke-width="2.4" marker-end="url(#arrAmber)"/>
+<text x="604" y="482" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#F59E0B">Reward Score</text>
+<line x1="310" y1="405" x2="310" y2="338" stroke="#A78BFA" stroke-width="2.4" marker-end="url(#arrViolet)"/>
+<text x="324" y="376" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#A78BFA">Next Generation</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 12.5 — AI-driven algorithm discovery with formal verification</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Standard Backpropagation vs. Modern Credit-Assignment Alternatives">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 13.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Standard Backpropagation vs. Modern Credit-Assignment Alternatives</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Comparing memory scaling, backward-pass locking, biological plausibility, and large-scale accuracy</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="130" width="1104" height="48" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="64" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Method</text>
+<text x="300" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Backward Pass?</text>
+<text x="485" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Activation Memory</text>
+<text x="700" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Biological Fit</text>
+<text x="915" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Frontier Scale Fit</text>
+<rect x="48" y="192" width="1104" height="72" rx="10" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<text x="64" y="233" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#34D399">Reverse-Mode Backprop</text>
+<text x="300" y="233" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Yes (weight transport)</text>
+<text x="485" y="233" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#94a3b8">O(L) / O(√L) ckpt</text>
+<text x="700" y="233" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Low (non-local)</text>
+<text x="915" y="233" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#34D399">Dominant (100% frontier)</text>
+<rect x="48" y="276" width="1104" height="72" rx="10" fill="#111520" stroke="#242c3e" stroke-width="1"/>
+<text x="64" y="317" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#F59E0B">Forward-Forward (Hinton)</text>
+<text x="300" y="317" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">No (2 forward passes)</text>
+<text x="485" y="317" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#94a3b8">O(1) per layer</text>
+<text x="700" y="317" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">High (local goodness)</text>
+<text x="915" y="317" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#F59E0B">Research / small vision</text>
+<rect x="48" y="360" width="1104" height="72" rx="10" fill="#111520" stroke="#242c3e" stroke-width="1"/>
+<text x="64" y="401" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#A78BFA">Equilibrium Propagation</text>
+<text x="300" y="401" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">No (energy relaxation)</text>
+<text x="485" y="401" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#94a3b8">O(1) local state</text>
+<text x="700" y="401" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">High (analog physics)</text>
+<text x="915" y="401" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#A78BFA">Analog / neuromorphic</text>
+<rect x="48" y="444" width="1104" height="72" rx="10" fill="#111520" stroke="#242c3e" stroke-width="1"/>
+<text x="64" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">Direct Feedback Alignment</text>
+<text x="300" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">Random fixed matrix</text>
+<text x="485" y="485" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#94a3b8">O(L) cached</text>
+<text x="700" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Moderate (no symmetry)</text>
+<text x="915" y="485" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#94a3b8">Breaks down on deep CNNs</text>
+<rect x="48" y="528" width="1104" height="72" rx="10" fill="#111520" stroke="#242c3e" stroke-width="1"/>
+<text x="64" y="569" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13.5" font-weight="700" fill="#38BDF8">Zeroth-Order (MeZO)</text>
+<text x="300" y="569" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">No (2 perturbations)</text>
+<text x="485" y="569" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#94a3b8">O(1) inference VRAM</text>
+<text x="700" y="569" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Low</text>
+<text x="915" y="569" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#38BDF8">Memory-bound LLM LoRA</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 13.6 — Backpropagation vs. alternative training algorithms</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

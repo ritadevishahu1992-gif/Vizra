@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Algorithmic Determinism, Proof Verification &amp; Governance Stack">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 12.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Algorithmic Determinism, Proof Verification &amp; Governance Stack</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Mapping production systems across verifiability tiers and regulatory audit obligations</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="132" width="1104" height="102" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<rect x="48" y="132" width="8" height="102" rx="4" fill="#34D399"/>
+<text x="76" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">TIER 1 · FORMALLY VERIFIED DETERMINISTIC</text>
+<text x="76" y="188" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="500" fill="#f1f5f9">Systems:  Aviation control, cryptography (SHA-256 / AES), LLVM sorting kernels</text>
+<text x="76" y="213" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Controls: Mathematical proof of correctness · Zero runtime ambiguity · Deterministic replay</text>
+<text x="1126" y="162" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="700" fill="#64748b">AUDIT COMPLEXITY</text>
+<rect x="950" y="178" width="176" height="14" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<rect x="950" y="178" width="44" height="14" rx="7" fill="#34D399"/>
+<rect x="48" y="250" width="1104" height="102" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<rect x="48" y="250" width="8" height="102" rx="4" fill="#38BDF8"/>
+<text x="76" y="280" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">TIER 2 · AUDITABLE HEURISTIC &amp; STATISTICAL</text>
+<text x="76" y="306" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="500" fill="#f1f5f9">Systems:  Credit scorecards, gradient-boosted trees (XGBoost), routing engines</text>
+<text x="76" y="331" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Controls: SHAP feature attribution · Disparate impact testing · Monotonicity constraints</text>
+<text x="1126" y="280" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="700" fill="#64748b">AUDIT COMPLEXITY</text>
+<rect x="950" y="296" width="176" height="14" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<rect x="950" y="296" width="88" height="14" rx="7" fill="#38BDF8"/>
+<rect x="48" y="368" width="1104" height="102" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<rect x="48" y="368" width="8" height="102" rx="4" fill="#F59E0B"/>
+<text x="76" y="398" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">TIER 3 · PROBABILISTIC DEEP LEARNING</text>
+<text x="76" y="424" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="500" fill="#f1f5f9">Systems:  Medical imaging CNNs, recommendation rankers, real-time perception</text>
+<text x="76" y="449" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Controls: Calibration (ECE) · External hospital validation · EU AI Act High-Risk conformity</text>
+<text x="1126" y="398" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="700" fill="#64748b">AUDIT COMPLEXITY</text>
+<rect x="950" y="414" width="176" height="14" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<rect x="950" y="414" width="132" height="14" rx="7" fill="#F59E0B"/>
+<rect x="48" y="486" width="1104" height="102" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<rect x="48" y="486" width="8" height="102" rx="4" fill="#EB3B2D"/>
+<text x="76" y="516" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">TIER 4 · GENERAL-PURPOSE FRONTIER MODELS</text>
+<text x="76" y="542" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="500" fill="#f1f5f9">Systems:  Multimodal foundation models &amp; autonomous multi-step agents</text>
+<text x="76" y="567" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Controls: Red-teaming · NIST AI RMF &amp; EU AI Act GPAI systemic risk · Human-in-the-loop</text>
+<text x="1126" y="516" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="700" fill="#64748b">AUDIT COMPLEXITY</text>
+<rect x="950" y="532" width="176" height="14" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1"/>
+<rect x="950" y="532" width="176" height="14" rx="7" fill="#EB3B2D"/>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 12.6 — Algorithmic governance &amp; auditability tiers</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

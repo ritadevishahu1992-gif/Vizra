@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Scaled Dot-Product Attention: Softmax(QKᵀ / √dₖ + M) · V">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 16.2  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Scaled Dot-Product Attention: Softmax(QKᵀ / √dₖ + M) · V</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Step-by-step matrix mechanics showing 1/√dₖ variance stabilization and lower-triangular causal masking</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="150" width="155" height="195" rx="10" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="125" y="180" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#38BDF8">Q (n × dₖ)</text>
+<text x="125" y="204" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Queries</text>
+<rect x="48" y="375" width="155" height="195" rx="10" fill="#241d38" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="125" y="405" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#A78BFA">Kᵀ (dₖ × n)</text>
+<text x="125" y="429" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Keys</text>
+<rect x="68" y="224" width="115" height="14" rx="3" fill="#161b28" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="68" y="448" width="115" height="14" rx="3" fill="#161b28" stroke="#A78BFA" stroke-width="0.8"/>
+<rect x="68" y="246" width="115" height="14" rx="3" fill="#161b28" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="68" y="470" width="115" height="14" rx="3" fill="#161b28" stroke="#A78BFA" stroke-width="0.8"/>
+<rect x="68" y="268" width="115" height="14" rx="3" fill="#161b28" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="68" y="492" width="115" height="14" rx="3" fill="#161b28" stroke="#A78BFA" stroke-width="0.8"/>
+<rect x="68" y="290" width="115" height="14" rx="3" fill="#161b28" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="68" y="514" width="115" height="14" rx="3" fill="#161b28" stroke="#A78BFA" stroke-width="0.8"/>
+<rect x="68" y="312" width="115" height="14" rx="3" fill="#161b28" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="68" y="536" width="115" height="14" rx="3" fill="#161b28" stroke="#A78BFA" stroke-width="0.8"/>
+<line x1="205" y1="248" x2="256" y2="330" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<line x1="205" y1="472" x2="256" y2="386" stroke="#A78BFA" stroke-width="2" marker-end="url(#arrViolet)"/>
+<rect x="262" y="305" width="148" height="110" rx="10" fill="#111520" stroke="#F59E0B" stroke-width="1.5"/>
+<text x="336" y="338" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">MatMul &amp; Scale</text>
+<text x="336" y="366" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#f1f5f9">S = QKᵀ / √dₖ</text>
+<text x="336" y="394" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">Prevents softmax</text>
+<line x1="412" y1="360" x2="452" y2="360" stroke="#F59E0B" stroke-width="2" marker-end="url(#arrAmber)"/>
+<rect x="458" y="150" width="316" height="420" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.5"/>
+<text x="616" y="182" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">CAUSAL MASK + ROW SOFTMAX</text>
+<text x="546" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">AI</text>
+<text x="592" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">models</text>
+<text x="638" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">learn</text>
+<text x="684" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">from</text>
+<text x="730" y="220" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">data</text>
+<text x="518" y="258" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">AI</text>
+<rect x="526" y="232" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.95" stroke="#EB3B2D" stroke-width="1"/>
+<text x="546" y="256" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">1.00</text>
+<rect x="572" y="232" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="592" y="256" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="618" y="232" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="638" y="256" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="664" y="232" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="684" y="256" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="710" y="232" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="730" y="256" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<text x="518" y="304" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">models</text>
+<rect x="526" y="278" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.52" stroke="#EB3B2D" stroke-width="1"/>
+<text x="546" y="302" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.42</text>
+<rect x="572" y="278" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.64" stroke="#EB3B2D" stroke-width="1"/>
+<text x="592" y="302" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.58</text>
+<rect x="618" y="278" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="638" y="302" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="664" y="278" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="684" y="302" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="710" y="278" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="730" y="302" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<text x="518" y="350" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">learn</text>
+<rect x="526" y="324" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.34" stroke="#EB3B2D" stroke-width="1"/>
+<text x="546" y="348" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.18</text>
+<rect x="572" y="324" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.56" stroke="#EB3B2D" stroke-width="1"/>
+<text x="592" y="348" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.48</text>
+<rect x="618" y="324" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.46" stroke="#EB3B2D" stroke-width="1"/>
+<text x="638" y="348" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.34</text>
+<rect x="664" y="324" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="684" y="348" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<rect x="710" y="324" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="730" y="348" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<text x="518" y="396" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">from</text>
+<rect x="526" y="370" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.29" stroke="#EB3B2D" stroke-width="1"/>
+<text x="546" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.12</text>
+<rect x="572" y="370" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.32" stroke="#EB3B2D" stroke-width="1"/>
+<text x="592" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.16</text>
+<rect x="618" y="370" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.53" stroke="#EB3B2D" stroke-width="1"/>
+<text x="638" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.44</text>
+<rect x="664" y="370" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.41" stroke="#EB3B2D" stroke-width="1"/>
+<text x="684" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.28</text>
+<rect x="710" y="370" width="40" height="40" rx="5" fill="#0d1018" stroke="#232a3b" stroke-width="1"/>
+<text x="730" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#64748b">−∞</text>
+<text x="518" y="442" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">data</text>
+<rect x="526" y="416" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.31" stroke="#EB3B2D" stroke-width="1"/>
+<text x="546" y="440" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.15</text>
+<rect x="572" y="416" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.36" stroke="#EB3B2D" stroke-width="1"/>
+<text x="592" y="440" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.22</text>
+<rect x="618" y="416" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.43" stroke="#EB3B2D" stroke-width="1"/>
+<text x="638" y="440" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.31</text>
+<rect x="664" y="416" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.31" stroke="#EB3B2D" stroke-width="1"/>
+<text x="684" y="440" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.14</text>
+<rect x="710" y="416" width="40" height="40" rx="5" fill="#EB3B2D" fill-opacity="0.34" stroke="#EB3B2D" stroke-width="1"/>
+<text x="730" y="440" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#f1f5f9">0.18</text>
+<text x="616" y="494" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Upper triangle masked (−∞ → prob 0)</text>
+<text x="616" y="516" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#EB3B2D">Each row sums strictly to 1.00</text>
+<line x1="776" y1="360" x2="824" y2="360" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<rect x="830" y="235" width="128" height="250" rx="10" fill="#0f2c22" stroke="#34D399" stroke-width="1.5"/>
+<text x="894" y="272" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#34D399">V (n × dᵥ)</text>
+<text x="894" y="298" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Values</text>
+<rect x="848" y="326" width="92" height="16" rx="3" fill="#161b28" stroke="#34D399" stroke-width="0.8"/>
+<rect x="848" y="352" width="92" height="16" rx="3" fill="#161b28" stroke="#34D399" stroke-width="0.8"/>
+<rect x="848" y="378" width="92" height="16" rx="3" fill="#161b28" stroke="#34D399" stroke-width="0.8"/>
+<rect x="848" y="404" width="92" height="16" rx="3" fill="#161b28" stroke="#34D399" stroke-width="0.8"/>
+<rect x="848" y="430" width="92" height="16" rx="3" fill="#161b28" stroke="#34D399" stroke-width="0.8"/>
+<line x1="960" y1="360" x2="996" y2="360" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<rect x="1002" y="235" width="150" height="250" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.6"/>
+<text x="1077" y="286" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#38BDF8">OUTPUT</text>
+<text x="1077" y="314" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">Z ∈ ℝⁿˣᵈᵥ</text>
+<text x="1077" y="354" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Context-aware</text>
+<text x="1077" y="376" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">weighted sum of</text>
+<text x="1077" y="398" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">value vectors</text>
+<text x="1077" y="420" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">across all heads</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 16.2 — Scaled dot-product attention with causal mask</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="3D Distributed Parallelism &amp; Memory Sharding">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 11.4  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">3D Distributed Parallelism &amp; Memory Sharding</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Combining Data (ZeRO/FSDP), Tensor (Megatron-LM), and Pipeline Parallelism across multi-node GPU clusters</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="348" height="480" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="68" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">1. DATA PARALLEL (ZeRO / FSDP)</text>
+<text x="68" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Shards weights, grads &amp; AdamW states</text>
+<rect x="68" y="208" width="308" height="60" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="82" y="232" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">GPU 0</text>
+<text x="82" y="253" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="400" fill="#94a3b8">Batch B1</text>
+<rect x="164" y="222" width="62" height="32" rx="5" fill="#10283a" stroke="#38BDF8" stroke-width="1"/>
+<text x="195" y="242" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">W[0]</text>
+<rect x="232" y="222" width="62" height="32" rx="5" fill="#2a161a" stroke="#EB3B2D" stroke-width="1"/>
+<text x="263" y="242" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#EB3B2D">G[0]</text>
+<rect x="300" y="222" width="64" height="32" rx="5" fill="#241d38" stroke="#A78BFA" stroke-width="1"/>
+<text x="332" y="242" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#A78BFA">Opt[0]</text>
+<rect x="68" y="284" width="308" height="60" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="82" y="308" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">GPU 1</text>
+<text x="82" y="329" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="400" fill="#94a3b8">Batch B2</text>
+<rect x="164" y="298" width="62" height="32" rx="5" fill="#10283a" stroke="#38BDF8" stroke-width="1"/>
+<text x="195" y="318" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">W[1]</text>
+<rect x="232" y="298" width="62" height="32" rx="5" fill="#2a161a" stroke="#EB3B2D" stroke-width="1"/>
+<text x="263" y="318" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#EB3B2D">G[1]</text>
+<rect x="300" y="298" width="64" height="32" rx="5" fill="#241d38" stroke="#A78BFA" stroke-width="1"/>
+<text x="332" y="318" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#A78BFA">Opt[1]</text>
+<rect x="68" y="360" width="308" height="60" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="82" y="384" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">GPU 2</text>
+<text x="82" y="405" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="400" fill="#94a3b8">Batch B3</text>
+<rect x="164" y="374" width="62" height="32" rx="5" fill="#10283a" stroke="#38BDF8" stroke-width="1"/>
+<text x="195" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">W[2]</text>
+<rect x="232" y="374" width="62" height="32" rx="5" fill="#2a161a" stroke="#EB3B2D" stroke-width="1"/>
+<text x="263" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#EB3B2D">G[2]</text>
+<rect x="300" y="374" width="64" height="32" rx="5" fill="#241d38" stroke="#A78BFA" stroke-width="1"/>
+<text x="332" y="394" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#A78BFA">Opt[2]</text>
+<rect x="68" y="436" width="308" height="60" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="82" y="460" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">GPU 3</text>
+<text x="82" y="481" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="400" fill="#94a3b8">Batch B4</text>
+<rect x="164" y="450" width="62" height="32" rx="5" fill="#10283a" stroke="#38BDF8" stroke-width="1"/>
+<text x="195" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">W[3]</text>
+<rect x="232" y="450" width="62" height="32" rx="5" fill="#2a161a" stroke="#EB3B2D" stroke-width="1"/>
+<text x="263" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#EB3B2D">G[3]</text>
+<rect x="300" y="450" width="64" height="32" rx="5" fill="#241d38" stroke="#A78BFA" stroke-width="1"/>
+<text x="332" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#A78BFA">Opt[3]</text>
+<rect x="68" y="526" width="308" height="62" rx="8" fill="#0d1b26" stroke="#38BDF8" stroke-width="1"/>
+<text x="82" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">All-Gather weights on demand;</text>
+<text x="82" y="565" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Reduce-Scatter gradients across nodes.</text>
+<text x="82" y="582" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Memory scales as 1/N GPUs.</text>
+<rect x="426" y="128" width="348" height="480" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="446" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">2. TENSOR PARALLEL (MEGATRON)</text>
+<text x="446" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Splits MLP &amp; Attention matrices intra-node</text>
+<rect x="446" y="208" width="308" height="44" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="600" y="235" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">Input Activation Tensor X (replicated)</text>
+<line x1="530" y1="252" x2="516" y2="282" stroke="#F59E0B" stroke-width="1.8" marker-end="url(#arrAmber)"/>
+<line x1="670" y1="252" x2="684" y2="282" stroke="#F59E0B" stroke-width="1.8" marker-end="url(#arrAmber)"/>
+<rect x="446" y="286" width="146" height="94" rx="8" fill="#241c0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="519" y="314" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">GPU 0 · Col Split W₁</text>
+<text x="519" y="338" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">GeLU(X · Wᵢ)</text>
+<text x="519" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">Heads 1..h/2</text>
+<rect x="608" y="286" width="146" height="94" rx="8" fill="#241c0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="681" y="314" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">GPU 1 · Col Split W₂</text>
+<text x="681" y="338" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">GeLU(X · Wᵢ)</text>
+<text x="681" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">Heads h/2+1..h</text>
+<line x1="519" y1="380" x2="565" y2="416" stroke="#F59E0B" stroke-width="1.8" marker-end="url(#arrAmber)"/>
+<line x1="681" y1="380" x2="635" y2="416" stroke="#F59E0B" stroke-width="1.8" marker-end="url(#arrAmber)"/>
+<rect x="446" y="420" width="308" height="52" rx="8" fill="#2c1614" stroke="#EB3B2D" stroke-width="1.3"/>
+<text x="600" y="443" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">NVLink All-Reduce (900 GB/s)</text>
+<text x="600" y="461" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Sums partial row-split outputs</text>
+<rect x="446" y="526" width="308" height="62" rx="8" fill="#1f190c" stroke="#F59E0B" stroke-width="1"/>
+<text x="460" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Requires ultra-low-latency NVLink;</text>
+<text x="460" y="565" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">typically TP=8 within a single HGX</text>
+<text x="460" y="582" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">server node (e.g. Llama 3 405B).</text>
+<rect x="804" y="128" width="348" height="480" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="824" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">3. PIPELINE PARALLEL (1F1B)</text>
+<text x="824" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Stages layers across nodes w/ micro-batches</text>
+<text x="1000" y="212" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#64748b">TIME STEPS →</text>
+<text x="824" y="251" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">Stage 1</text>
+<rect x="876" y="224" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="876" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="891.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F1</text>
+<rect x="909" y="224" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="909" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="924.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F2</text>
+<rect x="942" y="224" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="942" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="957.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F3</text>
+<rect x="975" y="224" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="975" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="990.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F4</text>
+<rect x="1008" y="224" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1008" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1023.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B1</text>
+<rect x="1041" y="224" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1041" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1056.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B2</text>
+<rect x="1074" y="224" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1074" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1089.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B3</text>
+<rect x="1107" y="224" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1107" y="224" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1122.5" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B4</text>
+<text x="824" y="307" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">Stage 2</text>
+<rect x="876" y="280" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="891.5" y="306" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="909" y="280" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="909" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="924.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F1</text>
+<rect x="942" y="280" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="942" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="957.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F2</text>
+<rect x="975" y="280" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="975" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="990.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F3</text>
+<rect x="1008" y="280" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="1008" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1023.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F4</text>
+<rect x="1041" y="280" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1041" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1056.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B1</text>
+<rect x="1074" y="280" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1074" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1089.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B2</text>
+<rect x="1107" y="280" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1107" y="280" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1122.5" y="306" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B3</text>
+<text x="824" y="363" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">Stage 3</text>
+<rect x="876" y="336" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="891.5" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="909" y="336" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="924.5" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="942" y="336" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="942" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="957.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F1</text>
+<rect x="975" y="336" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="975" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="990.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F2</text>
+<rect x="1008" y="336" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="1008" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1023.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F3</text>
+<rect x="1041" y="336" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="1041" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1056.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F4</text>
+<rect x="1074" y="336" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1074" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1089.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B1</text>
+<rect x="1107" y="336" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1107" y="336" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1122.5" y="362" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B2</text>
+<text x="824" y="419" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">Stage 4</text>
+<rect x="876" y="392" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="891.5" y="418" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="909" y="392" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="924.5" y="418" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="942" y="392" width="31" height="44" rx="4" fill="#0d1018" stroke="#2a3142" stroke-width="1"/>
+<text x="957.5" y="418" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700" fill="#64748b">·</text>
+<rect x="975" y="392" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="975" y="392" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="990.5" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F1</text>
+<rect x="1008" y="392" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="1008" y="392" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1023.5" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F2</text>
+<rect x="1041" y="392" width="31" height="44" rx="4" fill="#38BDF8" stroke="#38BDF8" stroke-width="0.8"/>
+<rect x="1041" y="392" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1056.5" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#38BDF8">F3</text>
+<rect x="1074" y="392" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1074" y="392" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1089.5" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B1</text>
+<rect x="1107" y="392" width="31" height="44" rx="4" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.8"/>
+<rect x="1107" y="392" width="31" height="44" rx="4" fill="#090b10" fill-opacity="0.72"/>
+<text x="1122.5" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">B2</text>
+<rect x="824" y="464" width="14" height="14" rx="3" fill="#38BDF8" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="844" y="476" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Forward micro-batch</text>
+<rect x="982" y="464" width="14" height="14" rx="3" fill="#F59E0B" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="1002" y="476" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Backward pass</text>
+<rect x="824" y="490" width="14" height="14" rx="3" fill="#0d1018" stroke="#2a3142" stroke-width="1.4"/>
+<text x="844" y="502" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Pipeline bubble (idle fraction ≈ (p-1)/m)</text>
+<rect x="824" y="526" width="308" height="62" rx="8" fill="#0d241b" stroke="#34D399" stroke-width="1"/>
+<text x="838" y="548" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Llama 3 405B used 16,384 H100s</text>
+<text x="838" y="565" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">with TP=8 × CP=16 × PP=16 × DP</text>
+<text x="838" y="582" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">over 54 days of pretraining.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 11.4 — 3D distributed training parallelism</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

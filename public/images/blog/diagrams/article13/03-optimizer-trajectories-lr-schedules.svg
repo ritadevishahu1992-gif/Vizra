@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Optimizer Dynamics &amp; Modern Learning-Rate Schedules">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 13.3  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Optimizer Dynamics &amp; Modern Learning-Rate Schedules</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Left: SGD vs. Momentum vs. AdamW across an ill-conditioned ravine  ·  Right: Cosine Decay vs. Warmup-Stable-Decay (WSD)</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="70" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">OPTIMIZER PATHS IN AN ILL-CONDITIONED RAVINE</text>
+<ellipse cx="500" cy="365" rx="220" ry="62" fill="none" stroke="#242c3e" stroke-width="1.2"/>
+<ellipse cx="500" cy="365" rx="170" ry="46" fill="none" stroke="#242c3e" stroke-width="1.2"/>
+<ellipse cx="500" cy="365" rx="120" ry="30" fill="none" stroke="#242c3e" stroke-width="1.2"/>
+<ellipse cx="500" cy="365" rx="72" ry="17" fill="none" stroke="#242c3e" stroke-width="1.2"/>
+<ellipse cx="500" cy="365" rx="32" ry="8" fill="none" stroke="#242c3e" stroke-width="1.2"/>
+<circle cx="500" cy="365" r="6" fill="#34D399"/>
+<text x="500" y="392" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#34D399">Optimum θ*</text>
+<polyline points="110,305 145,425 185,312 225,415 265,322 305,402 345,336" fill="none" stroke="#EB3B2D" stroke-width="2.2"/>
+<polyline points="110,305 175,392 255,342 345,378 430,358 495,365" fill="none" stroke="#F59E0B" stroke-width="2.4"/>
+<polyline points="110,305 180,342 265,358 360,364 445,365 500,365" fill="none" stroke="#38BDF8" stroke-width="2.8" marker-end="url(#arrCyan)"/>
+<line x1="72" y1="506" x2="104" y2="506" stroke="#EB3B2D" stroke-width="3"/>
+<text x="114" y="510" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Vanilla SGD (oscillates across steep walls)</text>
+<line x1="72" y1="532" x2="104" y2="532" stroke="#F59E0B" stroke-width="3"/>
+<text x="114" y="536" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">SGD + Momentum (dampens &amp; accelerates)</text>
+<line x1="72" y1="558" x2="104" y2="558" stroke="#38BDF8" stroke-width="3"/>
+<text x="114" y="562" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">AdamW (per-param adaptive step + weight decay)</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="634" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">LEARNING RATE SCHEDULES: COSINE vs. WSD</text>
+<rect x="656" y="200" width="466" height="260" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<polyline points="670.0,440.0 674.4,419.0 678.8,398.0 683.1,377.0 687.5,356.0 691.9,335.0 696.3,314.0 700.7,293.0 705.0,272.0 709.4,251.0 713.8,230.0 718.2,230.1 722.6,230.2 726.9,230.5 731.3,230.9 735.7,231.5 740.1,232.1 744.5,232.9 748.8,233.7 753.2,234.7 757.6,235.8 762.0,237.0 766.4,238.4 770.7,239.8 775.1,241.3 779.5,242.9 783.9,244.7 788.3,246.5 792.6,248.4 797.0,250.5 801.4,252.6 805.8,254.8 810.2,257.1 814.5,259.5 818.9,262.0 823.3,264.5 827.7,267.1 832.1,269.8 836.4,272.6 840.8,275.4 845.2,278.3 849.6,281.2 854.0,284.3 858.3,287.3 862.7,290.4 867.1,293.6 871.5,296.7 875.9,300.0 880.2,303.2 884.6,306.5 889.0,309.8 893.4,313.2 897.8,316.5 902.1,319.9 906.5,323.2 910.9,326.6 915.3,330.0 919.7,333.3 924.0,336.7 928.4,340.0 932.8,343.4 937.2,346.7 941.6,350.0 945.9,353.2 950.3,356.5 954.7,359.6 959.1,362.8 963.5,365.9 967.8,368.9 972.2,372.0 976.6,374.9 981.0,377.8 985.4,380.6 989.7,383.4 994.1,386.1 998.5,388.7 1002.9,391.2 1007.3,393.7 1011.6,396.1 1016.0,398.4 1020.4,400.6 1024.8,402.7 1029.2,404.8 1033.5,406.7 1037.9,408.5 1042.3,410.3 1046.7,411.9 1051.1,413.4 1055.4,414.8 1059.8,416.2 1064.2,417.4 1068.6,418.5 1073.0,419.5 1077.3,420.3 1081.7,421.1 1086.1,421.7 1090.5,422.3 1094.9,422.7 1099.2,423.0 1103.6,423.1 1108.0,423.2" fill="none" stroke="#38BDF8" stroke-width="2.8"/>
+<polyline points="670.0,440.0 674.4,419.0 678.8,398.0 683.1,377.0 687.5,356.0 691.9,335.0 696.3,314.0 700.7,293.0 705.0,272.0 709.4,251.0 713.8,230.0 718.2,230.0 722.6,230.0 726.9,230.0 731.3,230.0 735.7,230.0 740.1,230.0 744.5,230.0 748.8,230.0 753.2,230.0 757.6,230.0 762.0,230.0 766.4,230.0 770.7,230.0 775.1,230.0 779.5,230.0 783.9,230.0 788.3,230.0 792.6,230.0 797.0,230.0 801.4,230.0 805.8,230.0 810.2,230.0 814.5,230.0 818.9,230.0 823.3,230.0 827.7,230.0 832.1,230.0 836.4,230.0 840.8,230.0 845.2,230.0 849.6,230.0 854.0,230.0 858.3,230.0 862.7,230.0 867.1,230.0 871.5,230.0 875.9,230.0 880.2,230.0 884.6,230.0 889.0,230.0 893.4,230.0 897.8,230.0 902.1,230.0 906.5,230.0 910.9,230.0 915.3,230.0 919.7,230.0 924.0,230.0 928.4,230.0 932.8,230.0 937.2,230.0 941.6,230.0 945.9,230.0 950.3,230.0 954.7,230.0 959.1,230.0 963.5,230.0 967.8,230.0 972.2,230.0 976.6,230.0 981.0,230.0 985.4,230.0 989.7,230.0 994.1,230.0 998.5,230.0 1002.9,230.0 1007.3,230.0 1011.6,230.0 1016.0,230.0 1020.4,230.0 1024.8,240.0 1029.2,249.9 1033.5,259.9 1037.9,269.9 1042.3,279.9 1046.7,289.8 1051.1,299.8 1055.4,309.8 1059.8,319.8 1064.2,329.8 1068.6,339.7 1073.0,349.7 1077.3,359.7 1081.7,369.6 1086.1,379.6 1090.5,389.6 1094.9,399.6 1099.2,409.5 1103.6,419.5 1108.0,429.5" fill="none" stroke="#A78BFA" stroke-width="2.8" stroke-dasharray="7,4"/>
+<text x="704" y="224" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#F59E0B">Warmup</text>
+<text x="889.0" y="224" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#A78BFA">Stable Plateau (WSD enables endless continuation)</text>
+<text x="1078" y="424" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#34D399">Decay</text>
+<text x="889.0" y="482" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Training Progress (Steps / Tokens) →</text>
+<line x1="636" y1="520" x2="674" y2="520" stroke="#38BDF8" stroke-width="3" />
+<text x="684" y="524" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Cosine Annealing (requires fixed total horizon T)</text>
+<line x1="636" y1="550" x2="674" y2="550" stroke="#A78BFA" stroke-width="3" stroke-dasharray="7,4"/>
+<text x="684" y="554" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Warmup-Stable-Decay / WSD (flexible annealing phase)</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 13.3 — Optimizer trajectories and learning rate schedules</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

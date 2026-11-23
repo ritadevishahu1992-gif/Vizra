@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="From Siloed Task-Specific Models to Unified Foundation Models">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 15.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">From Siloed Task-Specific Models to Unified Foundation Models</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Homogenization of pretraining architecture enabling one base model to adapt across dozens of downstream tasks</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="490" height="480" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="72" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">LEGACY SILOED ML PARADIGM</text>
+<text x="72" y="182" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Separate labeled dataset + custom model per task</text>
+<rect x="72" y="216" width="134" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="139" y="246" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Labeled Sentiment</text>
+<line x1="208" y1="242" x2="238" y2="242" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="244" y="216" width="108" height="52" rx="7" fill="#241b0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="298" y="246" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">Model A</text>
+<line x1="354" y1="242" x2="384" y2="242" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="390" y="216" width="124" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="452" y="246" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">Sentiment</text>
+<rect x="72" y="302" width="134" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="139" y="332" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Labeled NER Tags</text>
+<line x1="208" y1="328" x2="238" y2="328" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="244" y="302" width="108" height="52" rx="7" fill="#241b0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="298" y="332" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">Model B</text>
+<line x1="354" y1="328" x2="384" y2="328" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="390" y="302" width="124" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="452" y="332" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">Entity Extraction</text>
+<rect x="72" y="388" width="134" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="139" y="418" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Parallel Corpus</text>
+<line x1="208" y1="414" x2="238" y2="414" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="244" y="388" width="108" height="52" rx="7" fill="#241b0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="298" y="418" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">Model C</text>
+<line x1="354" y1="414" x2="384" y2="414" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="390" y="388" width="124" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="452" y="418" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">Translation</text>
+<rect x="72" y="474" width="134" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="139" y="504" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Labeled Q&amp;A Pairs</text>
+<line x1="208" y1="500" x2="238" y2="500" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="244" y="474" width="108" height="52" rx="7" fill="#241b0d" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="298" y="504" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">Model D</text>
+<line x1="354" y1="500" x2="384" y2="500" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrAmber)"/>
+<rect x="390" y="474" width="124" height="52" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="452" y="504" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#f1f5f9">QA System</text>
+<text x="293" y="580" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600" fill="#F59E0B">Zero cross-task transfer · Linearly growing labeling cost</text>
+<rect x="572" y="128" width="580" height="480" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="596" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">FOUNDATION MODEL PARADIGM (STANFORD CRFM)</text>
+<text x="596" y="182" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Broad self-supervised pretraining + lightweight multi-task adaptation</text>
+<rect x="596" y="214" width="128" height="42" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="660" y="239" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Web Text</text>
+<line x1="726" y1="235" x2="778" y2="358" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+<rect x="596" y="276" width="128" height="42" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="660" y="301" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Source Code</text>
+<line x1="726" y1="297" x2="778" y2="358" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+<rect x="596" y="338" width="128" height="42" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="660" y="363" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Images/Video</text>
+<line x1="726" y1="359" x2="778" y2="358" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+<rect x="596" y="400" width="128" height="42" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="660" y="425" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Audio/Speech</text>
+<line x1="726" y1="421" x2="778" y2="358" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+<rect x="596" y="462" width="128" height="42" rx="7" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="660" y="487" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Scientific Data</text>
+<line x1="726" y1="483" x2="778" y2="358" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+<rect x="780" y="286" width="164" height="144" rx="14" fill="#102436" stroke="#EB3B2D" stroke-width="2"/>
+<text x="862" y="336" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13.5" font-weight="700" fill="#EB3B2D">FOUNDATION</text>
+<text x="862" y="358" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13.5" font-weight="700" fill="#f1f5f9">BASE MODEL</text>
+<text x="862" y="386" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="600" fill="#38BDF8">Self-Supervised</text>
+<text x="862" y="404" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="500" fill="#94a3b8">10¹²–10¹³ Tokens</text>
+<line x1="946" y1="358" x2="998" y2="235" stroke="#34D399" stroke-opacity="0.75" stroke-width="1.6" marker-end="url(#arrGreen)"/>
+<rect x="1004" y="214" width="126" height="42" rx="7" fill="#0f2920" stroke="#34D399" stroke-width="1.1"/>
+<text x="1067" y="239" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">Code Copilot</text>
+<line x1="946" y1="358" x2="998" y2="297" stroke="#34D399" stroke-opacity="0.75" stroke-width="1.6" marker-end="url(#arrGreen)"/>
+<rect x="1004" y="276" width="126" height="42" rx="7" fill="#0f2920" stroke="#34D399" stroke-width="1.1"/>
+<text x="1067" y="301" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">Enterprise RAG</text>
+<line x1="946" y1="358" x2="998" y2="359" stroke="#34D399" stroke-opacity="0.75" stroke-width="1.6" marker-end="url(#arrGreen)"/>
+<rect x="1004" y="338" width="126" height="42" rx="7" fill="#0f2920" stroke="#34D399" stroke-width="1.1"/>
+<text x="1067" y="363" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">Medical Triage</text>
+<line x1="946" y1="358" x2="998" y2="421" stroke="#34D399" stroke-opacity="0.75" stroke-width="1.6" marker-end="url(#arrGreen)"/>
+<rect x="1004" y="400" width="126" height="42" rx="7" fill="#0f2920" stroke="#34D399" stroke-width="1.1"/>
+<text x="1067" y="425" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">Multimodal UI</text>
+<line x1="946" y1="358" x2="998" y2="483" stroke="#34D399" stroke-opacity="0.75" stroke-width="1.6" marker-end="url(#arrGreen)"/>
+<rect x="1004" y="462" width="126" height="42" rx="7" fill="#0f2920" stroke="#34D399" stroke-width="1.1"/>
+<text x="1067" y="487" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">Agentic Tooling</text>
+<text x="862" y="580" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600" fill="#38BDF8">Shared representations + emergent transfer · Inherited upstream risks</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 15.1 — Siloed ML vs. foundation model paradigm</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

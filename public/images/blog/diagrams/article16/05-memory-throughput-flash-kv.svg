@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Breaking the Quadratic Wall: FlashAttention &amp; KV-Cache Compression">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 16.5  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Breaking the Quadratic Wall: FlashAttention &amp; KV-Cache Compression</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Left: Tiled on-chip SRAM FlashAttention eliminating O(n²) HBM writes  ·  Right: KV cache footprint per token</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="72" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A · FLASHATTENTION IO-AWARE TILING</text>
+<text x="72" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Keeps intermediate n×n attention tiles strictly inside ultra-fast GPU SRAM</text>
+<rect x="76" y="208" width="484" height="128" rx="10" fill="#181d2c" stroke="#242c3e" stroke-width="1.4"/>
+<text x="94" y="234" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">GPU HBM3 (80 GB · 3.35 TB/s — SLOW)</text>
+<rect x="96" y="254" width="110" height="56" rx="6" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="151" y="286" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">Q, K, V</text>
+<rect x="240" y="254" width="165" height="56" rx="6" fill="#2c1416" stroke="#EB3B2D" stroke-width="1.2"/>
+<text x="322" y="278" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">Standard: Writes n×n</text>
+<text x="322" y="296" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="10.5" font-weight="400" fill="#94a3b8">matrix to HBM (O(n²))</text>
+<rect x="436" y="254" width="106" height="56" rx="6" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="489" y="286" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">Output O</text>
+<line x1="151" y1="338" x2="151" y2="394" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<text x="164" y="370" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#38BDF8">Load Bᵣ×B_c tiles</text>
+<line x1="489" y1="394" x2="489" y2="338" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<text x="476" y="370" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#34D399">Write final O only</text>
+<rect x="76" y="400" width="484" height="178" rx="10" fill="#0d2420" stroke="#34D399" stroke-width="1.5"/>
+<text x="94" y="428" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">ON-CHIP GPU SRAM (~20 MB · 19+ TB/s — ULTRA-FAST)</text>
+<text x="94" y="458" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">1. Streams Q, K, V blocks into SRAM without materializing S = QKᵀ in HBM</text>
+<text x="94" y="484" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">2. Applies online softmax rescaling tile-by-tile (exact, zero approximation!)</text>
+<text x="94" y="510" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">3. Reduces HBM memory complexity from O(n²) → O(n) with 2×–4× speedup</text>
+<text x="94" y="536" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">4. Enables 128K–1M+ token context windows on commodity H100 clusters</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="636" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">B · KV-CACHE MEMORY PER TOKEN (RELATIVE TO MHA)</text>
+<text x="636" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Compressing Key-Value state directly multiplies concurrent serving batch size</text>
+<text x="636" y="224" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Multi-Head Attention (MHA)</text>
+<text x="1124" y="224" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#EB3B2D">100%</text>
+<rect x="636" y="236" width="488" height="22" rx="6" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="636" y="236" width="488" height="22" rx="6" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="636" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Every query head owns dedicated K &amp; V</text>
+<text x="636" y="314" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Grouped-Query (GQA · 8:1)</text>
+<text x="1124" y="314" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#F59E0B">12.5%</text>
+<rect x="636" y="326" width="488" height="22" rx="6" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="636" y="326" width="61" height="22" rx="6" fill="#F59E0B" fill-opacity="0.88"/>
+<text x="636" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Llama 3 70B/405B shares 8 KV heads across 64–128 Q</text>
+<text x="636" y="404" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Multi-Head Latent (MLA)</text>
+<text x="1124" y="404" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#38BDF8">~6.5%</text>
+<rect x="636" y="416" width="488" height="22" rx="6" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="636" y="416" width="31" height="22" rx="6" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="636" y="456" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">DeepSeek-V2/V3 compresses KV into joint low-rank latent c_KV</text>
+<text x="636" y="494" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Multi-Query Attention (MQA)</text>
+<text x="1124" y="494" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#34D399">1.6%</text>
+<rect x="636" y="506" width="488" height="22" rx="6" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="636" y="506" width="14" height="22" rx="6" fill="#34D399" fill-opacity="0.88"/>
+<text x="636" y="546" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Single shared K, V head across all queries (slight quality drop)</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 16.5 — FlashAttention IO-awareness &amp; KV-cache compression</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

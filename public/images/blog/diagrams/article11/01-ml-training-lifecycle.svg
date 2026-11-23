@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="End-to-End Machine Learning Training Lifecycle">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 11.1  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">End-to-End Machine Learning Training Lifecycle</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Five sequential engineering stages with continuous validation &amp; governance gates</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="145" width="200" height="310" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.5"/>
+<rect x="48" y="145" width="200" height="44" rx="12" fill="#38BDF8" fill-opacity="0.16"/>
+<text x="64" y="173" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#38BDF8">STAGE 01</text>
+<text x="64" y="214" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="700" fill="#f1f5f9">Data Curation</text>
+<line x1="64" y1="228" x2="232" y2="228" stroke="#242c3e" stroke-width="1"/>
+<circle cx="70" cy="254" r="3" fill="#38BDF8"/>
+<text x="82" y="258" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Web &amp; domain corpora</text>
+<circle cx="70" cy="290" r="3" fill="#38BDF8"/>
+<text x="82" y="294" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">MinHash deduplication</text>
+<circle cx="70" cy="326" r="3" fill="#38BDF8"/>
+<text x="82" y="330" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Quality &amp; PII filtering</text>
+<circle cx="70" cy="362" r="3" fill="#38BDF8"/>
+<text x="82" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">BPE / SentencePiece</text>
+<circle cx="70" cy="398" r="3" fill="#38BDF8"/>
+<text x="82" y="402" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Train / Val / Test split</text>
+<line x1="250" y1="295" x2="270" y2="295" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<rect x="274" y="145" width="200" height="310" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.5"/>
+<rect x="274" y="145" width="200" height="44" rx="12" fill="#A78BFA" fill-opacity="0.16"/>
+<text x="290" y="173" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#A78BFA">STAGE 02</text>
+<text x="290" y="214" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="700" fill="#f1f5f9">Forward &amp; Loss</text>
+<line x1="290" y1="228" x2="458" y2="228" stroke="#242c3e" stroke-width="1"/>
+<circle cx="296" cy="254" r="3" fill="#A78BFA"/>
+<text x="308" y="258" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Token embedding lookup</text>
+<circle cx="296" cy="290" r="3" fill="#A78BFA"/>
+<text x="308" y="294" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Transformer / DNN pass</text>
+<circle cx="296" cy="326" r="3" fill="#A78BFA"/>
+<text x="308" y="330" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Logits &amp; probabilities</text>
+<circle cx="296" cy="362" r="3" fill="#A78BFA"/>
+<text x="308" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Cross-Entropy / MSE</text>
+<circle cx="296" cy="398" r="3" fill="#A78BFA"/>
+<text x="308" y="402" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Scalar loss L(θ)</text>
+<line x1="476" y1="295" x2="496" y2="295" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<rect x="500" y="145" width="200" height="310" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.5"/>
+<rect x="500" y="145" width="200" height="44" rx="12" fill="#EB3B2D" fill-opacity="0.16"/>
+<text x="516" y="173" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">STAGE 03</text>
+<text x="516" y="214" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="700" fill="#f1f5f9">Backprop &amp; AdamW</text>
+<line x1="516" y1="228" x2="684" y2="228" stroke="#242c3e" stroke-width="1"/>
+<circle cx="522" cy="254" r="3" fill="#EB3B2D"/>
+<text x="534" y="258" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Reverse-mode autodiff</text>
+<circle cx="522" cy="290" r="3" fill="#EB3B2D"/>
+<text x="534" y="294" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Gradient clipping (1.0)</text>
+<circle cx="522" cy="326" r="3" fill="#EB3B2D"/>
+<text x="534" y="330" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">1st &amp; 2nd moments m,v</text>
+<circle cx="522" cy="362" r="3" fill="#EB3B2D"/>
+<text x="534" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Decoupled weight decay</text>
+<circle cx="522" cy="398" r="3" fill="#EB3B2D"/>
+<text x="534" y="402" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Warmup + Cosine / WSD</text>
+<line x1="702" y1="295" x2="722" y2="295" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<rect x="726" y="145" width="200" height="310" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.5"/>
+<rect x="726" y="145" width="200" height="44" rx="12" fill="#F59E0B" fill-opacity="0.16"/>
+<text x="742" y="173" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#F59E0B">STAGE 04</text>
+<text x="742" y="214" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="700" fill="#f1f5f9">3D Distributed</text>
+<line x1="742" y1="228" x2="910" y2="228" stroke="#242c3e" stroke-width="1"/>
+<circle cx="748" cy="254" r="3" fill="#F59E0B"/>
+<text x="760" y="258" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">ZeRO / FSDP sharding</text>
+<circle cx="748" cy="290" r="3" fill="#F59E0B"/>
+<text x="760" y="294" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Megatron tensor splits</text>
+<circle cx="748" cy="326" r="3" fill="#F59E0B"/>
+<text x="760" y="330" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Pipeline micro-batches</text>
+<circle cx="748" cy="362" r="3" fill="#F59E0B"/>
+<text x="760" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">BF16 &amp; FP8 precision</text>
+<circle cx="748" cy="398" r="3" fill="#F59E0B"/>
+<text x="760" y="402" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Async checkpointing</text>
+<line x1="928" y1="295" x2="948" y2="295" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<rect x="952" y="145" width="200" height="310" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<rect x="952" y="145" width="200" height="44" rx="12" fill="#34D399" fill-opacity="0.16"/>
+<text x="968" y="173" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#34D399">STAGE 05</text>
+<text x="968" y="214" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="700" fill="#f1f5f9">Post-Training</text>
+<line x1="968" y1="228" x2="1136" y2="228" stroke="#242c3e" stroke-width="1"/>
+<circle cx="974" cy="254" r="3" fill="#34D399"/>
+<text x="986" y="258" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Instruction SFT</text>
+<circle cx="974" cy="290" r="3" fill="#34D399"/>
+<text x="986" y="294" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">RLHF / DPO alignment</text>
+<circle cx="974" cy="326" r="3" fill="#34D399"/>
+<text x="986" y="330" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Verifier-driven RLVR</text>
+<circle cx="974" cy="362" r="3" fill="#34D399"/>
+<text x="986" y="366" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Red-team safety evals</text>
+<circle cx="974" cy="398" r="3" fill="#34D399"/>
+<text x="986" y="402" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Production deployment</text>
+<path d="M 600 455 C 600 505, 374 505, 374 460" fill="none" stroke="#EB3B2D" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrRed)"/>
+<rect x="395" y="488" width="185" height="28" rx="6" fill="#161b28" stroke="#EB3B2D" stroke-width="1"/>
+<text x="487" y="506" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#EB3B2D">10⁵–10⁶ Optimizer Steps</text>
+<rect x="48" y="540" width="1104" height="72" rx="10" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="70" y="566" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">CONTINUOUS VALIDATION, TELEMETRY &amp; GOVERNANCE LAYER</text>
+<circle cx="70" cy="591" r="4" fill="#34D399"/>
+<text x="82" y="595" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Data Lineage &amp; Contamination Checks</text>
+<circle cx="340" cy="591" r="4" fill="#34D399"/>
+<text x="352" y="595" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Held-Out Perplexity &amp; Loss Spike Alerts</text>
+<circle cx="610" cy="591" r="4" fill="#34D399"/>
+<text x="622" y="595" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Checkpoint Recovery &amp; Hardware ECC</text>
+<circle cx="880" cy="591" r="4" fill="#34D399"/>
+<text x="892" y="595" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Safety Evals &amp; NIST AI RMF Audit</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 11.1 — End-to-end machine learning training lifecycle</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>
