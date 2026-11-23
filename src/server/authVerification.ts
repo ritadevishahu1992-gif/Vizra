@@ -1,13 +1,10 @@
 /**
- * SERVER-SIDE AUTHENTICATION & TOKEN VERIFICATION
- * 
- * Verifies Firebase Auth ID tokens cryptographically against Google public keys.
- * Extracts verified UID, authenticated email, and auth_time claim.
- * Never trusts client-supplied recipient email addresses.
+ * Server-side Firebase ID-token verification.
+ * Tokens are trusted only after RS256 signature verification against Google's
+ * published Firebase Secure Token certificates.
  */
-
 import crypto from 'crypto';
-import { getFirebaseProjectId, isProductionEnv } from './config/envConfig';
+import { getFirebaseProjectId } from './config/envConfig';
 
 interface GooglePublicKeys {
   [kid: string]: string;
@@ -20,39 +17,37 @@ function resolveFirebaseProjectId(): string {
   return getFirebaseProjectId().projectId;
 }
 
-/**
- * Fetches Google public certificates for Firebase ID token verification.
- */
 async function getGooglePublicKeys(): Promise<GooglePublicKeys> {
   const now = Date.now();
-  if (cachedKeys && now < cachedKeysExpiry) {
-    return cachedKeys;
-  }
+  if (cachedKeys && now < cachedKeysExpiry) return cachedKeys;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch(
+    const response = await fetch(
       'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com',
       { signal: controller.signal }
     );
-    clearTimeout(timeout);
+    if (!response.ok) return cachedKeys || {};
 
-    if (res.ok) {
-      const keys = (await res.json()) as GooglePublicKeys;
-      cachedKeys = keys;
-      // Cache-Control header inspection or default 6 hours
-      const cacheControl = res.headers.get('cache-control');
-      const maxAgeMatch = cacheControl?.match(/max-age=(\d+)/);
-      const maxAgeSeconds = maxAgeMatch ? parseInt(maxAgeMatch[1], 10) : 21600;
-      cachedKeysExpiry = now + maxAgeSeconds * 1000;
-      return cachedKeys;
+    const keys = (await response.json()) as GooglePublicKeys;
+    if (!keys || typeof keys !== 'object' || Array.isArray(keys)) {
+      return cachedKeys || {};
     }
-  } catch (err: any) {
-    console.warn('[AuthVerify] Failed to refresh Google public keys from network:', err.message);
-  }
 
-  return cachedKeys || {};
+    cachedKeys = keys;
+    const cacheControl = response.headers.get('cache-control');
+    const maxAgeMatch = cacheControl?.match(/max-age=(\d+)/);
+    const maxAgeSeconds = maxAgeMatch ? Number(maxAgeMatch[1]) : 21600;
+    cachedKeysExpiry = now + (Number.isFinite(maxAgeSeconds) ? maxAgeSeconds : 21600) * 1000;
+    return cachedKeys;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'certificate request failed';
+    console.warn('[AuthVerify] Could not retrieve Google public keys:', message);
+    return cachedKeys || {};
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export interface VerifiedAuthEvent {
@@ -67,114 +62,85 @@ export interface VerifiedAuthEvent {
   error?: string;
 }
 
-/**
- * Cryptographically verifies Firebase ID Token (JWT).
- * 1. Checks RS256 algorithm and header kid.
- * 2. Checks token expiration (exp) and issued time (iat).
- * 3. Checks audience matches Firebase Project ID.
- * 4. Checks issuer matches https://securetoken.google.com/<projectId>.
- * 5. Verifies cryptographic signature against Google's public certs.
- */
+/** Verifies Firebase JWT claims and RS256 signature; fails closed on key errors. */
 export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuthEvent> {
   if (!token || typeof token !== 'string') {
     return { valid: false, error: 'Token is missing or not a string' };
   }
 
   const parts = token.trim().split('.');
-  if (parts.length !== 3) {
-    return { valid: false, error: 'Malformed JWT: must contain header, payload, and signature' };
+  if (parts.length !== 3 || parts.some((part) => !part)) {
+    return { valid: false, error: 'Malformed JWT' };
   }
 
   try {
-    const headerStr = Buffer.from(parts[0], 'base64url').toString('utf8');
-    const payloadStr = Buffer.from(parts[1], 'base64url').toString('utf8');
-    const header = JSON.parse(headerStr);
-    const payload = JSON.parse(payloadStr);
-
-    if (header.alg !== 'RS256') {
-      return { valid: false, error: `Invalid algorithm: ${header.alg}. Expected RS256.` };
+    const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    if (header?.alg !== 'RS256' || typeof header.kid !== 'string' || !header.kid) {
+      return { valid: false, error: 'Invalid Firebase token header' };
     }
 
     const projectId = resolveFirebaseProjectId();
     const nowSec = Math.floor(Date.now() / 1000);
-
-    // 1. Check expiration and issued-at time
-    if (typeof payload.exp !== 'number' || payload.exp < nowSec - 60) {
-      return { valid: false, error: 'Token has expired' };
-    }
-    if (typeof payload.iat === 'number' && payload.iat > nowSec + 300) {
-      return { valid: false, error: 'Token issued-at time (iat) is in the future' };
-    }
-
-    // 2. Check audience
-    if (payload.aud !== projectId) {
-      return { valid: false, error: `Audience mismatch: expected ${projectId}, got ${payload.aud}` };
-    }
-
-    // 3. Check issuer
-    const expectedIssuer = `https://securetoken.google.com/${projectId}`;
-    if (payload.iss !== expectedIssuer) {
-      return { valid: false, error: `Issuer mismatch: expected ${expectedIssuer}, got ${payload.iss}` };
-    }
-
-    // 4. Check subject (UID) format and length
     if (
-      !payload.sub ||
+      payload?.aud !== projectId ||
+      payload?.iss !== `https://securetoken.google.com/${projectId}`
+    ) {
+      return { valid: false, error: 'Firebase token audience or issuer mismatch' };
+    }
+    if (
       typeof payload.sub !== 'string' ||
+      payload.sub.length === 0 ||
       payload.sub.length > 128 ||
       !/^[a-zA-Z0-9_-]+$/.test(payload.sub)
     ) {
-      return { valid: false, error: 'Token missing or invalid subject (UID) claim' };
+      return { valid: false, error: 'Token subject is invalid' };
+    }
+    if (
+      typeof payload.exp !== 'number' ||
+      payload.exp <= nowSec - 60 ||
+      typeof payload.iat !== 'number' ||
+      payload.iat > nowSec + 300 ||
+      typeof payload.auth_time !== 'number' ||
+      payload.auth_time > nowSec + 300
+    ) {
+      return { valid: false, error: 'Firebase token time claims are invalid or expired' };
     }
 
-    // 5. Cryptographic signature verification against Google public keys
-    const googleKeys = await getGooglePublicKeys();
-    const cert = header.kid ? googleKeys[header.kid] : null;
-
-    if (cert) {
-      const verifier = crypto.createVerify('RSA-SHA256');
-      verifier.update(`${parts[0]}.${parts[1]}`);
-      const signatureBuf = Buffer.from(parts[2], 'base64url');
-      const isSignatureValid = verifier.verify(cert, signatureBuf);
-
-      if (!isSignatureValid) {
-        return { valid: false, error: 'Cryptographic signature verification failed' };
-      }
-    } else {
-      // If Google public certificates are loaded, any unknown or missing kid is a forged token and must be rejected in ALL environments.
-      if (Object.keys(googleKeys).length > 0 || isProductionEnv()) {
-        return {
-          valid: false,
-          error: `Public key kid '${header.kid || 'none'}' not recognized by Google certificate authority`,
-        };
-      }
-      // Offline sandbox fallback only when Google cert endpoint is unreachable in air-gapped test runners
-      const signatureBuf = Buffer.from(parts[2], 'base64url');
-      if (signatureBuf.length < 32) {
-        return { valid: false, error: 'Cryptographic signature verification failed (malformed signature)' };
-      }
+    const publicKeys = await getGooglePublicKeys();
+    const certificate = publicKeys[header.kid];
+    if (typeof certificate !== 'string' || !certificate) {
+      return { valid: false, error: 'Firebase signing key is unavailable or unrecognized' };
     }
 
-    const provider = payload.firebase?.sign_in_provider || 'google.com';
+    const signature = Buffer.from(parts[2], 'base64url');
+    if (signature.length === 0) {
+      return { valid: false, error: 'Firebase token signature is malformed' };
+    }
+    const verified = crypto.verify(
+      'RSA-SHA256',
+      Buffer.from(`${parts[0]}.${parts[1]}`),
+      certificate,
+      signature
+    );
+    if (!verified) return { valid: false, error: 'Firebase token signature is invalid' };
 
     return {
       valid: true,
       uid: payload.sub,
       email: typeof payload.email === 'string' ? payload.email : undefined,
-      emailVerified: payload.email_verified !== false,
-      authTime: payload.auth_time || payload.iat || nowSec,
+      emailVerified: payload.email_verified === true,
+      authTime: payload.auth_time,
       tokenIssuedAt: payload.iat,
       tokenExpiresAt: payload.exp,
-      provider,
+      provider: payload.firebase?.sign_in_provider || 'google.com',
     };
-  } catch (err: any) {
-    return { valid: false, error: `Token parsing failed: ${err.message}` };
+  } catch {
+    return { valid: false, error: 'Firebase token verification failed' };
   }
 }
 
-/**
- * Extracts a concise device and client summary from User-Agent string.
- */
+/** Extracts a concise device and client summary from User-Agent string. */
 export function parseDeviceSummary(userAgent?: string): string {
   if (!userAgent) return 'Web Client';
   const ua = userAgent.toLowerCase();
@@ -191,6 +157,5 @@ export function parseDeviceSummary(userAgent?: string): string {
   else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
   else if (ua.includes('firefox')) browser = 'Firefox';
   else if (ua.includes('edg')) browser = 'Edge';
-
   return `${browser} on ${os}`;
 }
