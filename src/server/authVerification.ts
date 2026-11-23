@@ -28,12 +28,10 @@ async function getGooglePublicKeys(): Promise<GooglePublicKeys> {
       'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com',
       { signal: controller.signal }
     );
-    if (!response.ok) return cachedKeys || {};
+    if (!response.ok) return {};
 
     const keys = (await response.json()) as GooglePublicKeys;
-    if (!keys || typeof keys !== 'object' || Array.isArray(keys)) {
-      return cachedKeys || {};
-    }
+    if (!keys || typeof keys !== 'object' || Array.isArray(keys)) return {};
 
     cachedKeys = keys;
     const cacheControl = response.headers.get('cache-control');
@@ -44,7 +42,8 @@ async function getGooglePublicKeys(): Promise<GooglePublicKeys> {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'certificate request failed';
     console.warn('[AuthVerify] Could not retrieve Google public keys:', message);
-    return cachedKeys || {};
+    // Expired certificates must not remain trusted indefinitely during outages.
+    return {};
   } finally {
     clearTimeout(timeout);
   }
@@ -69,7 +68,11 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
   }
 
   const parts = token.trim().split('.');
-  if (parts.length !== 3 || parts.some((part) => !part)) {
+  if (
+    parts.length !== 3 ||
+    parts.some((part) => !part || !/^[A-Za-z0-9_-]+$/.test(part)) ||
+    token.length > 16_384
+  ) {
     return { valid: false, error: 'Malformed JWT' };
   }
 
@@ -101,8 +104,10 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       payload.exp <= nowSec - 60 ||
       typeof payload.iat !== 'number' ||
       payload.iat > nowSec + 300 ||
+      payload.iat >= payload.exp ||
       typeof payload.auth_time !== 'number' ||
-      payload.auth_time > nowSec + 300
+      payload.auth_time > nowSec + 300 ||
+      payload.auth_time > payload.iat
     ) {
       return { valid: false, error: 'Firebase token time claims are invalid or expired' };
     }
