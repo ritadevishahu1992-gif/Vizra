@@ -45,6 +45,10 @@
       "destination": "/googlef66bb3a90d865a89.html"
     },
     {
+      "source": "/googlee265bfc7c69fa8d5.html",
+      "destination": "/googlee265bfc7c69fa8d5.html"
+    },
+    {
       "source": "/BingSiteAuth.xml",
       "destination": "/BingSiteAuth.xml"
     },
@@ -81,7 +85,7 @@
       "destination": "/$1/index.html"
     },
     {
-      "source": "/((?!ads\\.txt|sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|BingSiteAuth\\.xml|og-image\\.png).*)",
+      "source": "/((?!ads\\.txt|sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|googlee265bfc7c69fa8d5\\.html|BingSiteAuth\\.xml|og-image\\.png).*)",
       "destination": "/index.html"
     }
   ],

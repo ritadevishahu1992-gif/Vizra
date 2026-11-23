@@ -3438,10 +3438,15 @@ Revise only where necessary. Do not expose this checklist or describe internal r
     ogImageBufferCache = generateVizraOgImageBuffer();
   }
 
-  // Google Search Console HTML file verification endpoint (permanent)
+  // Google Search Console HTML file verification endpoints (permanent)
   app.get('/googlef66bb3a90d865a89.html', (_req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.status(200).send('google-site-verification: googlef66bb3a90d865a89.html');
+  });
+
+  app.get('/googlee265bfc7c69fa8d5.html', (_req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send('google-site-verification: googlee265bfc7c69fa8d5.html');
   });
 
   // Bing Webmaster Tools XML site verification endpoint (permanent)
