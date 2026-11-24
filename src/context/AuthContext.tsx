@@ -8,6 +8,10 @@ import {
   sendEmailVerification,
   updateProfile,
   signOut,
+  linkWithPopup,
+  linkWithCredential,
+  unlink,
+  EmailAuthProvider,
   FirebaseUser,
   auth,
   googleProvider,
@@ -38,6 +42,10 @@ interface AuthContextType {
   signUpWithEmail: (name: string, email: string, password: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
   signOutUser: () => Promise<void>;
+  linkGoogleProvider: () => Promise<{ ok: boolean; message: string }>;
+  linkEmailPasswordProvider: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
+  unlinkAuthProvider: (providerId: string) => Promise<{ ok: boolean; message: string }>;
+  resendVerificationEmail: () => Promise<{ ok: boolean; message: string }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -54,6 +62,10 @@ const AuthContext = createContext<AuthContextType>({
   signUpWithEmail: async () => false,
   resetPassword: async () => false,
   signOutUser: async () => {},
+  linkGoogleProvider: async () => ({ ok: false, message: 'Not signed in.' }),
+  linkEmailPasswordProvider: async () => ({ ok: false, message: 'Not signed in.' }),
+  unlinkAuthProvider: async () => ({ ok: false, message: 'Not signed in.' }),
+  resendVerificationEmail: async () => ({ ok: false, message: 'Not signed in.' }),
 });
 
 function formatFirebaseAuthError(err: any): string {
@@ -69,6 +81,18 @@ function formatFirebaseAuthError(err: any): string {
   }
   if (code === 'auth/email-already-in-use') {
     return 'An account with this email already exists. Try signing in instead.';
+  }
+  if (code === 'auth/credential-already-in-use') {
+    return 'This sign-in credential is already linked to a different VIZRA account. Accounts are never merged silently—sign in to the original account to manage linked methods.';
+  }
+  if (code === 'auth/account-exists-with-different-credential') {
+    return 'An account already exists for this email under another sign-in provider. Sign in with your original method first, then link additional providers in Settings.';
+  }
+  if (code === 'auth/provider-already-linked') {
+    return 'This sign-in provider is already linked to your account.';
+  }
+  if (code === 'auth/requires-recent-login') {
+    return 'For security, please sign out and sign back in recently before modifying authentication methods or deleting your account.';
   }
   if (code === 'auth/weak-password') {
     return 'Password is too weak. Please use at least 8 characters with numbers and symbols.';
@@ -389,6 +413,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const linkGoogleProvider = async (): Promise<{ ok: boolean; message: string }> => {
+    if (!auth.currentUser) {
+      return { ok: false, message: 'Sign in first to link Google to your account.' };
+    }
+    try {
+      clearAuthMessages();
+      const result = await linkWithPopup(auth.currentUser, googleProvider);
+      if (result.user) {
+        savePersistedAuthSessionSnapshot(result.user);
+        setUser({ ...result.user } as FirebaseUser);
+      }
+      return { ok: true, message: 'Google sign-in linked to your account.' };
+    } catch (err: any) {
+      const msg = formatFirebaseAuthError(err);
+      setError(msg);
+      return { ok: false, message: msg };
+    }
+  };
+
+  const linkEmailPasswordProvider = async (
+    email: string,
+    password: string
+  ): Promise<{ ok: boolean; message: string }> => {
+    if (!auth.currentUser) {
+      return { ok: false, message: 'Sign in first to add Email & Password login.' };
+    }
+    if (password.length < 8) {
+      return { ok: false, message: 'Password must be at least 8 characters long.' };
+    }
+    try {
+      clearAuthMessages();
+      const cred = EmailAuthProvider.credential(email.trim(), password);
+      const result = await linkWithCredential(auth.currentUser, cred);
+      if (result.user) {
+        savePersistedAuthSessionSnapshot(result.user);
+        setUser({ ...result.user } as FirebaseUser);
+      }
+      return { ok: true, message: 'Email & Password sign-in linked to your account.' };
+    } catch (err: any) {
+      const msg = formatFirebaseAuthError(err);
+      setError(msg);
+      return { ok: false, message: msg };
+    }
+  };
+
+  const unlinkAuthProvider = async (
+    providerId: string
+  ): Promise<{ ok: boolean; message: string }> => {
+    if (!auth.currentUser) {
+      return { ok: false, message: 'Sign in first to manage linked providers.' };
+    }
+    const providers = auth.currentUser.providerData || [];
+    if (providers.length <= 1) {
+      return {
+        ok: false,
+        message: 'You cannot unlink your only remaining sign-in method.',
+      };
+    }
+    try {
+      clearAuthMessages();
+      const updated = await unlink(auth.currentUser, providerId);
+      savePersistedAuthSessionSnapshot(updated);
+      setUser({ ...updated } as FirebaseUser);
+      return { ok: true, message: 'Sign-in method unlinked successfully.' };
+    } catch (err: any) {
+      const msg = formatFirebaseAuthError(err);
+      setError(msg);
+      return { ok: false, message: msg };
+    }
+  };
+
+  const resendVerificationEmail = async (): Promise<{ ok: boolean; message: string }> => {
+    if (!auth.currentUser) {
+      return { ok: false, message: 'Sign in first to verify your email address.' };
+    }
+    if (auth.currentUser.emailVerified) {
+      return { ok: true, message: 'Your email address is already verified.' };
+    }
+    try {
+      clearAuthMessages();
+      await sendEmailVerification(auth.currentUser);
+      return { ok: true, message: 'Verification email sent. Check your inbox.' };
+    } catch (err: any) {
+      const msg = formatFirebaseAuthError(err);
+      setError(msg);
+      return { ok: false, message: msg };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -405,6 +518,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUpWithEmail,
         resetPassword,
         signOutUser,
+        linkGoogleProvider,
+        linkEmailPasswordProvider,
+        unlinkAuthProvider,
+        resendVerificationEmail,
       }}
     >
       {children}

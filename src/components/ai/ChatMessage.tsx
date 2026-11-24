@@ -9,6 +9,8 @@ import { CitationItem } from '../../types/rag';
 import { SourcesBar } from './SourcesBar';
 import { VizraEngageBanner } from './engage/VizraEngageBanner';
 import { OmniaResponseSkeleton } from './MessageListSkeleton';
+import { ImageGenerationCard } from './ImageGenerationCard';
+import { useCopyToClipboard } from '../../utils/clipboard';
 
 export function deriveEngageLifecycleFromMessage(
   message: Pick<Message, 'status' | 'content'>
@@ -50,10 +52,13 @@ import {
   ShieldCheck,
   Cpu,
   AlertTriangle,
+  Copy,
+  RotateCw,
 } from 'lucide-react';
 
 interface ChatMessageProps {
   message: Message;
+  isTemporary?: boolean;
   onRegenerate?: () => void;
   onSelectSuggestion?: (suggestion: SmartSuggestion) => void;
   onCreateProject?: (draft?: any) => void;
@@ -64,6 +69,7 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
+  isTemporary = false,
   onRegenerate,
   onSelectSuggestion,
   onCreateProject,
@@ -75,6 +81,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [showThoughts, setShowThoughts] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content);
+  const { copied: quickCopied, copy: quickCopy } = useCopyToClipboard({
+    defaultLabel: 'AI output copied to clipboard.',
+  });
 
   const handleSaveEdit = () => {
     if (editText.trim() && onEditUserMessage) {
@@ -211,6 +220,24 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   {message.knowledge_state}
                 </span>
               )}
+
+              {/* Quick Copy Output Button */}
+              {message.status !== 'streaming' && message.content && message.content.trim().length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => quickCopy(message.content, 'AI output copied to clipboard.')}
+                  className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-900/70 hover:bg-neutral-800 border border-neutral-800 text-[11px] text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  title="Copy AI output"
+                  aria-label="Copy AI output to clipboard"
+                >
+                  {quickCopied ? (
+                    <Check size={11} className="text-emerald-400" />
+                  ) : (
+                    <Copy size={11} />
+                  )}
+                  <span>{quickCopied ? 'Copied' : 'Copy'}</span>
+                </button>
+              )}
             </div>
 
             {/* Governed Discrepancy / Conflict Notice */}
@@ -307,8 +334,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
               return (
                 <>
-                  {(engageLifecycleState === 'generating' ||
-                    engageLifecycleState === 'streaming') && (
+                  {!isTemporary &&
+                    (engageLifecycleState === 'generating' ||
+                      engageLifecycleState === 'streaming') && (
                     <VizraEngageBanner
                       lifecycleState={engageLifecycleState}
                       mode={message.mode}
@@ -321,6 +349,36 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         key="awaiting-omnia-skeleton"
                         mode={message.mode}
                       />
+                    ) : message.status === 'error' ? (
+                      <motion.div
+                        key="omnia-error-block"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 rounded-xl bg-red-950/25 border border-red-900/50 text-sm text-red-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        role="alert"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <AlertTriangle size={16} className="text-[#eb3b2d] shrink-0 mt-0.5" />
+                          <div className="space-y-0.5">
+                            <div className="font-medium text-white">{displayContent}</div>
+                            {message.errorCategory && (
+                              <div className="text-[11px] font-mono text-neutral-400">
+                                Status: {message.errorCategory.replace(/_/g, ' ')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {onRegenerate && (
+                          <button
+                            type="button"
+                            onClick={onRegenerate}
+                            className="px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-colors inline-flex items-center gap-1.5 shrink-0 cursor-pointer"
+                          >
+                            <RotateCw size={12} />
+                            <span>Retry</span>
+                          </button>
+                        )}
+                      </motion.div>
                     ) : displayContent ? (
                       <motion.div
                         key="omnia-response-content"
@@ -337,6 +395,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
+
+                  {/* Inline AI Image Generation Card */}
+                  {message.generatedImage && (
+                    <div className="pt-2">
+                      <ImageGenerationCard
+                        prompt={message.generatedImage.prompt}
+                        aspectRatio={message.generatedImage.aspectRatio || '16:9'}
+                        imageUrl={message.generatedImage.imageUrl}
+                        modelName={
+                          message.generatedImage.modelName ||
+                          'Omnia Visual Studio · Procedural Render'
+                        }
+                        initialStatus="generating"
+                      />
+                    </div>
+                  )}
                 </>
               );
             })()}
@@ -410,11 +484,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
 
             {/* Action Bar (Copy, Regenerate, Feedback) */}
-            {message.status !== 'streaming' && onRegenerate && (
+            {message.status !== 'streaming' && message.status !== 'error' && onRegenerate && (
               <MessageActions
                 content={message.content}
                 retrievedSources={message.sources || (message.grounding?.citations as any)}
                 onRegenerate={onRegenerate}
+                isTemporary={isTemporary}
               />
             )}
           </div>

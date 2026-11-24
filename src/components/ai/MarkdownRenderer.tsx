@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
+import { useCopyToClipboard } from '../../utils/clipboard';
 
 interface MarkdownRendererProps {
   content: string;
@@ -60,14 +61,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         }
 
         if (block.type === 'blockquote') {
-          return (
-            <blockquote
-              key={idx}
-              className="border-l-2 border-[#eb3b2d] pl-4 my-2 text-neutral-300 italic bg-neutral-900/30 py-1.5 rounded-r-md"
-            >
-              {renderInline(block.content)}
-            </blockquote>
-          );
+          return <BlockquoteBlock key={idx} content={block.content} />;
         }
 
         if (block.type === 'list' && block.items) {
@@ -354,42 +348,101 @@ function renderInline(text: string): React.ReactNode {
   });
 }
 
-const TableBlock: React.FC<{ tableData: { headers: string[]; rows: string[][] } }> = ({ tableData }) => {
+const BlockquoteBlock: React.FC<{ content: string }> = ({ content }) => {
+  const { copied, copy } = useCopyToClipboard({
+    defaultLabel: 'Quote block copied to clipboard.',
+  });
+
   return (
-    <div className="my-3 overflow-x-auto rounded-xl border border-neutral-800 bg-[#0c0c0c]/80">
-      <table className="w-full text-left text-xs md:text-sm text-neutral-300">
-        <thead className="bg-neutral-900/80 text-white font-semibold border-b border-neutral-800">
-          <tr>
-            {tableData.headers.map((h, idx) => (
-              <th key={idx} className="px-4 py-2.5 font-mono text-xs uppercase tracking-wider">
-                {renderInline(h)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-800/60 font-sans">
-          {tableData.rows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-neutral-900/40 transition-colors">
-              {row.map((cell, cIdx) => (
-                <td key={cIdx} className="px-4 py-2 leading-relaxed">
-                  {renderInline(cell)}
-                </td>
+    <div className="group relative my-2 rounded-xl border border-neutral-800/80 bg-neutral-900/40 px-4 py-3">
+      <blockquote className="pr-14 text-neutral-300 italic leading-relaxed">
+        {renderInline(content)}
+      </blockquote>
+      <button
+        type="button"
+        onClick={() => copy(content, 'Quoted insight copied to clipboard.')}
+        className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-md bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-[11px] font-mono text-neutral-400 hover:text-white opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all cursor-pointer"
+        title="Copy quote"
+        aria-label="Copy quote to clipboard"
+      >
+        {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+        <span>{copied ? 'Copied' : 'Copy'}</span>
+      </button>
+    </div>
+  );
+};
+
+const TableBlock: React.FC<{ tableData: { headers: string[]; rows: string[][] } }> = ({ tableData }) => {
+  const { copied, copy } = useCopyToClipboard({
+    defaultLabel: 'Table data copied to clipboard.',
+  });
+
+  const handleCopyTable = () => {
+    const tsvLines = [
+      tableData.headers.join('\t'),
+      ...tableData.rows.map((row) => row.join('\t')),
+    ];
+    void copy(
+      tsvLines.join('\n'),
+      `Table (${tableData.rows.length} rows × ${tableData.headers.length} columns) copied to clipboard.`
+    );
+  };
+
+  return (
+    <div className="my-3 overflow-hidden rounded-xl border border-neutral-800 bg-[#0c0c0c]/80">
+      <div className="flex items-center justify-between px-4 py-2 bg-neutral-900/70 border-b border-neutral-800/80 text-xs font-mono text-neutral-400">
+        <span>
+          Table · {tableData.rows.length} {tableData.rows.length === 1 ? 'row' : 'rows'}
+        </span>
+        <button
+          type="button"
+          onClick={handleCopyTable}
+          className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+          title="Copy table to clipboard"
+          aria-label="Copy table to clipboard"
+        >
+          {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+          <span>{copied ? 'Copied' : 'Copy Table'}</span>
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs md:text-sm text-neutral-300">
+          <thead className="bg-neutral-900/60 text-white font-semibold border-b border-neutral-800">
+            <tr>
+              {tableData.headers.map((h, idx) => (
+                <th key={idx} className="px-4 py-2.5 font-mono text-xs uppercase tracking-wider">
+                  {renderInline(h)}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-neutral-800/60 font-sans">
+            {tableData.rows.map((row, rIdx) => (
+              <tr key={rIdx} className="hover:bg-neutral-900/40 transition-colors">
+                {row.map((cell, cIdx) => (
+                  <td key={cIdx} className="px-4 py-2 leading-relaxed">
+                    {renderInline(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
 const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, language }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    defaultLabel: `${language ? `${language.toUpperCase()} code` : 'Code block'} copied to clipboard.`,
+  });
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void copy(
+      code,
+      `${language ? `${language.toUpperCase()} code block` : 'Code block'} copied to clipboard.`
+    );
   };
 
   return (
@@ -400,10 +453,11 @@ const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, langua
           <span>{language || 'code'}</span>
         </div>
         <button
+          type="button"
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-          title="Copy to clipboard"
-          aria-label="Copy code"
+          title="Copy code to clipboard"
+          aria-label="Copy code to clipboard"
         >
           {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
           <span>{copied ? 'Copied' : 'Copy'}</span>

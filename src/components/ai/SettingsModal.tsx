@@ -30,20 +30,26 @@ import {
   fetchServerIntegrations,
   disconnectServerIntegration,
 } from '../../services/integrationService';
+import { Link } from 'react-router-dom';
 import { auth } from '../../lib/firebase';
+
+export type SettingsModalTab = 'general' | 'ai' | 'memory' | 'integrations' | 'privacy';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onClearHistory?: () => void;
+  initialTab?: SettingsModalTab;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   onClearHistory,
+  initialTab = 'general',
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'ai' | 'memory' | 'integrations' | 'privacy'>('general');
+  const [activeTab, setActiveTab] = useState<SettingsModalTab>(initialTab);
+  const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const [language, setLanguage] = useState<'auto' | 'en' | 'hi' | 'hinglish'>('auto');
   const [themeMode, setThemeMode] = useState<'pure_black' | 'charcoal'>('pure_black');
   const [defaultMode, setDefaultMode] = useState<AIMode>('quick');
@@ -61,6 +67,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      setActiveTab(initialTab);
+      setConfirmClearHistory(false);
       setMemories(getPersonalMemories());
       setMemoryActive(isMemoryEnabled());
       setIntegrations(getIntegrations());
@@ -74,7 +82,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
       })();
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   if (!isOpen) return null;
 
@@ -474,18 +482,68 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               </div>
 
-              {onClearHistory && (
-                <div className="flex items-center justify-between p-3 rounded-xl bg-red-950/20 border border-red-900/30">
-                  <div>
-                    <div className="font-semibold text-[#eb3b2d]">Clear Conversation History</div>
-                    <div className="text-[11px] text-neutral-400">Permanently delete all active chat sessions.</div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/40 border border-neutral-800">
+                <div>
+                  <div className="font-semibold text-neutral-300">Collected Data &amp; Account Controls</div>
+                  <div className="text-[11px] text-neutral-500">
+                    Review DPDP data categories, link accounts, clear cache, or delete your account.
                   </div>
-                  <button
-                    onClick={onClearHistory}
-                    className="px-3 py-1.5 rounded-lg bg-[#eb3b2d] text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer"
-                  >
-                    Delete All
-                  </button>
+                </div>
+                <Link
+                  to="/settings"
+                  onClick={onClose}
+                  className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-white text-xs transition-colors shrink-0"
+                >
+                  Open Settings
+                </Link>
+              </div>
+
+              {onClearHistory && (
+                <div className="p-3 rounded-xl bg-red-950/20 border border-red-900/30 space-y-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-[#eb3b2d]">Clear Conversation History</div>
+                      <div className="text-[11px] text-neutral-400">
+                        Permanently removes saved chat threads from this browser.
+                      </div>
+                    </div>
+                    {!confirmClearHistory && (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmClearHistory(true)}
+                        className="px-3 py-1.5 rounded-lg bg-[#eb3b2d] text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+                      >
+                        Delete All
+                      </button>
+                    )}
+                  </div>
+                  {confirmClearHistory && (
+                    <div className="pt-2 border-t border-red-900/40 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-red-200 flex items-center gap-1.5">
+                        <AlertTriangle size={13} className="text-[#eb3b2d] shrink-0" />
+                        <span>Confirm permanent deletion of all local chats?</span>
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmClearHistory(false)}
+                          className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white text-[11px] cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClearHistory();
+                            setConfirmClearHistory(false);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-[#eb3b2d] hover:bg-red-600 text-white font-semibold text-[11px] cursor-pointer"
+                        >
+                          Confirm Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

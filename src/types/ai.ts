@@ -95,6 +95,13 @@ export interface SmartSuggestion {
   promptValue?: string;
 }
 
+export interface GeneratedImagePayload {
+  prompt: string;
+  aspectRatio?: '16:9' | '9:16' | '1:1' | '21:9';
+  imageUrl?: string;
+  modelName?: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -118,6 +125,18 @@ export interface Message {
   reasoning_trace_id?: string;
   knowledge_state?: KnowledgeState;
   conflicts?: ConflictRecord[];
+  generatedImage?: GeneratedImagePayload;
+  errorCategory?: string;
+}
+
+export interface TemporaryChatSession {
+  id: string;
+  createdAt: number;
+  expiresAt: number;
+  ttlMinutes: number;
+  sessionInstructions: string;
+  model?: OmniaModel;
+  messages: Message[];
 }
 
 export interface ProjectWorkflowStage {

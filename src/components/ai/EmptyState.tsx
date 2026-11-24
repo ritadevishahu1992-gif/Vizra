@@ -1,7 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { VizraLogo } from '../VizraLogo';
-import { Sparkles, Film, Code, Globe, ArrowUpRight, Brain, Zap, BarChart2, Music, Atom } from 'lucide-react';
+import {
+  Code,
+  Globe,
+  ArrowUpRight,
+  Music,
+  Atom,
+  EyeOff,
+  Clock,
+  Sliders,
+  ShieldAlert,
+} from 'lucide-react';
 import { AIMode } from '../../types/ai';
 import { Tooltip } from '../ui/Tooltip';
 
@@ -9,6 +20,11 @@ interface EmptyStateProps {
   onSelectPrompt: (prompt: string, mode?: AIMode) => void;
   activeMode?: AIMode;
   onSelectMode?: (mode: AIMode) => void;
+  isTemporaryChat?: boolean;
+  temporaryTtlMinutes?: number;
+  onChangeTemporaryTtl?: (minutes: number) => void;
+  temporaryInstructions?: string;
+  onChangeTemporaryInstructions?: (value: string) => void;
 }
 
 const MODE_TOOLTIPS: Record<AIMode, string> = {
@@ -56,7 +72,107 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onSelectPrompt,
   activeMode,
   onSelectMode,
+  isTemporaryChat = false,
+  temporaryTtlMinutes = 30,
+  onChangeTemporaryTtl,
+  temporaryInstructions = '',
+  onChangeTemporaryInstructions,
 }) => {
+  if (isTemporaryChat) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-2xl mx-auto my-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full space-y-5 text-center"
+        >
+          <div className="flex flex-col items-center">
+            <div className="mb-3 p-3 rounded-2xl bg-[#eb3b2d]/10 border border-[#eb3b2d]/30 text-[#eb3b2d]">
+              <EyeOff size={24} />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
+              Temporary Chat
+            </h1>
+            <p className="text-neutral-400 text-sm max-w-lg mt-2 leading-relaxed">
+              Messages in this session stay strictly in client memory, are never saved to your sidebar history or Firestore, and are excluded from analytics and continuous learning logs.
+            </p>
+          </div>
+
+          {/* Session TTL & Custom Instructions Card */}
+          <div className="text-left rounded-2xl bg-[#0e0e0e] border border-neutral-800 p-4 sm:p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-neutral-800/80">
+              <div className="flex items-center gap-2 text-xs font-medium text-white">
+                <Clock size={14} className="text-[#eb3b2d]" />
+                <span>Auto-Wipe Session Expiration</span>
+              </div>
+              {onChangeTemporaryTtl && (
+                <div className="flex items-center gap-1.5">
+                  {[15, 30, 60].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => onChangeTemporaryTtl(mins)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono border transition-colors cursor-pointer ${
+                        temporaryTtlMinutes === mins
+                          ? 'bg-white text-black border-white font-semibold'
+                          : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {onChangeTemporaryInstructions && (
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="temp-session-instructions"
+                  className="flex items-center gap-1.5 text-xs font-medium text-neutral-300"
+                >
+                  <Sliders size={12} className="text-[#eb3b2d]" />
+                  <span>Session-Only Instructions (Optional)</span>
+                </label>
+                <textarea
+                  id="temp-session-instructions"
+                  rows={2}
+                  maxLength={1500}
+                  value={temporaryInstructions}
+                  onChange={(e) => onChangeTemporaryInstructions(e.target.value)}
+                  placeholder="e.g., Reply in concise bullet points. Focus strictly on TypeScript architecture..."
+                  className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 focus:border-[#eb3b2d] focus:outline-none text-xs text-white placeholder-neutral-500 resize-none"
+                />
+              </div>
+            )}
+
+            <div className="flex items-start gap-2.5 pt-2 border-t border-neutral-800/80 text-[11px] text-neutral-400 leading-relaxed">
+              <ShieldAlert size={14} className="text-amber-400 shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-neutral-200 font-medium">Retention Disclosure:</strong> VIZRA does not persist Temporary Chat transcripts to your account or local history. Prompts sent for AI inference are still transmitted via HTTPS proxy to our upstream model provider (Google Gemini API) subject to provider processing terms. Use of this mode is governed by our{' '}
+                <Link
+                  to="/terms-and-conditions"
+                  className="text-white underline underline-offset-2 hover:text-[#eb3b2d]"
+                >
+                  Terms &amp; Conditions
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to="/privacy-policy"
+                  className="text-white underline underline-offset-2 hover:text-[#eb3b2d]"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-2xl mx-auto select-none my-auto">
       {/* Brand Symbol & Heading */}
@@ -71,15 +187,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
 
         <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-white mb-2">
-          How can Omnia help you today?
+          What can I help you with?
         </h1>
 
         <p className="text-neutral-400 text-sm md:text-base max-w-md leading-normal mb-3">
           Your ideas. My knowledge. Our future.
         </p>
 
-        {/* Core Philosophy Pipeline Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-800 text-[11px] font-mono text-neutral-300">
+        {/* Core Philosophy Pipeline */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-neutral-900/90 border border-neutral-800 text-[11px] font-mono text-neutral-300">
           <span className="text-[#eb3b2d]">RESEARCH</span>
           <span className="text-neutral-600">→</span>
           <span className="text-neutral-300">UNDERSTAND</span>
@@ -92,7 +208,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
       </motion.div>
 
-      {/* Mode Quick Select Pills */}
+      {/* Mode Quick Select */}
       {onSelectMode && (
         <div className="flex flex-wrap items-center justify-center gap-1.5 mb-6 max-w-lg">
           {[
@@ -113,7 +229,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectMode(m.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
                   activeMode === m.id
                     ? 'bg-white text-black border-white shadow-sm'
                     : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
@@ -138,6 +254,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           return (
             <button
               key={idx}
+              type="button"
               onClick={() => onSelectPrompt(item.prompt, item.mode)}
               className="text-left p-4 rounded-xl bg-neutral-950/80 hover:bg-neutral-900/70 border border-neutral-800/80 hover:border-neutral-700 transition-all duration-150 cursor-pointer group flex flex-col justify-between"
             >

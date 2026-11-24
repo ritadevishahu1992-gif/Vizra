@@ -15,6 +15,9 @@ import {
   ChevronRight,
   Keyboard,
   LayoutDashboard,
+  Puzzle,
+  CreditCard,
+  Settings,
 } from 'lucide-react';
 import { Conversation, Project } from '../../types/ai';
 import { VizraLogo } from '../VizraLogo';
@@ -33,6 +36,7 @@ interface AISidebarProps {
   onCloseMobile: () => void;
   isOpenDesktop?: boolean;
   onOpenShortcutsHelp?: () => void;
+  onOpenPlugins?: () => void;
   projects?: Project[];
   activeProjectId?: string | null;
   onSelectProject?: (id: string) => void;
@@ -51,6 +55,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
   onCloseMobile,
   isOpenDesktop = true,
   onOpenShortcutsHelp,
+  onOpenPlugins,
   projects = [],
   activeProjectId,
   onSelectProject,
@@ -124,6 +129,31 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             placeholder="Search chats & projects"
             className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800 focus:border-neutral-700 focus:outline-none text-xs text-white placeholder-neutral-500 transition-colors font-sans"
           />
+        </div>
+
+        {/* Quick Workspace Navigation: Plans & Plugins */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <Link
+            to="/pricing"
+            onClick={() => {
+              if (isOpenMobile) onCloseMobile();
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800/80 text-xs text-neutral-300 hover:text-white transition-colors"
+          >
+            <CreditCard size={13} className="text-[#eb3b2d] shrink-0" />
+            <span className="truncate">Plans</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              onOpenPlugins?.();
+              if (isOpenMobile) onCloseMobile();
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800/80 text-xs text-neutral-300 hover:text-white transition-colors cursor-pointer"
+          >
+            <Puzzle size={13} className="text-[#eb3b2d] shrink-0" />
+            <span className="truncate">Plugins</span>
+          </button>
         </div>
       </div>
 
@@ -359,20 +389,28 @@ export const AISidebar: React.FC<AISidebarProps> = ({
           </div>
         </div>
 
-        <Link
-          to="/workspace"
-          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-300 hover:text-white transition-colors"
-          title="Open Studio Workspace"
-        >
-          <div className="flex items-center gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
+          <Link
+            to="/workspace"
+            className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-300 hover:text-white transition-colors"
+            title="Open Studio Workspace"
+          >
             <LayoutDashboard size={12} className="text-[#eb3b2d]" />
-            <span>Studio Workspace</span>
-          </div>
-          <span className="text-[9px] font-mono text-neutral-500">Dashboard →</span>
-        </Link>
+            <span>Workspace</span>
+          </Link>
+          <Link
+            to="/settings"
+            className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-300 hover:text-white transition-colors"
+            title="Account & Privacy Settings"
+          >
+            <Settings size={12} className="text-[#eb3b2d]" />
+            <span>Settings</span>
+          </Link>
+        </div>
 
         {onOpenShortcutsHelp && (
           <button
+            type="button"
             onClick={onOpenShortcutsHelp}
             className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-neutral-850 border border-neutral-850 hover:border-neutral-800 text-[11px] text-neutral-400 hover:text-white transition-colors cursor-pointer"
             title={`Keyboard Shortcuts (${modKey}/)`}

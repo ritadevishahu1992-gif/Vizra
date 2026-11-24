@@ -1,6 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Plus, Settings, User, Sparkles, Database, Music, Radio, Atom, Search, Keyboard, BarChart3 } from 'lucide-react';
+import {
+  Menu,
+  Plus,
+  Settings,
+  Sparkles,
+  Database,
+  Music,
+  Radio,
+  Atom,
+  Search,
+  Keyboard,
+  BarChart3,
+  Clock,
+  EyeOff,
+} from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
 import { CapabilitiesMenu } from './CapabilitiesMenu';
@@ -17,6 +31,9 @@ interface AIHeaderProps {
   onNewChat: () => void;
   onToggleSidebar: () => void;
   onOpenSettings: () => void;
+  isTemporaryChat?: boolean;
+  temporaryRemainingLabel?: string;
+  onToggleTemporaryChat?: () => void;
   onOpenCreateHub?: () => void;
   onOpenKnowledgeBase?: () => void;
   onOpenMusicStudio?: () => void;
@@ -33,6 +50,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onNewChat,
   onToggleSidebar,
   onOpenSettings,
+  isTemporaryChat = false,
+  temporaryRemainingLabel,
+  onToggleTemporaryChat,
   onOpenCreateHub,
   onOpenKnowledgeBase,
   onOpenMusicStudio,
@@ -43,13 +63,21 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onOpenEngageAdmin,
 }) => {
   return (
-    <header className="h-14 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none">
-      {/* Left: Hamburger (mobile), Vizra Logo back to '/' + Omnia 1.0 + Online Indicator */}
-      <div className="flex items-center gap-3 md:gap-4">
+    <header
+      className={`h-14 border-b backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none transition-colors ${
+        isTemporaryChat
+          ? 'border-[#eb3b2d]/40 bg-[#120707]/90'
+          : 'border-neutral-800/80 bg-neutral-950/80'
+      }`}
+    >
+      {/* Left: Collapsible Sidebar Toggle (mobile & desktop), Vizra Logo back to '/' + Omnia 1.0 */}
+      <div className="flex items-center gap-2.5 md:gap-3.5">
         <button
+          type="button"
           onClick={onToggleSidebar}
-          className="md:hidden p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors"
+          className="p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors cursor-pointer"
           aria-label="Toggle Conversation Sidebar"
+          title="Toggle Sidebar"
         >
           <Menu size={18} />
         </button>
@@ -69,12 +97,14 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-neutral-300 tracking-tight">
-            Omnia 1.0
+            {isTemporaryChat ? 'Temporary Chat' : 'Omnia 1.0'}
           </span>
-          <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d] animate-pulse" />
-            <span>Online</span>
-          </div>
+          {isTemporaryChat && temporaryRemainingLabel && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[10px] font-mono text-[#ff867c]">
+              <Clock size={10} />
+              <span>{temporaryRemainingLabel}</span>
+            </span>
+          )}
         </div>
       </div>
 
@@ -220,6 +250,7 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           align="end"
         >
           <button
+            type="button"
             onClick={onNewChat}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-white transition-colors cursor-pointer"
             aria-label="New Chat"
@@ -228,6 +259,37 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             <span className="hidden md:inline">New Chat</span>
           </button>
         </Tooltip>
+
+        {/* Temporary Chat Toggle (Ephemeral Client-Only Session) */}
+        {onToggleTemporaryChat && (
+          <Tooltip
+            label={isTemporaryChat ? 'Exit Temporary Chat' : 'Temporary Chat'}
+            text={
+              isTemporaryChat
+                ? 'End and immediately wipe this ephemeral session from memory.'
+                : 'Start an ephemeral chat not saved to your history or learning logs.'
+            }
+            position="bottom"
+            align="end"
+          >
+            <button
+              type="button"
+              onClick={onToggleTemporaryChat}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+                isTemporaryChat
+                  ? 'bg-[#eb3b2d] text-white border-[#eb3b2d] hover:bg-[#dc2626]'
+                  : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white'
+              }`}
+              aria-label={isTemporaryChat ? 'Exit Temporary Chat' : 'Start Temporary Chat'}
+              aria-pressed={isTemporaryChat}
+            >
+              <EyeOff size={13} className={isTemporaryChat ? 'text-white' : 'text-[#eb3b2d]'} />
+              <span className="hidden lg:inline">
+                {isTemporaryChat ? 'Exit Temp' : 'Temp Chat'}
+              </span>
+            </button>
+          </Tooltip>
+        )}
 
         {onOpenShortcutsHelp && (
           <Tooltip

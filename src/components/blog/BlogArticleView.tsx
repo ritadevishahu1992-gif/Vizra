@@ -9,11 +9,15 @@ import {
   ChevronUp,
   CheckCircle2,
   AlertCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import type { BlogBlock, BlogPost } from '../../data/blog/types';
 import { BlogRichText } from './BlogRichText';
 import { BlogMathBlock } from './BlogMathBlock';
 import { BlogTableOfContents, type TocEntry } from './BlogTableOfContents';
+import { BlogArticleAgent } from './BlogArticleAgent';
+import { useCopyToClipboard } from '../../utils/clipboard';
 
 interface BlogArticleViewProps {
   post: BlogPost;
@@ -38,6 +42,10 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
   const [readProgress, setReadProgress] = useState(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [heroImgFailed, setHeroImgFailed] = useState(false);
+  const [copiedCodeKey, setCopiedCodeKey] = useState<string | null>(null);
+  const { copy: copySnippet } = useCopyToClipboard({
+    defaultLabel: 'Code snippet copied to clipboard.',
+  });
 
   useEffect(() => {
     setHeroImgFailed(false);
@@ -208,13 +216,45 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
         );
       }
 
-      case 'code':
+      case 'code': {
+        const codeKey = `code-${blockIdx}-${block.code.slice(0, 20)}`;
+        const isCodeCopied = copiedCodeKey === codeKey;
         return (
           <figure key={blockIdx} className="my-7">
             <div className="rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-neutral-950 overflow-hidden">
-              <div className="px-4 py-2 border-b border-white/[0.08] flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-400">
-                <span>{block.language}</span>
-                {block.caption && <span className="normal-case tracking-normal">{block.caption}</span>}
+              <div className="px-4 py-2 border-b border-white/[0.08] flex items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-400">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span>{block.language}</span>
+                  {block.caption && (
+                    <span className="normal-case tracking-normal truncate">{block.caption}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await copySnippet(block.code, `${block.language || 'Code'} snippet copied to clipboard.`);
+                    if (ok) {
+                      setCopiedCodeKey(codeKey);
+                      window.setTimeout(
+                        () => setCopiedCodeKey((prev) => (prev === codeKey ? null : prev)),
+                        2000
+                      );
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-white/10 text-neutral-300 hover:text-white normal-case tracking-normal transition-colors cursor-pointer shrink-0"
+                >
+                  {isCodeCopied ? (
+                    <>
+                      <Check size={12} className="text-emerald-400" />
+                      <span className="text-emerald-400">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
               </div>
               <pre className="p-4 sm:p-5 overflow-x-auto text-xs sm:text-[13px] leading-relaxed font-mono text-neutral-200">
                 <code>{block.code}</code>
@@ -222,11 +262,15 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
             </div>
           </figure>
         );
+      }
 
       case 'image':
         return (
           <figure key={blockIdx} className="my-8">
-            <div className="w-full overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-[#0a0c11]">
+            <div
+              onContextMenu={(e) => e.preventDefault()}
+              className="w-full overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-[#0a0c11] select-none"
+            >
               <img
                 src={block.src}
                 alt={block.alt}
@@ -234,8 +278,9 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                 height={block.height || 675}
                 loading="lazy"
                 decoding="async"
+                draggable={false}
                 referrerPolicy="no-referrer"
-                className="w-full h-auto block"
+                className="w-full h-auto block pointer-events-none select-none"
               />
             </div>
             {block.caption && (
@@ -307,7 +352,10 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
 
         {/* Featured 16:9 Editorial Artwork */}
         <figure className="mt-10 mb-12">
-          <div className="aspect-video w-full overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-[#111111]">
+          <div
+            onContextMenu={(e) => e.preventDefault()}
+            className="aspect-video w-full overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-[#111111] select-none"
+          >
             {!heroImgFailed ? (
               <img
                 src={post.featuredImage}
@@ -315,9 +363,10 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                 width={1280}
                 height={720}
                 loading="eager"
+                draggable={false}
                 referrerPolicy="no-referrer"
                 onError={() => setHeroImgFailed(true)}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pointer-events-none select-none"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-[#161616] via-[#0d0d0d] to-[#1a0b0a]">
@@ -629,6 +678,9 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
           </div>
         </div>
       </article>
+
+      {/* Article-Scoped AI Reading Agent */}
+      <BlogArticleAgent post={post} />
     </div>
   );
 };

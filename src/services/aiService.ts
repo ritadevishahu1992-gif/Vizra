@@ -9,6 +9,7 @@ import {
   Project,
   AIActionTrigger,
   SourceValidationGateReport,
+  GeneratedImagePayload,
 } from '../types/ai';
 import { CitationItem, GroundingEvaluation } from '../types/rag';
 import { KnowledgeState, ConflictRecord } from '../types/omniaGovernance';
@@ -24,6 +25,7 @@ import {
 import { getPersonalMemories, isMemoryEnabled } from './memoryService';
 import { evaluateSafeMath, MathEvaluationResult } from '../utils/mathReasoning';
 import { validateCodeSnippet } from '../utils/codeValidator';
+import { fetchWithRetry, classifyApiError, HIGH_TRAFFIC_MESSAGE } from '../utils/apiErrorHandler';
 
 export type UserIntent =
   | 'CHAT'
@@ -43,7 +45,7 @@ export type UserIntent =
 
 export interface RoutingDecision {
   intent: UserIntent;
-  targetModel: 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite';
+  targetModel: 'gemini-4-hydrogen' | 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite';
   needsWebSearch: boolean;
   needsMathValidation: boolean;
   needsVision: boolean;
@@ -61,6 +63,8 @@ export interface SendMessageOptions {
   mode?: AIMode;
   activeProject?: Project | null;
   ragScope?: 'auto' | 'all' | 'project' | 'off';
+  temporarySession?: boolean;
+  sessionInstructions?: string;
   onChunk?: (chunk: string) => void;
   signal?: AbortSignal;
 }
@@ -87,6 +91,8 @@ export interface SendMessageResult {
   reasoning_trace_id?: string;
   knowledge_state?: KnowledgeState;
   conflicts?: ConflictRecord[];
+  generatedImage?: GeneratedImagePayload;
+  errorCategory?: string;
 }
 
 // Detect language: Hindi, Hinglish, or English
@@ -941,8 +947,8 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     }
   }
 
-  // 2b. Personal Memory Injection (Strictly user-provided preferences, scrubbed of PII, separate from system instructions)
-  if (isMemoryEnabled()) {
+  // 2b. Personal Memory Injection (Strictly user-provided preferences, scrubbed of PII; disabled in Temporary Chat)
+  if (!options.temporarySession && isMemoryEnabled()) {
     try {
       const personalMems = getPersonalMemories();
       if (personalMems.length > 0) {
@@ -1141,19 +1147,24 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       const cachedSources = (!isTimeSensitive && needWebResearch) ? webResearchCache.get(rawPrompt) : null;
 
       try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: rawPrompt,
-            conversationHistory,
-            ragContext: ragContextForServer,
-            needWebResearch,
-            mode: options.mode,
-            attachments,
-          }),
-          signal,
-        });
+        const res = await fetchWithRetry(
+          '/api/chat',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: rawPrompt,
+              conversationHistory,
+              ragContext: ragContextForServer,
+              needWebResearch,
+              mode: options.mode,
+              attachments,
+              temporarySession: Boolean(options.temporarySession),
+              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+            }),
+          },
+          { timeoutMs: 32000, maxRetries: 1, signal }
+        );
 
         if (res.ok) {
           const data = await res.json();
@@ -1175,8 +1186,20 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
               sources = cachedSources;
             }
           }
+        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
+          const errPayload = await res.json().catch(() => null);
+          const classified = classifyApiError(
+            res.status,
+            errPayload?.error?.code,
+            errPayload?.error?.message
+          );
+          responseText = classified.userMessage || HIGH_TRAFFIC_MESSAGE;
+          serverFetched = true;
         }
-      } catch {
+      } catch (err: any) {
+        if (err?.name === 'AbortError' || signal?.aborted) {
+          throw err;
+        }
         // Network/server error fallback to local intelligence
       }
 
@@ -1249,25 +1272,34 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   else if (intent === 'CODE') {
     let serverFetched = false;
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: rawPrompt,
-          conversationHistory,
-          ragContext: ragContextForServer,
-          mode: 'code',
-        }),
-        signal,
-      });
+      const res = await fetchWithRetry(
+        '/api/chat',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: rawPrompt,
+            conversationHistory,
+            ragContext: ragContextForServer,
+            mode: 'code',
+            temporarySession: Boolean(options.temporarySession),
+            sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+          }),
+        },
+        { timeoutMs: 32000, maxRetries: 1, signal }
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.text && typeof data.text === 'string' && data.text.trim()) {
           responseText = data.text.trim();
           serverFetched = true;
         }
+      } else if (res.status === 429 || res.status === 503 || res.status === 504) {
+        responseText = HIGH_TRAFFIC_MESSAGE;
+        serverFetched = true;
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || signal?.aborted) throw err;
       // Fallback
     }
 
@@ -1322,25 +1354,34 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     // For creative writing/scripts, query /api/chat first
     if (lower.includes('script') || lower.includes('story') || lower.includes('poem') || lower.includes('brief') || lower.includes('outline')) {
       try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: rawPrompt,
-            conversationHistory,
-            ragContext: ragContextForServer,
-            mode: 'create',
-          }),
-          signal,
-        });
+        const res = await fetchWithRetry(
+          '/api/chat',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: rawPrompt,
+              conversationHistory,
+              ragContext: ragContextForServer,
+              mode: 'create',
+              temporarySession: Boolean(options.temporarySession),
+              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+            }),
+          },
+          { timeoutMs: 32000, maxRetries: 1, signal }
+        );
         if (res.ok) {
           const data = await res.json();
           if (data.text && typeof data.text === 'string' && data.text.trim()) {
             responseText = data.text.trim();
             serverFetched = true;
           }
+        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
+          responseText = HIGH_TRAFFIC_MESSAGE;
+          serverFetched = true;
         }
-      } catch {
+      } catch (err: any) {
+        if (err?.name === 'AbortError' || signal?.aborted) throw err;
         // Fallback
       }
     }
@@ -1415,25 +1456,34 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     } else {
       let serverFetched = false;
       try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: rawPrompt,
-            conversationHistory,
-            ragContext: ragContextForServer,
-            mode: 'think',
-          }),
-          signal,
-        });
+        const res = await fetchWithRetry(
+          '/api/chat',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: rawPrompt,
+              conversationHistory,
+              ragContext: ragContextForServer,
+              mode: 'think',
+              temporarySession: Boolean(options.temporarySession),
+              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+            }),
+          },
+          { timeoutMs: 32000, maxRetries: 1, signal }
+        );
         if (res.ok) {
           const data = await res.json();
           if (data.text && typeof data.text === 'string' && data.text.trim()) {
             responseText = data.text.trim();
             serverFetched = true;
           }
+        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
+          responseText = HIGH_TRAFFIC_MESSAGE;
+          serverFetched = true;
         }
-      } catch {
+      } catch (err: any) {
+        if (err?.name === 'AbortError' || signal?.aborted) throw err;
         // Local math fallback
       }
       if (!serverFetched) {
@@ -1465,17 +1515,22 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   else if (intent === 'ANALYZE' || intent === 'IMAGE_UNDERSTANDING' || intent === 'DOCUMENT_ANALYSIS') {
     let serverFetched = false;
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: rawPrompt || (intent === 'IMAGE_UNDERSTANDING' ? 'Analyze this image and describe the visual content, subjects, composition, and details.' : 'Analyze this document, extract key entities, and summarize findings.'),
-          conversationHistory,
-          attachments,
-          mode: 'analyze',
-        }),
-        signal,
-      });
+      const res = await fetchWithRetry(
+        '/api/chat',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: rawPrompt || (intent === 'IMAGE_UNDERSTANDING' ? 'Analyze this image and describe the visual content, subjects, composition, and details.' : 'Analyze this document, extract key entities, and summarize findings.'),
+            conversationHistory,
+            attachments,
+            mode: 'analyze',
+            temporarySession: Boolean(options.temporarySession),
+            sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+          }),
+        },
+        { timeoutMs: 32000, maxRetries: 1, signal }
+      );
 
       if (res.ok) {
         const data = await res.json();
@@ -1483,8 +1538,12 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
           responseText = data.text.trim();
           serverFetched = true;
         }
+      } else if (res.status === 429 || res.status === 503 || res.status === 504) {
+        responseText = HIGH_TRAFFIC_MESSAGE;
+        serverFetched = true;
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || signal?.aborted) throw err;
       // Local fallback
     }
 
@@ -1572,21 +1631,23 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
-  // Log immutable Reasoning Trace
-  omniaGovernanceService.logReasoningTrace({
-    trace_id: traceId,
-    session_id: 'session_' + (conversationHistory[0]?.id || 'live'),
-    timestamp: new Date().toISOString(),
-    user_query: rawPrompt,
-    intent,
-    retrieval_decision: citations && citations.length > 0 ? 'retrieval_needed' : 'direct_response',
-    safety_check: safetyCheck,
-    model_id: options.model || 'omnia-1.0',
-    latency_ms: Math.round(25 + Math.random() * 30),
-    knowledge_state_surfaced: knowledgeState,
-    citations: citations || [],
-    conflict_ids: activeConflicts.map((c) => c.id),
-  });
+  // Log immutable Reasoning Trace (strictly skipped for Temporary Chat sessions)
+  if (!options.temporarySession) {
+    omniaGovernanceService.logReasoningTrace({
+      trace_id: traceId,
+      session_id: 'session_' + (conversationHistory[0]?.id || 'live'),
+      timestamp: new Date().toISOString(),
+      user_query: rawPrompt,
+      intent,
+      retrieval_decision: citations && citations.length > 0 ? 'retrieval_needed' : 'direct_response',
+      safety_check: safetyCheck,
+      model_id: options.model || 'omnia-1.0',
+      latency_ms: Math.round(25 + Math.random() * 30),
+      knowledge_state_surfaced: knowledgeState,
+      citations: citations || [],
+      conflict_ids: activeConflicts.map((c) => c.id),
+    });
+  }
 
   // Convert document citations to verified sources ONLY if query explicitly targeted internal documentation
   const isInternalQuery =

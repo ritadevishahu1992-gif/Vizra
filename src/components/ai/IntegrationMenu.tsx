@@ -1,14 +1,9 @@
 import React, { useState, useRef } from 'react';
 import {
-  Upload,
   Image as ImageIcon,
-  Video,
   FileText,
   File,
   Sparkles,
-  Film,
-  Layers,
-  Search,
   ChevronRight,
   HardDrive,
   FileSpreadsheet,
@@ -16,13 +11,13 @@ import {
   Figma,
   Palette,
   Youtube,
-  Presentation,
-  Table,
   X,
   FileCheck,
-  CheckCircle,
-  Lock,
   Music,
+  Atom,
+  Database,
+  Globe,
+  Puzzle,
 } from 'lucide-react';
 import { Attachment, Integration } from '../../types/ai';
 import { FileUpload } from '../ui/FileUpload';
@@ -32,22 +27,55 @@ interface IntegrationMenuProps {
   onClose: () => void;
   onAddAttachment: (attachment: Attachment) => void;
   onSelectCreativeMode: (modeTitle: string) => void;
+  onCreateImage?: (prompt: string, aspectRatio?: '16:9' | '1:1' | '9:16') => void;
   onOpenCreationTools?: () => void;
   onRequestConnectIntegration?: (integration: Integration) => void;
   onOpenMusicStudio?: () => void;
+  onOpenScienceHub?: () => void;
+  onOpenKnowledgeBase?: () => void;
 }
+
+const IMAGE_PROMPT_SUGGESTIONS: Array<{
+  label: string;
+  prompt: string;
+  aspectRatio: '16:9' | '1:1' | '9:16';
+}> = [
+  {
+    label: 'Obsidian Architectural Prism',
+    prompt:
+      'Minimalist obsidian architectural monolith with surgical crimson caustic light refraction, dark studio lighting, 8k editorial render',
+    aspectRatio: '16:9',
+  },
+  {
+    label: 'Kinetic Typography Poster',
+    prompt:
+      'Swiss modernist geometric poster composition on matte charcoal void with razor-sharp red accents and radial grid lines',
+    aspectRatio: '1:1',
+  },
+  {
+    label: 'Sci-Fi Product Concept',
+    prompt:
+      'Industrial design render of a brushed anodized titanium audio controller with subtle ruby LED halo on dark slate desk',
+    aspectRatio: '16:9',
+  },
+];
 
 export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
   isOpen,
   onClose,
   onAddAttachment,
   onSelectCreativeMode,
-  onOpenCreationTools,
+  onCreateImage,
   onRequestConnectIntegration,
   onOpenMusicStudio,
+  onOpenScienceHub,
+  onOpenKnowledgeBase,
 }) => {
-  const [comingSoonNotice, setComingSoonNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [activeUploadAccept, setActiveUploadAccept] = useState<string>('*');
+  const [showImageSuggestions, setShowImageSuggestions] = useState(false);
+  const [showPluginsPanel, setShowPluginsPanel] = useState(false);
+  const [customImagePrompt, setCustomImagePrompt] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   if (!isOpen) return null;
@@ -60,7 +88,7 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
     const maxSizeBytes = 10 * 1024 * 1024; // 10MB limit
 
     if (file.size > maxSizeBytes) {
-      setComingSoonNotice(`File "${file.name}" exceeds the 10MB limit.`);
+      setNotice(`File "${file.name}" exceeds the 10MB upload limit.`);
       return;
     }
 
@@ -69,7 +97,10 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
     const isVideo = file.type.startsWith('video/');
     const isAudio = file.type.startsWith('audio/');
     const isPdf = file.type.includes('pdf') || fileNameLower.endsWith('.pdf');
-    const isCsv = fileNameLower.endsWith('.csv') || fileNameLower.endsWith('.tsv') || file.type.includes('csv');
+    const isCsv =
+      fileNameLower.endsWith('.csv') ||
+      fileNameLower.endsWith('.tsv') ||
+      file.type.includes('csv');
     const isText =
       file.type.startsWith('text/') ||
       fileNameLower.endsWith('.txt') ||
@@ -79,119 +110,83 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
       fileNameLower.endsWith('.js') ||
       fileNameLower.endsWith('.py');
 
-    const attachmentType: Attachment['type'] = isImage
-      ? 'image'
-      : isVideo
-      ? 'video'
-      : isAudio
-      ? 'audio'
-      : isCsv
-      ? 'csv'
-      : isPdf
-      ? 'pdf'
-      : 'document';
-
-    // 1. Image handling: Create Data URL for preview and inline multimodal processing
     if (isImage) {
       const reader = new FileReader();
       reader.onload = () => {
-        const dataUrl = reader.result as string;
         onAddAttachment({
           id: Date.now().toString(),
           name: file.name,
           type: 'image',
           size: `${(file.size / 1024).toFixed(1)} KB`,
-          previewUrl: dataUrl,
+          previewUrl: reader.result as string,
         });
-      };
-      reader.onerror = () => {
-        console.error('Failed to read image file');
       };
       reader.readAsDataURL(file);
       onClose();
       return;
     }
 
-    // 2. PDF handling: Read as Data URL (Base64) for native document comprehension
     if (isPdf) {
       const reader = new FileReader();
       reader.onload = () => {
-        const dataUrl = reader.result as string;
         onAddAttachment({
           id: Date.now().toString(),
           name: file.name,
           type: 'pdf',
           size: `${(file.size / 1024).toFixed(1)} KB`,
-          previewUrl: dataUrl,
+          previewUrl: reader.result as string,
         });
-      };
-      reader.onerror = () => {
-        console.error('Failed to read PDF file');
       };
       reader.readAsDataURL(file);
       onClose();
       return;
     }
 
-    // 3. Text, CSV, Markdown, Code handling: Extract real text content directly
     if (isCsv || isText || file.type === 'application/json') {
       const reader = new FileReader();
       reader.onload = () => {
-        const textContent = (reader.result as string) || '';
         onAddAttachment({
           id: Date.now().toString(),
           name: file.name,
           type: isCsv ? 'csv' : 'document',
           size: `${(file.size / 1024).toFixed(1)} KB`,
-          content: textContent,
+          content: (reader.result as string) || '',
         });
-      };
-      reader.onerror = () => {
-        console.error('Failed to read text/document file');
       };
       reader.readAsText(file);
       onClose();
       return;
     }
 
-    // 4. Audio handling: Read as Data URL for Gemini audio multimodal analysis
     if (isAudio) {
       const reader = new FileReader();
       reader.onload = () => {
-        const dataUrl = reader.result as string;
         onAddAttachment({
           id: Date.now().toString(),
           name: file.name,
           type: 'audio',
           size: `${(file.size / 1024).toFixed(1)} KB`,
-          previewUrl: dataUrl,
+          previewUrl: reader.result as string,
         });
-      };
-      reader.onerror = () => {
-        console.error('Failed to read audio file');
       };
       reader.readAsDataURL(file);
       onClose();
       return;
     }
 
-    // 5. Reject binary video files honestly until server video ingestion is enabled
     if (isVideo) {
-      setComingSoonNotice(
+      setNotice(
         `Video "${file.name}" cannot be analyzed in chat attachments yet. Upload frames (PNG/JPG), audio, or transcripts.`
       );
       return;
     }
 
-    // Default fallback for other readable document formats
-    const attachment: Attachment = {
+    onAddAttachment({
       id: Date.now().toString(),
       name: file.name,
-      type: attachmentType,
+      type: 'document',
       size: `${(file.size / 1024).toFixed(1)} KB`,
-    };
-
-    onAddAttachment(attachment);
+    });
     onClose();
   };
 
@@ -202,14 +197,24 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
     }, 50);
   };
 
-  const showComingSoon = (name: string) => {
-    setComingSoonNotice(`${name} integration is in development and coming soon.`);
-    setTimeout(() => setComingSoonNotice(null), 3000);
+  const launchImageGeneration = (
+    prompt: string,
+    aspectRatio: '16:9' | '1:1' | '9:16' = '16:9'
+  ) => {
+    const clean = prompt.trim();
+    if (!clean) return;
+    if (onCreateImage) {
+      onCreateImage(clean, aspectRatio);
+    } else {
+      onSelectCreativeMode(`Create Image: ${clean}`);
+    }
+    setCustomImagePrompt('');
+    setShowImageSuggestions(false);
+    onClose();
   };
 
   return (
     <>
-      {/* Hidden Native File Input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -230,13 +235,14 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
         <div className="p-4 border-b border-neutral-900 bg-neutral-900/40 flex items-start justify-between">
           <div>
             <h3 className="text-sm font-semibold text-white tracking-tight">
-              Add to Omnia Workspace
+              Composer Actions &amp; Plugins
             </h3>
             <p className="text-xs text-neutral-400 mt-0.5">
-              Attach files, connect platforms, or launch creation tools.
+              Attach files or photos (max 10MB), generate visuals, or launch plugins.
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors cursor-pointer"
             aria-label="Close menu"
@@ -245,250 +251,279 @@ export const IntegrationMenu: React.FC<IntegrationMenuProps> = ({
           </button>
         </div>
 
-        {/* Temporary Notice */}
-        {comingSoonNotice && (
-          <div className="mx-4 mt-3 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-300 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d]" />
-              <span>{comingSoonNotice}</span>
-            </div>
-            <span className="text-[10px] font-mono text-[#eb3b2d] uppercase">Coming Soon</span>
+        {/* Notice */}
+        {notice && (
+          <div className="mx-4 mt-3 px-3 py-2 rounded-lg bg-neutral-900 border border-[#eb3b2d]/40 text-xs text-neutral-200 flex items-center justify-between gap-2">
+            <span>{notice}</span>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="text-neutral-400 hover:text-white cursor-pointer"
+              aria-label="Dismiss notice"
+            >
+              <X size={12} />
+            </button>
           </div>
         )}
 
-        {/* Scrollable Categories List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 text-xs">
-          {/* SECTION 1: ATTACH */}
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2 px-1 flex items-center justify-between">
-              <span>ATTACH & DRAG-AND-DROP</span>
-              <span className="text-emerald-500 text-[9px]">READY</span>
-            </div>
-            <div className="mb-2.5">
-              <FileUpload
-                compact
-                title="Drop files directly into Omnia"
-                subtitle="Or click to browse images, PDFs, CSVs, and code (max 10MB)"
-                onAttachmentReady={(att) => {
-                  onAddAttachment(att);
-                  onClose();
+        {/* Primary 4-Action Menu */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+          <div className="space-y-1.5">
+            {/* 1. Files (up to 10MB) */}
+            <button
+              type="button"
+              onClick={() => triggerUpload('.pdf,.txt,.md,.csv,.tsv,.json,.ts,.js,.py,.doc,.docx,audio/*')}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800/70 transition-colors group cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 group-hover:text-white">
+                  <File size={15} className="text-[#eb3b2d]" />
+                </div>
+                <div>
+                  <div className="font-medium text-white text-xs">Files</div>
+                  <div className="text-[11px] text-neutral-400">
+                    PDF, CSV, code, markdown &amp; audio (up to 10MB)
+                  </div>
+                </div>
+              </div>
+              <ChevronRight size={14} className="text-neutral-500 group-hover:text-white" />
+            </button>
+
+            {/* 2. Photos (up to 10MB) */}
+            <button
+              type="button"
+              onClick={() => triggerUpload('image/*')}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800/70 transition-colors group cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 group-hover:text-white">
+                  <ImageIcon size={15} className="text-[#eb3b2d]" />
+                </div>
+                <div>
+                  <div className="font-medium text-white text-xs">Photos</div>
+                  <div className="text-[11px] text-neutral-400">
+                    PNG, JPG, WebP, or screenshots for vision analysis (up to 10MB)
+                  </div>
+                </div>
+              </div>
+              <ChevronRight size={14} className="text-neutral-500 group-hover:text-white" />
+            </button>
+
+            {/* 3. Create Image (with prompt suggestions & inline generation) */}
+            <div className="rounded-xl bg-neutral-900/50 border border-neutral-800/70 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImageSuggestions((prev) => !prev);
+                  setShowPluginsPanel(false);
                 }}
-              />
+                className="w-full flex items-center justify-between p-2.5 hover:bg-neutral-900 transition-colors group cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 group-hover:text-white">
+                    <Sparkles size={15} className="text-[#eb3b2d]" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-white text-xs">Create Image</div>
+                    <div className="text-[11px] text-neutral-400">
+                      Generate studio visual concepts with prompt suggestions
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight
+                  size={14}
+                  className={`text-neutral-500 transition-transform ${
+                    showImageSuggestions ? 'rotate-90 text-[#eb3b2d]' : 'group-hover:text-white'
+                  }`}
+                />
+              </button>
+
+              {showImageSuggestions && (
+                <div className="px-3 pb-3 pt-2 border-t border-neutral-800/80 space-y-2.5 bg-neutral-950/60">
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={customImagePrompt}
+                      onChange={(e) => setCustomImagePrompt(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          launchImageGeneration(customImagePrompt);
+                        }
+                      }}
+                      placeholder="Describe the visual to render..."
+                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 focus:border-[#eb3b2d] focus:outline-none text-xs text-white placeholder-neutral-500"
+                    />
+                    <button
+                      type="button"
+                      disabled={!customImagePrompt.trim()}
+                      onClick={() => launchImageGeneration(customImagePrompt)}
+                      className="px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 disabled:opacity-40 cursor-pointer"
+                    >
+                      Generate
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                      Prompt Suggestions
+                    </div>
+                    {IMAGE_PROMPT_SUGGESTIONS.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => launchImageGeneration(item.prompt, item.aspectRatio)}
+                        className="w-full text-left p-2 rounded-lg bg-neutral-900/70 hover:bg-neutral-800 border border-neutral-800/80 transition-colors cursor-pointer"
+                      >
+                        <div className="font-medium text-neutral-200 text-[11px]">{item.label}</div>
+                        <div className="text-[10px] text-neutral-500 line-clamp-1">{item.prompt}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="space-y-1">
+
+            {/* 4. Plugins (Available Integrations Only Clearly Highlighted) */}
+            <div className="rounded-xl bg-neutral-900/50 border border-neutral-800/70 overflow-hidden">
               <button
                 type="button"
-                onClick={() => triggerUpload('*')}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
+                onClick={() => {
+                  setShowPluginsPanel((prev) => !prev);
+                  setShowImageSuggestions(false);
+                }}
+                className="w-full flex items-center justify-between p-2.5 hover:bg-neutral-900 transition-colors group cursor-pointer text-left"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <File size={14} className="text-[#eb3b2d]" />
+                  <div className="p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 group-hover:text-white">
+                    <Puzzle size={15} className="text-[#eb3b2d]" />
                   </div>
                   <div>
-                    <div className="font-medium text-white text-xs">File</div>
-                    <div className="text-[11px] text-neutral-500">Any code, zip, audio or generic document</div>
+                    <div className="font-medium text-white text-xs">Plugins</div>
+                    <div className="text-[11px] text-neutral-400">
+                      Available studio integrations &amp; connectors
+                    </div>
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-neutral-600 group-hover:text-neutral-400" />
+                <ChevronRight
+                  size={14}
+                  className={`text-neutral-500 transition-transform ${
+                    showPluginsPanel ? 'rotate-90 text-[#eb3b2d]' : 'group-hover:text-white'
+                  }`}
+                />
               </button>
 
-              <button
-                type="button"
-                onClick={() => triggerUpload('image/*')}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <ImageIcon size={14} className="text-[#eb3b2d]" />
+              {showPluginsPanel && (
+                <div className="px-3 pb-3 pt-2 border-t border-neutral-800/80 space-y-3 bg-neutral-950/60">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-400">
+                      Available Now
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenMusicStudio?.();
+                          onClose();
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left cursor-pointer"
+                      >
+                        <Music size={13} className="text-[#eb3b2d] shrink-0" />
+                        <span className="text-[11px] font-medium text-white truncate">AI Music (Lyria)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenScienceHub?.();
+                          onClose();
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left cursor-pointer"
+                      >
+                        <Atom size={13} className="text-[#eb3b2d] shrink-0" />
+                        <span className="text-[11px] font-medium text-white truncate">Science Hub</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenKnowledgeBase?.();
+                          onClose();
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left cursor-pointer"
+                      >
+                        <Database size={13} className="text-[#eb3b2d] shrink-0" />
+                        <span className="text-[11px] font-medium text-white truncate">Knowledge RAG</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectCreativeMode('Research live web sources for');
+                          onClose();
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-left cursor-pointer"
+                      >
+                        <Globe size={13} className="text-[#eb3b2d] shrink-0" />
+                        <span className="text-[11px] font-medium text-white truncate">Web Search</span>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Image</div>
-                    <div className="text-[11px] text-neutral-500">PNG, JPG, WebP, SVG compositions</div>
-                  </div>
-                </div>
-                <ChevronRight size={14} className="text-neutral-600 group-hover:text-neutral-400" />
-              </button>
 
-              <button
-                type="button"
-                onClick={() => triggerUpload('.pdf,.doc,.docx,.txt,.csv,.xlsx')}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <FileText size={14} className="text-[#eb3b2d]" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Document</div>
-                    <div className="text-[11px] text-neutral-500">PDF, TXT, CSV, Sheets & Word specs</div>
+                  {/* External OAuth Connectors — transparently labeled */}
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                      External OAuth Connectors (Requires OAuth Config)
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: 'google_drive', name: 'Drive', icon: HardDrive, scope: 'https://www.googleapis.com/auth/drive.readonly', category: 'productivity' as const },
+                        { id: 'google_docs', name: 'Docs', icon: FileText, scope: 'https://www.googleapis.com/auth/documents.readonly', category: 'productivity' as const },
+                        { id: 'google_sheets', name: 'Sheets', icon: FileSpreadsheet, scope: 'https://www.googleapis.com/auth/spreadsheets.readonly', category: 'productivity' as const },
+                        { id: 'github', name: 'GitHub', icon: Github, scope: 'read:user public_repo', category: 'development' as const },
+                        { id: 'figma', name: 'Figma', icon: Figma, scope: 'file_read', category: 'development' as const },
+                        { id: 'notion', name: 'Notion', icon: FileCheck, scope: 'read_content', category: 'productivity' as const },
+                        { id: 'canva', name: 'Canva', icon: Palette, scope: 'design:meta:read', category: 'creator' as const },
+                        { id: 'youtube', name: 'YouTube', icon: Youtube, scope: 'https://www.googleapis.com/auth/youtube.readonly', category: 'creator' as const },
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              onRequestConnectIntegration?.({
+                                id: item.id,
+                                name: item.name,
+                                category: item.category,
+                                icon: item.id,
+                                description: `External OAuth 2.0 connector for ${item.name}`,
+                                status: 'coming_soon',
+                                scopeRequired: item.scope,
+                                configured: false,
+                              });
+                              onClose();
+                            }}
+                            className="p-2 rounded-lg bg-neutral-900/50 border border-neutral-800/70 hover:border-neutral-700 text-center cursor-pointer"
+                          >
+                            <Icon size={14} className="text-neutral-400 mx-auto mb-1" />
+                            <div className="text-[10px] text-neutral-300 truncate">{item.name}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-neutral-600 group-hover:text-neutral-400" />
-              </button>
+              )}
             </div>
           </div>
 
-          {/* SECTION 2: CONNECT */}
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2 px-1 flex items-center justify-between">
-              <span>CONNECT WORKSPACES (OAUTH 2.0)</span>
-              <span className="text-neutral-500 text-[9px]">EXTERNAL APPROVAL REQUIRED</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: 'google_drive', name: 'Google Drive', icon: HardDrive, scope: 'https://www.googleapis.com/auth/drive.readonly', category: 'productivity' as const },
-                { id: 'google_docs', name: 'Google Docs', icon: FileText, scope: 'https://www.googleapis.com/auth/documents.readonly', category: 'productivity' as const },
-                { id: 'google_sheets', name: 'Google Sheets', icon: FileSpreadsheet, scope: 'https://www.googleapis.com/auth/spreadsheets.readonly', category: 'productivity' as const },
-                { id: 'github', name: 'GitHub', icon: Github, scope: 'read:user public_repo', category: 'development' as const },
-                { id: 'figma', name: 'Figma', icon: Figma, scope: 'file_read', category: 'development' as const },
-                { id: 'canva', name: 'Canva', icon: Palette, scope: 'design:meta:read', category: 'creator' as const },
-                { id: 'notion', name: 'Notion', icon: FileCheck, scope: 'read_content', category: 'productivity' as const },
-                { id: 'youtube', name: 'YouTube', icon: Youtube, scope: 'https://www.googleapis.com/auth/youtube.readonly', category: 'creator' as const },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      if (onRequestConnectIntegration) {
-                        onRequestConnectIntegration({
-                          id: item.id,
-                          name: item.name,
-                          category: item.category,
-                          icon: item.id,
-                          description: `Connect ${item.name} via server-side OAuth 2.0`,
-                          status: 'coming_soon',
-                          scopeRequired: item.scope,
-                          configured: false,
-                        });
-                        onClose();
-                      } else {
-                        showComingSoon(item.name);
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all text-center group cursor-pointer"
-                  >
-                    <Icon size={16} className="text-neutral-400 group-hover:text-white mx-auto mb-1" />
-                    <div className="text-[11px] font-medium text-neutral-300 truncate">{item.name}</div>
-                    <span className="text-[9px] font-mono text-amber-400/90 block mt-0.5">OAuth Pending</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* SECTION 3: CREATE */}
-          <div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2 px-1 flex items-center justify-between">
-              <span>CREATE</span>
-              <span className="text-white text-[9px]">WORKFLOWS</span>
-            </div>
-            <div className="space-y-1">
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectCreativeMode('Generate an obsidian aesthetic image concept');
-                  onClose();
-                }}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <Sparkles size={14} className="text-[#eb3b2d]" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Image</div>
-                    <div className="text-[11px] text-neutral-500">Visual prompt synthesizer & diffusion aesthetics</div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-neutral-400">Launch</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => showComingSoon('Video Generation')}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left opacity-75"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300">
-                    <Video size={14} className="text-neutral-500" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Video</div>
-                    <div className="text-[11px] text-neutral-500">Kinetic temporal rendering & scene synthesis</div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-[#eb3b2d]">Coming Soon</span>
-              </button>
-
-              {/* AI Music Studio Generator (Lyria 3) */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (onOpenMusicStudio) {
-                    onOpenMusicStudio();
-                  } else {
-                    onSelectCreativeMode('Generate custom music soundtrack with Lyria');
-                  }
-                  onClose();
-                }}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <Music size={14} className="text-[#eb3b2d]" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">AI Music Studio</div>
-                    <div className="text-[11px] text-neutral-500">Custom soundtracks, jingles & background audio (Lyria 3)</div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-[#eb3b2d]">Launch</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectCreativeMode('Create a structured project specification document');
-                  onClose();
-                }}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <FileText size={14} className="text-[#eb3b2d]" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Document</div>
-                    <div className="text-[11px] text-neutral-500">Product requirements, briefs & technical specs</div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-neutral-400">Launch</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectCreativeMode('Create a multi-slide presentation outline');
-                  onClose();
-                }}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-neutral-900/80 transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 group-hover:text-white">
-                    <Presentation size={14} className="text-[#eb3b2d]" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-white text-xs">Presentation</div>
-                    <div className="text-[11px] text-neutral-500">Slide decks, pitch narratives & talking points</div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-neutral-400">Launch</span>
-              </button>
-            </div>
-          </div>
+          {/* Drag & Drop Zone */}
+          <FileUpload
+            compact
+            title="Drop files or photos directly here"
+            subtitle="Images, PDFs, CSVs, code & audio (max 10MB)"
+            onAttachmentReady={(att) => {
+              onAddAttachment(att);
+              onClose();
+            }}
+          />
         </div>
       </div>
     </>

@@ -432,12 +432,19 @@ export const CookieConsent: React.FC<{
             <p className="text-xs text-neutral-300 mt-3 leading-relaxed">
               VIZRA uses strictly necessary storage for security, authentication, and saving your consent choices. With your explicit permission, we also support optional Analytics, Functional preferences, and Marketing controls. Public informational pages also integrate Google AdSense, whose regional ad consent is managed via Google Privacy &amp; Messaging when active. Read our{' '}
               <Link
+                to="/terms-and-conditions"
+                className="text-white underline underline-offset-4 hover:text-[#EB3B2D] transition-colors"
+              >
+                Terms &amp; Conditions
+              </Link>
+              ,{' '}
+              <Link
                 to="/privacy-policy"
                 className="text-white underline underline-offset-4 hover:text-[#EB3B2D] transition-colors"
               >
                 Privacy Policy
-              </Link>{' '}
-              and{' '}
+              </Link>
+              , and{' '}
               <Link
                 to="/cookie-policy"
                 className="text-white underline underline-offset-4 hover:text-[#EB3B2D] transition-colors"

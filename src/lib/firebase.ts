@@ -14,6 +14,11 @@ import {
   signOut,
   deleteUser,
   onAuthStateChanged,
+  linkWithPopup,
+  linkWithCredential,
+  unlink,
+  EmailAuthProvider,
+  reauthenticateWithPopup,
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
@@ -150,5 +155,10 @@ export {
   signOut,
   deleteUser,
   onAuthStateChanged,
+  linkWithPopup,
+  linkWithCredential,
+  unlink,
+  EmailAuthProvider,
+  reauthenticateWithPopup,
 };
 export type { FirebaseUser };

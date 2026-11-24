@@ -15,9 +15,13 @@ interface PromptComposerProps {
   initialPrompt?: string;
   onClearInitialPrompt?: () => void;
   onOpenCreationTools?: () => void;
+  onCreateImage?: (prompt: string, aspectRatio?: '16:9' | '1:1' | '9:16') => void;
   onRequestConnectIntegration?: (integration: Integration) => void;
   onOpenMusicStudio?: () => void;
   onOpenLiveVoice?: () => void;
+  onOpenScienceHub?: () => void;
+  onOpenKnowledgeBase?: () => void;
+  isTemporaryChat?: boolean;
 }
 
 export const PromptComposer: React.FC<PromptComposerProps> = ({
@@ -29,9 +33,13 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
   initialPrompt,
   onClearInitialPrompt,
   onOpenCreationTools,
+  onCreateImage,
   onRequestConnectIntegration,
   onOpenMusicStudio,
   onOpenLiveVoice,
+  onOpenScienceHub,
+  onOpenKnowledgeBase,
+  isTemporaryChat = false,
 }) => {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -162,13 +170,22 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
         onClose={() => setIsMenuOpen(false)}
         onAddAttachment={handleAddAttachment}
         onSelectCreativeMode={handleSelectCreativeMode}
+        onCreateImage={onCreateImage}
         onOpenCreationTools={onOpenCreationTools}
         onRequestConnectIntegration={onRequestConnectIntegration}
         onOpenMusicStudio={onOpenMusicStudio}
+        onOpenScienceHub={onOpenScienceHub}
+        onOpenKnowledgeBase={onOpenKnowledgeBase}
       />
 
       {/* Main Composer Box */}
-      <div className="relative rounded-2xl bg-[#0e0e0e] border border-neutral-800 focus-within:border-neutral-700 transition-all duration-200 shadow-xl overflow-visible">
+      <div
+        className={`relative rounded-2xl bg-[#0e0e0e] border transition-all duration-200 shadow-xl overflow-visible ${
+          isTemporaryChat
+            ? 'border-[#eb3b2d]/45 focus-within:border-[#eb3b2d]'
+            : 'border-neutral-800 focus-within:border-neutral-700'
+        }`}
+      >
         {/* Active listening banner if mic active */}
         {isListening && (
           <div className="px-4 py-1.5 bg-[#eb3b2d]/10 border-b border-[#eb3b2d]/30 text-xs text-[#eb3b2d] flex items-center gap-2">
@@ -204,7 +221,11 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Omnia… (Press / to focus, ⌘K for commands)"
+            placeholder={
+              isTemporaryChat
+                ? 'Message Temporary Chat… (not saved to history)'
+                : 'Message Omnia… (Press / to focus, ⌘K for commands)'
+            }
             className="w-full bg-transparent text-white placeholder-neutral-500 text-sm md:text-base focus:outline-none resize-none leading-relaxed max-h-[180px] overflow-y-auto font-sans"
           />
         </div>
@@ -366,8 +387,10 @@ export const PromptComposer: React.FC<PromptComposerProps> = ({
       </div>
 
       {/* Discreet Legal & Context Line */}
-      <div className="text-center mt-2 text-[11px] text-neutral-600 font-mono">
-        Omnia 1.0 may produce creative suggestions. Verify critical technical parameters.
+      <div className="text-center mt-2 text-[11px] text-neutral-500 font-mono">
+        {isTemporaryChat
+          ? 'Temporary Chat is not saved to your history. AI can make mistakes—verify important info.'
+          : 'AI can make mistakes. Check important info.'}
       </div>
     </div>
   );

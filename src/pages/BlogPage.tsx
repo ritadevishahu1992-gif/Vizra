@@ -28,12 +28,21 @@ function formatShortDate(isoDate: string): string {
 export const BlogPage: React.FC = () => {
   const { slug } = useParams<{ slug?: string }>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSeries, setSelectedSeries] = useState<string>('ALL');
   const activePost = slug ? getPublishedBlogPost(slug) : undefined;
+
+  const seriesOptions = useMemo(() => {
+    const unique = Array.from(new Set(BLOG_POSTS.map((p) => p.series)));
+    return ['ALL', ...unique];
+  }, []);
 
   const filteredPosts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return BLOG_POSTS;
     return BLOG_POSTS.filter((post) => {
+      if (selectedSeries !== 'ALL' && post.series !== selectedSeries) {
+        return false;
+      }
+      if (!q) return true;
       return (
         post.title.toLowerCase().includes(q) ||
         post.description.toLowerCase().includes(q) ||
@@ -44,7 +53,7 @@ export const BlogPage: React.FC = () => {
         post.series.toLowerCase().includes(q)
       );
     });
-  }, [searchQuery]);
+  }, [searchQuery, selectedSeries]);
 
   // Individual Article View (/blog/:slug) when a published post exists
   if (slug && activePost) {
@@ -108,12 +117,12 @@ export const BlogPage: React.FC = () => {
     );
   }
 
-  const isSearching = searchQuery.trim().length > 0;
-  const leadPost = !isSearching ? filteredPosts[0] : undefined;
-  const featuredGridPosts = !isSearching ? filteredPosts.slice(1, 5) : [];
-  const archivePosts = !isSearching ? filteredPosts.slice(5, 10) : filteredPosts;
-  const batch2FeaturedPosts = !isSearching ? filteredPosts.slice(10, 14) : [];
-  const batch2ArchivePosts = !isSearching ? filteredPosts.slice(14) : [];
+  const isFiltering = searchQuery.trim().length > 0 || selectedSeries !== 'ALL';
+  const leadPost = !isFiltering ? filteredPosts[0] : undefined;
+  const featuredGridPosts = !isFiltering ? filteredPosts.slice(1, 5) : [];
+  const archivePosts = !isFiltering ? filteredPosts.slice(5, 10) : filteredPosts;
+  const batch2FeaturedPosts = !isFiltering ? filteredPosts.slice(10, 14) : [];
+  const batch2ArchivePosts = !isFiltering ? filteredPosts.slice(14) : [];
 
   // Primary Blog Landing View (/blog)
   return (
@@ -171,6 +180,37 @@ export const BlogPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Dynamic Series Filter Bar (Scales automatically across batches 1–50) */}
+        <div
+          role="tablist"
+          aria-label="Filter blog articles by editorial series"
+          className="mt-7 flex flex-wrap items-center gap-2"
+        >
+          {seriesOptions.map((series) => {
+            const active = selectedSeries === series;
+            const count =
+              series === 'ALL'
+                ? BLOG_POSTS.length
+                : BLOG_POSTS.filter((p) => p.series === series).length;
+            return (
+              <button
+                key={series}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setSelectedSeries(series)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors cursor-pointer border ${
+                  active
+                    ? 'bg-[#EB3B2D] border-[#EB3B2D] text-white font-semibold'
+                    : 'bg-white dark:bg-[#111111] border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:border-[#EB3B2D]/60 hover:text-neutral-950 dark:hover:text-white'
+                }`}
+              >
+                {series === 'ALL' ? `All Articles (${count})` : `${series} (${count})`}
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       {/* Main Editorial Catalog */}
@@ -203,15 +243,19 @@ export const BlogPage: React.FC = () => {
                   to={`/blog/${leadPost.slug}`}
                   className="group grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] hover:border-[#EB3B2D]/60 transition-colors overflow-hidden p-5 sm:p-7"
                 >
-                  <div className="lg:col-span-7 aspect-video w-full overflow-hidden rounded-xl bg-[#0c0c0c]">
+                  <div
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="lg:col-span-7 aspect-video w-full overflow-hidden rounded-xl bg-[#0c0c0c] select-none"
+                  >
                     <img
                       src={leadPost.featuredImage}
                       alt={leadPost.featuredImageAlt}
                       width={1280}
                       height={720}
                       loading="eager"
+                      draggable={false}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 pointer-events-none select-none"
                     />
                   </div>
                   <div className="lg:col-span-5 space-y-4">
@@ -298,11 +342,13 @@ export const BlogPage: React.FC = () => {
               <div className="space-y-6">
                 <div className="flex items-baseline justify-between border-b border-neutral-200 dark:border-white/[0.08] pb-3">
                   <h2 className="font-display text-lg sm:text-xl font-semibold text-neutral-950 dark:text-white">
-                    {isSearching
-                      ? `Search Results (${archivePosts.length})`
+                    {isFiltering
+                      ? selectedSeries !== 'ALL' && !searchQuery.trim()
+                        ? `${selectedSeries} (${archivePosts.length})`
+                        : `Filtered Articles (${archivePosts.length})`
                       : 'Systems, Data, Language & Vision'}
                   </h2>
-                  {!isSearching && (
+                  {!isFiltering && (
                     <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-500 tabular-nums">
                       Articles 06 – 10
                     </span>

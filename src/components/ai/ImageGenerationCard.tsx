@@ -10,6 +10,8 @@ import {
   Layers,
 } from 'lucide-react';
 import { TextShimmer } from '../ui/TextShimmer';
+import { useCopyToClipboard } from '../../utils/clipboard';
+import { useToast } from '../ui/Toast';
 
 export interface ImageGenerationCardProps {
   prompt: string;
@@ -103,7 +105,10 @@ export const ImageGenerationCard: React.FC<ImageGenerationCardProps> = ({
     initialStatus === 'generating' ? 15 : 100
   );
   const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 10000));
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const { copied: copiedPrompt, copy } = useCopyToClipboard({
+    defaultLabel: 'Image generation prompt copied to clipboard.',
+  });
+  const { toast } = useToast();
   const [dataUrl, setDataUrl] = useState<string>(imageUrl || '');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -261,12 +266,16 @@ export const ImageGenerationCard: React.FC<ImageGenerationCardProps> = ({
     link.href = targetUrl;
     link.download = `vizra-omnia-synthesis-${seed}.png`;
     link.click();
+    toast({
+      title: 'PNG downloaded',
+      description: `Saved vizra-omnia-synthesis-${seed}.png with AI provenance metadata.`,
+      type: 'success',
+      durationMs: 2600,
+    });
   };
 
   const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(prompt);
-    setCopiedPrompt(true);
-    window.setTimeout(() => setCopiedPrompt(false), 1800);
+    void copy(prompt, 'Image prompt copied to clipboard.');
   };
 
   return (

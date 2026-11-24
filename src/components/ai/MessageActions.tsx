@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Copy, Check, RotateCw, ThumbsUp, ThumbsDown, Edit3, X, Send, Flag, AlertCircle } from 'lucide-react';
 import { omniaLearningService } from '../../services/omniaLearningService';
 import { auth } from '../../lib/firebase';
+import { useCopyToClipboard } from '../../utils/clipboard';
 
 function getClientSessionHeaderId(): string {
   try {
@@ -22,6 +23,7 @@ interface MessageActionsProps {
   question?: string;
   retrievedSources?: any[];
   onRegenerate: () => void;
+  isTemporary?: boolean;
 }
 
 export const MessageActions: React.FC<MessageActionsProps> = ({
@@ -29,8 +31,11 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   question,
   retrievedSources,
   onRegenerate,
+  isTemporary = false,
 }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    defaultLabel: 'AI response copied to clipboard.',
+  });
   const [feedback, setFeedback] = useState<'HELPFUL' | 'NOT_HELPFUL' | null>(null);
   const [isCorrectionOpen, setIsCorrectionOpen] = useState(false);
   const [correctionText, setCorrectionText] = useState('');
@@ -44,9 +49,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   const [safetyError, setSafetyError] = useState<string | null>(null);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void copy(content, 'Full AI response copied to clipboard.');
   };
 
   const handleThumbs = (type: 'HELPFUL' | 'NOT_HELPFUL') => {
@@ -139,16 +142,19 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       <div className="flex items-center gap-1">
         {/* Copy button */}
         <button
+          type="button"
           onClick={handleCopy}
-          className="p-1.5 rounded-md hover:bg-neutral-900 hover:text-white transition-colors cursor-pointer"
-          title="Copy response"
-          aria-label="Copy response"
+          className="px-2 py-1.5 rounded-md hover:bg-neutral-900 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
+          title="Copy response to clipboard"
+          aria-label="Copy response to clipboard"
         >
           {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+          <span className="text-[11px] font-medium">{copied ? 'Copied' : 'Copy'}</span>
         </button>
 
         {/* Regenerate button */}
         <button
+          type="button"
           onClick={onRegenerate}
           className="p-1.5 rounded-md hover:bg-neutral-900 hover:text-white transition-colors cursor-pointer"
           title="Regenerate response"
@@ -157,48 +163,57 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           <RotateCw size={14} />
         </button>
 
-        {/* Good response */}
-        <button
-          onClick={() => handleThumbs('HELPFUL')}
-          className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer ${
-            feedback === 'HELPFUL' ? 'text-emerald-400 bg-neutral-900' : 'hover:text-white'
-          }`}
-          title="Helpful response"
-          aria-label="Helpful response"
-        >
-          <ThumbsUp size={14} />
-        </button>
+        {/* Learning / Feedback controls are disabled in Temporary Chat to avoid sending ephemeral text to learning logs */}
+        {!isTemporary && (
+          <>
+            {/* Good response */}
+            <button
+              type="button"
+              onClick={() => handleThumbs('HELPFUL')}
+              className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer ${
+                feedback === 'HELPFUL' ? 'text-emerald-400 bg-neutral-900' : 'hover:text-white'
+              }`}
+              title="Helpful response"
+              aria-label="Helpful response"
+            >
+              <ThumbsUp size={14} />
+            </button>
 
-        {/* Bad response */}
-        <button
-          onClick={() => handleThumbs('NOT_HELPFUL')}
-          className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer ${
-            feedback === 'NOT_HELPFUL' ? 'text-red-400 bg-neutral-900' : 'hover:text-white'
-          }`}
-          title="Not helpful"
-          aria-label="Not helpful"
-        >
-          <ThumbsDown size={14} />
-        </button>
+            {/* Bad response */}
+            <button
+              type="button"
+              onClick={() => handleThumbs('NOT_HELPFUL')}
+              className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer ${
+                feedback === 'NOT_HELPFUL' ? 'text-red-400 bg-neutral-900' : 'hover:text-white'
+              }`}
+              title="Not helpful"
+              aria-label="Not helpful"
+            >
+              <ThumbsDown size={14} />
+            </button>
 
-        {/* Suggest Correction (Learning Pipeline) */}
-        <button
-          onClick={() => {
-            setIsCorrectionOpen(!isCorrectionOpen);
-            setIsSafetyReportOpen(false);
-          }}
-          className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer flex items-center gap-1 ${
-            isCorrectionOpen ? 'text-[#eb3b2d] bg-neutral-900' : 'hover:text-white'
-          }`}
-          title="Suggest correction to teach Omnia"
-          aria-label="Suggest correction"
-        >
-          <Edit3 size={13} />
-          <span className="text-[10px] hidden sm:inline">Teach / Correct</span>
-        </button>
+            {/* Suggest Correction (Learning Pipeline) */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsCorrectionOpen(!isCorrectionOpen);
+                setIsSafetyReportOpen(false);
+              }}
+              className={`p-1.5 rounded-md hover:bg-neutral-900 transition-colors cursor-pointer flex items-center gap-1 ${
+                isCorrectionOpen ? 'text-[#eb3b2d] bg-neutral-900' : 'hover:text-white'
+              }`}
+              title="Suggest correction to teach Omnia"
+              aria-label="Suggest correction"
+            >
+              <Edit3 size={13} />
+              <span className="text-[10px] hidden sm:inline">Teach / Correct</span>
+            </button>
+          </>
+        )}
 
         {/* Report Unsafe Output (AI Safety Governance) */}
         <button
+          type="button"
           onClick={() => {
             setIsSafetyReportOpen(!isSafetyReportOpen);
             setIsCorrectionOpen(false);
