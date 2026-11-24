@@ -222,6 +222,29 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
             </div>
           </figure>
         );
+
+      case 'image':
+        return (
+          <figure key={blockIdx} className="my-8">
+            <div className="w-full overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-[#0a0c11]">
+              <img
+                src={block.src}
+                alt={block.alt}
+                width={block.width || 1200}
+                height={block.height || 675}
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                className="w-full h-auto block"
+              />
+            </div>
+            {block.caption && (
+              <figcaption className="mt-2.5 text-xs font-instrument-serif italic text-neutral-500 dark:text-neutral-400 tracking-wide">
+                {block.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
     }
   };
 
@@ -252,7 +275,7 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
             <span>All Blog Articles</span>
           </Link>
           <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400 tabular-nums">
-            {post.series} · Article {String(post.number).padStart(2, '0')} of 10
+            {post.series} · Article {String(post.number).padStart(2, '0')} of {allPosts.length}
           </div>
         </nav>
 
@@ -570,7 +593,7 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                     <span>Series Index</span>
                   </div>
                   <div className="font-display text-sm sm:text-base font-semibold text-neutral-950 dark:text-white group-hover:text-[#EB3B2D] transition-colors leading-snug">
-                    Browse all 10 AI Foundations articles
+                    Browse all {allPosts.length} VIZRA Blog articles
                   </div>
                 </Link>
               )}
@@ -594,7 +617,7 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                   className="p-5 rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] hover:border-[#EB3B2D]/50 transition-colors group space-y-1.5 sm:text-right"
                 >
                   <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-500 sm:justify-end w-full">
-                    <span>End of Batch 1</span>
+                    <span>End of Series</span>
                     <ArrowRight size={12} />
                   </div>
                   <div className="font-display text-sm sm:text-base font-semibold text-neutral-950 dark:text-white group-hover:text-[#EB3B2D] transition-colors leading-snug">

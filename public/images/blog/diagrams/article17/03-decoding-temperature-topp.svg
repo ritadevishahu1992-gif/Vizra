@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Generative Decoding: Temperature Scaling &amp; Nucleus (Top-p) Sampling">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 17.3  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Generative Decoding: Temperature Scaling &amp; Nucleus (Top-p) Sampling</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">How temperature T reshapes next-token softmax probabilities while Top-p truncates the incoherent long tail</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="68" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">LOW TEMPERATURE (T = 0.3)</text>
+<text x="68" y="214" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">quantum</text>
+<rect x="152" y="200" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="200" width="165" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="214" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">93.2%</text>
+<text x="68" y="256" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">neural</text>
+<rect x="152" y="242" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="242" width="11" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="256" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 6.5%</text>
+<text x="68" y="298" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">symbolic</text>
+<rect x="152" y="284" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="284" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="298" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.3%</text>
+<text x="68" y="340" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">causal</text>
+<rect x="152" y="326" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="326" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="340" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.0%</text>
+<text x="68" y="382" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">modern</text>
+<rect x="152" y="368" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="368" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="382" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.0%</text>
+<text x="68" y="424" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">hybrid</text>
+<rect x="152" y="410" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="410" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="424" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.0%</text>
+<text x="68" y="466" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">banana</text>
+<rect x="152" y="452" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="452" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="466" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.0%</text>
+<text x="68" y="508" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">zebra</text>
+<rect x="152" y="494" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="152" y="494" width="3" height="20" rx="4" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="380" y="508" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8"> 0.0%</text>
+<rect x="66" y="536" width="316" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="78" y="558" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Sharp deterministic peak</text>
+<text x="78" y="576" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Best for math, SQL &amp; JSON</text>
+<rect x="424" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="444" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">STANDARD + TOP-P (T = 1.0, p = 0.90)</text>
+<text x="444" y="214" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">quantum</text>
+<rect x="528" y="200" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="200" width="99" height="20" rx="4" fill="#34D399" fill-opacity="0.88"/>
+<text x="756" y="214" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">55.9%</text>
+<text x="444" y="256" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">neural</text>
+<rect x="528" y="242" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="242" width="44" height="20" rx="4" fill="#34D399" fill-opacity="0.88"/>
+<text x="756" y="256" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">25.1%</text>
+<text x="444" y="298" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">symbolic</text>
+<rect x="528" y="284" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="284" width="18" height="20" rx="4" fill="#34D399" fill-opacity="0.88"/>
+<text x="756" y="298" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">10.2%</text>
+<text x="444" y="340" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#64748b">causal</text>
+<rect x="528" y="326" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="326" width="8" height="20" rx="4" fill="#64748b" fill-opacity="0.35"/>
+<text x="756" y="340" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#64748b"> 4.6%</text>
+<text x="444" y="382" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#64748b">modern</text>
+<rect x="528" y="368" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="368" width="4" height="20" rx="4" fill="#64748b" fill-opacity="0.35"/>
+<text x="756" y="382" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#64748b"> 2.5%</text>
+<text x="444" y="424" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#64748b">hybrid</text>
+<rect x="528" y="410" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="410" width="3" height="20" rx="4" fill="#64748b" fill-opacity="0.35"/>
+<text x="756" y="424" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#64748b"> 1.4%</text>
+<text x="444" y="466" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#64748b">banana</text>
+<rect x="528" y="452" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="452" width="3" height="20" rx="4" fill="#64748b" fill-opacity="0.35"/>
+<text x="756" y="466" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#64748b"> 0.2%</text>
+<text x="444" y="508" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#64748b">zebra</text>
+<rect x="528" y="494" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="528" y="494" width="3" height="20" rx="4" fill="#64748b" fill-opacity="0.35"/>
+<text x="756" y="508" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#64748b"> 0.1%</text>
+<line x1="442" y1="436" x2="758" y2="436" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="5,3"/>
+<text x="600" y="452" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#F59E0B">Top-p = 0.90 Nucleus Cutoff (tail zeroed)</text>
+<rect x="442" y="536" width="316" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="454" y="558" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Balanced diversity</text>
+<text x="454" y="576" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Cuts low-prob tail ('banana', 'zebra')</text>
+<rect x="800" y="128" width="352" height="480" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="820" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">HIGH TEMPERATURE (T = 1.8)</text>
+<text x="820" y="214" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">quantum</text>
+<rect x="904" y="200" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="200" width="66" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="214" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">37.6%</text>
+<text x="820" y="256" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">neural</text>
+<rect x="904" y="242" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="242" width="42" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="256" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">24.1%</text>
+<text x="820" y="298" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">symbolic</text>
+<rect x="904" y="284" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="284" width="26" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="298" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">14.6%</text>
+<text x="820" y="340" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">causal</text>
+<rect x="904" y="326" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="326" width="16" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="340" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D"> 9.4%</text>
+<text x="820" y="382" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">modern</text>
+<rect x="904" y="368" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="368" width="11" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="382" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D"> 6.7%</text>
+<text x="820" y="424" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">hybrid</text>
+<rect x="904" y="410" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="410" width="8" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="424" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D"> 4.8%</text>
+<text x="820" y="466" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">banana</text>
+<rect x="904" y="452" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="452" width="3" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="466" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D"> 1.7%</text>
+<text x="820" y="508" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="600" fill="#f1f5f9">zebra</text>
+<rect x="904" y="494" width="178" height="20" rx="4" fill="#0b0e15" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="904" y="494" width="3" height="20" rx="4" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="1132" y="508" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D"> 1.1%</text>
+<rect x="818" y="536" width="316" height="54" rx="8" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="830" y="558" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Flattened distribution</text>
+<text x="830" y="576" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#f1f5f9">Creative but high hallucination risk</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 17.3 — Temperature scaling and Top-p nucleus sampling</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

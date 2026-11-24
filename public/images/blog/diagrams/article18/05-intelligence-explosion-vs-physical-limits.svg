@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Recursive Self-Improvement Loop vs. Physical &amp; Verification Ceilings">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 18.5  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Recursive Self-Improvement Loop vs. Physical &amp; Verification Ceilings</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Theoretical software intelligence explosion (I.J. Good 1965) weighed against real-world compute, energy, and empirical bottlenecks</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="130" width="540" height="476" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="72" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">THEORETICAL RECURSIVE SELF-IMPROVEMENT</text>
+<circle cx="318" cy="360" r="128" fill="none" stroke="#EB3B2D" stroke-width="2.5" stroke-dasharray="10,6"/>
+<rect x="230" y="208" width="176" height="48" rx="8" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="318" y="237" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">Better AI Researcher</text>
+<rect x="358" y="336" width="176" height="48" rx="8" fill="#161b28" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="446" y="365" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">Better Algorithms &amp; Code</text>
+<rect x="230" y="464" width="176" height="48" rx="8" fill="#161b28" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="318" y="493" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">Stronger Next-Gen AI</text>
+<rect x="102" y="336" width="176" height="48" rx="8" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="190" y="365" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#A78BFA">Faster R&amp;D Velocity</text>
+<text x="318" y="354" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="700" fill="#f1f5f9">Feedback Gain</text>
+<text x="318" y="376" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">λ &gt; 1 → Fast Takeoff?</text>
+<text x="318" y="578" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8">Assumes software gains alone can compound unboundedly</text>
+<rect x="612" y="130" width="540" height="476" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="636" y="162" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">REAL-WORLD PHYSICAL &amp; EPISTEMIC BRAKES</text>
+<rect x="636" y="194" width="492" height="82" rx="9" fill="#161b28" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="654" y="222" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#F59E0B">1. Silicon Fab &amp; Supply Chains</text>
+<text x="654" y="244" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">EUV lithography (ASML) &amp; TSMC fabs take 3–5 years to build</text>
+<text x="654" y="262" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">regardless of AI IQ.</text>
+<rect x="636" y="292" width="492" height="82" rx="9" fill="#161b28" stroke="#EB3B2D" stroke-width="1.2"/>
+<text x="654" y="320" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#EB3B2D">2. Grid Power &amp; Thermodynamics</text>
+<text x="654" y="342" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Megawatt transformers, cooling water &amp; Landauer physics cap</text>
+<text x="654" y="360" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">compute doubling.</text>
+<rect x="636" y="390" width="492" height="82" rx="9" fill="#161b28" stroke="#34D399" stroke-width="1.2"/>
+<text x="654" y="418" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#34D399">3. Empirical Experiment Bottleneck</text>
+<text x="654" y="440" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Wet-lab biology, materials &amp; robotics still run at physical</text>
+<text x="654" y="458" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">clock speed.</text>
+<rect x="636" y="488" width="492" height="82" rx="9" fill="#161b28" stroke="#A78BFA" stroke-width="1.2"/>
+<text x="654" y="516" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#A78BFA">4. Diminishing Logarithmic Returns</text>
+<text x="654" y="538" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Each 10× compute jump yields linear, not exponential,</text>
+<text x="654" y="556" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">benchmark gains.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 18.5 — Recursive self-improvement vs. physical constraints</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

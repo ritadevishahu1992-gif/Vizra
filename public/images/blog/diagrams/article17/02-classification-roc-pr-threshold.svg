@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Why PR-AUC Exposes Rare-Class Failures Hidden by ROC-AUC">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 17.2  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Why PR-AUC Exposes Rare-Class Failures Hidden by ROC-AUC</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Comparing ROC vs. Precision–Recall curves for a 0.1% fraud / rare-disease detector with identical predictions</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="72" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">A · ROC CURVE (TPR vs. FPR) — LOOKS OPTIMISTIC</text>
+<rect x="114" y="196" width="434" height="300" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="114" y1="496" x2="548" y2="196" stroke="#64748b" stroke-dasharray="5,4"/>
+<polyline points="114.0,496.0 122.7,422.1 131.4,365.4 140.0,322.2 148.7,289.4 157.4,264.6 166.1,246.1 174.8,232.3 183.4,222.1 192.1,214.6 200.8,209.2 209.5,205.3 218.2,202.4 226.8,200.4 235.5,199.0 244.2,198.0 252.9,197.4 261.6,196.9 270.2,196.6 278.9,196.4 287.6,196.2 296.3,196.1 305.0,196.1 313.6,196.1 322.3,196.0 331.0,196.0 339.7,196.0 348.4,196.0 357.0,196.0 365.7,196.0 374.4,196.0 383.1,196.0 391.8,196.0 400.4,196.0 409.1,196.0 417.8,196.0 426.5,196.0 435.2,196.0 443.8,196.0 452.5,196.0 461.2,196.0 469.9,196.0 478.6,196.0 487.2,196.0 495.9,196.0 504.6,196.0 513.3,196.0 522.0,196.0 530.6,196.0 539.3,196.0 548.0,196.0" fill="none" stroke="#F59E0B" stroke-width="3"/>
+<text x="532" y="240" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#F59E0B">ROC-AUC = 0.965</text>
+<text x="331.0" y="520" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">False Positive Rate (FP / Total Negatives)</text>
+<text x="102" y="210" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">1.0</text>
+<text x="102" y="496" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">0.0</text>
+<text x="72" y="544" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Because True Negatives = 999,000, even 10,000 false alarms</text>
+<text x="72" y="564" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">yields FPR = 1% — making ROC-AUC appear near-perfect.</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="636" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">B · PRECISION–RECALL CURVE — REVEALS FALSE ALARMS</text>
+<rect x="678" y="196" width="434" height="300" rx="8" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="678" y1="490" x2="1112" y2="490" stroke="#64748b" stroke-dasharray="4,3"/>
+<text x="1102" y="482" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10" font-weight="600" fill="#64748b">No-skill baseline = 0.001</text>
+<polyline points="678.0,211.0 686.7,229.1 695.4,246.1 704.0,261.9 712.7,276.7 721.4,290.6 730.1,303.5 738.8,315.5 747.4,326.8 756.1,337.3 764.8,347.2 773.5,356.4 782.2,365.0 790.8,373.0 799.5,380.5 808.2,387.5 816.9,394.0 825.6,400.1 834.2,405.8 842.9,411.2 851.6,416.2 860.3,420.8 869.0,425.2 877.6,429.2 886.3,433.0 895.0,436.6 903.7,439.9 912.4,443.0 921.0,445.9 929.7,448.6 938.4,451.1 947.1,453.5 955.8,455.7 964.4,457.7 973.1,459.7 981.8,461.5 990.5,463.1 999.2,464.7 1007.8,466.2 1016.5,467.5 1025.2,468.8 1033.9,470.0 1042.6,471.1 1051.2,472.2 1059.9,473.1 1068.6,474.1 1077.3,474.9 1086.0,475.7 1094.6,476.4 1103.3,477.1 1112.0,477.8" fill="none" stroke="#EB3B2D" stroke-width="3"/>
+<text x="1096" y="240" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#EB3B2D">PR-AUC = 0.318</text>
+<text x="895.0" y="520" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Recall (TP / Total Actual Positives)</text>
+<text x="666" y="210" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">1.0</text>
+<text x="666" y="496" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#94a3b8">0.0</text>
+<text x="636" y="544" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Precision = TP / (TP + FP) ignores True Negatives completely —</text>
+<text x="636" y="564" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">exposing alert fatigue on rare fraud, security &amp; cancer tasks.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 17.2 — ROC-AUC vs. PR-AUC under severe class imbalance</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

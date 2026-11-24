@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Roofline Analysis of On-Device LLM Inference">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 19.2  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Roofline Analysis of On-Device LLM Inference</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Why single-stream token decoding (1 tok/step) hits the LPDDR5x memory-bandwidth roof far below peak NPU TOPS</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="120" y="145" width="720" height="420" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<line x1="192.0" y1="145" x2="192.0" y2="565" stroke="#1a2030"/>
+<text x="192.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1</text>
+<line x1="336.0" y1="145" x2="336.0" y2="565" stroke="#1a2030"/>
+<text x="336.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">4</text>
+<line x1="480.0" y1="145" x2="480.0" y2="565" stroke="#1a2030"/>
+<text x="480.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">16</text>
+<line x1="624.0" y1="145" x2="624.0" y2="565" stroke="#1a2030"/>
+<text x="624.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">64</text>
+<line x1="768.0" y1="145" x2="768.0" y2="565" stroke="#1a2030"/>
+<text x="768.0" y="587" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">256</text>
+<line x1="120" y1="565.0" x2="840" y2="565.0" stroke="#1a2030"/>
+<text x="108" y="569.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">0.1</text>
+<line x1="120" y1="425.0" x2="840" y2="425.0" stroke="#1a2030"/>
+<text x="108" y="429.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">1</text>
+<line x1="120" y1="285.0" x2="840" y2="285.0" stroke="#1a2030"/>
+<text x="108" y="289.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">10</text>
+<line x1="120" y1="145.0" x2="840" y2="145.0" stroke="#1a2030"/>
+<text x="108" y="149.0" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" fill="#94a3b8">100</text>
+<polyline points="120.0,540.3 127.2,536.1 134.4,531.9 141.6,527.7 148.8,523.5 156.0,519.3 163.2,515.1 170.4,510.8 177.6,506.6 184.8,502.4 192.0,498.2 199.2,494.0 206.4,489.8 213.6,485.6 220.8,481.3 228.0,477.1 235.2,472.9 242.4,468.7 249.6,464.5 256.8,460.3 264.0,456.1 271.2,451.8 278.4,447.6 285.6,443.4 292.8,439.2 300.0,435.0 307.2,430.8 314.4,426.6 321.6,422.3 328.8,418.1 336.0,413.9 343.2,409.7 350.4,405.5 357.6,401.3 364.8,397.1 372.0,392.8 379.2,388.6 386.4,384.4 393.6,380.2 400.8,376.0 408.0,371.8 415.2,367.6 422.4,363.3 429.6,359.1 436.8,354.9 444.0,350.7 451.2,346.5 458.4,342.3 465.6,338.1 472.8,333.8 480.0,329.6 487.2,325.4 494.4,321.2 501.6,317.0 508.8,312.8 516.0,308.6 523.2,304.3 530.4,300.1 537.6,295.9 544.8,291.7 552.0,287.5 559.2,283.3 566.4,279.1 573.6,274.8 580.8,270.6 588.0,266.4 595.2,262.2 602.4,258.0 609.6,253.8 616.8,249.6 624.0,245.3 631.2,241.1 638.4,236.9 645.6,232.7 652.8,228.5 660.0,224.3 667.2,220.1 674.4,215.8 681.6,211.6 688.8,207.4 696.0,203.2 703.2,199.0 710.4,194.8 717.6,193.6 724.8,193.6 732.0,193.6 739.2,193.6 746.4,193.6 753.6,193.6 760.8,193.6 768.0,193.6 775.2,193.6 782.4,193.6 789.6,193.6 796.8,193.6 804.0,193.6 811.2,193.6 818.4,193.6 825.6,193.6 832.8,193.6 840.0,193.6" fill="none" stroke="#38BDF8" stroke-width="3.2"/>
+<line x1="712.5" y1="193.6" x2="712.5" y2="565" stroke="#64748b" stroke-dasharray="5,4"/>
+<text x="602.4749457157035" y="181" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">MEMORY-BANDWIDTH BOUND</text>
+<text x="787.4749457157035" y="181" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">COMPUTE BOUND</text>
+<circle cx="264.0" cy="456.1" r="8" fill="#EB3B2D" stroke="#090b10" stroke-width="2"/>
+<text x="278.0" y="446.05882494628986" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">LLM Token Decode (Batch=1)</text>
+<text x="278.0" y="464.05882494628986" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">Streams all weights per token → BW-limited!</text>
+<circle cx="752.3" cy="200.7" r="8" fill="#34D399" stroke="#090b10" stroke-width="2"/>
+<text x="738.2578993737756" y="226.71160121408525" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">Prompt Prefill &amp; CNNs</text>
+<text x="738.2578993737756" y="244.71160121408525" text-anchor="end" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">High weight reuse → Saturates NPU</text>
+<text x="480.0" y="611" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="600" fill="#f1f5f9">Arithmetic Intensity (Operations per Byte Moved — Log₂ Scale)</text>
+<text x="58" y="355.0" transform="rotate(-90 58 355.0)" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Attainable Performance (TOPS — Log₁₀)</text>
+<rect x="865" y="145" width="287" height="420" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="885" y="178" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">WHY QUANTIZATION WINS</text>
+<text x="885" y="208" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Decode speed formula:</text>
+<text x="885" y="229" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">tok/s ≈ BW / Model_Bytes</text>
+<text x="885" y="250" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="885" y="271" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Example: 7B LLM on</text>
+<text x="885" y="292" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">100 GB/s mobile LPDDR5x:</text>
+<text x="885" y="313" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• FP16 (14 GB): ~7 tok/s</text>
+<text x="885" y="334" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• INT8 (7 GB):  ~14 tok/s</text>
+<text x="885" y="355" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• INT4 (3.5 GB): ~28 tok/s</text>
+<text x="885" y="376" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8"></text>
+<text x="885" y="397" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Halving weight bit-width</text>
+<text x="885" y="418" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">nearly DOUBLES token</text>
+<text x="885" y="439" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">generation speed AND cuts</text>
+<text x="885" y="460" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">DRAM energy per token by</text>
+<text x="885" y="481" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">up to 4× — even before</text>
+<text x="885" y="502" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">faster NPU math kicks in.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 19.2 — Roofline model of on-device LLM inference</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

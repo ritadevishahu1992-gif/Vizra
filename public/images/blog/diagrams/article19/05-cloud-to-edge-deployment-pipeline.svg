@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Five-Stage Cloud-to-Edge Model Deployment Pipeline">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 19.5  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Five-Stage Cloud-to-Edge Model Deployment Pipeline</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Compiling a cloud-trained foundation model into a quantized, hardware-verified on-device binary</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="155" width="200" height="340" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.5"/>
+<rect x="48" y="155" width="200" height="44" rx="12" fill="#38BDF8" fill-opacity="0.15"/>
+<text x="64" y="183" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#38BDF8">STAGE 01</text>
+<text x="64" y="226" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">DISTILL &amp; PRUNE</text>
+<line x1="64" y1="240" x2="232" y2="240" stroke="#242c3e"/>
+<circle cx="70" cy="272" r="3.2" fill="#38BDF8"/>
+<text x="82" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Teacher → Student</text>
+<circle cx="70" cy="320" r="3.2" fill="#38BDF8"/>
+<text x="82" y="324" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Structured 2:4 pruning</text>
+<circle cx="70" cy="368" r="3.2" fill="#38BDF8"/>
+<text x="82" y="372" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Layer / head slimming</text>
+<circle cx="70" cy="416" r="3.2" fill="#38BDF8"/>
+<text x="82" y="420" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Target &lt;3B–8B params</text>
+<line x1="250" y1="320" x2="270" y2="320" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<rect x="274" y="155" width="200" height="340" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.5"/>
+<rect x="274" y="155" width="200" height="44" rx="12" fill="#F59E0B" fill-opacity="0.15"/>
+<text x="290" y="183" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#F59E0B">STAGE 02</text>
+<text x="290" y="226" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">QUANTIZE</text>
+<line x1="290" y1="240" x2="458" y2="240" stroke="#242c3e"/>
+<circle cx="296" cy="272" r="3.2" fill="#F59E0B"/>
+<text x="308" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">PTQ (AWQ / GPTQ)</text>
+<circle cx="296" cy="320" r="3.2" fill="#F59E0B"/>
+<text x="308" y="324" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">or QAT fine-tuning</text>
+<circle cx="296" cy="368" r="3.2" fill="#F59E0B"/>
+<text x="308" y="372" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">INT4 weights / INT8 act</text>
+<circle cx="296" cy="416" r="3.2" fill="#F59E0B"/>
+<text x="308" y="420" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Verify perplexity drop</text>
+<line x1="476" y1="320" x2="496" y2="320" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<rect x="500" y="155" width="200" height="340" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.5"/>
+<rect x="500" y="155" width="200" height="44" rx="12" fill="#A78BFA" fill-opacity="0.15"/>
+<text x="516" y="183" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#A78BFA">STAGE 03</text>
+<text x="516" y="226" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">GRAPH COMPILE</text>
+<line x1="516" y1="240" x2="684" y2="240" stroke="#242c3e"/>
+<circle cx="522" cy="272" r="3.2" fill="#A78BFA"/>
+<text x="534" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Export ONNX / ExecuTorch</text>
+<circle cx="522" cy="320" r="3.2" fill="#A78BFA"/>
+<text x="534" y="324" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Operator fusion (Conv+BN)</text>
+<circle cx="522" cy="368" r="3.2" fill="#A78BFA"/>
+<text x="534" y="372" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Core ML / LiteRT / QNN</text>
+<circle cx="522" cy="416" r="3.2" fill="#A78BFA"/>
+<text x="534" y="420" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">SRAM buffer planning</text>
+<line x1="702" y1="320" x2="722" y2="320" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<rect x="726" y="155" width="200" height="340" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.5"/>
+<rect x="726" y="155" width="200" height="44" rx="12" fill="#EB3B2D" fill-opacity="0.15"/>
+<text x="742" y="183" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">STAGE 04</text>
+<text x="742" y="226" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">DEVICE PROFILE</text>
+<line x1="742" y1="240" x2="910" y2="240" stroke="#242c3e"/>
+<circle cx="748" cy="272" r="3.2" fill="#EB3B2D"/>
+<text x="760" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Measure TTFT &amp; tok/s</text>
+<circle cx="748" cy="320" r="3.2" fill="#EB3B2D"/>
+<text x="760" y="324" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Thermal throttle 30m test</text>
+<circle cx="748" cy="368" r="3.2" fill="#EB3B2D"/>
+<text x="760" y="372" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Battery mWh / query</text>
+<circle cx="748" cy="416" r="3.2" fill="#EB3B2D"/>
+<text x="760" y="420" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">RAM peak watermark</text>
+<line x1="928" y1="320" x2="948" y2="320" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<rect x="952" y="155" width="200" height="340" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<rect x="952" y="155" width="200" height="44" rx="12" fill="#34D399" fill-opacity="0.15"/>
+<text x="968" y="183" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#34D399">STAGE 05</text>
+<text x="968" y="226" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14" font-weight="700" fill="#f1f5f9">OTA &amp; MONITOR</text>
+<line x1="968" y1="240" x2="1136" y2="240" stroke="#242c3e"/>
+<circle cx="974" cy="272" r="3.2" fill="#34D399"/>
+<text x="986" y="276" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Signed model bundles</text>
+<circle cx="974" cy="320" r="3.2" fill="#34D399"/>
+<text x="986" y="324" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">A/B canary rollout</text>
+<circle cx="974" cy="368" r="3.2" fill="#34D399"/>
+<text x="986" y="372" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Crash / fallback telemetry</text>
+<circle cx="974" cy="416" r="3.2" fill="#34D399"/>
+<text x="986" y="420" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">Local drift checks</text>
+<rect x="48" y="526" width="1104" height="78" rx="10" fill="#161b28" stroke="#34D399" stroke-width="1.2"/>
+<text x="72" y="556" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">PRODUCTION RUNTIME STACKS</text>
+<text x="72" y="582" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="400" fill="#f1f5f9">Apple Core ML &amp; MLX  ·  Google LiteRT (TFLite)  ·  Meta ExecuTorch  ·  ONNX Runtime  ·  llama.cpp / MLC-LLM  ·  Arm KleidiAI</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 19.5 — Cloud-to-edge deployment pipeline</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

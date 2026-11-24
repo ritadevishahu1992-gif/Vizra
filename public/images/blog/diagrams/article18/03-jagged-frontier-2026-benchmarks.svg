@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="The Jagged Frontier of Frontier AI Capabilities (2025–2026)">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 18.3  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">The Jagged Frontier of Frontier AI Capabilities (2025–2026)</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Why systems excel at olympiad math and isolated coding while struggling on novel abstraction and open-world robotics</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="136" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="169" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">GPQA Diamond (PhD Science)</text>
+<rect x="418" y="153" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="153" width="306" height="22" rx="6" fill="#34D399" fill-opacity="0.88"/>
+<text x="792" y="169" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">~85%</text>
+<text x="848" y="169" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Exceeds human non-specialist PhDs</text>
+<rect x="48" y="204" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="237" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">AIME Competition Math (RLVR)</text>
+<rect x="418" y="221" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="221" width="316" height="22" rx="6" fill="#34D399" fill-opacity="0.88"/>
+<text x="792" y="237" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">~88%</text>
+<text x="848" y="237" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Test-time reasoning excels on verifiable math</text>
+<rect x="48" y="272" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="305" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">SWE-bench Verified (GitHub Issues)</text>
+<rect x="418" y="289" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="289" width="234" height="22" rx="6" fill="#38BDF8" fill-opacity="0.88"/>
+<text x="792" y="305" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">~65%</text>
+<text x="848" y="305" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Strong real-world repo bug-fixing</text>
+<rect x="48" y="340" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="373" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">OSWorld (GUI Computer Use)</text>
+<rect x="418" y="357" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="357" width="136" height="22" rx="6" fill="#F59E0B" fill-opacity="0.88"/>
+<text x="792" y="373" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">~38%</text>
+<text x="848" y="373" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Multi-step desktop control still brittle</text>
+<rect x="48" y="408" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="441" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">ARC-AGI-2 (Novel Fluid Abstraction)</text>
+<rect x="418" y="425" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="425" width="57" height="22" rx="6" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="792" y="441" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">~16%</text>
+<text x="848" y="441" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Exposes lack of sample-efficient generalization</text>
+<rect x="48" y="476" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="509" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">FrontierMath (Research-Grade Math)</text>
+<rect x="418" y="493" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="493" width="90" height="22" rx="6" fill="#EB3B2D" fill-opacity="0.88"/>
+<text x="792" y="509" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">~25%</text>
+<text x="848" y="509" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Unseen research problems remain far below experts</text>
+<rect x="48" y="544" width="1104" height="56" rx="8" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="68" y="577" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Open-World Physical Manipulation</text>
+<rect x="418" y="561" width="360" height="22" rx="6" fill="#0a0d14" stroke="#242c3e" stroke-width="1.4"/>
+<rect x="418" y="561" width="50" height="22" rx="6" fill="#A78BFA" fill-opacity="0.88"/>
+<text x="792" y="577" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#A78BFA">~14%</text>
+<text x="848" y="577" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Moravec's Paradox: dexterity lags abstract logic</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 18.3 — The jagged frontier of contemporary AI benchmarks</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

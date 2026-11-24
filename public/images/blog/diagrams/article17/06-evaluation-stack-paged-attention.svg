@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Modern AI Evaluation Hierarchy &amp; vLLM PagedAttention Serving">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 17.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Modern AI Evaluation Hierarchy &amp; vLLM PagedAttention Serving</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Left: Multi-layer evaluation pyramid preventing benchmark contamination  ·  Right: Non-contiguous KV memory paging</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#242c3e" stroke-width="1.4"/>
+<text x="72" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A · MULTI-LAYER EVALUATION HIERARCHY</text>
+<rect x="144" y="194" width="348" height="80" rx="10" fill="#161b28" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="318" y="224" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">4. LIVE PRODUCTION TELEMETRY</text>
+<text x="318" y="250" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Real-user A/B, latency (TTFT/TPOT), drift &amp; safety alerts</text>
+<rect x="120" y="292" width="396" height="80" rx="10" fill="#161b28" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="318" y="322" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">3. HUMAN &amp; RUBRIC PREFERENCES</text>
+<text x="318" y="348" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Chatbot Arena Elo, domain experts &amp; calibrated LLM-as-Judge</text>
+<rect x="96" y="390" width="444" height="80" rx="10" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="318" y="420" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">2. PRIVATE / DYNAMIC BENCHMARKS</text>
+<text x="318" y="446" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">LiveCodeBench, FrontierMath, SWE-bench Verified (uncontaminated)</text>
+<rect x="72" y="488" width="492" height="80" rx="10" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="318" y="518" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">1. DETERMINISTIC UNIT &amp; STATIC SUITES</text>
+<text x="318" y="544" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="400" fill="#94a3b8">Exact-match math, compiler tests, JSON schema &amp; calibration ECE</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="636" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">B · vLLM PAGEDATTENTION MEMORY MANAGEMENT</text>
+<text x="636" y="198" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#EB3B2D">Legacy Contiguous Allocation (~60%–80% HBM wasted on reserved slack)</text>
+<rect x="636" y="212" width="140" height="46" rx="5" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="706" y="240" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#38BDF8">Req A (used)</text>
+<rect x="776" y="212" width="175" height="46" rx="5" fill="#2c1416" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="863" y="240" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#EB3B2D">WASTED SLACK</text>
+<rect x="951" y="212" width="95" height="46" rx="5" fill="#241d38" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="998" y="240" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="700" fill="#A78BFA">Req B</text>
+<rect x="1046" y="212" width="82" height="46" rx="5" fill="#2c1416" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="1087" y="240" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="700" fill="#EB3B2D">WASTE</text>
+<text x="636" y="304" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" fill="#34D399">PagedAttention Physical KV Blocks (&lt;4% waste · OS Virtual Memory)</text>
+<rect x="636" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="664" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A0</text>
+<rect x="698" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="726" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">B0</text>
+<rect x="760" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="788" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A1</text>
+<rect x="822" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="850" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">C0</text>
+<rect x="884" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="912" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">A2</text>
+<rect x="946" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="974" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">B1</text>
+<rect x="1008" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="1036" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#F59E0B">C1</text>
+<rect x="1070" y="320" width="56" height="54" rx="6" fill="#161b28" stroke="#64748b" stroke-width="1.4"/>
+<text x="1098" y="352" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#64748b">Free</text>
+<rect x="636" y="408" width="492" height="168" rx="10" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="654" y="438" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">• Partitions each sequence's KV cache into fixed-size 16-token blocks</text>
+<text x="654" y="466" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">• Eliminates internal &amp; external HBM fragmentation (&lt;4% waste)</text>
+<text x="654" y="494" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">• Enables zero-copy prefix sharing (shared system prompts &amp; beam search)</text>
+<text x="654" y="522" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">• Delivers 2×–4× higher concurrent serving throughput on identical GPUs</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 17.6 — Evaluation stack and vLLM PagedAttention</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

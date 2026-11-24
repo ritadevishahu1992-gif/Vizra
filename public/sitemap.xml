@@ -44,7 +44,7 @@
   </url>
   <url>
     <loc>https://vizra.vercel.app/blog</loc>
-    <lastmod>2026-11-21</lastmod>
+    <lastmod>2026-11-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -105,6 +105,66 @@
   <url>
     <loc>https://vizra.vercel.app/blog/computer-vision-how-ai-interprets-images-and-videos</loc>
     <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/how-machine-learning-models-are-trained</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/understanding-algorithms-foundation-of-intelligent-systems</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/gradient-descent-and-backpropagation-explained</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/overfitting-and-underfitting-in-machine-learning</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/what-are-foundation-models</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/understanding-transformers-architecture-behind-modern-ai</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/how-ai-models-evaluate-and-generate-predictions</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/narrow-ai-vs-general-ai-vs-superintelligence</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/edge-ai-bringing-artificial-intelligence-to-everyday-devices</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vizra.vercel.app/blog/future-of-machine-learning-and-intelligent-computing</loc>
+    <lastmod>2026-11-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

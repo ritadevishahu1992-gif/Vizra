@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Beyond Next-Token Prediction: JEPA World Models &amp; Neuro-Symbolic AI">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 20.4  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Beyond Next-Token Prediction: JEPA World Models &amp; Neuro-Symbolic AI</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Left: Joint-Embedding Predictive Architecture predicting abstract latent states  ·  Right: Neural proposer + formal theorem prover</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="72" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#A78BFA">A · JOINT-EMBEDDING PREDICTIVE ARCHITECTURE (JEPA)</text>
+<text x="72" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Predicts in abstract representation space — ignores unpredictable pixel noise</text>
+<rect x="86" y="224" width="150" height="62" rx="8" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="161" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">Context x (Video)</text>
+<text x="161" y="270" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">Encoder E_θ(x)</text>
+<rect x="396" y="224" width="150" height="62" rx="8" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="471" y="250" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">Target y (Future)</text>
+<text x="471" y="270" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">EMA Encoder E_ξ(y)</text>
+<line x1="161" y1="288" x2="161" y2="338" stroke="#38BDF8" stroke-width="2" marker-end="url(#arrCyan)"/>
+<line x1="471" y1="288" x2="471" y2="338" stroke="#34D399" stroke-width="2" marker-end="url(#arrGreen)"/>
+<rect x="86" y="344" width="150" height="56" rx="8" fill="#10283a" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="161" y="377" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#38BDF8">Latent sₓ</text>
+<line x1="238" y1="372" x2="270" y2="372" stroke="#A78BFA" stroke-width="2" marker-end="url(#arrViolet)"/>
+<rect x="276" y="336" width="98" height="72" rx="8" fill="#241d38" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="325" y="366" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#A78BFA">Predictor</text>
+<text x="325" y="386" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" font-weight="600" fill="#F59E0B">+ Action a</text>
+<line x1="376" y1="372" x2="394" y2="372" stroke="#A78BFA" stroke-width="2" marker-end="url(#arrViolet)"/>
+<rect x="396" y="344" width="150" height="56" rx="8" fill="#0f2c22" stroke="#34D399" stroke-width="1.4"/>
+<text x="471" y="377" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">Predicted ŝᵧ ≈ sᵧ</text>
+<rect x="86" y="444" width="460" height="134" rx="10" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="104" y="474" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• Avoids wasting capacity generating every leaf or water ripple</text>
+<text x="104" y="502" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• Enables energy-based planning in compact latent physics space</text>
+<text x="104" y="530" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">• Powers V-JEPA 2 &amp; next-gen robotic world-model control</text>
+<rect x="612" y="128" width="540" height="480" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.4"/>
+<text x="636" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">B · NEURO-SYMBOLIC VERIFICATION (ALPHAPROOF)</text>
+<text x="636" y="180" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Marrying neural intuition with zero-hallucination formal proof kernels</text>
+<rect x="654" y="218" width="456" height="86" rx="10" fill="#102436" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="882" y="248" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">NEURAL PROPOSER (SYSTEM 1 INTUITION)</text>
+<text x="882" y="276" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">LLM proposes candidate lemmas, proof tactics &amp; code diffs</text>
+<line x1="780" y1="306" x2="780" y2="366" stroke="#38BDF8" stroke-width="2.2" marker-end="url(#arrCyan)"/>
+<text x="768" y="340" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#38BDF8">Candidate Tactic</text>
+<line x1="984" y1="366" x2="984" y2="306" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<text x="996" y="340" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#34D399">Exact Proof State / Error</text>
+<rect x="654" y="372" width="456" height="86" rx="10" fill="#0f2c22" stroke="#34D399" stroke-width="1.4"/>
+<text x="882" y="402" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">FORMAL SYMBOLIC KERNEL (LEAN 4 / Z3 / COMPILER)</text>
+<text x="882" y="430" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Deterministically verifies every logical inference step (0% hallucination)</text>
+<rect x="654" y="488" width="456" height="90" rx="10" fill="#161b28" stroke="#242c3e" stroke-width="1.4"/>
+<text x="672" y="518" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">• Achieved IMO 2024 Silver Medal level (28/42 points)</text>
+<text x="672" y="546" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.2" font-weight="400" fill="#94a3b8">• Guarantees mathematically sound software &amp; theorem proofs</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 20.4 — JEPA latent world models and neuro-symbolic loops</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

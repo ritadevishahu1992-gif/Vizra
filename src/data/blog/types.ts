@@ -30,6 +30,14 @@ export type BlogBlock =
       language: string;
       code: string;
       caption?: string;
+    }
+  | {
+      type: 'image';
+      src: string;
+      alt: string;
+      caption?: string;
+      width?: number;
+      height?: number;
     };
 
 export interface BlogSection {

@@ -18,7 +18,7 @@ Core Operating Principles (from `/about`):
 
 ---
 
-## 2. Public Pages & Sitemap Index (13 Canonical URLs)
+## 2. Public Pages & Sitemap Index (33 Canonical URLs)
 
 1. `/` — Home: Platform showcase, Omnia 1.0 workspace preview, ecosystem bento navigation.
 2. `/features` — Features & Pipeline: 4 Core Pillars (Think, Create, Build, Explore), 5-Step Idea-to-Finish pipeline, 10-Stage Project Workspace memory, and Live vs. Staging capabilities transparency.
@@ -27,7 +27,7 @@ Core Operating Principles (from `/about`):
 5. `/explore` — Explore 3D Creative Showcase: Interactive 3D perspective tunnel of curated AI visual prompts and 6 discipline starter profiles.
 6. `/pricing` — Pricing & Compute Tiers: Creator Free, Omnia Pro, VIZRA Studio & Team, full entitlement comparison table, and 4 billing FAQs.
 7. `/docs` — Public Documentation Centre (Sections A–H): 49 topics and 17 dedicated feature guides covering getting started, platform architecture, OMNIA prompting, security/privacy, troubleshooting, and feature availability matrix.
-8. `/blog` — Blog & Studio Updates: Official editorial hub (`No articles published yet.` until articles are authored).
+8. `/blog` — VIZRA Technical Editorial Blog: 20 published, source-verified long-form monographs spanning Batch 1 (AI Foundations, Articles 01–10: evolution of AI, AI complete guide, machine learning, deep learning, neural networks, computing history, learning paradigms, data engineering, NLP, computer vision) and Batch 2 (Machine Learning & Advanced AI, Articles 11–20: ML model training, algorithms, gradient descent & backpropagation, overfitting & underfitting, foundation models, transformers, evaluation & inference, ANI vs. AGI vs. ASI, edge AI, and the future of intelligent computing), each published at `/blog/<slug>`.
 9. `/about` — About VIZRA: Philosophy creed, core engineering principles, and target creator disciplines.
 10. `/contact` — Contact & Studio Inquiries: Direct studio inquiry form, early-access beta request form, and response SLAs.
 11. `/terms-and-conditions` — Legal Terms & Conditions (`STRICT_18_PLUS` adult studio policy, acceptable use, USCO AI copyrightability notice, DMCA 17 U.S.C. § 512 procedure, EU AI Act Art. 50(2) provenance, and third-party Google AdSense advertising disclosures).

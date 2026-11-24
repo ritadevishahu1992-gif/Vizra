@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Inside Modern Edge AI Silicon (Unified Memory SoC)">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 19.4  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Inside Modern Edge AI Silicon (Unified Memory SoC)</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">How Apple Neural Engine, Qualcomm Hexagon, and mobile NPUs coordinate sensors, on-chip SRAM, and unified LPDDR5x</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="1104" height="480" rx="14" fill="#111520" stroke="#242c3e" stroke-width="1.6"/>
+<text x="74" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">SYSTEM-ON-CHIP (SoC) SILICON DIE — ZERO-COPY UNIFIED ARCHITECTURE</text>
+<rect x="74" y="184" width="210" height="214" rx="10" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="179" y="214" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">SENSOR PIPELINE</text>
+<text x="179" y="250" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">4K Camera ISP</text>
+<text x="179" y="278" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Mic Array DSP</text>
+<text x="179" y="306" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">IMU / LiDAR</text>
+<text x="179" y="334" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">Always-On Audio</text>
+<text x="179" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#f1f5f9">(&lt;5 mW island)</text>
+<rect x="314" y="184" width="220" height="214" rx="10" fill="#161b28" stroke="#F59E0B" stroke-width="1.4"/>
+<text x="424" y="214" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">CPU CLUSTERS</text>
+<text x="424" y="250" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">OS &amp; Scheduling</text>
+<text x="424" y="278" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Tokenization / Control</text>
+<text x="424" y="306" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Arm KleidiAI NEON/SME</text>
+<text x="424" y="334" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Scalar Branch Logic</text>
+<text x="424" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Low-Latency Dispatch</text>
+<rect x="564" y="184" width="240" height="214" rx="10" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="684" y="214" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#A78BFA">INTEGRATED GPU</text>
+<text x="684" y="250" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Graphics &amp; UI Render</text>
+<text x="684" y="278" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">FP16 / BF16 Shaders</text>
+<text x="684" y="306" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Metal / Vulkan Compute</text>
+<text x="684" y="334" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Flexible Custom Ops</text>
+<text x="684" y="362" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Medium Power (8–25W)</text>
+<rect x="834" y="184" width="292" height="214" rx="10" fill="#102436" stroke="#EB3B2D" stroke-width="1.8"/>
+<text x="980" y="214" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#EB3B2D">NEURAL ENGINE / NPU</text>
+<rect x="856" y="234" width="248" height="56" rx="6" fill="#2a1417" stroke="#EB3B2D" stroke-width="1.4"/>
+<text x="980" y="258" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#f1f5f9">INT4 / INT8 Systolic MAC Array</text>
+<text x="980" y="278" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" font-weight="600" fill="#F59E0B">35–80+ TOPS @ 3–6 Watts</text>
+<rect x="856" y="306" width="248" height="72" rx="6" fill="#0f2c22" stroke="#34D399" stroke-width="1.4"/>
+<text x="980" y="332" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#34D399">Dedicated On-Chip SRAM</text>
+<text x="980" y="354" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">8–32 MB scratchpad avoids</text>
+<text x="980" y="370" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="400" fill="#94a3b8">costly DRAM round-trips</text>
+<line x1="179" y1="400" x2="179" y2="452" stroke="#38BDF8" stroke-width="2.4" marker-end="url(#arrCyan)" marker-start="url(#arrCyan)"/>
+<line x1="424" y1="400" x2="424" y2="452" stroke="#38BDF8" stroke-width="2.4" marker-end="url(#arrCyan)" marker-start="url(#arrCyan)"/>
+<line x1="684" y1="400" x2="684" y2="452" stroke="#38BDF8" stroke-width="2.4" marker-end="url(#arrCyan)" marker-start="url(#arrCyan)"/>
+<line x1="980" y1="400" x2="980" y2="452" stroke="#38BDF8" stroke-width="2.4" marker-end="url(#arrCyan)" marker-start="url(#arrCyan)"/>
+<rect x="74" y="458" width="1052" height="122" rx="12" fill="#0e1a26" stroke="#38BDF8" stroke-width="1.6"/>
+<text x="600" y="492" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13.5" font-weight="700" fill="#38BDF8">UNIFIED MEMORY FABRIC  ·  LPDDR5x / HBM (100–546 GB/s SHARED POOL)</text>
+<text x="600" y="524" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#f1f5f9">CPU, GPU, ISP, and NPU access identical physical pointers — eliminating PCIe host-to-device memory copies</text>
+<text x="600" y="550" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#94a3b8">Direct DMA streaming keeps battery draw under thermal throttling ceilings (~40°C skin temperature).</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 19.4 — Edge AI System-on-Chip architecture</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

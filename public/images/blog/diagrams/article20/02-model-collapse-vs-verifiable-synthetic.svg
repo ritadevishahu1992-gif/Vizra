@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Navigating the Data Wall: Model Collapse vs. Verifiable Synthesis">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 20.2  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">Navigating the Data Wall: Model Collapse vs. Verifiable Synthesis</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Why uncurated recursive AI-on-AI training erodes tail distributions (Shumailov et al., Nature 2024) while oracle-filtered synthesis scales</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="128" width="1104" height="224" rx="12" fill="#111520" stroke="#EB3B2D" stroke-width="1.5"/>
+<text x="72" y="158" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#EB3B2D">FAILURE MODE · UNCURATED RECURSIVE SYNTHETIC TRAINING → MODEL COLLAPSE</text>
+<rect x="78" y="180" width="214" height="130" rx="8" fill="#0a0d14" stroke="#38BDF8" stroke-width="1.2"/>
+<text x="185" y="202" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#38BDF8">Gen 0 (Real)</text>
+<polyline points="94.0,291.6 98.5,290.7 103.0,289.4 107.5,287.8 112.0,285.7 116.5,283.2 121.0,280.1 125.5,276.4 130.0,272.2 134.5,267.3 139.0,262.0 143.5,256.3 148.0,250.3 152.5,244.3 157.0,238.3 161.5,232.8 166.0,227.8 170.5,223.7 175.0,220.6 179.5,218.7 184.0,218.0 188.5,218.7 193.0,220.6 197.5,223.7 202.0,227.8 206.5,232.8 211.0,238.3 215.5,244.3 220.0,250.3 224.5,256.3 229.0,262.0 233.5,267.3 238.0,272.2 242.5,276.4 247.0,280.1 251.5,283.2 256.0,285.7 260.5,287.8 265.0,289.4 269.5,290.7 274.0,291.6" fill="none" stroke="#38BDF8" stroke-width="2.6"/>
+<line x1="296" y1="245" x2="340" y2="245" stroke="#EB3B2D" stroke-width="2" marker-end="url(#arrRed)"/>
+<rect x="346" y="180" width="214" height="130" rx="8" fill="#0a0d14" stroke="#F59E0B" stroke-width="1.2"/>
+<text x="453" y="202" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#F59E0B">Gen 1</text>
+<polyline points="362.0,293.9 366.5,293.8 371.0,293.7 375.5,293.4 380.0,292.9 384.5,292.2 389.0,291.1 393.5,289.5 398.0,287.1 402.5,283.9 407.0,279.7 411.5,274.3 416.0,267.9 420.5,260.5 425.0,252.3 429.5,243.9 434.0,235.8 438.5,228.6 443.0,222.9 447.5,219.3 452.0,218.0 456.5,219.3 461.0,222.9 465.5,228.6 470.0,235.8 474.5,243.9 479.0,252.3 483.5,260.5 488.0,267.9 492.5,274.3 497.0,279.7 501.5,283.9 506.0,287.1 510.5,289.5 515.0,291.1 519.5,292.2 524.0,292.9 528.5,293.4 533.0,293.7 537.5,293.8 542.0,293.9" fill="none" stroke="#F59E0B" stroke-width="2.6"/>
+<line x1="564" y1="245" x2="608" y2="245" stroke="#EB3B2D" stroke-width="2" marker-end="url(#arrRed)"/>
+<rect x="614" y="180" width="214" height="130" rx="8" fill="#0a0d14" stroke="#f97316" stroke-width="1.2"/>
+<text x="721" y="202" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#f97316">Gen 3</text>
+<polyline points="630.0,294.0 634.5,294.0 639.0,294.0 643.5,294.0 648.0,294.0 652.5,294.0 657.0,294.0 661.5,294.0 666.0,293.9 670.5,293.7 675.0,293.1 679.5,292.0 684.0,289.7 688.5,285.5 693.0,278.8 697.5,269.1 702.0,256.8 706.5,243.2 711.0,230.4 715.5,221.3 720.0,218.0 724.5,221.3 729.0,230.4 733.5,243.2 738.0,256.8 742.5,269.1 747.0,278.8 751.5,285.5 756.0,289.7 760.5,292.0 765.0,293.1 769.5,293.7 774.0,293.9 778.5,294.0 783.0,294.0 787.5,294.0 792.0,294.0 796.5,294.0 801.0,294.0 805.5,294.0 810.0,294.0" fill="none" stroke="#f97316" stroke-width="2.6"/>
+<line x1="832" y1="245" x2="876" y2="245" stroke="#EB3B2D" stroke-width="2" marker-end="url(#arrRed)"/>
+<rect x="882" y="180" width="214" height="130" rx="8" fill="#0a0d14" stroke="#EB3B2D" stroke-width="1.2"/>
+<text x="989" y="202" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="700" fill="#EB3B2D">Gen 9 (Collapsed)</text>
+<polyline points="898.0,294.0 902.5,294.0 907.0,294.0 911.5,294.0 916.0,294.0 920.5,294.0 925.0,294.0 929.5,294.0 934.0,294.0 938.5,294.0 943.0,294.0 947.5,294.0 952.0,294.0 956.5,294.0 961.0,294.0 965.5,294.0 970.0,293.7 974.5,290.4 979.0,274.3 983.5,239.8 988.0,218.0 992.5,239.8 997.0,274.3 1001.5,290.4 1006.0,293.7 1010.5,294.0 1015.0,294.0 1019.5,294.0 1024.0,294.0 1028.5,294.0 1033.0,294.0 1037.5,294.0 1042.0,294.0 1046.5,294.0 1051.0,294.0 1055.5,294.0 1060.0,294.0 1064.5,294.0 1069.0,294.0 1073.5,294.0 1078.0,294.0" fill="none" stroke="#EB3B2D" stroke-width="2.6"/>
+<text x="72" y="336" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#EB3B2D">Tails vanish irreversibly across generations → variance collapses into repetitive, low-information gibberish.</text>
+<rect x="48" y="376" width="1104" height="232" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<text x="72" y="406" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">SOLUTION · COMPILER, PROVER &amp; SIMULATOR-VERIFIED SYNTHETIC DATA LOOP</text>
+<rect x="72" y="434" width="234" height="114" rx="10" fill="#161b28" stroke="#38BDF8" stroke-width="1.4"/>
+<text x="189" y="464" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#38BDF8">1. Anchor Real Corpus</text>
+<text x="189" y="492" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">Retain curated human +</text>
+<text x="189" y="510" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">scientific ground truth</text>
+<line x1="308" y1="491" x2="334" y2="491" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<rect x="340" y="434" width="234" height="114" rx="10" fill="#161b28" stroke="#A78BFA" stroke-width="1.4"/>
+<text x="457" y="464" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#A78BFA">2. Candidate Generation</text>
+<text x="457" y="492" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">Sample diverse solutions,</text>
+<text x="457" y="510" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">proofs &amp; simulations</text>
+<line x1="576" y1="491" x2="602" y2="491" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<rect x="608" y="434" width="234" height="114" rx="10" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="725" y="464" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">3. Deterministic Oracle</text>
+<text x="725" y="492" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">Lean 4 prover · Unit tests</text>
+<text x="725" y="510" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">· Physics engine</text>
+<line x1="844" y1="491" x2="870" y2="491" stroke="#34D399" stroke-width="2.2" marker-end="url(#arrGreen)"/>
+<rect x="876" y="434" width="234" height="114" rx="10" fill="#161b28" stroke="#34D399" stroke-width="1.4"/>
+<text x="993" y="464" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" fill="#34D399">4. Verified Dataset</text>
+<text x="993" y="492" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">Keep ONLY 100% verified</text>
+<text x="993" y="510" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="11.8" font-weight="400" fill="#f1f5f9">traces → Re-train</text>
+<text x="72" y="584" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="400" fill="#34D399">Grounded external verification injects fresh mathematical &amp; physical truth — powering AlphaProof, AlphaGeometry &amp; RLVR models.</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 20.2 — Model collapse vs. verifiable synthetic data</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

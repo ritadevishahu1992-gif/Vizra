@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="AI as a Primary Scientific Discovery Instrument">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a2030" stroke-width="0.8" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0e15"/>
+      <stop offset="100%" stop-color="#07090e"/>
+    </linearGradient>
+    <marker id="arrCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#EB3B2D"/>
+    </marker>
+    <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399"/>
+    </marker>
+    <marker id="arrMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bgGrad)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="3" fill="#EB3B2D"/>
+  <text x="48" y="38" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11.5" font-weight="600" letter-spacing="2" fill="#EB3B2D">FIG 20.6  ·  VIZRA TECHNICAL EDITORIAL</text>
+  <text x="48" y="66" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700" fill="#f1f5f9">AI as a Primary Scientific Discovery Instrument</text>
+  <text x="48" y="88" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#94a3b8">Accelerating hypothesis generation, simulation, and experimental verification across four core scientific frontiers</text>
+  <line x1="48" y1="104" x2="1152" y2="104" stroke="#242c3e" stroke-width="1"/>
+
+<rect x="48" y="132" width="540" height="222" rx="12" fill="#111520" stroke="#34D399" stroke-width="1.5"/>
+<rect x="48" y="132" width="540" height="44" rx="12" fill="#34D399" fill-opacity="0.14"/>
+<text x="70" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#34D399">01 · STRUCTURAL BIOLOGY</text>
+<text x="70" y="204" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#f1f5f9">AlphaFold 3 · ESM-3 · RoseTTAFold</text>
+<circle cx="76" cy="238" r="3.2" fill="#34D399"/>
+<text x="90" y="242" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">2024 Nobel Prize in Chemistry (Hassabis, Jumper, Baker)</text>
+<circle cx="76" cy="274" r="3.2" fill="#34D399"/>
+<text x="90" y="278" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Joint 3D structure prediction for proteins, DNA, RNA &amp; ligands</text>
+<circle cx="76" cy="310" r="3.2" fill="#34D399"/>
+<text x="90" y="314" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">De novo enzyme &amp; therapeutic antibody design</text>
+<rect x="612" y="132" width="540" height="222" rx="12" fill="#111520" stroke="#38BDF8" stroke-width="1.5"/>
+<rect x="612" y="132" width="540" height="44" rx="12" fill="#38BDF8" fill-opacity="0.14"/>
+<text x="634" y="160" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#38BDF8">02 · MATERIALS &amp; ENERGY</text>
+<text x="634" y="204" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#f1f5f9">GNoME · MatterGen · Fusion RL</text>
+<circle cx="640" cy="238" r="3.2" fill="#38BDF8"/>
+<text x="654" y="242" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">2.2M crystal structures predicted; 380K stable candidates</text>
+<circle cx="640" cy="274" r="3.2" fill="#38BDF8"/>
+<text x="654" y="278" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Accelerated solid-state battery electrolytes &amp; superconductors</text>
+<circle cx="640" cy="310" r="3.2" fill="#38BDF8"/>
+<text x="654" y="314" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Real-time tokamak magnetic plasma containment control</text>
+<rect x="48" y="378" width="540" height="222" rx="12" fill="#111520" stroke="#F59E0B" stroke-width="1.5"/>
+<rect x="48" y="378" width="540" height="44" rx="12" fill="#F59E0B" fill-opacity="0.14"/>
+<text x="70" y="406" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#F59E0B">03 · CLIMATE &amp; EARTH PHYSICS</text>
+<text x="70" y="450" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#f1f5f9">GraphCast · GenCast · Aurora</text>
+<circle cx="76" cy="484" r="3.2" fill="#F59E0B"/>
+<text x="90" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">10-day global weather &amp; cyclone forecasts in &lt;60 seconds</text>
+<circle cx="76" cy="520" r="3.2" fill="#F59E0B"/>
+<text x="90" y="524" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">1,000×–10,000× faster than classical numerical PDE solvers</text>
+<circle cx="76" cy="556" r="3.2" fill="#F59E0B"/>
+<text x="90" y="560" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Probabilistic extreme-event &amp; air-quality ensembles</text>
+<rect x="612" y="378" width="540" height="222" rx="12" fill="#111520" stroke="#A78BFA" stroke-width="1.5"/>
+<rect x="612" y="378" width="540" height="44" rx="12" fill="#A78BFA" fill-opacity="0.14"/>
+<text x="634" y="406" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" font-weight="700" fill="#A78BFA">04 · MATHEMATICS &amp; ALGORITHMS</text>
+<text x="634" y="450" text-anchor="start" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" font-weight="700" fill="#f1f5f9">AlphaProof · AlphaEvolve · FunSearch</text>
+<circle cx="640" cy="484" r="3.2" fill="#A78BFA"/>
+<text x="654" y="488" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Formal Lean 4 theorem proving at IMO Silver Medal level</text>
+<circle cx="640" cy="520" r="3.2" fill="#A78BFA"/>
+<text x="654" y="524" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Discovered improved 4×4 matrix multiplication &amp; sorting kernels</text>
+<circle cx="640" cy="556" r="3.2" fill="#A78BFA"/>
+<text x="654" y="560" text-anchor="start" font-family="Inter,system-ui,sans-serif" font-size="12.5" font-weight="400" fill="#94a3b8">Automated kernel &amp; cluster scheduling optimization</text>
+  <line x1="48" y1="636" x2="1152" y2="636" stroke="#242c3e" stroke-width="1"/>
+  <text x="48" y="657" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">Fig. 20.6 — AI as a primary scientific instrument</text>
+  <text x="1152" y="657" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748b">vizra.vercel.app/blog</text>
+</svg>

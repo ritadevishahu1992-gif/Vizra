@@ -668,9 +668,9 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
   },
   '/blog': {
     canonicalPath: '/blog',
-    title: 'AI Foundations & Technical Editorial — Vizra Blog',
+    title: 'AI Foundations, Machine Learning & Technical Editorial — Vizra Blog',
     description:
-      'In-depth, fact-checked guides on artificial intelligence, machine learning, deep learning, neural networks, computing history, data engineering, NLP, and computer vision from VIZRA.',
+      'In-depth, fact-checked technical monographs on artificial intelligence, machine learning, neural networks, gradient descent, foundation models, transformers, edge AI, and intelligent computing from VIZRA.',
     isIndexable: true,
     robots: 'index, follow',
     ogType: 'website',
@@ -680,10 +680,10 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       {
         '@context': 'https://schema.org',
         '@type': 'Blog',
-        name: 'VIZRA Blog — AI Foundations Series',
+        name: 'VIZRA Blog — AI Foundations & Advanced Machine Learning',
         url: `${SITE_ORIGIN}/blog`,
         description:
-          'Ten independently audited, source-verified long-form technical monographs covering artificial intelligence foundations from symbolic rules to modern generative models.',
+          'Twenty independently audited, source-verified long-form technical monographs covering AI foundations (Articles 01–10) and machine learning & advanced AI architectures (Articles 11–20).',
         publisher: {
           '@id': `${SITE_ORIGIN}/#organization`,
         },
@@ -698,13 +698,13 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       },
     ],
     prehydration: {
-      eyebrow: 'VIZRA EDITORIAL · BATCH 1 · AI FOUNDATIONS SERIES',
+      eyebrow: 'VIZRA EDITORIAL · BATCH 1 & BATCH 2 · AI FOUNDATIONS & ADVANCED ML',
       h1: 'Technical Monographs on Modern Artificial Intelligence',
-      lead: 'Ten independently audited, source-verified long-form guides examining artificial intelligence—from symbolic rules and computing hardware to neural networks, learning paradigms, data engineering, NLP, and computer vision.',
+      lead: 'Twenty independently audited, source-verified long-form guides examining artificial intelligence—from symbolic rules, neural networks, and data engineering to training pipelines, backpropagation, transformers, foundation models, edge AI, and future intelligent computing.',
       sections: [
         {
-          heading: 'Published Articles — Batch 1 (AI Foundations, Articles 01–10)',
-          body: 'Each monograph includes KaTeX-rendered mathematical formulations, structured comparison tables, FAQs, and primary verified HTTPS references:',
+          heading: 'Published Articles — Batch 1 (AI Foundations, Articles 01–10) & Batch 2 (Machine Learning & Advanced AI, Articles 11–20)',
+          body: 'Each monograph includes KaTeX-rendered mathematical formulations, bespoke technical diagrams, structured comparison tables, FAQs, and primary verified HTTPS references:',
           bullets: BLOG_POSTS.map(
             (post) =>
               `Article ${String(post.number).padStart(2, '0')}: ${post.title} (/blog/${post.slug}) — ${post.description}`
@@ -1162,7 +1162,7 @@ export function resolveRouteSeoPayload(
         twitterImageAlt: publishedPost.featuredImageAlt,
         jsonLd: articleJsonLd,
         prehydration: {
-          eyebrow: `VIZRA BLOG · ${publishedPost.series} · ARTICLE ${String(publishedPost.number).padStart(2, '0')} OF 10`,
+          eyebrow: `VIZRA BLOG · ${publishedPost.series} · ARTICLE ${String(publishedPost.number).padStart(2, '0')} OF ${BLOG_POSTS.length}`,
           h1: publishedPost.title,
           lead: publishedPost.excerpt,
           sections: prehydrationSections,

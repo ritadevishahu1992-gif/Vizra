@@ -40,7 +40,8 @@ export const BlogPage: React.FC = () => {
         post.excerpt.toLowerCase().includes(q) ||
         post.primaryKeyword.toLowerCase().includes(q) ||
         post.secondaryKeywords.some((kw) => kw.toLowerCase().includes(q)) ||
-        post.category.toLowerCase().includes(q)
+        post.category.toLowerCase().includes(q) ||
+        post.series.toLowerCase().includes(q)
       );
     });
   }, [searchQuery]);
@@ -110,13 +111,15 @@ export const BlogPage: React.FC = () => {
   const isSearching = searchQuery.trim().length > 0;
   const leadPost = !isSearching ? filteredPosts[0] : undefined;
   const featuredGridPosts = !isSearching ? filteredPosts.slice(1, 5) : [];
-  const archivePosts = !isSearching ? filteredPosts.slice(5) : filteredPosts;
+  const archivePosts = !isSearching ? filteredPosts.slice(5, 10) : filteredPosts;
+  const batch2FeaturedPosts = !isSearching ? filteredPosts.slice(10, 14) : [];
+  const batch2ArchivePosts = !isSearching ? filteredPosts.slice(14) : [];
 
   // Primary Blog Landing View (/blog)
   return (
     <PageLayout
-      title="AI Foundations & Technical Editorial — Vizra Blog"
-      description="In-depth, fact-checked guides on artificial intelligence, machine learning, deep learning, neural networks, computing history, data engineering, NLP, and computer vision from VIZRA."
+      title="AI Foundations, Machine Learning & Technical Editorial — Vizra Blog"
+      description="In-depth, fact-checked technical monographs on artificial intelligence, machine learning, neural networks, gradient descent, foundation models, transformers, edge AI, and intelligent computing from VIZRA."
       canonicalPath="/blog"
     >
       {/* Editorial Masthead */}
@@ -124,13 +127,13 @@ export const BlogPage: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div className="max-w-3xl space-y-4">
             <div className="typo-eyebrow">
-              VIZRA Editorial · Batch 1 · AI Foundations Series
+              VIZRA Editorial · Batch 1 &amp; Batch 2 · AI Foundations &amp; Advanced ML
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-semibold tracking-[-0.03em] leading-[1.06] text-neutral-950 dark:text-white [text-wrap:balance]">
               Technical Monographs on Modern Artificial Intelligence
             </h1>
             <p className="text-base sm:text-lg leading-relaxed text-neutral-600 dark:text-neutral-300 max-w-[64ch]">
-              Ten independently audited, source-verified essays examining how modern AI works—from early symbolic logic and computing hardware to neural networks, learning paradigms, data engineering, natural language processing, and computer vision.
+              Twenty independently audited, source-verified essays examining how modern AI works—from symbolic logic, neural networks, and data engineering to training pipelines, backpropagation, transformers, foundation models, edge deployment, and future intelligent computing.
             </p>
             <div className="pt-1 text-xs font-mono uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400 tabular-nums">
               {BLOG_POSTS.length} Published Monographs · Fact-Checked Primary Citations · KaTeX Mathematics
@@ -140,7 +143,7 @@ export const BlogPage: React.FC = () => {
           {/* Clean Editorial Search Input */}
           <div className="w-full lg:w-80 shrink-0">
             <label htmlFor="vizra-blog-search" className="sr-only">
-              Search AI Foundations articles
+              Search VIZRA Blog articles
             </label>
             <div className="relative">
               <Search
@@ -185,7 +188,7 @@ export const BlogPage: React.FC = () => {
               onClick={() => setSearchQuery('')}
               className="px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black text-xs font-display font-semibold hover:opacity-90 transition-opacity"
             >
-              Show All 10 Articles
+              Show All {BLOG_POSTS.length} Articles
             </button>
           </div>
         ) : (
@@ -308,6 +311,119 @@ export const BlogPage: React.FC = () => {
 
                 <div className="divide-y divide-neutral-200 dark:divide-white/[0.08] border-b border-neutral-200 dark:border-white/[0.08]">
                   {archivePosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      to={`/blog/${post.slug}`}
+                      className="group py-6 grid grid-cols-1 md:grid-cols-12 gap-5 items-center hover:bg-neutral-100/50 dark:hover:bg-white/[0.015] -mx-3 px-3 rounded-xl transition-colors"
+                    >
+                      <div className="md:col-span-3 aspect-video w-full overflow-hidden rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-[#0c0c0c]">
+                        <img
+                          src={post.featuredImage}
+                          alt={post.featuredImageAlt}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="md:col-span-7 space-y-2">
+                        <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#EB3B2D] tabular-nums">
+                          Article {String(post.number).padStart(2, '0')} ·{' '}
+                          {post.category} · {formatShortDate(post.publishedAt)}
+                        </div>
+                        <h3 className="font-display text-lg sm:text-xl font-semibold leading-snug text-neutral-950 dark:text-white group-hover:text-[#EB3B2D] transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                          {post.excerpt}
+                        </p>
+                      </div>
+                      <div className="md:col-span-2 flex md:flex-col md:items-end justify-between gap-2 text-xs font-mono text-neutral-500 tabular-nums">
+                        <span>{post.readTimeMinutes} min read</span>
+                        <span>{post.sources.length} sources</span>
+                        <span className="inline-flex items-center gap-1 text-neutral-900 dark:text-white group-hover:text-[#EB3B2D] transition-colors">
+                          <span>Read</span>
+                          <ArrowRight size={13} />
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Batch 2 · Tier 2: Training, Optimization & Foundation Architectures (Articles 11–14) */}
+            {batch2FeaturedPosts.length > 0 && (
+              <div className="space-y-6 pt-4">
+                <div className="flex items-baseline justify-between border-b border-neutral-200 dark:border-white/[0.08] pb-3">
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#EB3B2D]">
+                      Batch 2 · Machine Learning &amp; Advanced AI
+                    </div>
+                    <h2 className="font-display text-lg sm:text-xl font-semibold text-neutral-950 dark:text-white">
+                      Training, Optimization &amp; Generalization
+                    </h2>
+                  </div>
+                  <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-500 tabular-nums">
+                    Articles 11 – 14
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {batch2FeaturedPosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      to={`/blog/${post.slug}`}
+                      className="group rounded-2xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] hover:border-[#EB3B2D]/60 transition-colors overflow-hidden flex flex-col"
+                    >
+                      <div className="aspect-video w-full overflow-hidden bg-[#0c0c0c]">
+                        <img
+                          src={post.featuredImage}
+                          alt={post.featuredImageAlt}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
+                        <div className="space-y-2.5">
+                          <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#EB3B2D] tabular-nums">
+                            Article {String(post.number).padStart(2, '0')} ·{' '}
+                            {post.readTimeMinutes} min read · {post.sources.length} sources
+                          </div>
+                          <h3 className="font-display text-xl font-semibold leading-snug text-neutral-950 dark:text-white group-hover:text-[#EB3B2D] transition-colors [text-wrap:balance]">
+                            {post.title}
+                          </h3>
+                          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                            {post.excerpt}
+                          </p>
+                        </div>
+                        <div className="pt-4 mt-2 border-t border-neutral-200/80 dark:border-white/[0.06] flex items-center justify-between text-xs font-mono text-neutral-500">
+                          <span>{formatShortDate(post.publishedAt)}</span>
+                          <span className="inline-flex items-center gap-1 text-neutral-900 dark:text-neutral-200 group-hover:text-[#EB3B2D] transition-colors">
+                            <span>Read</span>
+                            <ArrowRight size={13} />
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Batch 2 · Tier 3: Foundation Models, Transformers, Evaluation, AGI, Edge AI & Future Computing (Articles 15–20) */}
+            {batch2ArchivePosts.length > 0 && (
+              <div className="space-y-6">
+                <div className="flex items-baseline justify-between border-b border-neutral-200 dark:border-white/[0.08] pb-3">
+                  <h2 className="font-display text-lg sm:text-xl font-semibold text-neutral-950 dark:text-white">
+                    Foundation Models, Transformers, Edge AI &amp; Future Computing
+                  </h2>
+                  <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-neutral-500 tabular-nums">
+                    Articles 15 – 20
+                  </span>
+                </div>
+
+                <div className="divide-y divide-neutral-200 dark:divide-white/[0.08] border-b border-neutral-200 dark:border-white/[0.08]">
+                  {batch2ArchivePosts.map((post) => (
                     <Link
                       key={post.slug}
                       to={`/blog/${post.slug}`}
