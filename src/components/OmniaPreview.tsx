@@ -363,6 +363,7 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
         style={yTransform ? { y: yTransform } : undefined}
         role="region"
         aria-label="Omnia 1.0 Interactive Studio Preview"
+        data-keep-dark="true"
         className={`absolute top-6 md:top-12 left-1/2 -translate-x-1/2 max-w-5xl w-[92%] rounded-2xl border bg-neutral-950/90 shadow-2xl backdrop-blur-xl overflow-hidden z-20 transition-colors duration-300 ${
           isDemoMode ? 'border-[#eb3b2d]/45' : 'border-neutral-800/80 hover:border-neutral-700/80'
         }`}

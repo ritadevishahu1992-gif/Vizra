@@ -13,8 +13,12 @@ import {
   Download,
   AlertTriangle,
   Lock,
+  Moon,
+  Sun,
+  Monitor,
 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
+import { useTheme, ThemePreference } from '../../context/ThemeContext';
 import { AIMode, PersonalMemoryItem, Integration } from '../../types/ai';
 import {
   getPersonalMemories,
@@ -48,10 +52,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClearHistory,
   initialTab = 'general',
 }) => {
+  const { theme, themePreference, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsModalTab>(initialTab);
   const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const [language, setLanguage] = useState<'auto' | 'en' | 'hi' | 'hinglish'>('auto');
-  const [themeMode, setThemeMode] = useState<'pure_black' | 'charcoal'>('pure_black');
   const [defaultMode, setDefaultMode] = useState<AIMode>('quick');
   const [responseStyle, setResponseStyle] = useState<'concise' | 'detailed' | 'kinetic'>('kinetic');
 
@@ -242,32 +246,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               <div>
-                <label className="font-semibold text-neutral-300 block mb-1.5">Surface Aesthetic</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setThemeMode('pure_black')}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-colors ${
-                      themeMode === 'pure_black'
-                        ? 'bg-neutral-900 border-[#eb3b2d] text-white'
-                        : 'bg-neutral-950 border-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    <div className="font-semibold text-xs">Pure Obsidian (0% L)</div>
-                    <div className="text-[10px] text-neutral-500">True OLED black depth</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setThemeMode('charcoal')}
-                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-colors ${
-                      themeMode === 'charcoal'
-                        ? 'bg-neutral-900 border-[#eb3b2d] text-white'
-                        : 'bg-neutral-950 border-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    <div className="font-semibold text-xs">Matte Charcoal</div>
-                    <div className="text-[10px] text-neutral-500">Subtle studio elevation</div>
-                  </button>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-semibold text-neutral-300 block">Appearance Theme</label>
+                  <span className="text-[10px] font-mono text-neutral-500">
+                    {themePreference === 'system'
+                      ? `System (${theme === 'dark' ? 'Dark' : 'Light'})`
+                      : theme === 'dark'
+                        ? 'Dark Mode'
+                        : 'Light Mode'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Appearance Theme">
+                  {(
+                    [
+                      { id: 'dark' as ThemePreference, label: 'Dark', desc: 'Obsidian default', icon: Moon },
+                      { id: 'light' as ThemePreference, label: 'Light', desc: 'Studio daylight', icon: Sun },
+                      { id: 'system' as ThemePreference, label: 'System', desc: 'Match OS', icon: Monitor },
+                    ]
+                  ).map((opt) => {
+                    const Icon = opt.icon;
+                    const isSelected = themePreference === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => setTheme(opt.id)}
+                        className={`p-2.5 rounded-xl border text-left cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-neutral-900 border-[#eb3b2d] text-white'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 font-semibold text-xs">
+                          <Icon size={13} className={isSelected ? 'text-[#eb3b2d]' : 'opacity-75'} />
+                          <span>{opt.label}</span>
+                        </div>
+                        <div className="text-[10px] text-neutral-500 mt-0.5">{opt.desc}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -412,6 +412,7 @@ export const PerspectiveTunnelHero: React.FC<PerspectiveTunnelHeroProps> = ({
       id={id}
       ref={sectionRef}
       aria-label="VIZRA Creative Universe 3D Perspective Showcase"
+      data-keep-dark="true"
       className={`relative w-full bg-[#090909] text-white border-t border-b border-white/[0.08] select-none ${
         showAccessibleGrid ? 'py-20 md:py-28' : 'min-h-[210vh] md:min-h-[245vh]'
       } ${className}`}

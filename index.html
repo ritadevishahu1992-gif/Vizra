@@ -30,12 +30,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='4,4 16,28 28,4 20,4 16,14 12,4' fill='%23EB3B2D'/></svg>" />
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem('vizra_theme_mode_v1');
+          var resolved = 'dark';
+          if (pref === 'light') {
+            resolved = 'light';
+          } else if (pref === 'system') {
+            resolved = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          var root = document.documentElement;
+          root.classList.remove('dark', 'light');
+          root.classList.add(resolved);
+          root.dataset.theme = resolved;
+          root.dataset.themePreference = (pref === 'light' || pref === 'dark' || pref === 'system') ? pref : 'dark';
+          root.style.colorScheme = resolved;
+        } catch (e) {}
+      })();
+    </script>
     <!-- VIZRA_ADSENSE_HEAD_START -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2808034055890408"
      crossorigin="anonymous"></script>
     <!-- VIZRA_ADSENSE_HEAD_END -->
   </head>
-  <body class="bg-black text-white antialiased selection:bg-[#eb3b2d] selection:text-white">
+  <body class="bg-[var(--vizra-bg)] text-[var(--vizra-text)] antialiased selection:bg-[#eb3b2d] selection:text-white">
     <div id="root">
       <!-- VIZRA_PRERENDER_START -->
       <header style="background:#050505;border-bottom:1px solid #1a1a1a;padding:18px 24px;">

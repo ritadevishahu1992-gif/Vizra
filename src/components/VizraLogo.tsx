@@ -26,8 +26,8 @@ export const VizraLogo: React.FC<VizraLogoProps> = ({
         {/* Obsidian geometric prism facet */}
         <path
           d="M4 6L16 26L28 6H21.5L16 17.5L10.5 6H4Z"
-          fill="#FFFFFF"
-          fillOpacity="0.9"
+          fill="var(--vizra-logo-fill, #FFFFFF)"
+          fillOpacity="0.92"
         />
         {/* Vizra signature controlled red accent inner core */}
         <path
@@ -67,7 +67,7 @@ export const VizraMark: React.FC<{ className?: string }> = ({ className = 'w-14 
         />
         <path
           d="M26 8L38 32L50 8"
-          stroke="#FFFFFF"
+          stroke="var(--vizra-logo-fill, #FFFFFF)"
           strokeOpacity="0.25"
           strokeWidth="2"
           strokeLinecap="square"

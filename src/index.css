@@ -10,19 +10,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --muted-foreground: 0 0% 40%;
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 9%;
-    --border: 0 0% 88%;
-    --primary-vizra: 4 82% 55%;
-    --hero-subtitle: 0 0% 30%;
-    --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-
+  :root,
   html.dark {
     --background: 0 0% 4%;
     --foreground: 0 0% 100%;
@@ -32,6 +20,77 @@
     --border: 0 0% 16%;
     --primary-vizra: 4 82% 55%;
     --hero-subtitle: 210 17% 95%;
+    --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Centralized VIZRA Semantic Design Tokens (Dark Mode — Preserved) */
+    --vizra-bg: #090909;
+    --vizra-bg-deep: #050505;
+    --vizra-bg-ai: #0a0a0c;
+    --vizra-surface: #111114;
+    --vizra-surface-elevated: #16161b;
+    --vizra-surface-subtle: #141418;
+    --vizra-surface-hover: #1e1e25;
+    --vizra-text: #ffffff;
+    --vizra-text-secondary: #d4d4d8;
+    --vizra-text-muted: #a3a3a3;
+    --vizra-text-subtle: #71717a;
+    --vizra-border: rgba(255, 255, 255, 0.08);
+    --vizra-border-strong: rgba(255, 255, 255, 0.14);
+    --vizra-accent: #eb3b2d;
+    --vizra-accent-crimson: #dc143c;
+    --vizra-accent-hover: #b91c1c;
+    --vizra-accent-soft: rgba(235, 59, 45, 0.14);
+    --vizra-btn-primary-bg: #ffffff;
+    --vizra-btn-primary-text: #09090b;
+    --vizra-btn-primary-hover: #e5e5e5;
+    --vizra-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+    --vizra-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.65);
+    --vizra-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.8);
+    --vizra-overlay: rgba(0, 0, 0, 0.78);
+    --vizra-logo-fill: #ffffff;
+  }
+
+  html.light {
+    --background: 240 14% 98%;
+    --foreground: 240 10% 7%;
+    --muted-foreground: 240 4% 38%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 7%;
+    --border: 240 6% 88%;
+    --primary-vizra: 0 72% 51%;
+    --hero-subtitle: 240 5% 32%;
+
+    /* Centralized VIZRA Semantic Design Tokens (Studio Light Mode) */
+    --vizra-bg: #f8f8fa;
+    --vizra-bg-deep: #f2f2f6;
+    --vizra-bg-ai: #f6f6f9;
+    --vizra-surface: #ffffff;
+    --vizra-surface-elevated: #f1f1f5;
+    --vizra-surface-subtle: #ececf2;
+    --vizra-surface-hover: #e4e4ec;
+    --vizra-text: #111114;
+    --vizra-text-secondary: #3f3f46;
+    --vizra-text-muted: #52525b;
+    --vizra-text-subtle: #71717a;
+    --vizra-border: rgba(17, 17, 20, 0.1);
+    --vizra-border-strong: rgba(17, 17, 20, 0.18);
+    --vizra-accent: #dc2626;
+    --vizra-accent-crimson: #c8102e;
+    --vizra-accent-hover: #b91c1c;
+    --vizra-accent-soft: rgba(220, 38, 38, 0.09);
+    --vizra-btn-primary-bg: #111114;
+    --vizra-btn-primary-text: #ffffff;
+    --vizra-btn-primary-hover: #27272e;
+    --vizra-shadow-sm: 0 1px 3px rgba(17, 17, 20, 0.06), 0 1px 2px rgba(17, 17, 20, 0.04);
+    --vizra-shadow-md: 0 10px 28px rgba(17, 17, 20, 0.08), 0 2px 6px rgba(17, 17, 20, 0.04);
+    --vizra-shadow-lg: 0 20px 48px rgba(17, 17, 20, 0.12), 0 4px 12px rgba(17, 17, 20, 0.05);
+    --vizra-overlay: rgba(17, 17, 20, 0.45);
+    --vizra-logo-fill: #111114;
+  }
+
+  html.light [data-keep-dark="true"] {
+    --vizra-logo-fill: #ffffff;
   }
 
   html {
@@ -39,16 +98,13 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--vizra-bg);
+    color: var(--vizra-text);
   }
 
-  html.dark {
-    background-color: #090909;
-    color: #ffffff;
-  }
-
-  html.light {
-    background-color: #fafafa;
-    color: #111111;
+  body {
+    background-color: var(--vizra-bg);
+    color: var(--vizra-text);
   }
 
   h1, h2, h3, .font-display {
@@ -68,7 +124,7 @@
   font-family: var(--font-sans);
 }
 
-/* Reusable VIZRA Typography Tokens */
+/* Reusable VIZRA Typography Tokens (Theme-Aware) */
 .typo-eyebrow {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
@@ -76,7 +132,7 @@
   line-height: 1.4;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #EB3B2D;
+  color: var(--vizra-accent);
 }
 
 .typo-hero {
@@ -85,7 +141,7 @@
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.03em;
-  color: #FFFFFF;
+  color: var(--vizra-text);
   text-wrap: balance;
 }
 
@@ -95,7 +151,7 @@
   font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.025em;
-  color: #FFFFFF;
+  color: var(--vizra-text);
   text-wrap: balance;
 }
 
@@ -105,7 +161,7 @@
   font-weight: 600;
   line-height: 1.18;
   letter-spacing: -0.02em;
-  color: #FFFFFF;
+  color: var(--vizra-text);
   text-wrap: balance;
 }
 
@@ -115,7 +171,7 @@
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.015em;
-  color: #FFFFFF;
+  color: var(--vizra-text);
 }
 
 .typo-body-lg {
@@ -124,7 +180,7 @@
   font-weight: 400;
   line-height: 1.65;
   letter-spacing: -0.005em;
-  color: #D4D4D4;
+  color: var(--vizra-text-secondary);
   max-width: 64ch;
 }
 
@@ -133,11 +189,11 @@
   font-size: 0.9375rem;
   font-weight: 400;
   line-height: 1.65;
-  color: #A3A3A3;
+  color: var(--vizra-text-muted);
   max-width: 68ch;
 }
 
-/* Exact Liquid Glass specification from prompt */
+/* Exact Liquid Glass specification (Dark Mode preserved; Light Mode adapted) */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.01);
   background-blend-mode: luminosity;
@@ -172,6 +228,21 @@
   pointer-events: none;
 }
 
+html.light .liquid-glass {
+  background: rgba(255, 255, 255, 0.78);
+  background-blend-mode: normal;
+  box-shadow: 0 2px 10px rgba(17, 17, 20, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+html.light .liquid-glass::before {
+  background: linear-gradient(
+    180deg,
+    rgba(17, 17, 20, 0.14) 0%,
+    rgba(17, 17, 20, 0.06) 50%,
+    rgba(17, 17, 20, 0.14) 100%
+  );
+}
+
 /* Subtle custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -185,6 +256,16 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #404040;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f2f2f6;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #d4d4dc;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
 }
 
 /* KaTeX math rendering compatibility */
@@ -206,8 +287,9 @@
 }
 
 html.light .katex-display {
-  background: rgba(245, 245, 245, 0.9);
-  border-color: rgba(229, 229, 229, 1);
+  background: rgba(245, 245, 248, 0.95);
+  border-color: rgba(228, 228, 234, 1);
+  color: #111114;
 }
 
 .katex-display > .katex {
@@ -221,4 +303,415 @@ html.light .katex-display {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.875em;
 }
+
+/* ============================================================================
+ * VIZRA Studio Light Mode — Semantic Fallback & Consistency Layer
+ * Strictly scoped to `html.light`. Never executes in Dark Mode (`html.dark`).
+ * Protects:
+ *  - Elements with explicit `dark:*` variants (already light-themed)
+ *  - Elements inside `[data-keep-dark="true"]` (e.g. live dark canvas previews)
+ *  - Solid crimson / semantic colored buttons & badges
+ * ============================================================================ */
+
+/* 1. Deep Canvas & Page Backgrounds */
+html.light :where(
+  .bg-\[\#050505\],
+  .bg-\[\#08080A\],
+  .bg-\[\#090909\],
+  .bg-\[\#09090B\],
+  .bg-\[\#0a0a0a\],
+  .bg-\[\#0A0A0C\],
+  .bg-\[\#0B0B0D\],
+  .bg-\[\#0c0c0c\],
+  .bg-\[\#0D0D0D\],
+  .bg-\[\#0d0d10\],
+  .bg-\[\#0e0e0e\],
+  .bg-black,
+  .bg-neutral-950,
+  .bg-zinc-950
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-bg);
+}
+
+html.light :where(
+  .bg-\[\#090909\]\/95,
+  .bg-\[\#090909\]\/90,
+  .bg-\[\#090909\]\/80,
+  .bg-\[\#090909\]\/70,
+  .bg-\[\#090909\]\/60,
+  .bg-\[\#09090B\]\/98,
+  .bg-\[\#09090B\]\/92,
+  .bg-\[\#09090B\]\/70,
+  .bg-\[\#0A0A0C\]\/90,
+  .bg-\[\#0c0c0c\]\/80,
+  .bg-neutral-950\/95,
+  .bg-neutral-950\/92,
+  .bg-neutral-950\/90,
+  .bg-neutral-950\/85,
+  .bg-neutral-950\/80,
+  .bg-neutral-950\/70,
+  .bg-neutral-950\/60,
+  .bg-neutral-950\/50,
+  .bg-neutral-950\/40
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: rgba(248, 248, 250, 0.92);
+}
+
+/* Modal & Overlay Backdrops stay dark translucent in Light Mode */
+html.light :where(
+  .bg-black\/85,
+  .bg-black\/80,
+  .bg-black\/75,
+  .bg-black\/70,
+  .bg-black\/60
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-overlay);
+}
+
+/* 2. Primary Cards, Modals, Panels & Elevated Surfaces */
+html.light :where(
+  .bg-\[\#0F0F12\],
+  .bg-\[\#101013\],
+  .bg-\[\#111111\],
+  .bg-\[\#111114\],
+  .bg-\[\#121215\],
+  .bg-\[\#121216\],
+  .bg-\[\#141417\],
+  .bg-\[\#141418\],
+  .bg-\[\#151515\],
+  .bg-\[\#151519\],
+  .bg-neutral-900
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-surface);
+  box-shadow: var(--vizra-shadow-sm);
+}
+
+html.light :where(
+  .bg-\[\#111111\]\/95,
+  .bg-\[\#111111\]\/90,
+  .bg-\[\#111111\]\/80,
+  .bg-\[\#111111\]\/60,
+  .bg-\[\#121216\]\/90,
+  .bg-\[\#141418\]\/95,
+  .bg-\[\#141418\]\/90,
+  .bg-neutral-900\/95,
+  .bg-neutral-900\/90,
+  .bg-neutral-900\/85,
+  .bg-neutral-900\/80,
+  .bg-neutral-900\/70,
+  .bg-neutral-900\/60,
+  .bg-neutral-900\/50,
+  .bg-neutral-900\/40,
+  .bg-neutral-900\/30,
+  .bg-neutral-900\/20,
+  .bg-zinc-900\/80,
+  .bg-zinc-900\/60,
+  .bg-zinc-900\/50
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: rgba(255, 255, 255, 0.94);
+}
+
+/* 3. Secondary / Nested Interactive Surfaces & Chips */
+html.light :where(
+  .bg-\[\#16161B\],
+  .bg-\[\#171717\],
+  .bg-\[\#17171C\],
+  .bg-\[\#18181E\],
+  .bg-\[\#19191F\],
+  .bg-\[\#1a1a1a\],
+  .bg-\[\#1A1A20\],
+  .bg-\[\#1B1B21\],
+  .bg-\[\#1C1C22\],
+  .bg-\[\#1E1E25\],
+  .bg-\[\#222228\],
+  .bg-\[\#23232A\],
+  .bg-neutral-800,
+  .bg-neutral-800\/80,
+  .bg-neutral-800\/60,
+  .bg-neutral-800\/50,
+  .bg-neutral-800\/40,
+  .bg-zinc-900,
+  .bg-zinc-800
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-surface-elevated);
+}
+
+html.light :where(
+  .bg-white\/\[0\.02\],
+  .bg-white\/\[0\.03\],
+  .bg-white\/\[0\.04\],
+  .bg-white\/\[0\.05\],
+  .bg-white\/\[0\.06\],
+  .bg-white\/\[0\.08\],
+  .bg-white\/\[0\.1\],
+  .bg-white\/\[0\.12\],
+  .bg-white\/5,
+  .bg-white\/10,
+  .bg-white\/15
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: rgba(17, 17, 20, 0.06);
+}
+
+/* Tinted status backgrounds */
+html.light :where(.bg-emerald-950\/40, .bg-emerald-950\/30, .bg-emerald-950\/20):not([class*="dark:bg-"]):not([data-keep-dark="true"] *) {
+  background-color: #ecfdf5;
+}
+html.light :where(.bg-amber-950\/40, .bg-amber-950\/30, .bg-amber-950\/25):not([class*="dark:bg-"]):not([data-keep-dark="true"] *) {
+  background-color: #fffbeb;
+}
+html.light :where(.bg-yellow-950\/40, .bg-yellow-950\/30):not([class*="dark:bg-"]):not([data-keep-dark="true"] *) {
+  background-color: #fefce8;
+}
+html.light :where(.bg-red-950\/40, .bg-red-950\/30, .bg-red-950\/20, .bg-\[\#14090C\]\/95, .bg-\[\#191416\]):not([class*="dark:bg-"]):not([data-keep-dark="true"] *) {
+  background-color: #fef2f2;
+}
+html.light :where(.bg-blue-950\/40, .bg-blue-950\/30):not([class*="dark:bg-"]):not([data-keep-dark="true"] *) {
+  background-color: #eff6ff;
+}
+
+/* 4. Hover Background States */
+html.light :where(
+  .hover\:bg-neutral-900:hover,
+  .hover\:bg-neutral-800:hover,
+  .hover\:bg-neutral-800\/90:hover,
+  .hover\:bg-\[\#171717\]:hover,
+  .hover\:bg-\[\#18181E\]:hover,
+  .hover\:bg-\[\#19191F\]:hover,
+  .hover\:bg-\[\#1B1B21\]:hover,
+  .hover\:bg-\[\#1E1E25\]:hover,
+  .hover\:bg-\[\#23232A\]:hover,
+  .hover\:bg-white\/\[0\.02\]:hover,
+  .hover\:bg-white\/\[0\.03\]:hover,
+  .hover\:bg-white\/\[0\.04\]:hover,
+  .hover\:bg-white\/\[0\.05\]:hover,
+  .hover\:bg-white\/\[0\.06\]:hover,
+  .hover\:bg-white\/\[0\.08\]:hover,
+  .hover\:bg-white\/10:hover
+):not([class*="dark:hover:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-surface-hover);
+}
+
+/* 5. Primary Contrast-Inverted Buttons (`bg-white text-black` -> obsidian button in light mode) */
+html.light :where(
+  .bg-white.text-black,
+  .bg-white.text-\[\#09090B\]
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-btn-primary-bg);
+  color: var(--vizra-btn-primary-text);
+  box-shadow: var(--vizra-shadow-sm);
+}
+
+html.light :where(
+  .bg-white.text-black:hover,
+  .bg-white.text-\[\#09090B\]:hover
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  background-color: var(--vizra-btn-primary-hover);
+  color: var(--vizra-btn-primary-text);
+}
+
+html.light :where(
+  .bg-white.text-black,
+  .bg-white.text-\[\#09090B\]
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) :where(.text-black, .text-\[\#09090B\]) {
+  color: #ffffff;
+}
+
+html.light :where(
+  .bg-white.text-black,
+  .bg-white.text-\[\#09090B\]
+):not([class*="dark:bg-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) .bg-black\/\[0\.08\] {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* 6. Primary & Secondary Text Colors (protecting solid colored buttons/badges) */
+html.light :where(
+  .text-white,
+  .text-neutral-50,
+  .text-neutral-100,
+  .text-zinc-50,
+  .text-zinc-100
+):not([class*="dark:text-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *):not([class*="bg-[#DC"]):not([class*="bg-[#EB"]):not([class*="bg-[#B0"]):not([class*="bg-[#B9"]):not([class*="bg-red-6"]):not([class*="bg-red-7"]):not([class*="bg-emerald-6"]):not([class*="bg-blue-6"]):not([class*="bg-indigo-6"]):not([class*="bg-amber-6"]):not([class*="bg-purple-6"]):not([class*="bg-neutral-900 dark:bg-white"]) {
+  color: var(--vizra-text);
+}
+
+/* Preserve white text inside solid crimson / semantic colored buttons & badges */
+html.light :where(
+  [class*="bg-[#DC143C]"]:not([class*="bg-[#DC143C]/"]),
+  [class*="bg-[#DC2626]"]:not([class*="bg-[#DC2626]/"]),
+  [class*="bg-[#EB3B2D]"]:not([class*="bg-[#EB3B2D]/"]),
+  [class*="bg-[#B91C1C]"]:not([class*="bg-[#B91C1C]/"]),
+  [class*="bg-red-600"]:not([class*="bg-red-600/"]),
+  [class*="bg-emerald-600"]:not([class*="bg-emerald-600/"]),
+  [class*="bg-blue-600"]:not([class*="bg-blue-600/"])
+) {
+  color: #ffffff;
+}
+html.light :where(
+  [class*="bg-[#DC143C]"]:not([class*="bg-[#DC143C]/"]),
+  [class*="bg-[#DC2626]"]:not([class*="bg-[#DC2626]/"]),
+  [class*="bg-[#EB3B2D]"]:not([class*="bg-[#EB3B2D]/"]),
+  [class*="bg-red-600"]:not([class*="bg-red-600/"]),
+  [class*="bg-emerald-600"]:not([class*="bg-emerald-600/"]),
+  [class*="bg-blue-600"]:not([class*="bg-blue-600/"])
+) :where(.text-white, svg, span) {
+  color: inherit;
+}
+
+html.light :where(
+  .text-neutral-200,
+  .text-neutral-300,
+  .text-zinc-200,
+  .text-zinc-300
+):not([class*="dark:text-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  color: var(--vizra-text-secondary);
+}
+
+html.light :where(
+  .text-neutral-400,
+  .text-zinc-400
+):not([class*="dark:text-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  color: var(--vizra-text-muted);
+}
+
+html.light :where(
+  .text-neutral-500,
+  .text-zinc-500
+):not([class*="dark:text-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  color: var(--vizra-text-subtle);
+}
+
+/* Hover text colors */
+html.light :where(
+  .hover\:text-white:hover,
+  .hover\:text-neutral-200:hover,
+  .hover\:text-neutral-300:hover,
+  .group:hover .group-hover\:text-white
+):not([class*="dark:hover:text-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *):not([class*="bg-[#DC"]):not([class*="bg-[#EB"]):not([class*="bg-red-6"]) {
+  color: var(--vizra-text);
+}
+
+/* Status & Semantic Light-Surface Text Contrast */
+html.light :where(.text-rose-100, .text-rose-200, .text-rose-300):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #9f1239;
+}
+html.light :where(.text-emerald-300, .text-emerald-400, .text-emerald-400\/90):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #047857;
+}
+html.light :where(.text-amber-200, .text-amber-300, .text-amber-400):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #b45309;
+}
+html.light :where(.text-yellow-300, .text-yellow-400):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #a16207;
+}
+html.light :where(.text-red-300, .text-red-400):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #b91c1c;
+}
+html.light :where(.text-blue-300, .text-blue-400):not([class*="dark:text-"]):not([data-keep-dark="true"] *) {
+  color: #1d4ed8;
+}
+
+/* 7. Borders & Dividers */
+html.light :where(
+  .border-white\/\[0\.05\],
+  .border-white\/\[0\.06\],
+  .border-white\/\[0\.07\],
+  .border-white\/\[0\.08\],
+  .border-white\/\[0\.1\],
+  .border-white\/\[0\.12\],
+  .border-white\/\[0\.14\],
+  .border-white\/\[0\.15\],
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/15,
+  .border-white\/20,
+  .border-white\/25,
+  .border-neutral-900,
+  .border-neutral-900\/80,
+  .border-neutral-800,
+  .border-neutral-800\/90,
+  .border-neutral-800\/80,
+  .border-neutral-800\/60,
+  .border-neutral-800\/50,
+  .border-neutral-800\/40,
+  .border-neutral-700,
+  .border-\[\#1E1E24\],
+  .border-\[\#23232A\],
+  .border-\[\#27272F\],
+  .border-\[\#2A2A32\],
+  .border-\[\#2E2E36\],
+  .border-zinc-800
+):not([class*="dark:border-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  border-color: var(--vizra-border);
+}
+
+html.light :where(
+  .hover\:border-white\/\[0\.08\]:hover,
+  .hover\:border-white\/\[0\.1\]:hover,
+  .hover\:border-white\/\[0\.18\]:hover,
+  .hover\:border-white\/\[0\.2\]:hover,
+  .hover\:border-white\/\[0\.22\]:hover,
+  .hover\:border-white\/25:hover,
+  .hover\:border-neutral-700:hover,
+  .hover\:border-neutral-600:hover
+):not([class*="dark:hover:border-"]):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  border-color: var(--vizra-border-strong);
+}
+
+html.light :where(
+  .divide-white\/\[0\.05\] > :not(:first-child),
+  .divide-white\/\[0\.06\] > :not(:first-child),
+  .divide-white\/10 > :not(:first-child),
+  .divide-neutral-900 > :not(:first-child),
+  .divide-neutral-800 > :not(:first-child),
+  .divide-neutral-800\/80 > :not(:first-child),
+  .divide-neutral-800\/60 > :not(:first-child)
+):not([data-keep-dark="true"] *) {
+  border-color: var(--vizra-border);
+}
+
+/* 8. Placeholders, Focus Rings & Form Controls */
+html.light :where(.placeholder-neutral-500, .placeholder-zinc-500, .placeholder-neutral-600)::placeholder {
+  color: #71717a;
+}
+
+html.light :where(
+  .focus-visible\:ring-offset-\[\#050505\],
+  .focus-visible\:ring-offset-\[\#090909\],
+  .focus-visible\:ring-offset-\[\#0A0A0C\],
+  .focus-visible\:ring-offset-black
+):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  --tw-ring-offset-color: var(--vizra-bg);
+}
+
+/* 9. Shadows softened for Light Mode */
+html.light :where(.shadow-2xl, .shadow-xl):not([data-keep-dark="true"]):not([data-keep-dark="true"] *) {
+  box-shadow: var(--vizra-shadow-md);
+}
+
+/* 10. Gradient fade scrims in Chat Composer & Hero */
+html.light .from-\[\#0A0A0C\] {
+  --tw-gradient-from: #f8f8fa;
+}
+html.light .via-\[\#0A0A0C\]\/95 {
+  --tw-gradient-via: rgba(248, 248, 250, 0.94);
+}
+html.light .from-\[\#090909\] {
+  --tw-gradient-from: #f8f8fa;
+}
+html.light .via-\[\#090909\]\/80 {
+  --tw-gradient-via: rgba(248, 248, 250, 0.8);
+}
+html.light .from-\[\#050505\] {
+  --tw-gradient-from: #f8f8fa;
+}
+html.light .via-\[\#050505\]\/50 {
+  --tw-gradient-via: rgba(248, 248, 250, 0.5);
+}
+html.light .from-black {
+  --tw-gradient-from: #f8f8fa;
+}
+html.light .via-black\/80 {
+  --tw-gradient-via: rgba(248, 248, 250, 0.82);
+}
+
 

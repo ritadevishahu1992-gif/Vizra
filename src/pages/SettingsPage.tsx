@@ -4,6 +4,7 @@ import {
   Settings as SettingsIcon,
   Moon,
   Sun,
+  Monitor,
   Shield,
   Trash2,
   Check,
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { LiquidGlassToggle } from '../components/ui/LiquidGlassToggle';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ThemePreference } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { CreditUsageIndicator } from '../components/ui/CreditUsageIndicator';
@@ -66,7 +67,7 @@ const DPDP_DATA_INVENTORY = [
 ];
 
 export const SettingsPage: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, themePreference, setTheme } = useTheme();
   const {
     user,
     openLoginModal,
@@ -365,7 +366,9 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-                {theme === 'dark' ? (
+                {themePreference === 'system' ? (
+                  <Monitor size={18} className="text-[#eb3b2d]" />
+                ) : theme === 'dark' ? (
                   <Moon size={18} className="text-[#eb3b2d]" />
                 ) : (
                   <Sun size={18} className="text-amber-500" />
@@ -373,15 +376,61 @@ export const SettingsPage: React.FC = () => {
                 <span>Global Visual Appearance</span>
               </h2>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">
-                Toggle between Obsidian Dark Mode (default) and Studio Light Mode using the Liquid Glass switch.
+                Choose Obsidian Dark Mode (default), Studio Light Mode, or sync with your OS when System is selected.
               </p>
             </div>
             <div className="shrink-0 flex items-center gap-3">
               <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400 hidden sm:inline">
-                {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                {themePreference === 'system'
+                  ? `System (${theme === 'dark' ? 'Dark' : 'Light'})`
+                  : theme === 'dark'
+                    ? 'Dark Mode'
+                    : 'Light Mode'}
               </span>
               <LiquidGlassToggle size="md" />
             </div>
+          </div>
+
+          <div
+            role="radiogroup"
+            aria-label="Theme preference"
+            className="grid grid-cols-3 gap-2.5 pt-2 border-t border-neutral-200 dark:border-white/10"
+          >
+            {(
+              [
+                { id: 'dark' as ThemePreference, label: 'Dark', desc: 'Obsidian default', icon: Moon },
+                { id: 'light' as ThemePreference, label: 'Light', desc: 'Studio daylight', icon: Sun },
+                { id: 'system' as ThemePreference, label: 'System', desc: 'Match OS setting', icon: Monitor },
+              ]
+            ).map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = themePreference === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => setTheme(opt.id)}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                    isSelected
+                      ? 'bg-neutral-100 dark:bg-white/[0.07] border-[#DC2626] text-neutral-900 dark:text-white shadow-sm'
+                      : 'bg-neutral-50 dark:bg-neutral-950/60 border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-white/20 hover:text-neutral-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon
+                    size={15}
+                    className={isSelected ? 'text-[#DC2626] shrink-0' : 'shrink-0 opacity-75'}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold leading-tight">{opt.label}</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+                      {opt.desc}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -446,7 +446,10 @@ const CodeBlock: React.FC<{ code: string; language?: string }> = ({ code, langua
   };
 
   return (
-    <div className="my-3 rounded-xl border border-neutral-800 bg-[#0c0c0c] overflow-hidden">
+    <div
+      data-keep-dark="true"
+      className="my-3 rounded-xl border border-neutral-800 bg-[#0c0c0c] overflow-hidden shadow-sm"
+    >
       <div className="flex items-center justify-between px-4 py-2 bg-neutral-900/70 border-b border-neutral-800/80 text-xs font-mono text-neutral-400">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#eb3b2d]" />

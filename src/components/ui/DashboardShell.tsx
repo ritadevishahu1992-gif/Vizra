@@ -22,6 +22,7 @@ import { VizraLogo } from '../VizraLogo';
 import { UserMenu } from '../auth/UserMenu';
 import { NotificationCenterTrigger } from './Toast';
 import { CreditUsageIndicator } from './CreditUsageIndicator';
+import { LiquidGlassToggle } from './LiquidGlassToggle';
 
 export type DashboardSectionId =
   | 'overview'
@@ -319,6 +320,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
               </button>
             )}
             {headerActions}
+            <LiquidGlassToggle size="sm" className="hidden sm:inline-flex" />
             <NotificationCenterTrigger />
             <UserMenu />
           </div>

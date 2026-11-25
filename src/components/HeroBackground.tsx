@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Optional configuration for drop-in video replacement.
@@ -117,6 +118,8 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
   keepEnergyOverlayWithVideo = true,
   className = '',
 }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [videoReady, setVideoReady] = useState(false);
@@ -219,7 +222,7 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
       const maxDim = Math.max(width, height);
 
       // 1. Volumetric light orbs with slow harmonic drift
-      ctx.globalCompositeOperation = 'screen';
+      ctx.globalCompositeOperation = isLight ? 'source-over' : 'screen';
 
       for (let i = 0; i < VOLUMETRIC_ORBS.length; i++) {
         const orb = VOLUMETRIC_ORBS[i];
@@ -231,11 +234,16 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
         const breathe = 1 + Math.sin(theta + orb.phaseOffset) * 0.12;
         const radius = maxDim * orb.radiusRatio * breathe;
 
+        const baseOrbAlpha = isLight
+          ? i < 3
+            ? orb.baseAlpha * 0.95
+            : orb.baseAlpha * 1.4
+          : orb.baseAlpha;
         const alphaPulse =
-          orb.baseAlpha * (0.85 + 0.15 * Math.sin(theta * 2 + orb.phaseOffset));
+          baseOrbAlpha * (0.85 + 0.15 * Math.sin(theta * 2 + orb.phaseOffset));
 
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        const [r, g, b] = orb.color;
+        const [r, g, b] = isLight && i >= 3 ? [113, 113, 122] : orb.color;
         grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alphaPulse.toFixed(4)})`);
         grad.addColorStop(0.45, `rgba(${r}, ${g}, ${b}, ${(alphaPulse * 0.42).toFixed(4)})`);
         grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
@@ -261,8 +269,12 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
         const beamGrad = ctx.createLinearGradient(-beamWidth / 2, 0, beamWidth / 2, 0);
 
         const isCrimsonBeam = beamIdx === 0;
-        const peakAlpha = isCrimsonBeam ? 0.032 : 0.018;
-        const colorStr = isCrimsonBeam ? '235, 59, 45' : '255, 250, 245';
+        const peakAlpha = isCrimsonBeam ? (isLight ? 0.04 : 0.032) : (isLight ? 0.025 : 0.018);
+        const colorStr = isCrimsonBeam
+          ? '235, 59, 45'
+          : isLight
+            ? '113, 113, 122'
+            : '255, 250, 245';
 
         beamGrad.addColorStop(0, `rgba(${colorStr}, 0)`);
         beamGrad.addColorStop(0.5, `rgba(${colorStr}, ${peakAlpha})`);
@@ -280,8 +292,8 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
           amp1: 0.045,
           amp2: 0.022,
           color: '235, 59, 45',
-          coreAlpha: 0.095,
-          glowAlpha: 0.03,
+          coreAlpha: isLight ? 0.13 : 0.095,
+          glowAlpha: isLight ? 0.04 : 0.03,
           phaseShift: 0,
         },
         {
@@ -289,17 +301,17 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
           amp1: 0.035,
           amp2: 0.028,
           color: '220, 38, 38',
-          coreAlpha: 0.06,
-          glowAlpha: 0.022,
+          coreAlpha: isLight ? 0.09 : 0.06,
+          glowAlpha: isLight ? 0.03 : 0.022,
           phaseShift: 2.4,
         },
         {
           yBase: 0.27,
           amp1: 0.03,
           amp2: 0.016,
-          color: '255, 255, 255',
-          coreAlpha: 0.035,
-          glowAlpha: 0.012,
+          color: isLight ? '24, 24, 27' : '255, 255, 255',
+          coreAlpha: isLight ? 0.06 : 0.035,
+          glowAlpha: isLight ? 0.018 : 0.012,
           phaseShift: 4.1,
         },
       ];
@@ -383,8 +395,10 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
         const alpha = (mote.isCrimson ? 0.16 : 0.08) * twinkle;
 
         ctx.fillStyle = mote.isCrimson
-          ? `rgba(235, 59, 45, ${alpha.toFixed(3)})`
-          : `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
+          ? `rgba(235, 59, 45, ${(isLight ? alpha * 1.2 : alpha).toFixed(3)})`
+          : isLight
+            ? `rgba(24, 24, 27, ${(alpha * 1.1).toFixed(3)})`
+            : `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
         ctx.beginPath();
         ctx.arc(mx, my, mote.size, 0, Math.PI * 2);
         ctx.fill();
@@ -404,14 +418,14 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       motionQuery.removeEventListener('change', handleMotionPreferenceChange);
     };
-  }, [shouldRunProceduralCanvas]);
+  }, [shouldRunProceduralCanvas, isLight]);
 
   return (
     <div
       ref={containerRef}
       aria-hidden="true"
       data-component="vizra-hero-background"
-      className={`absolute inset-0 overflow-hidden bg-[#050505] pointer-events-none select-none z-0 ${className}`}
+      className={`absolute inset-0 overflow-hidden bg-[#F8F8FA] dark:bg-[#050505] pointer-events-none select-none z-0 ${className}`}
     >
       {/* Layer 1: Optional Drop-In Looping Video Asset */}
       {hasActiveVideo && (
@@ -442,10 +456,11 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
 
       {/* Layer 3: Subtle Architectural Optical Grid (fades out toward edges via radial mask) */}
       <div
-        className="absolute inset-0 opacity-[0.022]"
+        className={`absolute inset-0 ${isLight ? 'opacity-[0.04]' : 'opacity-[0.022]'}`}
         style={{
-          backgroundImage:
-            'linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.9) 1px, transparent 1px)',
+          backgroundImage: isLight
+            ? 'linear-gradient(to right, rgba(17,17,20,0.9) 1px, transparent 1px), linear-gradient(to bottom, rgba(17,17,20,0.9) 1px, transparent 1px)'
+            : 'linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.9) 1px, transparent 1px)',
           backgroundSize: '4.5rem 4.5rem',
           maskImage: 'radial-gradient(ellipse 75% 55% at 50% 34%, #000 15%, transparent 80%)',
           WebkitMaskImage:
@@ -457,8 +472,9 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[78%] max-w-5xl h-px opacity-35"
         style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(235,59,45,0.55) 50%, rgba(255,255,255,0.12) 75%, transparent 100%)',
+          background: isLight
+            ? 'linear-gradient(90deg, transparent 0%, rgba(17,17,20,0.12) 25%, rgba(220,38,38,0.5) 50%, rgba(17,17,20,0.12) 75%, transparent 100%)'
+            : 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(235,59,45,0.55) 50%, rgba(255,255,255,0.12) 75%, transparent 100%)',
         }}
       />
 
@@ -466,12 +482,13 @@ export const HeroBackground: React.FC<HeroBackgroundProps> = ({
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'radial-gradient(ellipse 85% 65% at 50% 36%, transparent 25%, rgba(5, 5, 5, 0.72) 75%, #050505 100%)',
+          background: isLight
+            ? 'radial-gradient(ellipse 85% 65% at 50% 36%, transparent 28%, rgba(248, 248, 250, 0.72) 76%, #F8F8FA 100%)'
+            : 'radial-gradient(ellipse 85% 65% at 50% 36%, transparent 25%, rgba(5, 5, 5, 0.72) 75%, #050505 100%)',
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#050505] via-[#050505]/50 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#090909] via-[#090909]/80 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#F8F8FA] via-[#F8F8FA]/50 dark:from-[#050505] dark:via-[#050505]/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#F8F8FA] via-[#F8F8FA]/80 dark:from-[#090909] dark:via-[#090909]/80 to-transparent" />
     </div>
   );
 };

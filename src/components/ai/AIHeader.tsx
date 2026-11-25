@@ -390,7 +390,7 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           </button>
         </Tooltip>
 
-        <LiquidGlassToggle size="sm" className="hidden 2xl:inline-flex" />
+        <LiquidGlassToggle size="sm" className="hidden sm:inline-flex" />
 
         <div className="ml-0.5">
           <UserMenu />
