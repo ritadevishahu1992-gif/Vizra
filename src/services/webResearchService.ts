@@ -317,23 +317,31 @@ export function validateSourceCandidate(
   }
   checks.exists = true;
 
-  // 2. URL is valid check
-  let parsed: URL;
-  try {
-    parsed = new URL(source.url);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return { isValid: false, checks, rejectionReason: 'Protocol must be HTTP/HTTPS' };
-    }
-    if (!parsed.hostname.includes('.') || parsed.hostname.endsWith('.')) {
-      return { isValid: false, checks, rejectionReason: 'Invalid domain hostname' };
-    }
+  // 2. URL is valid check (allow HTTP/HTTPS external sources and safe internal VIZRA /blog/ or /docs/ paths)
+  const isSafeInternalVizraPath =
+    typeof source.url === 'string' &&
+    /^\/(blog|docs)\/[a-z0-9/_-]+$/i.test(source.url.trim());
+
+  let parsed: URL | null = null;
+  if (isSafeInternalVizraPath) {
     checks.urlValid = true;
-  } catch {
-    return { isValid: false, checks, rejectionReason: 'Malformed URL syntax' };
+  } else {
+    try {
+      parsed = new URL(source.url);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return { isValid: false, checks, rejectionReason: 'Protocol must be HTTP/HTTPS' };
+      }
+      if (!parsed.hostname.includes('.') || parsed.hostname.endsWith('.')) {
+        return { isValid: false, checks, rejectionReason: 'Invalid domain hostname' };
+      }
+      checks.urlValid = true;
+    } catch {
+      return { isValid: false, checks, rejectionReason: 'Malformed URL syntax' };
+    }
   }
 
   // 3. Domain verification check
-  const cleanDomain = (source.domain || parsed.hostname).toLowerCase().replace(/^www\./, '');
+  const cleanDomain = (source.domain || parsed?.hostname || 'vizra.ai').toLowerCase().replace(/^www\./, '');
   if (
     cleanDomain === 'localhost' ||
     cleanDomain.endsWith('.local') ||
@@ -354,7 +362,7 @@ export function validateSourceCandidate(
   }
   checks.contentRetrieved = true;
 
-  // 5. Claim support check (verified by Google Search grounding pipeline)
+  // 5. Claim support check (verified by Google Search grounding or VIZRA KB pipeline)
   checks.claimSupported = true;
 
   // 6. Source metadata authenticity check
@@ -371,8 +379,12 @@ export function validateSourceCandidate(
  * strips hashes, trailing slashes, and common referral/tracking query parameters (ref, utm_*, fbclid).
  */
 export function normalizeSourceUrl(rawUrl: string): string {
+  const trimmed = rawUrl.trim();
+  if (/^\/(blog|docs)\//i.test(trimmed)) {
+    return trimmed.replace(/\/+$/, '').toLowerCase();
+  }
   try {
-    const u = new URL(rawUrl);
+    const u = new URL(trimmed);
     const searchParams = new URLSearchParams(u.search);
     const trackingParams = [
       'utm_source',
@@ -392,7 +404,7 @@ export function normalizeSourceUrl(rawUrl: string): string {
     const cleanPath = u.pathname.replace(/\/+$/, '');
     return `${u.protocol}//${u.hostname.toLowerCase()}${cleanPath}${cleanSearch ? '?' + cleanSearch : ''}`.toLowerCase();
   } catch {
-    return rawUrl.trim().toLowerCase();
+    return trimmed.toLowerCase();
   }
 }
 

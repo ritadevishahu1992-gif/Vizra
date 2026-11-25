@@ -603,8 +603,15 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
     const trimmedQuery = queryText.trim();
     if (!trimmedQuery) return [];
 
-    // Generate query embedding
-    const queryEmbedding = await EmbeddingService.generateEmbedding(trimmedQuery);
+    // Always generate a local 384d semantic embedding for space-matched comparison with local-seeded chunks,
+    // plus request a Gemini embedding if any indexed chunks live in Gemini vector space.
+    const localQueryEmbedding = EmbeddingService.generateLocalSemanticEmbedding(trimmedQuery);
+    const hasRemoteSpaceChunks = Array.from(this.chunks.values()).some(
+      (c) => Array.isArray(c.embedding) && c.embedding.length !== VECTOR_DIMENSION
+    );
+    const remoteQueryEmbedding = hasRemoteSpaceChunks
+      ? await EmbeddingService.generateEmbedding(trimmedQuery)
+      : localQueryEmbedding;
 
     // Extract query terms for sparse matching
     const queryTerms = trimmedQuery
@@ -612,6 +619,8 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
       .replace(/[^a-z0-9_\s#-]/g, ' ')
       .split(/\s+/)
       .filter((t) => t.length > 1 && !STOP_WORDS.has(t));
+
+    const SEED_SAMPLE_PROJECTS = new Set(['proj_camera_rig', 'proj_singularity']);
 
     // Filter candidate chunks according to tier, workspace, and project
     const candidateChunks: RAGChunk[] = [];
@@ -625,31 +634,42 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
         continue;
       }
 
-      // Platform internal documentation isolation: do not pull Vizra architecture for general inquiries
+      // Platform internal documentation isolation: do not pull Vizra architecture for unrelated general inquiries
       if (doc.tier === 'global' || doc.tier === 'vizra' || doc.tier === 'omnia') {
-        const isPlatformQuery = /(vizra|omnia|platform\s*architecture|creative\s*engine|design\s*constitution|rag\s*specification)/i.test(trimmedQuery);
+        const isPlatformQuery =
+          /(vizra|omnia|platform\s*architecture|creative\s*engine|design\s*constitution|rag\s*specification|hybrid\s*retrieval|knowledge\s*isolation)/i.test(
+            trimmedQuery
+          );
         if (!isPlatformQuery && (!options.tiers || options.tiers.length === 0)) {
           continue;
         }
       }
 
-      // Project tier isolation: PROJECT DATA IS NOT GLOBAL KNOWLEDGE.
-      // Only include project-tier chunks if:
-      // 1. A specific projectId is passed in query options, OR
-      // 2. The user's query explicitly mentions that project by title or keyword.
+      // Project tier isolation:
+      // - Keep built-in demo/sample projects (`proj_camera_rig`, `proj_singularity`) strictly isolated
+      //   unless selected as active project or explicitly mentioned.
+      // - Allow user-uploaded documents (`proj_active` or non-seed uploads) to be searched cleanly
+      //   so users can ask questions about files they uploaded to the Knowledge Base!
       if (doc.tier === 'project') {
         const queryLower = trimmedQuery.toLowerCase();
+        const isSeedSampleProject = SEED_SAMPLE_PROJECTS.has(doc.project_id || '');
         const matchesQueryProject =
-          (doc.project_id === 'proj_camera_rig' && /(camera|dolly|rig|esp32|nema|keyframe|motion control)/i.test(queryLower)) ||
-          (doc.project_id === 'proj_singularity' && /(singularity|kerr|film|cinematic|black hole film)/i.test(queryLower)) ||
-          (doc.title && queryLower.includes(doc.title.toLowerCase()));
+          (doc.project_id === 'proj_camera_rig' &&
+            /(camera|dolly|rig|esp32|nema|keyframe|motion control|home-switch)/i.test(queryLower)) ||
+          (doc.project_id === 'proj_singularity' &&
+            /(singularity|kerr|film|cinematic|black hole film|gargantua)/i.test(queryLower)) ||
+          (doc.title && doc.title.length > 2 && queryLower.includes(doc.title.toLowerCase())) ||
+          (doc.file_name && queryLower.includes(doc.file_name.toLowerCase().replace(/\.[^/.]+$/, '')));
 
         if (options.projectId) {
-          if (doc.project_id !== options.projectId) {
+          if (doc.project_id !== options.projectId && isSeedSampleProject) {
             continue;
           }
-        } else if (!matchesQueryProject) {
-          // If no active project context and user didn't mention this project, DO NOT RETRIEVE project data!
+          if (doc.project_id !== options.projectId && !isSeedSampleProject && doc.project_id !== 'proj_active') {
+            continue;
+          }
+        } else if (isSeedSampleProject && !matchesQueryProject) {
+          // Do NOT leak built-in demo hardware/film projects into unrelated queries
           continue;
         }
       }
@@ -662,36 +682,87 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
       candidateChunks.push(chunk);
     }
 
-    const scoredResults: RetrievalResult[] = [];
-
-    for (const chunk of candidateChunks) {
-      // 1. Dense Score (Cosine Similarity)
+    const scoreCandidate = (chunk: RAGChunk): {
+      denseScore: number;
+      sparseScore: number;
+      hybridScore: number;
+      matchedTerms: string[];
+      titleOrSectionHit: boolean;
+    } => {
+      // 1. Space-Matched Dense Cosine Similarity (never compare mismatched 384d vs 3072d spaces!)
       const chunkEmbedding =
         chunk.embedding || EmbeddingService.generateLocalSemanticEmbedding(chunk.text);
-      const denseScore = EmbeddingService.cosineSimilarity(queryEmbedding, chunkEmbedding);
+      let denseScore = 0;
+      if (chunkEmbedding.length === remoteQueryEmbedding.length) {
+        denseScore = EmbeddingService.cosineSimilarity(remoteQueryEmbedding, chunkEmbedding);
+      } else if (chunkEmbedding.length === localQueryEmbedding.length) {
+        denseScore = EmbeddingService.cosineSimilarity(localQueryEmbedding, chunkEmbedding);
+      } else {
+        // Fallback: compute local embedding on-the-fly for exact vector space alignment
+        const alignedChunkVec = EmbeddingService.generateLocalSemanticEmbedding(chunk.text);
+        denseScore = EmbeddingService.cosineSimilarity(localQueryEmbedding, alignedChunkVec);
+      }
 
-      // 2. Sparse Lexical BM25 Score
+      // 2. Sparse Lexical BM25-style Score with Title & Section Boost
       const chunkLower = chunk.text.toLowerCase();
+      const doc = this.documents.get(chunk.metadata.document_id);
+      const headerContext = `${doc?.title || ''} ${chunk.metadata.file_name || ''} ${chunk.metadata.section || ''}`.toLowerCase();
       let matchedCount = 0;
+      let headerMatchCount = 0;
       const matchedTerms: string[] = [];
 
       for (const term of queryTerms) {
-        if (chunkLower.includes(term)) {
+        const stem = term.length > 4 && term.endsWith('s') ? term.slice(0, -1) : term;
+        const inBody = chunkLower.includes(term) || (stem !== term && chunkLower.includes(stem));
+        const inHeader = headerContext.includes(term) || (stem !== term && headerContext.includes(stem));
+        if (inBody || inHeader) {
           matchedCount++;
           matchedTerms.push(term);
+          if (inHeader) headerMatchCount++;
         }
       }
 
-      const sparseScore =
+      const rawSparse =
         queryTerms.length > 0
-          ? Math.min(1.0, (matchedCount / queryTerms.length) * 1.2)
+          ? Math.min(1.0, (matchedCount / queryTerms.length) * 1.15 + Math.min(0.2, headerMatchCount * 0.08))
           : 0;
 
-      // 3. Combined Hybrid Score (Reciprocal / Linear Fusion)
-      const hybridScore = alpha * denseScore + (1 - alpha) * sparseScore;
+      // 3. Combined Hybrid Score
+      const hybridScore = alpha * denseScore + (1 - alpha) * rawSparse;
+      return {
+        denseScore,
+        sparseScore: rawSparse,
+        hybridScore,
+        matchedTerms,
+        titleOrSectionHit: headerMatchCount > 0,
+      };
+    };
 
-      if (hybridScore >= minScore) {
+    const scoredResults: RetrievalResult[] = [];
+    const relaxedCandidates: RetrievalResult[] = [];
+
+    for (const chunk of candidateChunks) {
+      const { denseScore, sparseScore, hybridScore, matchedTerms, titleOrSectionHit } = scoreCandidate(chunk);
+
+      // Require at least 1 real lexical term match OR very strong dense similarity so irrelevant noise is rejected
+      const hasQualityEvidence =
+        matchedTerms.length >= 1 || denseScore >= 0.45 || titleOrSectionHit;
+
+      if (hybridScore >= minScore && hasQualityEvidence) {
         scoredResults.push({
+          chunk,
+          denseScore,
+          sparseScore,
+          hybridScore,
+          matchedTerms,
+          rank: 0,
+        });
+      } else if (
+        hasQualityEvidence &&
+        (matchedTerms.length >= 2 || (titleOrSectionHit && matchedTerms.length >= 1)) &&
+        hybridScore >= Math.max(0.14, minScore * 0.65)
+      ) {
+        relaxedCandidates.push({
           chunk,
           denseScore,
           sparseScore,
@@ -702,17 +773,20 @@ Project ID: proj_singularity | Creative Workspace Project Knowledge
       }
     }
 
+    // Fallback retrieval pass: if primary threshold returned 0 results but high-signal lexical/title hits exist
+    const finalCandidates = scoredResults.length > 0 ? scoredResults : relaxedCandidates;
+
     // Sort descending by hybrid score
-    scoredResults.sort((a, b) => b.hybridScore - a.hybridScore);
+    finalCandidates.sort((a, b) => b.hybridScore - a.hybridScore);
 
     // Assign rank and pack context within token budget with deduplication
     const packedResults: RetrievalResult[] = [];
     const seenHashes = new Set<string>();
     let accumulatedTokens = 0;
 
-    for (let i = 0; i < scoredResults.length; i++) {
+    for (let i = 0; i < finalCandidates.length; i++) {
       if (packedResults.length >= topK) break;
-      const res = scoredResults[i];
+      const res = finalCandidates[i];
 
       // Deduplicate by content hash
       const hash = res.chunk.metadata.content_hash;

@@ -13,7 +13,7 @@ import {
 } from '../types/ai';
 import { CitationItem, GroundingEvaluation } from '../types/rag';
 import { KnowledgeState, ConflictRecord } from '../types/omniaGovernance';
-import { ragVectorStore } from './ragVectorStore';
+import { ragVectorStore, expandQueryWithConversationHistory } from './ragVectorStore';
 import { omniaGovernanceService } from './omniaGovernanceService';
 import {
   shouldPerformWebResearch,
@@ -835,23 +835,22 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   let knowledgeState: KnowledgeState = 'HIGH_CONFIDENCE';
   let activeConflicts: ConflictRecord[] = [];
 
-  // 2. Perform RAG Hybrid Retrieval & Versioned Knowledge DB Query if eligible
+  // 2. Perform RAG Hybrid Retrieval & Versioned Knowledge DB Query for all substantive queries
   const isSimpleGreeting = /^(hi|hey|hello|sup|yo|hiya|namaste|good\s*(morning|afternoon|evening))[!.]*$/i.test(lower);
   const isSimpleStatus = /^(how\s*are\s*you|how'?s\s*it\s*going|kya\s*kar\s*rahe\s*ho)[?!.]*$/i.test(lower);
-  const mentionsExternalEntity = /\b(gemini|argon|gpt|claude|deepseek|llama|mistral|french\s+revolution)\b/i.test(lower);
+  const isPureThanksOrAck = /^(thanks|thank\s*you|ok|okay|got\s*it|cool|nice|great|bye|goodbye)[!.]*$/i.test(lower);
 
   const isEligibleForRAG =
     !isSimpleGreeting &&
     !isSimpleStatus &&
-    !mentionsExternalEntity &&
+    !isPureThanksOrAck &&
     options.ragScope !== 'off' &&
-    (Boolean(options.activeProject?.id) ||
-      options.ragScope === 'project' ||
-      /\b(vizra|omnia|vizrma)\b/i.test(lower));
+    rawPrompt.trim().length >= 3;
 
   if (isEligibleForRAG) {
     try {
-      const matchedChunks = await ragVectorStore.query(rawPrompt, {
+      const expandedRagQuery = expandQueryWithConversationHistory(rawPrompt, conversationHistory);
+      const matchedChunks = await ragVectorStore.query(expandedRagQuery, {
         projectId: options.activeProject?.id,
         topK: 4,
         minScore: 0.22,
@@ -859,7 +858,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
 
       // Build Governed Retrieval Bundle (Records + Vector chunks + Conflicts)
       const bundle = omniaGovernanceService.buildRetrievalBundle(
-        rawPrompt,
+        expandedRagQuery,
         matchedChunks.map((m) => m.chunk),
         options.activeProject?.id
       );
@@ -1135,8 +1134,20 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       options.mode === 'research' ||
       shouldPerformWebResearch(rawPrompt, ragScore, ragCount, options.mode);
 
-    // 2. If it's a simple, timeless question and web research is NOT needed, check direct answer first
-    const directAns = !needWebResearch ? getDirectAnswer(rawPrompt, lang) : null;
+    // 2. Only allow local timeless direct answer if there are NO attachments, NO retrieved RAG citations,
+    // NO active project, NO VIZRA blog/article reference, and web research is not needed.
+    const mentionsArticleOrDocument =
+      /\b(article|blog|post|document|file|pdf|uploaded|attached|vizra|omnia|report|spec)\b/i.test(lower);
+    const hasRetrievedOrAttachedContext =
+      attachments.length > 0 ||
+      Boolean(citations && citations.length > 0) ||
+      Boolean(options.activeProject?.id) ||
+      mentionsArticleOrDocument;
+
+    const directAns =
+      !needWebResearch && !hasRetrievedOrAttachedContext
+        ? getDirectAnswer(rawPrompt, lang)
+        : null;
     if (directAns) {
       responseText = directAns;
     } else {
@@ -1523,6 +1534,7 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
           body: JSON.stringify({
             prompt: rawPrompt || (intent === 'IMAGE_UNDERSTANDING' ? 'Analyze this image and describe the visual content, subjects, composition, and details.' : 'Analyze this document, extract key entities, and summarize findings.'),
             conversationHistory,
+            ragContext: ragContextForServer,
             attachments,
             mode: 'analyze',
             temporarySession: Boolean(options.temporarySession),
@@ -1537,6 +1549,13 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
         if (data.text && typeof data.text === 'string' && data.text.trim()) {
           responseText = data.text.trim();
           serverFetched = true;
+
+          if (data.sources && Array.isArray(data.sources) && data.sources.length > 0) {
+            const gateResult = runSourceValidationGate(data.sources, rawPrompt);
+            sources = gateResult.passedSources;
+            sourceValidationGate = gateResult.report;
+            webSearchQueries = data.webSearchQueries || [];
+          }
         }
       } else if (res.status === 429 || res.status === 503 || res.status === 504) {
         responseText = HIGH_TRAFFIC_MESSAGE;
@@ -1649,16 +1668,10 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     });
   }
 
-  // Convert document citations to verified sources ONLY if query explicitly targeted internal documentation
-  const isInternalQuery =
-    Boolean(options.activeProject?.id) ||
-    options.ragScope === 'project' ||
-    /\b(vizra|omnia|studio|architecture|constitution|governance|rag\s*spec)\b/i.test(lower);
-
-  if (isInternalQuery && citations && citations.length > 0) {
+  // Convert retrieved RAG document citations into verified sources so uploaded & indexed docs are always attributed
+  if (citations && citations.length > 0) {
     const docSources = citations.map((c) => convertCitationToVerifiedSource(c));
     const existing = sources || [];
-    // Deduplicate against any already present document sources
     const newDocs = docSources.filter((d) => !existing.some((e) => e.sourceId === d.sourceId));
     sources = [...existing, ...newDocs];
   }

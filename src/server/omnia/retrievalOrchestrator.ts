@@ -336,7 +336,7 @@ export function retrieveVizraBlogSources(params: {
   };
 
   // Ensure published articles are indexed
-  const publishedArticles = blogKnowledgeBase.getPublishedArticles();
+  const publishedArticles = blogKnowledgeBase.getAllPublishedArticles();
   if (publishedArticles.length === 0) {
     return emptyResult;
   }
