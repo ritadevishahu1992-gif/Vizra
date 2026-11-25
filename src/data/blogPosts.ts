@@ -57,7 +57,15 @@ export const BLOG_POSTS: BlogPost[] = [
   article20,
 ];
 
+export function isBlogPostPublished(post: BlogPost): boolean {
+  return post.status !== 'draft';
+}
+
+export function getPublishedBlogPosts(): BlogPost[] {
+  return BLOG_POSTS.filter(isBlogPostPublished);
+}
+
 export function getPublishedBlogPost(slug?: string): BlogPost | undefined {
   if (!slug) return undefined;
-  return BLOG_POSTS.find((post) => post.slug === slug);
+  return BLOG_POSTS.find((post) => post.slug === slug && isBlogPostPublished(post));
 }

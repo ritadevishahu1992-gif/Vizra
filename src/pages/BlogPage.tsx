@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { BlogArticleView } from '../components/blog/BlogArticleView';
-import { BLOG_POSTS, getPublishedBlogPost } from '../data/blogPosts';
+import { getPublishedBlogPost, getPublishedBlogPosts } from '../data/blogPosts';
 
 function formatShortDate(isoDate: string): string {
   const parsed = new Date(`${isoDate}T00:00:00Z`);
@@ -29,16 +29,17 @@ export const BlogPage: React.FC = () => {
   const { slug } = useParams<{ slug?: string }>();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSeries, setSelectedSeries] = useState<string>('ALL');
+  const publishedPosts = useMemo(() => getPublishedBlogPosts(), []);
   const activePost = slug ? getPublishedBlogPost(slug) : undefined;
 
   const seriesOptions = useMemo(() => {
-    const unique = Array.from(new Set(BLOG_POSTS.map((p) => p.series)));
+    const unique = Array.from(new Set(publishedPosts.map((p) => p.series)));
     return ['ALL', ...unique];
-  }, []);
+  }, [publishedPosts]);
 
   const filteredPosts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return BLOG_POSTS.filter((post) => {
+    return publishedPosts.filter((post) => {
       if (selectedSeries !== 'ALL' && post.series !== selectedSeries) {
         return false;
       }
@@ -53,7 +54,7 @@ export const BlogPage: React.FC = () => {
         post.series.toLowerCase().includes(q)
       );
     });
-  }, [searchQuery, selectedSeries]);
+  }, [publishedPosts, searchQuery, selectedSeries]);
 
   // Individual Article View (/blog/:slug) when a published post exists
   if (slug && activePost) {
@@ -63,7 +64,7 @@ export const BlogPage: React.FC = () => {
         description={activePost.description}
         canonicalPath={`/blog/${activePost.slug}`}
       >
-        <BlogArticleView post={activePost} allPosts={BLOG_POSTS} />
+        <BlogArticleView post={activePost} allPosts={publishedPosts} />
       </PageLayout>
     );
   }
@@ -145,7 +146,7 @@ export const BlogPage: React.FC = () => {
               Twenty independently audited, source-verified essays examining how modern AI works—from symbolic logic, neural networks, and data engineering to training pipelines, backpropagation, transformers, foundation models, edge deployment, and future intelligent computing.
             </p>
             <div className="pt-1 text-xs font-mono uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400 tabular-nums">
-              {BLOG_POSTS.length} Published Monographs · Fact-Checked Primary Citations · KaTeX Mathematics
+              {publishedPosts.length} Published Monographs · Fact-Checked Primary Citations · KaTeX Mathematics
             </div>
           </div>
 
@@ -191,8 +192,8 @@ export const BlogPage: React.FC = () => {
             const active = selectedSeries === series;
             const count =
               series === 'ALL'
-                ? BLOG_POSTS.length
-                : BLOG_POSTS.filter((p) => p.series === series).length;
+                ? publishedPosts.length
+                : publishedPosts.filter((p) => p.series === series).length;
             return (
               <button
                 key={series}
@@ -228,7 +229,7 @@ export const BlogPage: React.FC = () => {
               onClick={() => setSearchQuery('')}
               className="px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black text-xs font-display font-semibold hover:opacity-90 transition-opacity"
             >
-              Show All {BLOG_POSTS.length} Articles
+              Show All {publishedPosts.length} Articles
             </button>
           </div>
         ) : (

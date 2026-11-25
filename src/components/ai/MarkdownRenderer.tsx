@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Copy, Check, ExternalLink } from 'lucide-react';
 import { useCopyToClipboard } from '../../utils/clipboard';
 
@@ -278,8 +279,8 @@ function parseTableData(lines: string[]): { headers: string[]; rows: string[][] 
  * - Safe hyperlinks: [text](url) with javascript: filtering
  */
 function renderInline(text: string): React.ReactNode {
-  // Regex to match code, bold, links, italic
-  const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\[([^\]]+)\]\(([^)]+)\)|\*[^*]+\*|_[^_]+_)/g;
+  // Regex to match code, bold, links, italic (inner link groups are non-capturing so split() does not duplicate text)
+  const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\[(?:[^\]]+)\]\((?:[^)]+)\)|\*[^*]+\*|_[^_]+_)/g;
   const parts = text.split(inlineRegex);
 
   return parts.map((part, i) => {
@@ -314,9 +315,23 @@ function renderInline(text: string): React.ReactNode {
       const label = linkMatch[1];
       let href = linkMatch[2].trim();
 
-      // XSS Protection: Disallow javascript: and data: URIs
-      if (/^(javascript:|data:|vbscript:)/i.test(href)) {
+      // XSS Protection: Allow only https:, http:, mailto:, or safe internal relative paths (/...)
+      const isInternalPath = href.startsWith('/') && !href.startsWith('//');
+      const isSafeExternal = /^(https?:\/\/|mailto:)/i.test(href);
+      if (!isInternalPath && !isSafeExternal) {
         href = '#';
+      }
+
+      if (isInternalPath) {
+        return (
+          <Link
+            key={i}
+            to={href}
+            className="inline-flex items-center gap-1 text-[#eb3b2d] hover:text-[#ff5242] underline underline-offset-2 transition-colors font-medium"
+          >
+            <span>{label}</span>
+          </Link>
+        );
       }
 
       return (

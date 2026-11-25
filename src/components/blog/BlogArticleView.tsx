@@ -40,6 +40,9 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
   allPosts,
 }) => {
   const [readProgress, setReadProgress] = useState(0);
+  const [activeSection, setActiveSection] = useState<{ id: string; heading: string } | null>(
+    post.sections[0] ? { id: post.sections[0].id, heading: post.sections[0].heading } : null
+  );
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [heroImgFailed, setHeroImgFailed] = useState(false);
   const [copiedCodeKey, setCopiedCodeKey] = useState<string | null>(null);
@@ -50,24 +53,46 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
   useEffect(() => {
     setHeroImgFailed(false);
     setOpenFaqIndex(0);
-  }, [post.slug]);
+    setActiveSection(
+      post.sections[0] ? { id: post.sections[0].id, heading: post.sections[0].heading } : null
+    );
+  }, [post.slug, post.sections]);
 
   useEffect(() => {
-    const updateProgress = () => {
+    const updateProgressAndSection = () => {
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight <= 0) {
         setReadProgress(0);
-        return;
+      } else {
+        const ratio = Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100));
+        setReadProgress(ratio);
       }
-      const ratio = Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100));
-      setReadProgress(ratio);
+
+      // Determine the current section closest above the upper reading line (160px from top)
+      let current: { id: string; heading: string } | null =
+        post.sections[0] ? { id: post.sections[0].id, heading: post.sections[0].heading } : null;
+
+      for (const sec of post.sections) {
+        const el = document.getElementById(sec.id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 170) {
+          current = { id: sec.id, heading: sec.heading };
+        } else {
+          break;
+        }
+      }
+
+      setActiveSection((prev) =>
+        prev?.id === current?.id ? prev : current
+      );
     };
 
-    updateProgress();
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    return () => window.removeEventListener('scroll', updateProgress);
-  }, [post.slug]);
+    updateProgressAndSection();
+    window.addEventListener('scroll', updateProgressAndSection, { passive: true });
+    return () => window.removeEventListener('scroll', updateProgressAndSection);
+  }, [post.slug, post.sections]);
 
   const tocEntries: TocEntry[] = React.useMemo(() => {
     const items: TocEntry[] = post.sections.map((section) => ({
@@ -679,8 +704,12 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
         </div>
       </article>
 
-      {/* Article-Scoped AI Reading Agent */}
-      <BlogArticleAgent post={post} />
+      {/* VIZRA Article Agent (rendered via Portal outside <main> stacking context) */}
+      <BlogArticleAgent
+        post={post}
+        currentSection={activeSection}
+        allPosts={allPosts}
+      />
     </div>
   );
 };

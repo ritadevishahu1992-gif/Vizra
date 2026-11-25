@@ -77,6 +77,8 @@ export interface BlogPost {
   excerpt: string;
   publishedAt: string;
   updatedAt?: string;
+  /** Publication visibility; omitted defaults to 'published'. Drafts are strictly excluded from public & agent indexes. */
+  status?: 'published' | 'draft';
   category: string;
   series: string;
   author: string;
