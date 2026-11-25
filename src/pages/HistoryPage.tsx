@@ -94,6 +94,7 @@ export const HistoryPage: React.FC = () => {
       description="Review, search, export, and manage your saved Omnia 1.0 conversation threads and creative sessions."
       canonicalPath="/history"
       noindex={true}
+      showBottomNav={true}
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-6xl mx-auto">
         {/* Header Bar */}

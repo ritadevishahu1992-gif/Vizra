@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Menu,
   Plus,
   Settings,
   Sparkles,
@@ -14,6 +13,8 @@ import {
   BarChart3,
   Clock,
   EyeOff,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { ModelSelector } from './ModelSelector';
@@ -42,6 +43,9 @@ interface AIHeaderProps {
   onOpenCommandPalette?: () => void;
   onOpenShortcutsHelp?: () => void;
   onOpenEngageAdmin?: () => void;
+  isWideCanvas?: boolean;
+  onToggleWideCanvas?: () => void;
+  conversationTitle?: string;
 }
 
 export const AIHeader: React.FC<AIHeaderProps> = ({
@@ -61,55 +65,82 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
   onOpenCommandPalette,
   onOpenShortcutsHelp,
   onOpenEngageAdmin,
+  isWideCanvas = false,
+  onToggleWideCanvas,
+  conversationTitle,
 }) => {
   return (
     <header
-      className={`h-14 border-b backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-30 shrink-0 select-none transition-colors ${
+      className={`h-15 border-b backdrop-blur-md px-3 sm:px-5 flex items-center justify-between gap-3 z-30 shrink-0 select-none transition-colors ${
         isTemporaryChat
-          ? 'border-[#eb3b2d]/40 bg-[#120707]/90'
-          : 'border-neutral-800/80 bg-neutral-950/80'
+          ? 'border-[#DC143C]/40 bg-[#14090C]/95'
+          : 'border-[#23232A] bg-[#0A0A0C]/90'
       }`}
     >
-      {/* Left: Collapsible Sidebar Toggle (mobile & desktop), Vizra Logo back to '/' + Omnia 1.0 */}
-      <div className="flex items-center gap-2.5 md:gap-3.5">
+      {/* Left: Circular Sidebar Toggle, Vizra Brand & Plans Link */}
+      <div className="flex items-center gap-2.5 min-w-0">
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="p-2 -ml-1 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors cursor-pointer"
+          className="w-10 h-10 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/45 flex items-center justify-center text-zinc-200 hover:text-white transition-all active:scale-95 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#DC143C]"
           aria-label="Toggle Conversation Sidebar"
           title="Toggle Sidebar"
         >
-          <Menu size={18} />
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <line x1="5" y1="9" x2="19" y2="9" />
+            <line x1="5" y1="15" x2="15" y2="15" />
+          </svg>
         </button>
 
         <Link
           to="/"
-          className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-1 focus-visible:ring-[#eb3b2d] rounded py-1"
+          className="flex items-center gap-2 group focus:outline-none focus-visible:ring-1 focus-visible:ring-[#DC143C] rounded-lg py-1 shrink-0"
           aria-label="Back to Vizra Home"
         >
           <VizraLogo size={22} />
-          <span className="text-base font-bold tracking-tight text-white group-hover:opacity-90 transition-opacity">
+          <span className="font-display text-base font-semibold tracking-tight text-white group-hover:opacity-90 transition-opacity whitespace-nowrap">
             Vizra
           </span>
         </Link>
 
-        <div className="h-4 w-px bg-neutral-800" />
+        <div className="hidden sm:block h-4 w-px bg-[#23232A] shrink-0" />
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-neutral-300 tracking-tight">
-            {isTemporaryChat ? 'Temporary Chat' : 'Omnia 1.0'}
+        <div className="hidden sm:flex items-center gap-2 min-w-0">
+          <span className="text-xs font-medium text-zinc-300 tracking-tight truncate max-w-[160px] lg:max-w-[200px]">
+            {isTemporaryChat
+              ? 'Temporary Chat'
+              : conversationTitle || 'Omnia 1.0'}
           </span>
           {isTemporaryChat && temporaryRemainingLabel && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[10px] font-mono text-[#ff867c]">
-              <Clock size={10} />
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono tabular-nums text-rose-300 shrink-0">
+              <Clock size={11} className="text-[#DC143C]" />
               <span>{temporaryRemainingLabel}</span>
             </span>
           )}
         </div>
+
+        {/* Real VIZRA Plans / Upgrade Entry Point */}
+        <Link
+          to="/pricing"
+          aria-label="View Vizra Plans"
+          className="h-9 px-3 rounded-full bg-[#141418] hover:bg-[#DC143C]/14 border border-[#23232A] hover:border-[#DC143C]/50 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-200 hover:text-white transition-all active:scale-95 whitespace-nowrap shrink-0"
+        >
+          <Sparkles size={13} className="text-[#DC143C] shrink-0" />
+          <span className="font-display font-semibold tracking-wide">Plans</span>
+        </Link>
       </div>
 
-      {/* Center: Model Selector & Capabilities */}
-      <div className="hidden sm:flex items-center gap-3">
+      {/* Center: Model Selector & Studio Capabilities */}
+      <div className="hidden xl:flex items-center gap-2">
         <ModelSelector currentModel={currentModel} onSelectModel={onSelectModel} />
         <CapabilitiesMenu />
 
@@ -120,11 +151,12 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenCreateHub}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Open Create Hub"
             >
-              <Sparkles size={13} className="text-[#eb3b2d]" />
+              <Sparkles size={13} className="text-[#DC143C]" />
               <span>Create Hub</span>
             </button>
           </Tooltip>
@@ -137,11 +169,12 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenScienceHub}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Open Omnia Science Suite"
             >
-              <Atom size={13} className="text-[#eb3b2d]" />
+              <Atom size={13} className="text-[#DC143C]" />
               <span>Science</span>
             </button>
           </Tooltip>
@@ -154,12 +187,13 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenKnowledgeBase}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Open Knowledge Base"
             >
-              <Database size={13} className="text-[#eb3b2d]" />
-              <span>Knowledge Base</span>
+              <Database size={13} className="text-[#DC143C]" />
+              <span>Knowledge</span>
             </button>
           </Tooltip>
         )}
@@ -171,12 +205,13 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenMusicStudio}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Open AI Music Studio"
             >
-              <Music size={13} className="text-[#eb3b2d]" />
-              <span>AI Music</span>
+              <Music size={13} className="text-[#DC143C]" />
+              <span>Music</span>
             </button>
           </Tooltip>
         )}
@@ -188,12 +223,13 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenLiveVoice}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Start Live Voice Conversation"
             >
-              <Radio size={13} className="text-[#eb3b2d] animate-pulse" />
-              <span>Live Voice</span>
+              <Radio size={13} className="text-[#DC143C]" />
+              <span>Voice</span>
             </button>
           </Tooltip>
         )}
@@ -205,20 +241,46 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             position="bottom"
           >
             <button
+              type="button"
               onClick={onOpenEngageAdmin}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap shrink-0"
               aria-label="Open Vizra Engage Studio"
             >
-              <BarChart3 size={13} className="text-[#eb3b2d]" />
+              <BarChart3 size={13} className="text-[#DC143C]" />
               <span>Engage</span>
             </button>
           </Tooltip>
         )}
       </div>
 
-      {/* Right: Actions (Credits, Command Palette, New Chat, Settings, Profile) */}
-      <div className="flex items-center gap-1.5 md:gap-2">
-        <CreditUsageIndicator variant="header" />
+      {/* Right: Actions (Credits, Width Toggle, Command Palette, New Chat, Temp Chat, Settings, Profile) */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="hidden md:block">
+          <CreditUsageIndicator variant="header" />
+        </div>
+
+        {/* Model Selector on Medium Screens */}
+        <div className="hidden sm:block xl:hidden">
+          <ModelSelector currentModel={currentModel} onSelectModel={onSelectModel} />
+        </div>
+
+        {onToggleWideCanvas && (
+          <Tooltip
+            label={isWideCanvas ? 'Standard Width' : 'Wide View'}
+            text="Switch between focused reading width and expanded desktop canvas width."
+            position="bottom"
+            align="end"
+          >
+            <button
+              type="button"
+              onClick={onToggleWideCanvas}
+              aria-label={isWideCanvas ? 'Switch to standard chat width' : 'Switch to wide chat view'}
+              className="hidden md:flex w-9 h-9 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 items-center justify-center text-zinc-400 hover:text-white transition-all active:scale-95 cursor-pointer"
+            >
+              {isWideCanvas ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+          </Tooltip>
+        )}
 
         {onOpenCommandPalette && (
           <Tooltip
@@ -229,38 +291,21 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             align="end"
           >
             <button
+              type="button"
               onClick={onOpenCommandPalette}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-xs font-medium text-neutral-300 hover:text-white transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/40 text-xs font-medium text-zinc-300 hover:text-white transition-colors cursor-pointer whitespace-nowrap"
               aria-label="Command Palette"
             >
-              <Search size={13} className="text-neutral-400" />
-              <span className="hidden md:inline">Commands</span>
-              <kbd className="hidden sm:inline-block px-1.5 py-0.2 text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-800 rounded">
+              <Search size={13} className="text-zinc-400" />
+              <span className="hidden 2xl:inline">Commands</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-[#0A0A0C] border border-[#23232A] rounded">
                 {modKey}K
               </kbd>
             </button>
           </Tooltip>
         )}
 
-        <Tooltip
-          label="New Conversation"
-          shortcut={`${modKey}N`}
-          text="Start a fresh chat session while keeping your previous conversations saved in the sidebar."
-          position="bottom"
-          align="end"
-        >
-          <button
-            type="button"
-            onClick={onNewChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-medium text-white transition-colors cursor-pointer"
-            aria-label="New Chat"
-          >
-            <Plus size={14} className="text-[#eb3b2d]" />
-            <span className="hidden md:inline">New Chat</span>
-          </button>
-        </Tooltip>
-
-        {/* Temporary Chat Toggle (Ephemeral Client-Only Session) */}
+        {/* Temporary Chat Toggle */}
         {onToggleTemporaryChat && (
           <Tooltip
             label={isTemporaryChat ? 'Exit Temporary Chat' : 'Temporary Chat'}
@@ -275,21 +320,39 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             <button
               type="button"
               onClick={onToggleTemporaryChat}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+              className={`h-9 px-2.5 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 isTemporaryChat
-                  ? 'bg-[#eb3b2d] text-white border-[#eb3b2d] hover:bg-[#dc2626]'
-                  : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white'
+                  ? 'bg-[#DC143C] text-white border-[#DC143C] hover:bg-[#B01030]'
+                  : 'bg-[#141418] hover:bg-[#1B1B21] border-[#23232A] text-zinc-300 hover:text-white'
               }`}
               aria-label={isTemporaryChat ? 'Exit Temporary Chat' : 'Start Temporary Chat'}
               aria-pressed={isTemporaryChat}
             >
-              <EyeOff size={13} className={isTemporaryChat ? 'text-white' : 'text-[#eb3b2d]'} />
+              <EyeOff size={13} className={isTemporaryChat ? 'text-white' : 'text-[#DC143C]'} />
               <span className="hidden lg:inline">
-                {isTemporaryChat ? 'Exit Temp' : 'Temp Chat'}
+                {isTemporaryChat ? 'Exit Temp' : 'Temp'}
               </span>
             </button>
           </Tooltip>
         )}
+
+        {/* Circular New Chat Action Button (Crimson Reference) */}
+        <Tooltip
+          label="New Chat"
+          shortcut={`${modKey}N`}
+          text="Start a fresh chat session while keeping previous conversations in your history."
+          position="bottom"
+          align="end"
+        >
+          <button
+            type="button"
+            onClick={onNewChat}
+            className="w-10 h-10 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/50 flex items-center justify-center text-zinc-100 hover:text-white transition-all active:scale-95 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#DC143C]"
+            aria-label="Start new chat"
+          >
+            <Plus size={18} className="text-[#DC143C]" />
+          </button>
+        </Tooltip>
 
         {onOpenShortcutsHelp && (
           <Tooltip
@@ -300,8 +363,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
             align="end"
           >
             <button
+              type="button"
               onClick={onOpenShortcutsHelp}
-              className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+              className="hidden md:flex w-9 h-9 rounded-full text-zinc-400 hover:text-white hover:bg-[#1B1B21] items-center justify-center transition-colors cursor-pointer"
               aria-label="Keyboard Shortcuts"
             >
               <Keyboard size={16} />
@@ -317,20 +381,22 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           align="end"
         >
           <button
+            type="button"
             onClick={onOpenSettings}
-            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            className="w-9 h-9 rounded-full text-zinc-400 hover:text-white hover:bg-[#1B1B21] flex items-center justify-center transition-colors cursor-pointer"
             aria-label="Settings"
           >
             <Settings size={16} />
           </button>
         </Tooltip>
 
-        <LiquidGlassToggle size="sm" className="hidden lg:inline-flex" />
+        <LiquidGlassToggle size="sm" className="hidden 2xl:inline-flex" />
 
-        <div className="ml-1">
+        <div className="ml-0.5">
           <UserMenu />
         </div>
       </div>
     </header>
   );
 };
+

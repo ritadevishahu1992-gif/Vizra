@@ -61,15 +61,18 @@ interface ModeSelectorProps {
   currentMode: AIMode;
   onSelectMode: (mode: AIMode) => void;
   compact?: boolean;
+  direction?: 'up' | 'down';
 }
 
 export const ModeSelector: React.FC<ModeSelectorProps> = ({
   currentMode,
   onSelectMode,
   compact = false,
+  direction,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const resolvedDirection = direction ?? (compact ? 'up' : 'down');
 
   const activeOption = AI_MODES.find((m) => m.id === currentMode) || AI_MODES[0];
 
@@ -79,8 +82,17 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const renderIcon = (iconName: string, size = 13, className = '') => {
@@ -113,34 +125,42 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
             ? ''
             : `${activeOption.description} Click to switch between Quick, Think, Research, Science, Create, Code, or Analyze modes.`
         }
-        position="bottom"
+        position={resolvedDirection === 'up' ? 'top' : 'bottom'}
         align="start"
       >
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex items-center gap-1.5 rounded-lg border transition-all cursor-pointer select-none ${
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          className={`flex items-center gap-1.5 rounded-full border transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#DC143C] ${
             compact
-              ? 'px-2 py-1 bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-xs text-neutral-200'
-              : 'px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-xs text-white'
+              ? 'h-8 px-2.5 bg-[#1B1B21] hover:bg-[#23232A] border-[#27272F] hover:border-[#DC143C]/40 text-xs text-zinc-200'
+              : 'h-9 px-3 bg-[#141418] hover:bg-[#1B1B21] border-[#23232A] hover:border-[#DC143C]/40 text-xs text-white'
           }`}
           aria-label="Switch Omnia AI Mode"
         >
-          <span className="text-[#eb3b2d]">
+          <span className="text-[#DC143C]">
             {renderIcon(activeOption.icon, 13)}
           </span>
           <span className="font-medium">{activeOption.name}</span>
           <ChevronDown
             size={12}
-            className={`text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`text-zinc-400 transition-transform duration-150 ${isOpen ? 'rotate-180 text-[#DC143C]' : ''}`}
           />
         </button>
       </Tooltip>
 
       {isOpen && (
-        <div className="absolute left-0 mt-1.5 w-64 rounded-xl bg-neutral-950 border border-neutral-800 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2 py-1 text-[10px] font-mono uppercase text-neutral-500 tracking-wider mb-1">
-            Omnia Capability Mode
+        <div
+          role="listbox"
+          aria-label="Omnia capability modes"
+          className={`absolute left-0 w-64 rounded-2xl bg-[#141418] border border-[#23232A] shadow-2xl p-1.5 z-50 ${
+            resolvedDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
+        >
+          <div className="px-2.5 py-1.5 text-[11px] font-medium text-zinc-400">
+            Omnia Modes
           </div>
           <div className="space-y-0.5">
             {AI_MODES.map((mode) => {
@@ -149,36 +169,38 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
                 <button
                   key={mode.id}
                   type="button"
+                  role="option"
+                  aria-selected={isSelected}
                   onClick={() => {
                     onSelectMode(mode.id);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-start gap-2.5 p-2 rounded-lg text-left transition-colors cursor-pointer ${
+                  className={`w-full flex items-start gap-2.5 p-2 rounded-xl text-left transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-neutral-900 border border-neutral-800'
-                      : 'hover:bg-neutral-900/60'
+                      ? 'bg-[#DC143C]/14 border border-[#DC143C]/35'
+                      : 'hover:bg-[#1B1B21] border border-transparent'
                   }`}
                 >
-                  <div className={`mt-0.5 ${isSelected ? 'text-[#eb3b2d]' : 'text-neutral-400'}`}>
+                  <div className={`mt-0.5 ${isSelected ? 'text-[#DC143C]' : 'text-zinc-400'}`}>
                     {renderIcon(mode.icon, 14)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-neutral-300'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
                         {mode.name}
                       </span>
                       {mode.badge && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#eb3b2d]/15 text-[#eb3b2d] border border-[#eb3b2d]/30">
+                        <span className="text-[10px] font-medium text-rose-300/90">
                           {mode.badge}
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-neutral-400 leading-tight line-clamp-1 mt-0.5">
+                    <p className="text-[11px] text-zinc-400 leading-snug line-clamp-1 mt-0.5">
                       {mode.description}
                     </p>
                   </div>
                   {isSelected && (
-                    <Check size={13} className="text-[#eb3b2d] shrink-0 mt-0.5" />
+                    <Check size={13} className="text-[#DC143C] shrink-0 mt-0.5" />
                   )}
                 </button>
               );
@@ -189,3 +211,4 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
     </div>
   );
 };
+

@@ -241,6 +241,15 @@ export const NotificationCenterTrigger: React.FC = () => {
   const { history, unreadCount, markAllRead, clearHistory } = useToast();
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
     <div className="relative">
       <button
@@ -251,13 +260,18 @@ export const NotificationCenterTrigger: React.FC = () => {
             markAllRead();
           }
         }}
-        className="relative p-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+        className={`relative h-9 w-9 inline-flex items-center justify-center rounded-lg border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
+          isOpen
+            ? 'bg-white/[0.08] border-white/[0.14] text-white'
+            : 'bg-transparent hover:bg-white/[0.06] border-transparent hover:border-white/[0.08] text-neutral-400 hover:text-white'
+        }`}
         aria-label="Open Notification Center"
-        title="Workspace Notification Center"
+        aria-expanded={isOpen}
+        title="Notifications"
       >
-        <Bell size={15} />
+        <Bell size={16} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#DC2626] text-[10px] font-mono font-bold text-white flex items-center justify-center">
+          <span className="absolute top-1 right-1 min-w-[15px] h-[15px] px-1 rounded-full bg-[#DC2626] text-[9px] font-mono font-bold text-white flex items-center justify-center leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -275,7 +289,7 @@ export const NotificationCenterTrigger: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#111111] border border-white/[0.1] shadow-2xl z-50 overflow-hidden select-none"
+              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-[#111114] border border-white/[0.1] shadow-2xl z-50 overflow-hidden select-none"
             >
               <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
                 <div className="flex items-center gap-2">

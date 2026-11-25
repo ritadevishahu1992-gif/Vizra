@@ -14,8 +14,15 @@ export const UserMenu: React.FC = () => {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   if (!user) {
@@ -23,9 +30,9 @@ export const UserMenu: React.FC = () => {
       <button
         type="button"
         onClick={openLoginModal}
-        className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-800 hover:border-neutral-700 transition-all cursor-pointer flex items-center gap-1.5"
+        className="h-9 px-2.5 sm:px-3 rounded-lg text-xs sm:text-[13px] font-medium text-neutral-300 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/[0.08] transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
       >
-        <User size={13} className="text-[#eb3b2d]" />
+        <User size={14} className="hidden sm:block text-neutral-400" />
         <span>Log in</span>
       </button>
     );
@@ -36,26 +43,28 @@ export const UserMenu: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 p-1 rounded-full hover:ring-1 hover:ring-neutral-700 transition-all cursor-pointer"
+        aria-expanded={isOpen}
+        aria-label="Open account menu"
+        className="h-9 w-9 inline-flex items-center justify-center rounded-lg hover:bg-white/[0.06] border border-transparent hover:border-white/[0.1] transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
         title={user.displayName || user.email || 'Creator Account'}
       >
         {user.photoURL ? (
           <img
             src={user.photoURL}
             alt={user.displayName || 'Creator'}
-            className="w-8 h-8 rounded-full object-cover border border-neutral-800"
+            className="w-7 h-7 rounded-full object-cover border border-white/[0.14]"
             referrerPolicy="no-referrer"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white">
+          <div className="w-7 h-7 rounded-full bg-[#1B1B21] border border-white/[0.14] flex items-center justify-center text-xs font-semibold text-white">
             {(user.displayName || user.email || 'V')[0].toUpperCase()}
           </div>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-2 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
-          <div className="p-3 border-b border-neutral-900">
+        <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#111114] border border-white/[0.1] shadow-2xl p-2 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+          <div className="p-3 border-b border-white/[0.06]">
             <p className="text-xs font-semibold truncate text-white">
               {user.displayName || 'Vizra Creator'}
             </p>

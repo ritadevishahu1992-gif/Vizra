@@ -16,7 +16,10 @@ export interface PageLayoutProps {
   children: React.ReactNode;
   className?: string;
   hideBottomNav?: boolean;
+  showBottomNav?: boolean;
 }
+
+const APP_WORKSPACE_ROUTES = ['/history', '/settings', '/workspace'];
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
   title,
@@ -26,9 +29,15 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   className = '',
   hideBottomNav = false,
+  showBottomNav,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isAppWorkspaceRoute = APP_WORKSPACE_ROUTES.some(
+    (route) => location.pathname === route || location.pathname.startsWith(`${route}/`)
+  );
+  const shouldRenderBottomNav = !hideBottomNav && (showBottomNav ?? isAppWorkspaceRoute);
 
   // Sync route-level SEO metadata, canonical URL, robots directives, JSON-LD, and scroll position
   useEffect(() => {
@@ -60,9 +69,11 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       className={`min-h-screen bg-neutral-50 dark:bg-[#090909] text-neutral-900 dark:text-white font-inter selection:bg-[#eb3b2d] selection:text-white relative overflow-x-clip flex flex-col justify-between ${className}`}
     >
       <Navbar onLaunchOmnia={() => navigate('/ai')} />
-      <main className="flex-1 relative z-10 pb-16">{children}</main>
+      <main className={`flex-1 relative z-10 ${shouldRenderBottomNav ? 'pb-20' : ''}`}>
+        {children}
+      </main>
       <Footer />
-      {!hideBottomNav && <LiquidGlassNavbar />}
+      {shouldRenderBottomNav && <LiquidGlassNavbar />}
     </div>
   );
 };

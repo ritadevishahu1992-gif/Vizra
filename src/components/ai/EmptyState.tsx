@@ -179,33 +179,20 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="text-center mb-6 flex flex-col items-center"
       >
-        <div className="mb-4 p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800 shadow-sm">
-          <VizraLogo size={28} />
+        <div className="mb-5 w-12 h-12 rounded-2xl bg-[#141418] border border-[#23232A] flex items-center justify-center shadow-[0_0_14px_rgba(220,20,60,0.2)]">
+          <VizraLogo size={26} />
         </div>
 
-        <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-white mb-2">
-          What can I help you with?
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100 mb-2 [text-wrap:balance]">
+          What can I help with?
         </h1>
 
-        <p className="text-neutral-400 text-sm md:text-base max-w-md leading-normal mb-3">
-          Your ideas. My knowledge. Our future.
+        <p className="text-zinc-400 text-sm sm:text-[15px] max-w-md leading-relaxed">
+          Your ideas. Omnia&apos;s intelligence. Built for deep reasoning, grounded research, and structured creation.
         </p>
-
-        {/* Core Philosophy Pipeline */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-neutral-900/90 border border-neutral-800 text-[11px] font-mono text-neutral-300">
-          <span className="text-[#eb3b2d]">RESEARCH</span>
-          <span className="text-neutral-600">→</span>
-          <span className="text-neutral-300">UNDERSTAND</span>
-          <span className="text-neutral-600">→</span>
-          <span className="text-neutral-300">PLAN</span>
-          <span className="text-neutral-600">→</span>
-          <span className="text-white font-medium">CREATE</span>
-          <span className="text-neutral-600">→</span>
-          <span className="text-[#eb3b2d]">EXECUTE</span>
-        </div>
       </motion.div>
 
       {/* Mode Quick Select */}
@@ -216,7 +203,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             { id: 'think' as AIMode, label: 'Think' },
             { id: 'research' as AIMode, label: 'Research' },
             { id: 'science' as AIMode, label: 'Science' },
-            { id: 'create' as AIMode, label: 'Create' },
+            { id: 'create' as AIMode, label: 'Draft' },
             { id: 'code' as AIMode, label: 'Code' },
             { id: 'analyze' as AIMode, label: 'Analyze' },
           ].map((m) => (
@@ -229,10 +216,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectMode(m.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border whitespace-nowrap ${
                   activeMode === m.id
-                    ? 'bg-white text-black border-white shadow-sm'
-                    : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                    ? 'bg-[#DC143C] text-white border-[#DC143C] shadow-[0_0_12px_rgba(220,20,60,0.25)]'
+                    : 'bg-[#141418] text-zinc-300 border-[#23232A] hover:bg-[#1B1B21] hover:text-white hover:border-[#DC143C]/40'
                 }`}
               >
                 {m.label}
@@ -244,9 +231,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       {/* Suggestion Cards Grid */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.35, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
         className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full"
       >
         {suggestions.map((item, idx) => {
@@ -256,26 +243,26 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               key={idx}
               type="button"
               onClick={() => onSelectPrompt(item.prompt, item.mode)}
-              className="text-left p-4 rounded-xl bg-neutral-950/80 hover:bg-neutral-900/70 border border-neutral-800/80 hover:border-neutral-700 transition-all duration-150 cursor-pointer group flex flex-col justify-between"
+              className="text-left p-4 rounded-2xl bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-[#DC143C]/45 transition-all duration-150 cursor-pointer group flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Icon size={14} className="text-[#eb3b2d]" />
-                  <span className="text-xs font-mono font-medium text-neutral-400">
+                  <Icon size={14} className="text-[#DC143C]" />
+                  <span className="text-xs font-medium text-zinc-400">
                     {item.category}
                   </span>
                 </div>
                 <ArrowUpRight
                   size={14}
-                  className="text-neutral-600 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                  className="text-zinc-500 group-hover:text-[#DC143C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
                 />
               </div>
 
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium text-white block group-hover:text-white transition-colors line-clamp-2">
+              <div className="space-y-1">
+                <span className="text-sm font-medium text-zinc-100 block group-hover:text-white transition-colors line-clamp-2 leading-snug">
                   &quot;{item.prompt}&quot;
                 </span>
-                <span className="text-[11px] text-neutral-500 block leading-tight">
+                <span className="text-[11px] text-zinc-500 block leading-snug">
                   {item.desc}
                 </span>
               </div>

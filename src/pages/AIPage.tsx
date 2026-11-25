@@ -21,7 +21,7 @@ import { ShortcutsModal } from '../components/ai/ShortcutsModal';
 import { EngageAdminModal } from '../components/ai/engage/EngageAdminModal';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { CitationItem } from '../types/rag';
-import { ExternalLink, EyeOff, Trash2 } from 'lucide-react';
+import { ArrowDown, ExternalLink, EyeOff, Trash2 } from 'lucide-react';
 import {
   resolveRouteSeoPayload,
   applySeoToDocument,
@@ -93,9 +93,12 @@ export const AIPage: React.FC = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isInitialMessagesLoading, setIsInitialMessagesLoading] = useState(true);
   const [initialComposerPrompt, setInitialComposerPrompt] = useState<string | undefined>(undefined);
+  const [isWideCanvas, setIsWideCanvas] = useState(false);
+  const [showScrollToLatest, setShowScrollToLatest] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatScrollContainerRef = useRef<HTMLDivElement | null>(null);
   const hydrationTimerRef = useRef<number | null>(null);
 
   const openSettingsTab = (tab: SettingsModalTab = 'general') => {
@@ -445,8 +448,15 @@ export const AIPage: React.FC = () => {
     : [];
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
+
+  const handleChatScroll = () => {
+    const el = chatScrollContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollToLatest(distanceFromBottom > 180);
   };
 
   useEffect(() => {
@@ -965,8 +975,10 @@ export const AIPage: React.FC = () => {
     handleSendMessage(trimmed, originalAttachments, preservedPrefix);
   };
 
+  const threadWidthClass = isWideCanvas ? 'max-w-5xl' : 'max-w-3xl';
+
   return (
-    <div className="h-screen w-screen bg-black text-white flex flex-col overflow-hidden font-inter selection:bg-[#eb3b2d] selection:text-white">
+    <div className="h-[100dvh] w-screen bg-[#0A0A0C] text-zinc-100 flex flex-col overflow-hidden font-inter selection:bg-[#DC143C] selection:text-white">
       {/* Demo Transparent Notification Bar */}
       <DemoBanner onOpenSettings={() => setIsSettingsOpen(true)} />
 
@@ -988,10 +1000,13 @@ export const AIPage: React.FC = () => {
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenShortcutsHelp={() => setIsShortcutsHelpOpen(true)}
         onOpenEngageAdmin={() => setIsEngageAdminOpen(true)}
+        isWideCanvas={isWideCanvas}
+        onToggleWideCanvas={() => setIsWideCanvas((prev) => !prev)}
+        conversationTitle={isTemporaryChat ? undefined : activeConversation?.title}
       />
 
       {/* Main Workspace: Left Sidebar + Workspace / Chat Column */}
-      <div className="flex-1 flex h-[calc(100vh-5.5rem)] overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left Sidebar */}
         <AISidebar
           conversations={conversations}
@@ -1013,7 +1028,7 @@ export const AIPage: React.FC = () => {
         />
 
         {/* Center Workspace Column */}
-        <main className="flex-1 flex min-w-0 overflow-hidden">
+        <main className="flex-1 flex min-w-0 min-h-0 overflow-hidden">
           {activeProjectId && activeProject ? (
             /* Project Workspace View */
             <ProjectWorkspace
@@ -1024,23 +1039,29 @@ export const AIPage: React.FC = () => {
             />
           ) : (
             /* Main Omnia Chat Thread */
-            <div className="flex-1 flex flex-col justify-between bg-black relative overflow-hidden">
+            <div className="flex-1 min-w-0 min-h-0 flex flex-col justify-between bg-[#0A0A0C] relative overflow-hidden">
+              {/* Subtle Ambient Crimson Top Glow */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-44 bg-[#DC143C]/10 blur-[70px] rounded-full z-0"
+              />
+
               {/* Temporary Chat Active Banner */}
               {isTemporaryChat && (
-                <div className="px-4 py-2 bg-[#eb3b2d]/10 border-b border-[#eb3b2d]/30 text-xs flex items-center justify-between gap-3 z-10 shrink-0">
+                <div className="relative px-4 py-2 bg-[#DC143C]/12 border-b border-[#DC143C]/35 text-xs flex items-center justify-between gap-3 z-10 shrink-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <EyeOff size={13} className="text-[#eb3b2d] shrink-0" />
-                    <span className="font-semibold text-white shrink-0">Temporary Chat</span>
-                    <span className="text-neutral-300 truncate hidden sm:inline">
+                    <EyeOff size={13} className="text-[#DC143C] shrink-0" />
+                    <span className="font-display font-semibold text-white shrink-0">Temporary Chat</span>
+                    <span className="text-zinc-300 truncate hidden sm:inline">
                       Not saved to VIZRA history or personal memory · Auto-wipes in {tempRemainingLabel || `${tempTtlMinutes}m`}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={handleToggleTemporaryChat}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-[11px] font-medium text-neutral-200 hover:text-white transition-colors shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#141418] hover:bg-[#1B1B21] border border-[#27272F] text-[11px] font-medium text-zinc-200 hover:text-white transition-colors shrink-0 cursor-pointer"
                   >
-                    <Trash2 size={11} />
+                    <Trash2 size={11} className="text-[#DC143C]" />
                     <span>Wipe &amp; Exit</span>
                   </button>
                 </div>
@@ -1048,18 +1069,18 @@ export const AIPage: React.FC = () => {
 
               {/* Active Project Context Banner if project is loaded in background */}
               {!isTemporaryChat && activeProject && (
-                <div className="px-4 py-2 bg-neutral-950 border-b border-neutral-800 text-xs flex items-center justify-between z-10 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#eb3b2d]" />
-                    <span className="text-neutral-400">Project Context:</span>
-                    <span className="font-semibold text-white">{activeProject.title}</span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400">
-                      {activeProject.stages.length} Stages
+                <div className="relative px-4 py-2 bg-[#141418]/90 border-b border-[#23232A] text-xs flex items-center justify-between z-10 shrink-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-zinc-400 shrink-0">Project Context ·</span>
+                    <span className="font-semibold text-white truncate">{activeProject.title}</span>
+                    <span className="text-[11px] font-mono tabular-nums text-zinc-400 shrink-0">
+                      ({activeProject.stages.length} stages)
                     </span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setActiveProjectId(activeProject.id)}
-                    className="text-[11px] font-medium text-[#eb3b2d] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                    className="text-xs font-medium text-[#DC143C] hover:text-rose-300 flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
                   >
                     <span>Open Workspace</span>
                     <ExternalLink size={11} />
@@ -1068,79 +1089,99 @@ export const AIPage: React.FC = () => {
               )}
 
               {/* Scrollable Conversation Container */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-4 md:px-8 pt-4">
+              <div
+                ref={chatScrollContainerRef}
+                onScroll={handleChatScroll}
+                className="relative z-10 flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col px-3 sm:px-6 md:px-8 pt-4 scroll-smooth"
+              >
                 {isInitialMessagesLoading ? (
                   <MessageListSkeleton turns={2} mode={currentMode} />
                 ) : messages.length === 0 ? (
-                <EmptyState
-                  onSelectPrompt={handleSelectEmptyPrompt}
-                  activeMode={currentMode}
-                  onSelectMode={setCurrentMode}
-                  isTemporaryChat={isTemporaryChat}
-                  temporaryTtlMinutes={tempTtlMinutes}
-                  onChangeTemporaryTtl={handleChangeTemporaryTtl}
-                  temporaryInstructions={tempInstructions}
-                  onChangeTemporaryInstructions={handleChangeTemporaryInstructions}
-                />
-              ) : (
-                <div className="w-full max-w-3xl mx-auto py-4 space-y-4">
-                  <h1 className="sr-only">
-                    Omnia 1.0 AI Creative Workspace — {isTemporaryChat ? 'Temporary Chat' : activeConversation?.title || 'Active Session'}
-                  </h1>
-                  {messages.map((msg, index) => (
-                    <ChatMessage
-                      key={msg.id}
-                      message={msg}
-                      isTemporary={isTemporaryChat}
-                      onRegenerate={
-                        index === messages.length - 1 && msg.role === 'assistant'
-                          ? handleRegenerateLast
-                          : undefined
-                      }
-                      onSelectSuggestion={handleSelectSuggestion}
-                      onCreateProject={isTemporaryChat ? undefined : handleCreateProject}
-                      onEditUserMessage={handleEditUserMessage}
-                      onOpenCitation={(cit) => {
-                        setActiveCitation(cit);
-                        setIsCitationDrawerOpen(true);
-                      }}
-                    />
-                  ))}
-                  {isStreaming &&
-                    messages.length > 0 &&
-                    messages[messages.length - 1].role === 'user' && (
-                      <MessageListSkeleton
-                        variant="awaiting-response"
-                        mode={currentMode}
+                  <EmptyState
+                    onSelectPrompt={handleSelectEmptyPrompt}
+                    activeMode={currentMode}
+                    onSelectMode={setCurrentMode}
+                    isTemporaryChat={isTemporaryChat}
+                    temporaryTtlMinutes={tempTtlMinutes}
+                    onChangeTemporaryTtl={handleChangeTemporaryTtl}
+                    temporaryInstructions={tempInstructions}
+                    onChangeTemporaryInstructions={handleChangeTemporaryInstructions}
+                  />
+                ) : (
+                  <div className={`w-full ${threadWidthClass} mx-auto py-4 space-y-5 transition-all duration-200`}>
+                    <h1 className="sr-only">
+                      Omnia 1.0 AI Creative Workspace — {isTemporaryChat ? 'Temporary Chat' : activeConversation?.title || 'Active Session'}
+                    </h1>
+                    {messages.map((msg, index) => (
+                      <ChatMessage
+                        key={msg.id}
+                        message={msg}
+                        isTemporary={isTemporaryChat}
+                        onRegenerate={
+                          index === messages.length - 1 && msg.role === 'assistant'
+                            ? handleRegenerateLast
+                            : undefined
+                        }
+                        onSelectSuggestion={handleSelectSuggestion}
+                        onCreateProject={isTemporaryChat ? undefined : handleCreateProject}
+                        onEditUserMessage={handleEditUserMessage}
+                        onOpenCitation={(cit) => {
+                          setActiveCitation(cit);
+                          setIsCitationDrawerOpen(true);
+                        }}
                       />
-                    )}
-                  <div ref={messagesEndRef} className="h-4" />
+                    ))}
+                    {isStreaming &&
+                      messages.length > 0 &&
+                      messages[messages.length - 1].role === 'user' && (
+                        <MessageListSkeleton
+                          variant="awaiting-response"
+                          mode={currentMode}
+                        />
+                      )}
+                    <div ref={messagesEndRef} className="h-6" />
+                  </div>
+                )}
+              </div>
+
+              {/* Scroll-to-Latest Floating Control */}
+              {showScrollToLatest && messages.length > 0 && (
+                <div className="pointer-events-none absolute bottom-32 left-1/2 -translate-x-1/2 z-30">
+                  <button
+                    type="button"
+                    onClick={() => scrollToBottom('smooth')}
+                    aria-label="Scroll to latest message"
+                    className="pointer-events-auto h-9 px-3.5 rounded-full bg-[#141418]/95 hover:bg-[#1B1B21] border border-[#27272F] hover:border-[#DC143C]/50 text-xs font-medium text-zinc-200 hover:text-white shadow-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <ArrowDown size={13} className="text-[#DC143C]" />
+                    <span>Latest</span>
+                  </button>
                 </div>
               )}
-            </div>
 
-            {/* Sticky Bottom Prompt Composer */}
-            <div className="shrink-0 pt-2 bg-gradient-to-t from-black via-black/95 to-transparent">
-              <PromptComposer
-                onSendMessage={handleSendMessage}
-                isStreaming={isStreaming}
-                onStopStreaming={handleStopStreaming}
-                currentMode={currentMode}
-                onSelectMode={setCurrentMode}
-                initialPrompt={initialComposerPrompt}
-                onClearInitialPrompt={() => setInitialComposerPrompt(undefined)}
-                onOpenCreationTools={() => setIsCreationToolsOpen(true)}
-                onCreateImage={handleCreateImage}
-                onRequestConnectIntegration={(item) => setConnectingIntegration(item)}
-                onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
-                onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
-                onOpenScienceHub={() => setIsScienceHubOpen(true)}
-                onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
-                isTemporaryChat={isTemporaryChat}
-              />
+              {/* Fixed-Bottom Prompt Composer */}
+              <div className="relative z-20 shrink-0 pt-2 pb-[env(safe-area-inset-bottom)] bg-gradient-to-t from-[#0A0A0C] via-[#0A0A0C]/95 to-transparent">
+                <PromptComposer
+                  onSendMessage={handleSendMessage}
+                  isStreaming={isStreaming}
+                  onStopStreaming={handleStopStreaming}
+                  currentMode={currentMode}
+                  onSelectMode={setCurrentMode}
+                  initialPrompt={initialComposerPrompt}
+                  onClearInitialPrompt={() => setInitialComposerPrompt(undefined)}
+                  onOpenCreationTools={() => setIsCreationToolsOpen(true)}
+                  onCreateImage={handleCreateImage}
+                  onRequestConnectIntegration={(item) => setConnectingIntegration(item)}
+                  onOpenMusicStudio={() => setIsMusicStudioOpen(true)}
+                  onOpenLiveVoice={() => setIsLiveVoiceOpen(true)}
+                  onOpenScienceHub={() => setIsScienceHubOpen(true)}
+                  onOpenKnowledgeBase={() => setIsKnowledgeBaseOpen(true)}
+                  isTemporaryChat={isTemporaryChat}
+                  maxWidthClass={threadWidthClass}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </main>
       </div>
 

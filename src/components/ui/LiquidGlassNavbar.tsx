@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Home, Sparkles, History as HistoryIcon, Settings } from 'lucide-react';
 
 export interface LiquidGlassNavbarProps {
@@ -12,7 +12,6 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  accentColor?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -23,10 +22,9 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /**
- * Component 01 — Liquid Glass Navbar (Waterline)
- * Adapted from 21st.dev / Nimbus UI — Liquid Navbar by guglielmogiannatasio.it.
- * Bottom floating navigation dock for VIZRA with charcoal & crimson liquid-glass physics,
- * active indicator water tension pill, tactile spring movement, and haptic-friendly targets.
+ * Application Workspace Bottom Navigation Dock
+ * Mounted strictly inside workspace companion views (/history, /settings)
+ * for quick switching between Home, Omnia AI, History, and Settings.
  */
 export const LiquidGlassNavbar: React.FC<LiquidGlassNavbarProps> = ({ className = '' }) => {
   const location = useLocation();
@@ -46,32 +44,10 @@ export const LiquidGlassNavbar: React.FC<LiquidGlassNavbarProps> = ({ className 
 
   return (
     <nav
-      aria-label="Liquid Glass Primary Bottom Navigation"
+      aria-label="Workspace Quick Navigation"
       className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-40 select-none ${className}`}
     >
-      {/* Outer Floating Dock Shell */}
-      <div
-        className="relative flex items-center gap-1.5 p-1.5 sm:p-2 rounded-full border border-white/10 dark:border-white/10 border-neutral-300 bg-neutral-900/85 dark:bg-neutral-950/85 bg-white/85 shadow-[0_12px_36px_rgba(0,0,0,0.45)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.85)]"
-        style={{
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-        }}
-      >
-        {/* Subtle Liquid Waterline Ambient Glow */}
-        <div
-          className="absolute inset-0 rounded-full opacity-20 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 120%, rgba(235,59,45,0.45) 0%, transparent 70%)',
-          }}
-        />
-
-        {/* Liquid Highlight Top Border (Liquid Glass Spec) */}
-        <div
-          className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
-          aria-hidden="true"
-        />
-
+      <div className="relative flex items-center gap-1 p-1.5 rounded-full border border-neutral-300 dark:border-white/[0.12] bg-white/95 dark:bg-[#111114]/92 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.75)]">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeId === item.id;
@@ -86,63 +62,46 @@ export const LiquidGlassNavbar: React.FC<LiquidGlassNavbarProps> = ({ className 
               onMouseLeave={() => setHoveredId(null)}
               aria-current={isActive ? 'page' : undefined}
               aria-label={`Navigate to ${item.label}`}
-              className={`relative flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs font-medium cursor-pointer transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
+              className={`relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium cursor-pointer transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d] ${
                 isActive
                   ? 'text-white font-semibold'
-                  : 'text-neutral-400 hover:text-neutral-200 dark:hover:text-white'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              {/* Active State Waterline Tension Capsule */}
               {isActive && (
                 <motion.div
-                  layoutId="liquid-navbar-waterline"
+                  layoutId="workspace-navbar-active"
                   transition={{
                     type: 'spring',
                     stiffness: 420,
                     damping: 32,
                     mass: 0.8,
                   }}
-                  className="absolute inset-0 rounded-full bg-gradient-to-b from-neutral-800 to-neutral-900 border border-white/15 dark:border-white/15 shadow-[0_4px_16px_rgba(235,59,45,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)] pointer-events-none"
-                >
-                  {/* Internal Liquid Crimson Droplet Refraction */}
-                  <div
-                    className="absolute inset-0 rounded-full opacity-60"
-                    style={{
-                      background:
-                        'radial-gradient(circle at 50% 0%, rgba(235,59,45,0.35) 0%, transparent 60%)',
-                    }}
-                  />
-                </motion.div>
-              )}
-
-              {/* Hover Wave Effect (When Not Active) */}
-              {!isActive && isHovered && (
-                <motion.div
-                  layoutId="liquid-navbar-hover"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 rounded-full bg-white/5 dark:bg-white/5 pointer-events-none"
+                  className="absolute inset-0 rounded-full bg-[#1C1C22] border border-white/[0.14] shadow-sm pointer-events-none"
                 />
               )}
 
-              {/* Icon & Label */}
+              {!isActive && isHovered && (
+                <motion.div
+                  layoutId="workspace-navbar-hover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.14 }}
+                  className="absolute inset-0 rounded-full bg-black/[0.04] dark:bg-white/[0.05] pointer-events-none"
+                />
+              )}
+
               <div className="relative z-10 flex items-center gap-1.5">
                 <Icon
-                  size={16}
-                  className={`transition-transform duration-200 ${
+                  size={15}
+                  className={`transition-colors duration-150 ${
                     isActive
-                      ? 'text-[#eb3b2d] scale-110'
-                      : isHovered
-                      ? 'text-neutral-200 scale-105'
-                      : 'text-neutral-400'
+                      ? 'text-[#eb3b2d]'
+                      : 'text-neutral-500 dark:text-neutral-400'
                   }`}
                 />
                 <span className="tracking-tight">{item.label}</span>
-                {isActive && (
-                  <span className="w-1 h-1 rounded-full bg-[#eb3b2d] animate-pulse hidden sm:inline-block" />
-                )}
               </div>
             </button>
           );

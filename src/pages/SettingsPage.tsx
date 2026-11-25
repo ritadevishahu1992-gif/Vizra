@@ -345,6 +345,7 @@ export const SettingsPage: React.FC = () => {
       description="Configure your Vizra studio theme, Omnia 1.0 response style, linked sign-in methods, DPDP privacy inventory, and data erasure controls."
       canonicalPath="/settings"
       noindex={true}
+      showBottomNav={true}
     >
       <div className="pt-24 pb-28 px-4 sm:px-6 lg:px-12 max-w-4xl mx-auto space-y-8">
         {/* Header Bar */}

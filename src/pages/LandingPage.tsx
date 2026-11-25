@@ -10,7 +10,6 @@ import {
   ArrowUpRight,
   ArrowRight,
   Sparkles,
-  LayoutDashboard,
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { HeroSection } from '../components/HeroSection';

@@ -345,8 +345,7 @@ export const OmniaPreview: React.FC<OmniaPreviewProps> = ({
   return (
     <div
       id="omnia-preview"
-      className="relative w-screen aspect-[16/10] md:aspect-[16/9] min-h-[580px] md:min-h-[700px] overflow-hidden"
-      style={{ marginLeft: 'calc(-50vw + 50%)' }}
+      className="relative w-full aspect-[16/10] md:aspect-[16/9] min-h-[520px] sm:min-h-[580px] md:min-h-[680px] overflow-hidden"
     >
       {/* Background Visual: Transparent ambient halo complementing HeroBackground */}
       <div className="absolute inset-0 bg-transparent pointer-events-none">
