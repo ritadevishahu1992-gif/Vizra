@@ -1747,13 +1747,13 @@ Revise only where necessary. Do not expose this checklist or describe internal r
               getRemainingBudgetMs: getRemainingChatBudget,
               minBudgetForRetryMs: 3500,
               onRetry: ({ attempt, delayMs, status, category }) => {
+                totalRetriesUsed += 1;
                 lastProviderStatus = status;
                 retrievalErrors.push(`retry_${m}_#${attempt}_${category}(${delayMs}ms)`);
               },
             }
           );
 
-          totalRetriesUsed += retryOutcome.retriesUsed;
           response = retryOutcome.result;
 
           if (
@@ -1820,12 +1820,12 @@ Revise only where necessary. Do not expose this checklist or describe internal r
                   getRemainingBudgetMs: getRemainingChatBudget,
                   minBudgetForRetryMs: 3000,
                   onRetry: ({ attempt, delayMs, status, category }) => {
+                    totalRetriesUsed += 1;
                     lastProviderStatus = status;
                     retrievalErrors.push(`fallback_retry_${m}_#${attempt}_${category}(${delayMs}ms)`);
                   },
                 }
               );
-              totalRetriesUsed += fallbackOutcome.retriesUsed;
               response = fallbackOutcome.result;
               if (
                 response &&
@@ -2643,11 +2643,11 @@ Core Responsibilities:
               getRemainingBudgetMs: getRemainingAgentBudget,
               minBudgetForRetryMs: 3500,
               onRetry: ({ status }) => {
+                agentRetriesUsed += 1;
                 agentLastProviderStatus = status;
               },
             }
           );
-          agentRetriesUsed += outcome.retriesUsed;
           response = outcome.result;
           if (response && (response.text || response.candidates?.[0]?.content?.parts?.length)) {
             usedModel = m;
@@ -2698,9 +2698,12 @@ Core Responsibilities:
                   maxDelayMs: 2000,
                   getRemainingBudgetMs: getRemainingAgentBudget,
                   minBudgetForRetryMs: 3000,
+                  onRetry: ({ status }) => {
+                    agentRetriesUsed += 1;
+                    agentLastProviderStatus = status;
+                  },
                 }
               );
-              agentRetriesUsed += fbOutcome.retriesUsed;
               response = fbOutcome.result;
               if (response && (response.text || response.candidates?.[0]?.content?.parts?.length)) {
                 usedModel = m;
@@ -3044,11 +3047,11 @@ Core Responsibilities:
               getRemainingBudgetMs: getRemainingResearchBudget,
               minBudgetForRetryMs: 3500,
               onRetry: ({ status }) => {
+                researchRetriesUsed += 1;
                 researchLastStatus = status;
               },
             }
           );
-          researchRetriesUsed += outcome.retriesUsed;
           response = outcome.result;
           if (response && response.text) {
             usedModel = rm;
@@ -3102,9 +3105,12 @@ Core Responsibilities:
                   maxDelayMs: 2000,
                   getRemainingBudgetMs: getRemainingResearchBudget,
                   minBudgetForRetryMs: 3000,
+                  onRetry: ({ status }) => {
+                    researchRetriesUsed += 1;
+                    researchLastStatus = status;
+                  },
                 }
               );
-              researchRetriesUsed += fbOutcome.retriesUsed;
               response = fbOutcome.result;
               if (response && response.text) {
                 usedModel = rm;
@@ -3711,11 +3717,37 @@ Core Responsibilities:
 
   // Health check endpoint with system metrics, capacity status & zero-secret configuration status
   app.get('/api/health', (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     const mem = process.memoryUsage();
     const configSnapshot = getSystemConfigurationSnapshot();
     const queueSnap = chatTrafficController.getSnapshot();
+    const modelHealth = geminiModelHealthTracker.getStatus();
+    const obsMetrics = getObservabilityMetrics();
+
+    const modelEntries = Object.values(modelHealth);
+    const degradedModelsCount = modelEntries.filter((m) => m.degraded).length;
+    const allModelsDegraded = modelEntries.length > 0 && degradedModelsCount === modelEntries.length;
+    const queueSaturated =
+      queueSnap.maxQueueSize > 0 && queueSnap.queuedCount >= queueSnap.maxQueueSize;
+    const highConcurrency =
+      queueSnap.maxConcurrent > 0 &&
+      queueSnap.activeCount >= Math.max(1, Math.ceil(queueSnap.maxConcurrent * 0.7));
+
+    let serviceState: 'normal' | 'heavy_traffic' | 'limited_access' = 'normal';
+    if (!ai || allModelsDegraded || queueSaturated) {
+      serviceState = 'limited_access';
+    } else if (
+      queueSnap.queuedCount > 0 ||
+      highConcurrency ||
+      degradedModelsCount > 0 ||
+      queueSnap.avgQueueWaitMs >= 1500
+    ) {
+      serviceState = 'heavy_traffic';
+    }
+
     res.json({
       status: 'ok',
+      serviceState,
       service: 'Vizra AI Creative Studio',
       engine: 'Omnia 1.0',
       hasGemini: !!ai,
@@ -3726,7 +3758,10 @@ Core Responsibilities:
         maxConcurrentAiRequests: queueSnap.maxConcurrent,
         queuedAiRequests: queueSnap.queuedCount,
         maxQueueSize: queueSnap.maxQueueSize,
-        modelHealth: geminiModelHealthTracker.getStatus(),
+        avgQueueWaitMs: Math.round(queueSnap.avgQueueWaitMs || 0),
+        avgResponseLatencyMs: Math.round(obsMetrics.averageLatencyMs || 0),
+        p95ResponseLatencyMs: Math.round(obsMetrics.p95LatencyMs || 0),
+        modelHealth,
         retrievalCacheHits: publicBlogRetrievalCache.hits,
         retrievalCoalescedHits: publicBlogRetrievalCache.coalescedHits,
         publicResponseCacheHits: publicChatResponseCache.hits,

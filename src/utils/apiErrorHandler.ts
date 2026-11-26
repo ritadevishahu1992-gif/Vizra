@@ -317,6 +317,24 @@ function computeClientBackoffMs(
   return jittered;
 }
 
+export interface ApiHealthSignalDetail {
+  kind: 'ok' | 'heavy_traffic' | 'limited_access';
+  status?: number;
+  latencyMs?: number;
+  timestamp: number;
+}
+
+export const API_HEALTH_SIGNAL_EVENT = 'vizra:api-health-signal';
+
+function emitApiHealthSignal(detail: ApiHealthSignalDetail): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent<ApiHealthSignalDetail>(API_HEALTH_SIGNAL_EVENT, { detail }));
+  } catch {
+    // Ignore event dispatch failures in non-browser environments
+  }
+}
+
 /**
  * Executes fetch() with a strict per-attempt timeout, anonymous X-Vizra-Client-Id header
  * for fair concurrency, Retry-After awareness, and exponential backoff with randomized jitter
@@ -337,6 +355,7 @@ export async function fetchWithRetry(
     onRetry,
   } = options;
 
+  const isInternalApi = url.startsWith('/api/') && !url.startsWith('/api/health');
   const effectiveSignal = signal ?? init.signal ?? undefined;
   const headers = new Headers(init.headers || {});
   if (url.startsWith('/api/') && !headers.has('X-Vizra-Client-Id')) {
@@ -357,6 +376,7 @@ export async function fetchWithRetry(
     }
 
     const timeoutId = window.setTimeout(() => attemptController.abort(), timeoutMs);
+    const attemptStartedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
     try {
       const response = await fetch(url, {
@@ -370,12 +390,41 @@ export async function fetchWithRetry(
         effectiveSignal.removeEventListener('abort', onExternalAbort);
       }
 
+      const elapsedMs = Math.round(
+        (typeof performance !== 'undefined' ? performance.now() : Date.now()) - attemptStartedAt
+      );
+
       const isTransientStatus =
         response.status === 429 ||
         response.status === 500 ||
         response.status === 502 ||
         response.status === 503 ||
         response.status === 504;
+
+      if (isInternalApi) {
+        if (response.status === 503 || response.status === 500) {
+          emitApiHealthSignal({
+            kind: 'limited_access',
+            status: response.status,
+            latencyMs: elapsedMs,
+            timestamp: Date.now(),
+          });
+        } else if (response.status === 429 || response.status === 502 || response.status === 504) {
+          emitApiHealthSignal({
+            kind: 'heavy_traffic',
+            status: response.status,
+            latencyMs: elapsedMs,
+            timestamp: Date.now(),
+          });
+        } else if (response.ok) {
+          emitApiHealthSignal({
+            kind: 'ok',
+            status: response.status,
+            latencyMs: elapsedMs,
+            timestamp: Date.now(),
+          });
+        }
+      }
 
       if (!isTransientStatus || attempt === maxRetries) {
         return response;
@@ -404,6 +453,13 @@ export async function fetchWithRetry(
         effectiveSignal.removeEventListener('abort', onExternalAbort);
       }
       lastError = err;
+
+      if (isInternalApi && !effectiveSignal?.aborted) {
+        emitApiHealthSignal({
+          kind: 'limited_access',
+          timestamp: Date.now(),
+        });
+      }
 
       if (effectiveSignal?.aborted || attempt === maxRetries) {
         throw err;

@@ -20,6 +20,7 @@ import {
 import { UserMenu } from './auth/UserMenu';
 import { NotificationCenterTrigger } from './ui/Toast';
 import { LiquidGlassToggle } from './ui/LiquidGlassToggle';
+import { SystemStatusIndicator } from './ui/SystemStatusIndicator';
 
 export interface NavbarProps {
   onLaunchOmnia?: () => void;
@@ -366,7 +367,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
 
         {/* Right Zone: Harmonized Utility Controls, Auth & Restrained Workspace Action */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <SystemStatusIndicator variant="compact" shape="rounded" className="sm:hidden" />
           <div className="hidden sm:flex items-center gap-1.5">
+            <SystemStatusIndicator shape="rounded" labelClassName="hidden md:inline" />
             <LiquidGlassToggle size="sm" />
             <NotificationCenterTrigger />
           </div>
@@ -408,11 +411,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
             className="lg:hidden bg-[#09090B]/98 backdrop-blur-xl border-b border-white/[0.08] px-5 py-5 space-y-5 overflow-y-auto max-h-[calc(100vh-4rem)]"
           >
             {/* Mobile Utilities Row (Theme + Notifications on xs screens) */}
-            <div className="flex sm:hidden items-center justify-between px-3 py-2.5 rounded-xl bg-[#111114] border border-white/[0.08]">
-              <span className="text-xs font-medium text-neutral-300">Appearance &amp; Alerts</span>
-              <div className="flex items-center gap-2">
-                <LiquidGlassToggle size="sm" />
-                <NotificationCenterTrigger />
+            <div className="sm:hidden space-y-2.5">
+              <SystemStatusIndicator variant="row" />
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#111114] border border-white/[0.08]">
+                <span className="text-xs font-medium text-neutral-300">Appearance &amp; Alerts</span>
+                <div className="flex items-center gap-2">
+                  <LiquidGlassToggle size="sm" />
+                  <NotificationCenterTrigger />
+                </div>
               </div>
             </div>
 

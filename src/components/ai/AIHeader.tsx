@@ -29,6 +29,7 @@ import { modKey } from '../../hooks/useKeyboardShortcuts';
 import { Tooltip } from '../ui/Tooltip';
 import { CreditUsageIndicator } from '../ui/CreditUsageIndicator';
 import { LiquidGlassToggle } from '../ui/LiquidGlassToggle';
+import { SystemStatusIndicator } from '../ui/SystemStatusIndicator';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -193,8 +194,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           </Link>
         </div>
 
-        {/* Mobile Right: Essential Actions (New Chat, Controls Menu, Account) */}
+        {/* Mobile Right: Essential Actions (System Status, New Chat, Controls Menu, Account) */}
         <div className="flex items-center gap-1.5 shrink-0">
+          <SystemStatusIndicator variant="compact" shape="pill" />
           <button
             type="button"
             onClick={onNewChat}
@@ -236,6 +238,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
                 aria-label="Omnia workspace controls"
                 className="fixed right-3 top-[64px] w-[min(19.5rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-2xl bg-[#111114] border border-[#23232A] shadow-2xl p-3 z-50 text-white space-y-3"
               >
+                {/* Live System Status */}
+                <SystemStatusIndicator variant="row" />
+
                 {/* Section 1: Model Switcher */}
                 <div className="space-y-1">
                   <div className="px-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
@@ -616,8 +621,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           )}
         </div>
 
-        {/* Right: Actions (Credits, Width Toggle, Command Palette, New Chat, Temp Chat, Settings, Profile) */}
+        {/* Right: Actions (System Status, Credits, Width Toggle, Command Palette, New Chat, Temp Chat, Settings, Profile) */}
         <div className="flex items-center gap-2 shrink-0">
+          <SystemStatusIndicator shape="pill" labelClassName="hidden 2xl:inline" />
           <div>
             <CreditUsageIndicator variant="header" />
           </div>

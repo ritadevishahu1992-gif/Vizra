@@ -23,6 +23,7 @@ import { UserMenu } from '../auth/UserMenu';
 import { NotificationCenterTrigger } from './Toast';
 import { CreditUsageIndicator } from './CreditUsageIndicator';
 import { LiquidGlassToggle } from './LiquidGlassToggle';
+import { SystemStatusIndicator } from './SystemStatusIndicator';
 
 export type DashboardSectionId =
   | 'overview'
@@ -299,6 +300,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <SystemStatusIndicator shape="rounded" labelClassName="hidden lg:inline" />
             <CreditUsageIndicator
               variant="header"
               usedOverride={creditUsed}

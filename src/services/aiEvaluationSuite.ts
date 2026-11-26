@@ -306,12 +306,12 @@ export function add(a: number, b: number): number {
   // ==============================================================
   // 9. Query Router & Model Optimization
   // ==============================================================
-  record('9. Model Optimization', 'Routes complex coding tasks to gemini-3.1-pro-preview', () => {
+  record('9. Model Optimization', 'Routes complex coding tasks to gemini-4-hydrogen', () => {
     const route = routeUserQuery('Write a TypeScript function to balance an AVL tree');
-    return route.intent === 'CODE' && route.targetModel === 'gemini-3.1-pro-preview';
+    return route.intent === 'CODE' && route.targetModel === 'gemini-4-hydrogen';
   });
 
-  record('9. Model Optimization', 'Routes live research requests to gemini-3.8-flash with webSearch flag', () => {
+  record('9. Model Optimization', 'Routes live research requests to gemini-4-hydrogen with webSearch flag', () => {
     const route = routeUserQuery('Find latest news on solar energy subsidies');
     return route.intent === 'RESEARCH' && route.needsWebSearch === true;
   });

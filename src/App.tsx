@@ -10,6 +10,7 @@ const Analytics = () => null;
 const SpeedInsights = () => null;
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SystemStatusProvider } from './context/SystemStatusContext';
 import { ToastProvider } from './components/ui/Toast';
 import {
   CookieConsent,
@@ -105,9 +106,10 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <BrowserRouter>
+      <SystemStatusProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <BrowserRouter>
             <RouteMetadataSync />
             <AppErrorBoundary>
               <Suspense fallback={<RouteLoadingFallback />}>
@@ -174,6 +176,7 @@ export default function App() {
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>
+      </SystemStatusProvider>
     </ThemeProvider>
   );
 }

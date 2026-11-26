@@ -16,8 +16,11 @@ export type ServerErrorCategory =
   | 'CAPACITY_QUEUE_TIMEOUT'
   | 'DUPLICATE_IN_FLIGHT'
   | 'RETRIEVAL_FAILURE'
+  | 'NETWORK_ERROR'
   | 'FILE_PROCESSING_FAILURE'
-  | 'DATABASE_FAILURE';
+  | 'DATABASE_FAILURE'
+  | 'NONE'
+  | 'UNKNOWN';
 
 export const HIGH_TRAFFIC_USER_MESSAGE =
   "I'm unable to serve the data due to high traffic.";

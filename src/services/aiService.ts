@@ -399,7 +399,7 @@ export function routeUserQuery(
 ): RoutingDecision {
   const intent = classifyUserIntent(rawPrompt, history, attachments);
 
-  let targetModel: 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite' = 'gemini-3.8-flash';
+  let targetModel: 'gemini-4-hydrogen' | 'gemini-3.1-flash-lite' = 'gemini-3.1-flash-lite';
   let recommendedMode: AIMode = requestedMode || 'quick';
   let needsWebSearch = false;
   let needsMathValidation = false;
@@ -410,59 +410,59 @@ export function routeUserQuery(
 
   switch (intent) {
     case 'CODE':
-      targetModel = 'gemini-3.1-pro-preview';
+      targetModel = 'gemini-4-hydrogen';
       recommendedMode = 'code';
-      reasoning = 'Code synthesis/debugging routed to advanced STEM reasoning model.';
+      reasoning = 'Code synthesis/debugging routed to advanced reasoning model.';
       break;
     case 'MATH':
-      targetModel = 'gemini-3.1-pro-preview';
+      targetModel = 'gemini-4-hydrogen';
       recommendedMode = 'think';
       needsMathValidation = true;
-      reasoning = 'Mathematical reasoning routed to programmatic validation and Pro reasoning model.';
+      reasoning = 'Mathematical reasoning routed to programmatic validation and reasoning model.';
       break;
     case 'RESEARCH':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-4-hydrogen';
       recommendedMode = 'research';
       needsWebSearch = true;
       reasoning = 'Current factual request routed to Google Search Grounding with strict citation validation.';
       break;
     case 'IMAGE_UNDERSTANDING':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-4-hydrogen';
       recommendedMode = 'analyze';
       needsVision = true;
       reasoning = 'Visual inspection routed to multimodal vision pipeline.';
       break;
     case 'DOCUMENT_ANALYSIS':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-4-hydrogen';
       recommendedMode = 'analyze';
       needsDocumentExtraction = true;
       reasoning = 'Structured document analysis routed to inline extraction pipeline.';
       break;
     case 'CREATE':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-3.1-flash-lite';
       recommendedMode = 'create';
       reasoning = 'Creative ideation routed to generative writing pipeline.';
       break;
     case 'PROJECT':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-3.1-flash-lite';
       recommendedMode = 'quick';
       reasoning = 'Explicit project workspace creation requested.';
       break;
     case 'AMBIGUOUS':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-3.1-flash-lite';
       recommendedMode = 'quick';
       needsClarification = true;
       reasoning = 'Ambiguous input flagged for clarifying query.';
       break;
     case 'CHAT':
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-3.1-flash-lite';
       recommendedMode = 'quick';
       reasoning = 'Direct conversational exchange.';
       break;
     case 'QUESTION':
     case 'KNOWLEDGE':
     default:
-      targetModel = 'gemini-3.8-flash';
+      targetModel = 'gemini-3.1-flash-lite';
       recommendedMode = requestedMode || 'quick';
       reasoning = 'Factual question evaluated against verified knowledge.';
       break;
@@ -1625,6 +1625,24 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     sources = [];
   }
 
+  // If upstream returned a structured retryable/terminal error, return immediately without fake streaming
+  if (serverErrorResult) {
+    return {
+      fullText: serverErrorResult.message,
+      isDemo: false,
+      intent,
+      sources,
+      sourceValidationGate,
+      citations,
+      reasoning_trace_id: traceId,
+      knowledge_state: 'UNCERTAIN',
+      isError: true,
+      errorCategory: serverErrorResult.category,
+      retryable: serverErrorResult.retryable,
+      retryAfterSec: serverErrorResult.retryAfterSec,
+    };
+  }
+
   // Fast streaming output
   const chunks = responseText.split(/(?<=\s|[,.!?\n])/);
   let accumulated = '';
@@ -1665,7 +1683,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
 
   return {
     fullText: accumulated,
-    isDemo: true,
+    isDemo: false,
     intent,
     thoughtProcess,
     sources,
