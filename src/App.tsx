@@ -6,7 +6,7 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
-const Analytics = () => null;
+import { Analytics } from '@vercel/analytics/react';
 const SpeedInsights = () => null;
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
