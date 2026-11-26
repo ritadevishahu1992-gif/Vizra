@@ -79,6 +79,29 @@ export interface StructuredLog {
   tokens?: { input: number; output: number };
 }
 
+export type SystemApiLogCategory = 'ai' | 'health' | 'workspace' | 'content' | 'other';
+
+export interface SystemApiLogEntry {
+  id: string;
+  timestamp: string;
+  method: string;
+  path: string;
+  status: number;
+  durationMs: number;
+  level: 'info' | 'warn' | 'error';
+  category: SystemApiLogCategory;
+}
+
+export interface SystemApiLogsSummary {
+  totalTracked: number;
+  averageLatencyMs: number;
+  p95LatencyMs: number;
+  maxLatencyMs: number;
+  errorCount: number;
+  warnCount: number;
+  successRatePct: number;
+}
+
 // ============================================================================
 // 2. IN-MEMORY METRICS STORE
 // ============================================================================
@@ -86,7 +109,38 @@ export interface StructuredLog {
 const serverStartTime = Date.now();
 const recentLatencies: number[] = [];
 const MAX_LATENCY_SAMPLES = 500;
+const recentApiLogs: SystemApiLogEntry[] = [];
+const MAX_RECENT_API_LOGS = 150;
 let totalRetrievalDurationMs = 0;
+
+/**
+ * Strips query parameters and normalizes dynamic ID segments so API log paths
+ * never expose tokens, emails, or arbitrary user identifiers.
+ */
+function sanitizeLogPath(rawPath: string): string {
+  const withoutQuery = (rawPath || '/').split('?')[0].split('#')[0];
+  return withoutQuery
+    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi, '/:uuid')
+    .replace(/\/(?:tok|req|usr|ws|proj|chat)_[a-zA-Z0-9_-]{4,}(?=\/|$)/g, '/:id')
+    .replace(/\/\d{4,}(?=\/|$)/g, '/:id')
+    .slice(0, 140);
+}
+
+function classifyApiPath(path: string): SystemApiLogEntry['category'] {
+  if (path.startsWith('/api/chat') || path.startsWith('/api/ai') || path.startsWith('/api/image') || path.startsWith('/api/music') || path.startsWith('/live')) {
+    return 'ai';
+  }
+  if (path.startsWith('/api/health') || path.startsWith('/api/metrics') || path.startsWith('/api/config')) {
+    return 'health';
+  }
+  if (path.startsWith('/api/workspace') || path.startsWith('/api/credits') || path.startsWith('/api/auth') || path.startsWith('/api/account')) {
+    return 'workspace';
+  }
+  if (path.startsWith('/api/blog') || path.startsWith('/api/science') || path.startsWith('/api/engage')) {
+    return 'content';
+  }
+  return 'other';
+}
 
 const metricsStore: RequestMetrics = {
   totalRequests: 0,
@@ -288,6 +342,63 @@ export function getObservabilityMetrics(): RequestMetrics {
   };
 }
 
+export function getRecentApiLogs(options?: {
+  limit?: number;
+  level?: 'all' | 'info' | 'warn' | 'error';
+  search?: string;
+}): { logs: SystemApiLogEntry[]; summary: SystemApiLogsSummary } {
+  const limit = Math.min(100, Math.max(1, Math.floor(options?.limit ?? 50)));
+  const levelFilter =
+    options?.level && ['all', 'info', 'warn', 'error'].includes(options.level)
+      ? options.level
+      : 'all';
+  const searchQuery = (options?.search || '').trim().toLowerCase().slice(0, 64);
+
+  const ordered = [...recentApiLogs].reverse();
+  const latencies = ordered.map((entry) => entry.durationMs);
+  const totalTracked = ordered.length;
+  const errorCount = ordered.filter((entry) => entry.status >= 500).length;
+  const warnCount = ordered.filter((entry) => entry.status >= 400 && entry.status < 500).length;
+  const successCount = ordered.filter((entry) => entry.status < 400).length;
+  const averageLatencyMs =
+    totalTracked > 0
+      ? Math.round(latencies.reduce((acc, ms) => acc + ms, 0) / totalTracked)
+      : metricsStore.averageLatencyMs;
+  const p95LatencyMs =
+    totalTracked > 0 ? calculateP95(latencies) : calculateP95(recentLatencies);
+  const maxLatencyMs = latencies.length > 0 ? Math.max(...latencies) : 0;
+  const successRatePct =
+    totalTracked > 0 ? Number(((successCount / totalTracked) * 100).toFixed(1)) : 100;
+
+  const filtered = ordered.filter((entry) => {
+    if (levelFilter !== 'all' && entry.level !== levelFilter) {
+      return false;
+    }
+    if (searchQuery) {
+      return (
+        entry.path.toLowerCase().includes(searchQuery) ||
+        entry.method.toLowerCase().includes(searchQuery) ||
+        String(entry.status).includes(searchQuery) ||
+        entry.category.includes(searchQuery)
+      );
+    }
+    return true;
+  });
+
+  return {
+    logs: filtered.slice(0, limit),
+    summary: {
+      totalTracked,
+      averageLatencyMs,
+      p95LatencyMs,
+      maxLatencyMs,
+      errorCount,
+      warnCount,
+      successRatePct,
+    },
+  };
+}
+
 // ============================================================================
 // 3. STRUCTURED LOGGING & REQUEST ID TRACING
 // ============================================================================
@@ -371,13 +482,34 @@ export function observabilityMiddleware(req: Request, res: Response, next: NextF
     // Filter noisy static asset requests from logs
     const isApi = path.startsWith('/api') || path.startsWith('/live');
     if (isApi) {
-      const level = status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
+      const level: 'info' | 'warn' | 'error' =
+        status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
+      const timestamp = new Date().toISOString();
+      const sanitizedPath = sanitizeLogPath(path);
+
+      // Record into bounded in-memory System Logs buffer (skip self-polling endpoint to prevent feedback noise)
+      if (sanitizedPath !== '/api/system-logs') {
+        recentApiLogs.push({
+          id: requestId,
+          timestamp,
+          method: req.method.toUpperCase(),
+          path: sanitizedPath,
+          status,
+          durationMs,
+          level,
+          category: classifyApiPath(sanitizedPath),
+        });
+        if (recentApiLogs.length > MAX_RECENT_API_LOGS) {
+          recentApiLogs.shift();
+        }
+      }
+
       logStructured({
-        timestamp: new Date().toISOString(),
+        timestamp,
         level,
         requestId,
         method: req.method,
-        path,
+        path: sanitizedPath,
         status,
         durationMs,
         clientIp: clientIp.replace(/:\d+$/, ''), // Strip port if present

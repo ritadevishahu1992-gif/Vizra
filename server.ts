@@ -58,6 +58,7 @@ import {
   syncQueueReliabilitySnapshot,
   recordSsrfBlock,
   getObservabilityMetrics,
+  getRecentApiLogs,
   logStructured,
 } from './src/server/observability';
 import { verifyFirebaseIdToken, parseDeviceSummary } from './src/server/authVerification';
@@ -4191,6 +4192,38 @@ Core Responsibilities:
       }));
 
     res.json({ success: true, tokens: owned });
+  });
+
+  // Recent sanitized backend API call & latency logs for Workspace Dashboard System Logs viewer
+  app.get('/api/system-logs', generalApiRateLimiter.getMiddleware(), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    const owner = await resolveWorkspaceOwnerKey(req);
+    if (!owner.tenantKey) {
+      res.status(owner.errorStatus || 401).json({
+        error: {
+          code: 'WORKSPACE_AUTH_REQUIRED',
+          message: owner.errorMessage || 'Authentication required to inspect system logs.',
+        },
+      });
+      return;
+    }
+
+    const rawLimit = typeof req.query.limit === 'string' ? Number.parseInt(req.query.limit, 10) : 50;
+    const limit = Number.isFinite(rawLimit) ? Math.min(100, Math.max(1, rawLimit)) : 50;
+
+    const rawLevel = typeof req.query.level === 'string' ? req.query.level.toLowerCase() : 'all';
+    const level: 'all' | 'info' | 'warn' | 'error' =
+      rawLevel === 'info' || rawLevel === 'warn' || rawLevel === 'error' ? rawLevel : 'all';
+
+    const search =
+      typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 64) : '';
+
+    const snapshot = getRecentApiLogs({ limit, level, search });
+    res.json({
+      success: true,
+      ...snapshot,
+      generatedAt: new Date().toISOString(),
+    });
   });
 
   app.post('/api/workspace/tokens', generalApiRateLimiter.getMiddleware(), async (req, res) => {

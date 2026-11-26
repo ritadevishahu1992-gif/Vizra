@@ -19,6 +19,7 @@ import {
   Sliders,
   Play,
   Users,
+  Terminal,
 } from 'lucide-react';
 import {
   DashboardShell,
@@ -26,6 +27,7 @@ import {
 } from '../components/ui/DashboardShell';
 import { AnalyticsChart, ChartDataPoint } from '../components/ui/AnalyticsChart';
 import { UsageAnalyticsDashboard } from '../components/ui/UsageAnalyticsDashboard';
+import { SystemLogs } from '../components/ui/SystemLogsPanel';
 import { DataTable, DataTableColumn } from '../components/ui/DataTable';
 import { FileUpload } from '../components/ui/FileUpload';
 import { ConfirmDialog, Dialog } from '../components/ui/Dialog';
@@ -118,6 +120,12 @@ export const WorkspaceDashboardPage: React.FC = () => {
   const [serverMetrics, setServerMetrics] = useState<any>(null);
   const [engageOverview, setEngageOverview] = useState<any>(null);
   const [isSyncingTelemetry, setIsSyncingTelemetry] = useState(false);
+
+  // System Logs Viewer Toggle State
+  const [showSystemLogs, setShowSystemLogs] = useState<boolean>(
+    () => searchParams.get('logs') === '1'
+  );
+  const [trackedLogCount, setTrackedLogCount] = useState<number | null>(null);
 
   // Modals & Dialogs State
   const [deleteTargetProject, setDeleteTargetProject] = useState<Project | null>(
@@ -619,6 +627,25 @@ export const WorkspaceDashboardPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => setShowSystemLogs((prev) => !prev)}
+            aria-pressed={showSystemLogs}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+              showSystemLogs
+                ? 'bg-[#DC2626]/15 border-[#DC2626]/50 text-white'
+                : 'bg-[#111111] hover:bg-[#171717] border-white/[0.08] text-neutral-300 hover:text-white'
+            }`}
+            title={showSystemLogs ? 'Hide System Logs history' : 'View System Logs history'}
+          >
+            <Terminal size={13} className="text-[#EB3B2D]" />
+            <span className="hidden sm:inline">System Logs</span>
+            {trackedLogCount !== null && (
+              <span className="hidden md:inline-flex items-center justify-center px-1.5 py-0.2 rounded bg-white/[0.08] text-[10px] font-mono text-neutral-200">
+                {trackedLogCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
             onClick={() => setIsNewProjectModalOpen(true)}
             className="px-3 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
@@ -641,6 +668,15 @@ export const WorkspaceDashboardPage: React.FC = () => {
         <AIStatusShimmer
           status="syncing"
           label="Synchronizing live workspace telemetry & server metrics…"
+        />
+      )}
+
+      {/* Toggleable System Logs History Panel */}
+      {showSystemLogs && (
+        <SystemLogs
+          buildAuthHeaders={buildWorkspaceAuthHeaders}
+          onClose={() => setShowSystemLogs(false)}
+          onLogCountChange={setTrackedLogCount}
         />
       )}
 
