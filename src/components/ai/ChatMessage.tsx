@@ -345,10 +345,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   )}
                   <AnimatePresence mode="wait">
                     {engageLifecycleState === 'generating' && !displayContent ? (
-                      <OmniaResponseSkeleton
-                        key="awaiting-omnia-skeleton"
-                        mode={message.mode}
-                      />
+                      <div key="awaiting-omnia-skeleton" className="space-y-1.5">
+                        {message.statusHint && (
+                          <div className="text-[11px] font-mono text-amber-400/90 flex items-center gap-1.5">
+                            <RotateCw size={11} className="animate-spin" />
+                            <span>{message.statusHint}</span>
+                          </div>
+                        )}
+                        <OmniaResponseSkeleton mode={message.mode} />
+                      </div>
                     ) : message.status === 'error' ? (
                       <motion.div
                         key="omnia-error-block"
@@ -361,9 +366,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           <AlertTriangle size={16} className="text-[#eb3b2d] shrink-0 mt-0.5" />
                           <div className="space-y-0.5">
                             <div className="font-medium text-white">{displayContent}</div>
-                            {message.errorCategory && (
+                            {(message.errorCategory || message.retryAfterSec) && (
                               <div className="text-[11px] font-mono text-neutral-400">
-                                Status: {message.errorCategory.replace(/_/g, ' ')}
+                                {message.errorCategory ? message.errorCategory.replace(/_/g, ' ') : 'TEMPORARY UNAVAILABILITY'}
+                                {message.retryAfterSec ? ` · Suggested wait ~${message.retryAfterSec}s` : ''}
                               </div>
                             )}
                           </div>

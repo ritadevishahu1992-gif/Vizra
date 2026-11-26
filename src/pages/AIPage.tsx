@@ -689,12 +689,29 @@ export const AIPage: React.FC = () => {
     });
   };
 
+  const lastInFlightSubmissionRef = useRef<{ signature: string; at: number } | null>(null);
+
   const handleSendMessage = async (
     text: string,
     attachments: Attachment[] = [],
     overrideBaseMessages?: Message[]
   ) => {
-    if (!text.trim() && attachments.length === 0) return;
+    const trimmedText = text.trim();
+    if (!trimmedText && attachments.length === 0) return;
+
+    // Prevent accidental rapid duplicate submissions while an identical request is already in-flight
+    const submissionSignature = `${currentMode}:${trimmedText.toLowerCase()}:${attachments.length}`;
+    const nowMs = Date.now();
+    if (
+      isStreaming &&
+      overrideBaseMessages === undefined &&
+      lastInFlightSubmissionRef.current &&
+      lastInFlightSubmissionRef.current.signature === submissionSignature &&
+      nowMs - lastInFlightSubmissionRef.current.at < 3000
+    ) {
+      return;
+    }
+    lastInFlightSubmissionRef.current = { signature: submissionSignature, at: nowMs };
 
     const inTempMode = isTemporaryChat;
     let targetConvId = activeConversationId;
@@ -798,16 +815,55 @@ export const AIPage: React.FC = () => {
         temporarySession: inTempMode,
         sessionInstructions: inTempMode ? tempInstructions : undefined,
         signal: abortController.signal,
+        onStatusChange: (statusHint) => {
+          updateTargetMessages((msgs) =>
+            msgs.map((m) =>
+              m.id === assistantPlaceholderId && m.status === 'streaming'
+                ? { ...m, statusHint }
+                : m
+            )
+          );
+        },
         onChunk: (chunkText) => {
           updateTargetMessages((msgs) =>
             msgs.map((m) =>
               m.id === assistantPlaceholderId
-                ? { ...m, content: chunkText, status: 'streaming' }
+                ? { ...m, content: chunkText, status: 'streaming', statusHint: undefined }
                 : m
             )
           );
         },
       });
+
+      if (result.isError) {
+        updateTargetMessages((msgs) =>
+          msgs.map((m) =>
+            m.id === assistantPlaceholderId
+              ? {
+                  ...m,
+                  status: 'error',
+                  content: result.fullText,
+                  errorCategory: result.errorCategory,
+                  retryAfterSec: result.retryAfterSec,
+                  statusHint: undefined,
+                  sources: result.sources,
+                  sourceValidationGate: result.sourceValidationGate,
+                  citations: result.citations,
+                  reasoning_trace_id: inTempMode ? undefined : result.reasoning_trace_id,
+                }
+              : m
+          )
+        );
+        if (!inTempMode) {
+          logSafeInteractionEvent('chat_failed', {
+            mode: currentMode,
+            model: currentModel,
+            durationMs: Date.now() - turnStartedAt,
+            reason: result.errorCategory || 'API_UNAVAILABLE',
+          });
+        }
+        return;
+      }
 
       // Mark streaming completed with enriched metadata
       updateTargetMessages((msgs) =>
@@ -816,6 +872,7 @@ export const AIPage: React.FC = () => {
             ? {
                 ...m,
                 status: 'done',
+                statusHint: undefined,
                 content: m.content || result.fullText,
                 thoughtProcess: result.thoughtProcess,
                 sources: result.sources,
@@ -953,9 +1010,17 @@ export const AIPage: React.FC = () => {
 
   const handleRegenerateLast = () => {
     if (messages.length < 2 || isStreaming) return;
-    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
-    if (lastUserMessage) {
-      handleSendMessage(lastUserMessage.content, lastUserMessage.attachments);
+    let lastUserIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        lastUserIdx = i;
+        break;
+      }
+    }
+    if (lastUserIdx !== -1) {
+      const lastUserMessage = messages[lastUserIdx];
+      const preservedPrefix = messages.slice(0, lastUserIdx);
+      handleSendMessage(lastUserMessage.content, lastUserMessage.attachments, preservedPrefix);
     }
   };
 

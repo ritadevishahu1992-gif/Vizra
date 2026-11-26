@@ -11,6 +11,7 @@ import {
   getSessionHashSecretKeys,
   isProductionEnv,
 } from './config/envConfig';
+import { recordRateLimitHit } from './observability';
 
 // ============================================================================
 // 1. SSRF PROTECTION FOR EXTERNAL URLS & IMAGES
@@ -208,12 +209,18 @@ export class SlidingWindowRateLimiter {
       res.setHeader('X-RateLimit-Reset', Math.ceil(result.resetMs / 1000).toString());
 
       if (!result.allowed) {
+        const retryAfterSeconds = Math.max(1, Math.ceil(result.resetMs / 1000));
+        recordRateLimitHit();
+        res.setHeader('Retry-After', String(retryAfterSeconds));
         res.status(429).json({
           error: {
             code: 'RATE_LIMIT_EXCEEDED',
-            message: `Too many requests for ${this.name}. Please wait ${Math.ceil(result.resetMs / 1000)} seconds before trying again.`,
-            retryAfterSeconds: Math.ceil(result.resetMs / 1000),
+            category: 'RATE_LIMIT_EXCEEDED',
+            message: `Too many requests for ${this.name}. Please wait ${retryAfterSeconds} seconds before trying again.`,
+            retryAfterSeconds,
+            retryable: true,
           },
+          retryAfterSec: retryAfterSeconds,
         });
         return;
       }
@@ -295,12 +302,17 @@ export const publicApiRateLimiter = rateLimit({
   legacyHeaders: true,
   validate: false,
   handler: (_req: Request, res: Response) => {
+    recordRateLimitHit();
+    res.setHeader('Retry-After', '60');
     res.status(429).json({
       error: {
         code: 'RATE_LIMIT_EXCEEDED',
+        category: 'RATE_LIMIT_EXCEEDED',
         message: 'Too many API requests from this IP address. Please wait a moment and try again.',
         retryAfterSeconds: 60,
+        retryable: true,
       },
+      retryAfterSec: 60,
     });
   },
 });

@@ -208,7 +208,7 @@ export const BlogArticleAgent: React.FC<BlogArticleAgentProps> = ({
               articleContext,
             }),
           },
-          { timeoutMs: 30000, maxRetries: 1 }
+          { timeoutMs: 34000, maxRetries: 1, signal: controller.signal }
         );
 
         // Ignore response if user navigated to another article mid-flight

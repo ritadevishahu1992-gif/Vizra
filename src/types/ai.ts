@@ -127,6 +127,8 @@ export interface Message {
   conflicts?: ConflictRecord[];
   generatedImage?: GeneratedImagePayload;
   errorCategory?: string;
+  retryAfterSec?: number;
+  statusHint?: string;
 }
 
 export interface TemporaryChatSession {

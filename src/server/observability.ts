@@ -5,6 +5,36 @@ import crypto from 'crypto';
 // 1. OBSERVABILITY TYPES & INTERFACES
 // ============================================================================
 
+export interface ReliabilityMetrics {
+  totalAiRequests: number;
+  successfulAiRequests: number;
+  failedAiRequests: number;
+  successRatePct: number;
+  errorRatePct: number;
+  providerThrottleCount: number;
+  provider5xxCount: number;
+  totalRetries: number;
+  fallbackActivations: number;
+  fallbackRatePct: number;
+  queue: {
+    activeCount: number;
+    queuedCount: number;
+    totalQueued: number;
+    queueTimeouts: number;
+    queueRejections: number;
+    duplicateBlocked: number;
+    avgQueueWaitMs: number;
+  };
+  retrieval: {
+    totalRuns: number;
+    failures: number;
+    avgDurationMs: number;
+    cacheHits: number;
+    coalescedHits: number;
+  };
+  publicResponseCacheHits: number;
+}
+
 export interface RequestMetrics {
   totalRequests: number;
   routes: Record<string, number>;
@@ -20,6 +50,7 @@ export interface RequestMetrics {
     fallbacksTriggered: number;
     byModel: Record<string, number>;
   };
+  reliability: ReliabilityMetrics;
   rateLimitHits: number;
   ssrfBlocks: number;
   tokenUsage: {
@@ -55,6 +86,7 @@ export interface StructuredLog {
 const serverStartTime = Date.now();
 const recentLatencies: number[] = [];
 const MAX_LATENCY_SAMPLES = 500;
+let totalRetrievalDurationMs = 0;
 
 const metricsStore: RequestMetrics = {
   totalRequests: 0,
@@ -70,6 +102,35 @@ const metricsStore: RequestMetrics = {
     failed: 0,
     fallbacksTriggered: 0,
     byModel: {},
+  },
+  reliability: {
+    totalAiRequests: 0,
+    successfulAiRequests: 0,
+    failedAiRequests: 0,
+    successRatePct: 100,
+    errorRatePct: 0,
+    providerThrottleCount: 0,
+    provider5xxCount: 0,
+    totalRetries: 0,
+    fallbackActivations: 0,
+    fallbackRatePct: 0,
+    queue: {
+      activeCount: 0,
+      queuedCount: 0,
+      totalQueued: 0,
+      queueTimeouts: 0,
+      queueRejections: 0,
+      duplicateBlocked: 0,
+      avgQueueWaitMs: 0,
+    },
+    retrieval: {
+      totalRuns: 0,
+      failures: 0,
+      avgDurationMs: 0,
+      cacheHits: 0,
+      coalescedHits: 0,
+    },
+    publicResponseCacheHits: 0,
   },
   rateLimitHits: 0,
   ssrfBlocks: 0,
@@ -137,6 +198,78 @@ export function recordModelCall(options: {
 
   metricsStore.tokenUsage.estimatedCostUSD =
     Math.round((metricsStore.tokenUsage.estimatedCostUSD + incrementalCost) * 10000) / 10000;
+}
+
+export function recordAiReliabilityOutcome(event: {
+  success: boolean;
+  retriesUsed?: number;
+  fallbackActivated?: boolean;
+  providerStatus?: number;
+  retrievalDurationMs?: number;
+  retrievalFailed?: boolean;
+  retrievalCacheHit?: boolean;
+  retrievalCoalesced?: boolean;
+  publicResponseCacheHit?: boolean;
+}): void {
+  const rel = metricsStore.reliability;
+  rel.totalAiRequests += 1;
+  if (event.success) {
+    rel.successfulAiRequests += 1;
+  } else {
+    rel.failedAiRequests += 1;
+  }
+
+  if (event.retriesUsed && event.retriesUsed > 0) {
+    rel.totalRetries += event.retriesUsed;
+  }
+  if (event.fallbackActivated) {
+    rel.fallbackActivations += 1;
+  }
+  if (event.providerStatus === 429) {
+    rel.providerThrottleCount += 1;
+  } else if (event.providerStatus && event.providerStatus >= 500) {
+    rel.provider5xxCount += 1;
+  }
+
+  if (typeof event.retrievalDurationMs === 'number') {
+    rel.retrieval.totalRuns += 1;
+    totalRetrievalDurationMs += event.retrievalDurationMs;
+    rel.retrieval.avgDurationMs = Math.round(totalRetrievalDurationMs / rel.retrieval.totalRuns);
+  }
+  if (event.retrievalFailed) {
+    rel.retrieval.failures += 1;
+  }
+  if (event.retrievalCacheHit) {
+    rel.retrieval.cacheHits += 1;
+  }
+  if (event.retrievalCoalesced) {
+    rel.retrieval.coalescedHits += 1;
+  }
+  if (event.publicResponseCacheHit) {
+    rel.publicResponseCacheHits += 1;
+  }
+
+  rel.successRatePct = Number(
+    ((rel.successfulAiRequests / Math.max(1, rel.totalAiRequests)) * 100).toFixed(2)
+  );
+  rel.errorRatePct = Number(
+    ((rel.failedAiRequests / Math.max(1, rel.totalAiRequests)) * 100).toFixed(2)
+  );
+  rel.fallbackRatePct = Number(
+    ((rel.fallbackActivations / Math.max(1, rel.totalAiRequests)) * 100).toFixed(2)
+  );
+}
+
+export function syncQueueReliabilitySnapshot(snapshot: {
+  activeCount: number;
+  queuedCount: number;
+  totalQueued: number;
+  queueTimeouts: number;
+  queueRejections: number;
+  duplicateBlocked: number;
+  avgQueueWaitMs: number;
+}): void {
+  metricsStore.reliability.queue = { ...snapshot };
 }
 
 export function recordRateLimitHit(): void {

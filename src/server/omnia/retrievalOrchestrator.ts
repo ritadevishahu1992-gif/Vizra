@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { blogKnowledgeBase, type RetrievedBlogChunk } from '../blog/blogKnowledgeBase';
 
 export interface HistoryTurn {
@@ -91,6 +92,16 @@ export interface OmniaRetrievalTrace {
     latencyMs: number;
     outputChars: number;
     finishReason: string;
+  };
+  reliability?: {
+    queueDurationMs: number;
+    retrievalDurationMs: number;
+    retryCount: number;
+    providerStatus?: number;
+    failureCategory: string;
+    fallbackActivated: boolean;
+    cacheHit: boolean;
+    coalesced: boolean;
   };
   errors: string[];
 }
@@ -394,7 +405,7 @@ export function retrieveVizraBlogSources(params: {
         usedFallback = true;
         candidates = fallbackArticleList.map((article) => ({
           slug: article.slug,
-          articleNumber: article.articleNumber,
+          articleNumber: article.number,
           title: article.title,
           series: article.series,
           category: article.category,
@@ -402,7 +413,7 @@ export function retrieveVizraBlogSources(params: {
           sectionId: 'overview',
           sectionHeading: 'Article Overview',
           chunkType: 'overview' as const,
-          text: `${article.title} — ${article.subtitle}. ${article.summary}`,
+          text: `${article.title} — ${article.description}. ${article.excerpt}`,
           score: matchedArticles.length > 0 ? 3.0 : 2.0,
           matchedTermCount: 1,
           domainMatchCount: 1,
@@ -554,21 +565,46 @@ export function buildOmniaGroundingDirective(params: {
 }
 
 /**
- * Emits a structured server-side retrieval trace log without exposing API keys or raw private documents.
+ * Emits a structured server-side retrieval & reliability trace log.
+ * Privacy rule: NEVER logs API keys, private user prompts, emails, or raw private documents.
  */
 export function emitRetrievalTraceLog(trace: OmniaRetrievalTrace): void {
-  const safeTrace: OmniaRetrievalTrace = {
-    ...trace,
-    originalQuery: scrubLogText(trace.originalQuery, 220),
-    rewrittenQuery: scrubLogText(trace.rewrittenQuery, 260),
+  const queryHash = crypto
+    .createHash('sha256')
+    .update(trace.originalQuery || '')
+    .digest('hex')
+    .slice(0, 12);
+
+  const safePayload = {
+    requestId: trace.requestId,
+    timestamp: trace.timestamp,
+    queryHash,
+    queryLength: (trace.originalQuery || '').length,
+    rewrittenQueryLength: (trace.rewrittenQuery || '').length,
+    queryWasRewritten: trace.rewrittenQuery !== trace.originalQuery,
+    isFollowUp: trace.isFollowUp,
+    sourcePlan: trace.sourcePlan,
+    retrievalProviders: trace.retrievalProviders,
+    documentsRetrievedCount: trace.documentsRetrievedCount,
     retrievedDocuments: trace.retrievedDocuments.slice(0, 15).map((doc) => ({
       id: String(doc.id).slice(0, 80),
-      title: scrubLogText(doc.title, 120),
       provider: doc.provider,
+      // Only log public titles (never private uploaded filenames/user doc text)
+      ...(doc.provider === 'vizra_blog' || doc.provider === 'google_search' || doc.provider === 'approved_learning'
+        ? { title: scrubLogText(doc.title, 100) }
+        : {}),
       ...(typeof doc.score === 'number' ? { score: Number(doc.score.toFixed(3)) } : {}),
     })),
+    contextStats: trace.contextStats,
+    grounding: {
+      ...trace.grounding,
+      webSearchQueriesCount: trace.grounding.webSearchQueries.length,
+      webSearchQueries: undefined,
+    },
+    generation: trace.generation,
+    reliability: trace.reliability,
     errors: trace.errors.slice(0, 8).map((e) => scrubLogText(e, 180)),
   };
 
-  console.info('[Omnia Retrieval Trace]', JSON.stringify(safeTrace));
+  console.info('[Omnia Reliability & Retrieval Trace]', JSON.stringify(safePayload));
 }

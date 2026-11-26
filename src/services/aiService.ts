@@ -45,7 +45,7 @@ export type UserIntent =
 
 export interface RoutingDecision {
   intent: UserIntent;
-  targetModel: 'gemini-4-hydrogen' | 'gemini-3.8-flash' | 'gemini-3.1-pro-preview' | 'gemini-3.1-flash-lite';
+  targetModel: 'gemini-4-hydrogen' | 'gemini-3.1-flash-lite';
   needsWebSearch: boolean;
   needsMathValidation: boolean;
   needsVision: boolean;
@@ -66,6 +66,7 @@ export interface SendMessageOptions {
   temporarySession?: boolean;
   sessionInstructions?: string;
   onChunk?: (chunk: string) => void;
+  onStatusChange?: (statusHint: string) => void;
   signal?: AbortSignal;
 }
 
@@ -92,7 +93,122 @@ export interface SendMessageResult {
   knowledge_state?: KnowledgeState;
   conflicts?: ConflictRecord[];
   generatedImage?: GeneratedImagePayload;
+  isError?: boolean;
   errorCategory?: string;
+  retryable?: boolean;
+  retryAfterSec?: number;
+}
+
+interface ServerChatCallOutcome {
+  ok: boolean;
+  text?: string;
+  sources?: any[];
+  webSearchQueries?: string[];
+  partialSources?: any[];
+  error?: {
+    message: string;
+    category: string;
+    retryable: boolean;
+    retryAfterSec?: number;
+  };
+}
+
+/**
+ * Strips bulky metadata and old base64 attachments from prior turns before sending to /api/chat,
+ * preventing payload bloat and serialization latency during high-traffic sessions.
+ */
+function buildCompactHistoryPayload(history: Message[]): Array<{ role: 'user' | 'assistant'; content: string }> {
+  return history
+    .filter((m) => (m.role === 'user' || m.role === 'assistant') && m.status !== 'error' && m.content?.trim())
+    .slice(-8)
+    .map((m) => ({
+      role: m.role,
+      content: m.content.slice(0, 8000),
+    }));
+}
+
+async function postChatToServer(
+  payload: Record<string, unknown>,
+  options: { signal?: AbortSignal; onStatusChange?: (hint: string) => void }
+): Promise<ServerChatCallOutcome> {
+  try {
+    const res = await fetchWithRetry(
+      '/api/chat',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      },
+      {
+        timeoutMs: 36000,
+        maxRetries: 1,
+        baseDelayMs: 750,
+        maxDelayMs: 4500,
+        signal: options.signal,
+        onRetry: ({ attempt, status }) => {
+          if (status === 429 || status === 503) {
+            options.onStatusChange?.(`High demand — retrying automatically (attempt ${attempt + 1})…`);
+          } else {
+            options.onStatusChange?.(`Reconnecting to Omnia (attempt ${attempt + 1})…`);
+          }
+        },
+      }
+    );
+
+    const data = await res.json().catch(() => null);
+
+    if (res.ok && data?.text && typeof data.text === 'string' && data.text.trim()) {
+      return {
+        ok: true,
+        text: data.text.trim(),
+        sources: Array.isArray(data.sources) ? data.sources : undefined,
+        webSearchQueries: Array.isArray(data.webSearchQueries) ? data.webSearchQueries : undefined,
+      };
+    }
+
+    const retryAfterHeader = res.headers.get('Retry-After');
+    const retryAfterSec =
+      typeof data?.retryAfterSec === 'number'
+        ? data.retryAfterSec
+        : typeof data?.error?.retryAfterSeconds === 'number'
+        ? data.error.retryAfterSeconds
+        : retryAfterHeader && Number.isFinite(Number(retryAfterHeader))
+        ? Number(retryAfterHeader)
+        : undefined;
+
+    const classified = classifyApiError(
+      res.status,
+      data?.error?.code,
+      data?.error?.message,
+      undefined,
+      retryAfterSec
+    );
+
+    return {
+      ok: false,
+      partialSources: Array.isArray(data?.partialSources) ? data.partialSources : undefined,
+      error: {
+        message: classified.userMessage || HIGH_TRAFFIC_MESSAGE,
+        category: classified.category,
+        retryable: classified.retryable,
+        retryAfterSec: classified.retryAfterSec,
+      },
+    };
+  } catch (err: any) {
+    if (err?.name === 'AbortError' || options.signal?.aborted) {
+      throw err;
+    }
+    const classified = classifyApiError(undefined, undefined, err?.message, err);
+    return {
+      ok: false,
+      error: {
+        message: classified.userMessage || HIGH_TRAFFIC_MESSAGE,
+        category: classified.category,
+        retryable: classified.retryable,
+        retryAfterSec: classified.retryAfterSec,
+      },
+    };
+  }
 }
 
 // Detect language: Hindi, Hinglish, or English
@@ -834,6 +950,13 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   let ragContextForServer: string | undefined = undefined;
   let knowledgeState: KnowledgeState = 'HIGH_CONFIDENCE';
   let activeConflicts: ConflictRecord[] = [];
+  let serverErrorResult: {
+    message: string;
+    category: string;
+    retryable: boolean;
+    retryAfterSec?: number;
+  } | undefined = undefined;
+  const compactHistory = buildCompactHistoryPayload(conversationHistory);
 
   // 2. Perform RAG Hybrid Retrieval & Versioned Knowledge DB Query for all substantive queries
   const isSimpleGreeting = /^(hi|hey|hello|sup|yo|hiya|namaste|good\s*(morning|afternoon|evening))[!.]*$/i.test(lower);
@@ -1151,107 +1274,54 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     if (directAns) {
       responseText = directAns;
     } else {
-      let serverFetched = false;
-
       // 3. Check temporary source cache (if not time-sensitive)
       const isTimeSensitive = /\b(latest|current|recent|today|now|2025|2026|price|weather|election)\b/i.test(rawPrompt);
       const cachedSources = (!isTimeSensitive && needWebResearch) ? webResearchCache.get(rawPrompt) : null;
 
-      try {
-        const res = await fetchWithRetry(
-          '/api/chat',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: rawPrompt,
-              conversationHistory,
-              ragContext: ragContextForServer,
-              needWebResearch,
-              mode: options.mode,
-              attachments,
-              temporarySession: Boolean(options.temporarySession),
-              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
-            }),
-          },
-          { timeoutMs: 32000, maxRetries: 1, signal }
-        );
+      const serverOutcome = await postChatToServer(
+        {
+          prompt: rawPrompt,
+          conversationHistory: compactHistory,
+          ragContext: ragContextForServer,
+          needWebResearch,
+          mode: options.mode,
+          attachments,
+          temporarySession: Boolean(options.temporarySession),
+          sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+        },
+        { signal, onStatusChange: options.onStatusChange }
+      );
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data.text && typeof data.text === 'string' && data.text.trim()) {
-            responseText = data.text.trim();
-            serverFetched = true;
+      if (serverOutcome.ok && serverOutcome.text) {
+        responseText = serverOutcome.text;
 
-            // Process retrieved grounding sources through strict Source Validation Gate
-            if (data.sources && Array.isArray(data.sources)) {
-              const gateResult = runSourceValidationGate(data.sources, rawPrompt);
-              sources = gateResult.passedSources;
-              sourceValidationGate = gateResult.report;
-              webSearchQueries = data.webSearchQueries || [];
+        // Process retrieved grounding sources through strict Source Validation Gate
+        if (serverOutcome.sources && serverOutcome.sources.length > 0) {
+          const gateResult = runSourceValidationGate(serverOutcome.sources, rawPrompt);
+          sources = gateResult.passedSources;
+          sourceValidationGate = gateResult.report;
+          webSearchQueries = serverOutcome.webSearchQueries || [];
 
-              if (sources.length > 0) {
-                webResearchCache.set(rawPrompt, sources);
-              }
-            } else if (cachedSources && cachedSources.length > 0) {
-              sources = cachedSources;
-            }
+          if (sources.length > 0) {
+            webResearchCache.set(rawPrompt, sources);
           }
-        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
-          const errPayload = await res.json().catch(() => null);
-          const classified = classifyApiError(
-            res.status,
-            errPayload?.error?.code,
-            errPayload?.error?.message
-          );
-          responseText = classified.userMessage || HIGH_TRAFFIC_MESSAGE;
-          serverFetched = true;
+        } else if (cachedSources && cachedSources.length > 0) {
+          sources = cachedSources;
         }
-      } catch (err: any) {
-        if (err?.name === 'AbortError' || signal?.aborted) {
-          throw err;
+      } else {
+        // Preserve any verified partial sources retrieved before provider failure
+        if (serverOutcome.partialSources && serverOutcome.partialSources.length > 0) {
+          const gateResult = runSourceValidationGate(serverOutcome.partialSources, rawPrompt);
+          sources = gateResult.passedSources;
+          sourceValidationGate = gateResult.report;
         }
-        // Network/server error fallback to local intelligence
-      }
-
-      if (!serverFetched) {
-        // Direct answer check first
-        const direct = getDirectAnswer(rawPrompt, lang);
-        const ambig = isAmbiguousEntityQuery(rawPrompt);
-
-        if (ambig.isAmbiguous && ambig.clarificationPrompt) {
-          responseText = ambig.clarificationPrompt;
-        } else if (direct) {
-          responseText = direct;
-        } else {
-          // STRICT QUERY RELEVANCE: Only cite local documents if the document actually matches the query subject
-          // and the user did NOT ask about external entities/models or history
-          const mentionsExternal = /\b(gemini|argon|gpt|claude|deepseek|llama|mistral|french\s+revolution)\b/i.test(lower);
-          const isDocRelevant =
-            !mentionsExternal &&
-            citations &&
-            citations.length > 0 &&
-            citations[0].score >= 45 &&
-            (citations[0].fileName.toLowerCase().split(/[^a-z0-9]+/).some((w) => w.length > 3 && lower.includes(w)) ||
-              (citations[0].section && citations[0].section.toLowerCase().split(/[^a-z0-9]+/).some((w) => w.length > 3 && lower.includes(w))));
-
-          if (isDocRelevant) {
-            const topDoc = citations![0];
-            responseText = `According to verified documentation in **${topDoc.fileName}** (${topDoc.section}):\n\n${topDoc.excerpt}\n\n[Doc: ${topDoc.fileName}#${topDoc.section}]`;
-          } else if (needWebResearch) {
-            responseText = "I couldn't verify that from a reliable source.";
-            sources = [];
-          } else if (lower.includes('vizra') || lower.includes('omnia')) {
-            responseText = "That isn't currently documented in my verified Vizra knowledge.";
-          } else if (lang === 'hindi') {
-            responseText = `यह एक महत्वपूर्ण विषय है। कृपया अपने प्रश्न का विशिष्ट विवरण साझा करें।`;
-          } else if (lang === 'hinglish') {
-            responseText = `Yeh ek important topic hai. Kripya apna specific sawaal share karein taaki sahi jaankari mil sake.`;
-          } else {
-            responseText = "I couldn't verify that from a reliable source.";
-            sources = [];
-          }
-        }
+        serverErrorResult = serverOutcome.error || {
+          message: HIGH_TRAFFIC_MESSAGE,
+          category: 'API_UNAVAILABLE',
+          retryable: true,
+          retryAfterSec: 4,
+        };
+        responseText = serverErrorResult.message;
       }
 
       // Add thought process steps if web research occurred
@@ -1281,68 +1351,28 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   // INTENT: CODE (Deliver clean code directly, no fluff)
   // -------------------------------------------------------------
   else if (intent === 'CODE') {
-    let serverFetched = false;
-    try {
-      const res = await fetchWithRetry(
-        '/api/chat',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: rawPrompt,
-            conversationHistory,
-            ragContext: ragContextForServer,
-            mode: 'code',
-            temporarySession: Boolean(options.temporarySession),
-            sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
-          }),
-        },
-        { timeoutMs: 32000, maxRetries: 1, signal }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.text && typeof data.text === 'string' && data.text.trim()) {
-          responseText = data.text.trim();
-          serverFetched = true;
-        }
-      } else if (res.status === 429 || res.status === 503 || res.status === 504) {
-        responseText = HIGH_TRAFFIC_MESSAGE;
-        serverFetched = true;
-      }
-    } catch (err: any) {
-      if (err?.name === 'AbortError' || signal?.aborted) throw err;
-      // Fallback
-    }
+    const codeOutcome = await postChatToServer(
+      {
+        prompt: rawPrompt,
+        conversationHistory: compactHistory,
+        ragContext: ragContextForServer,
+        mode: 'code',
+        temporarySession: Boolean(options.temporarySession),
+        sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+      },
+      { signal, onStatusChange: options.onStatusChange }
+    );
 
-    if (!serverFetched) {
-      if (lower.includes('python')) {
-        responseText = `\`\`\`python
-def calculate_kinetic_motion(velocity: float, acceleration: float, time: float) -> float:
-    """Calculates displacement under uniform kinetic acceleration."""
-    return (velocity * time) + (0.5 * acceleration * (time ** 2))
-
-if __name__ == "__main__":
-    distance = calculate_kinetic_motion(velocity=0.0, acceleration=9.8, time=2.5)
-    print(f"Displacement: {distance:.2f} meters")
-\`\`\``;
-      } else {
-        responseText = `\`\`\`typescript
-export interface BezierPoint {
-  x: number;
-  y: number;
-}
-
-export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint): number {
-  const clamped = Math.max(0, Math.min(1, t));
-  const inv = 1 - clamped;
-  return (
-    3 * inv * inv * clamped * p1.y +
-    3 * inv * clamped * clamped * p2.y +
-    clamped * clamped * clamped
-  );
-}
-\`\`\``;
-      }
+    if (codeOutcome.ok && codeOutcome.text) {
+      responseText = codeOutcome.text;
+    } else {
+      serverErrorResult = codeOutcome.error || {
+        message: HIGH_TRAFFIC_MESSAGE,
+        category: 'API_UNAVAILABLE',
+        retryable: true,
+        retryAfterSec: 4,
+      };
+      responseText = serverErrorResult.message;
     }
 
     // Verify code block sanity
@@ -1364,36 +1394,29 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     let serverFetched = false;
     // For creative writing/scripts, query /api/chat first
     if (lower.includes('script') || lower.includes('story') || lower.includes('poem') || lower.includes('brief') || lower.includes('outline')) {
-      try {
-        const res = await fetchWithRetry(
-          '/api/chat',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: rawPrompt,
-              conversationHistory,
-              ragContext: ragContextForServer,
-              mode: 'create',
-              temporarySession: Boolean(options.temporarySession),
-              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
-            }),
-          },
-          { timeoutMs: 32000, maxRetries: 1, signal }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.text && typeof data.text === 'string' && data.text.trim()) {
-            responseText = data.text.trim();
-            serverFetched = true;
-          }
-        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
-          responseText = HIGH_TRAFFIC_MESSAGE;
-          serverFetched = true;
-        }
-      } catch (err: any) {
-        if (err?.name === 'AbortError' || signal?.aborted) throw err;
-        // Fallback
+      const createOutcome = await postChatToServer(
+        {
+          prompt: rawPrompt,
+          conversationHistory: compactHistory,
+          ragContext: ragContextForServer,
+          mode: 'create',
+          temporarySession: Boolean(options.temporarySession),
+          sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+        },
+        { signal, onStatusChange: options.onStatusChange }
+      );
+      if (createOutcome.ok && createOutcome.text) {
+        responseText = createOutcome.text;
+        serverFetched = true;
+      } else {
+        serverErrorResult = createOutcome.error || {
+          message: HIGH_TRAFFIC_MESSAGE,
+          category: 'API_UNAVAILABLE',
+          retryable: true,
+          retryAfterSec: 4,
+        };
+        responseText = serverErrorResult.message;
+        serverFetched = true;
       }
     }
 
@@ -1465,40 +1488,27 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
     if (mathEval.isMath && mathEval.formattedStepByStep) {
       responseText = mathEval.formattedStepByStep;
     } else {
-      let serverFetched = false;
-      try {
-        const res = await fetchWithRetry(
-          '/api/chat',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: rawPrompt,
-              conversationHistory,
-              ragContext: ragContextForServer,
-              mode: 'think',
-              temporarySession: Boolean(options.temporarySession),
-              sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
-            }),
-          },
-          { timeoutMs: 32000, maxRetries: 1, signal }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.text && typeof data.text === 'string' && data.text.trim()) {
-            responseText = data.text.trim();
-            serverFetched = true;
-          }
-        } else if (res.status === 429 || res.status === 503 || res.status === 504) {
-          responseText = HIGH_TRAFFIC_MESSAGE;
-          serverFetched = true;
-        }
-      } catch (err: any) {
-        if (err?.name === 'AbortError' || signal?.aborted) throw err;
-        // Local math fallback
-      }
-      if (!serverFetched) {
-        responseText = `Mathematical Analysis:\nFor \`${rawPrompt.replace(/[?!.]+$/, '')}\`, verifying formal mathematical steps. Please specify target variables or precision for complete calculation.`;
+      const mathOutcome = await postChatToServer(
+        {
+          prompt: rawPrompt,
+          conversationHistory: compactHistory,
+          ragContext: ragContextForServer,
+          mode: 'think',
+          temporarySession: Boolean(options.temporarySession),
+          sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+        },
+        { signal, onStatusChange: options.onStatusChange }
+      );
+      if (mathOutcome.ok && mathOutcome.text) {
+        responseText = mathOutcome.text;
+      } else {
+        serverErrorResult = mathOutcome.error || {
+          message: HIGH_TRAFFIC_MESSAGE,
+          category: 'API_UNAVAILABLE',
+          retryable: true,
+          retryAfterSec: 4,
+        };
+        responseText = serverErrorResult.message;
       }
     }
   }
@@ -1524,67 +1534,44 @@ export function evaluateKineticEase(t: number, p1: BezierPoint, p2: BezierPoint)
   // INTENT: ANALYZE / IMAGE_UNDERSTANDING / DOCUMENT_ANALYSIS / EDIT
   // -------------------------------------------------------------
   else if (intent === 'ANALYZE' || intent === 'IMAGE_UNDERSTANDING' || intent === 'DOCUMENT_ANALYSIS') {
-    let serverFetched = false;
-    try {
-      const res = await fetchWithRetry(
-        '/api/chat',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: rawPrompt || (intent === 'IMAGE_UNDERSTANDING' ? 'Analyze this image and describe the visual content, subjects, composition, and details.' : 'Analyze this document, extract key entities, and summarize findings.'),
-            conversationHistory,
-            ragContext: ragContextForServer,
-            attachments,
-            mode: 'analyze',
-            temporarySession: Boolean(options.temporarySession),
-            sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
-          }),
-        },
-        { timeoutMs: 32000, maxRetries: 1, signal }
-      );
+    const analyzeOutcome = await postChatToServer(
+      {
+        prompt:
+          rawPrompt ||
+          (intent === 'IMAGE_UNDERSTANDING'
+            ? 'Analyze this image and describe the visual content, subjects, composition, and details.'
+            : 'Analyze this document, extract key entities, and summarize findings.'),
+        conversationHistory: compactHistory,
+        ragContext: ragContextForServer,
+        attachments,
+        mode: 'analyze',
+        temporarySession: Boolean(options.temporarySession),
+        sessionInstructions: options.temporarySession ? options.sessionInstructions : undefined,
+      },
+      { signal, onStatusChange: options.onStatusChange }
+    );
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.text && typeof data.text === 'string' && data.text.trim()) {
-          responseText = data.text.trim();
-          serverFetched = true;
-
-          if (data.sources && Array.isArray(data.sources) && data.sources.length > 0) {
-            const gateResult = runSourceValidationGate(data.sources, rawPrompt);
-            sources = gateResult.passedSources;
-            sourceValidationGate = gateResult.report;
-            webSearchQueries = data.webSearchQueries || [];
-          }
-        }
-      } else if (res.status === 429 || res.status === 503 || res.status === 504) {
-        responseText = HIGH_TRAFFIC_MESSAGE;
-        serverFetched = true;
+    if (analyzeOutcome.ok && analyzeOutcome.text) {
+      responseText = analyzeOutcome.text;
+      if (analyzeOutcome.sources && analyzeOutcome.sources.length > 0) {
+        const gateResult = runSourceValidationGate(analyzeOutcome.sources, rawPrompt);
+        sources = gateResult.passedSources;
+        sourceValidationGate = gateResult.report;
+        webSearchQueries = analyzeOutcome.webSearchQueries || [];
       }
-    } catch (err: any) {
-      if (err?.name === 'AbortError' || signal?.aborted) throw err;
-      // Local fallback
-    }
-
-    if (!serverFetched) {
-      const attSummary = attachments
-        .slice(0, 5)
-        .map((a) => {
-          const lineInfo =
-            a.content && typeof a.content === 'string'
-              ? `, ${a.content.split(/\r?\n/).length} lines / ${a.content.length} chars`
-              : '';
-          return `• ${a.name} (${a.type}, ${a.size}${lineInfo})`;
-        })
-        .join('\n');
-
-      if (intent === 'IMAGE_UNDERSTANDING') {
-        responseText =
-          `Image attachment queued (${attachments.length} file${attachments.length === 1 ? '' : 's'}). Live server multimodal vision analysis (/api/chat) was unavailable for this request.\n\n${attSummary}\n\nRetry with server connectivity active or tell me what visual elements you want examined.`;
-      } else {
-        responseText =
-          `Local attachment inspection completed (${attachments.length} file${attachments.length === 1 ? '' : 's'}), but live server AI analysis (/api/chat) was unavailable so deep semantic parsing was skipped.\n\n${attSummary}\n\nCheck server connection and retry for full schema, metric, or document analysis.`;
+    } else {
+      if (analyzeOutcome.partialSources && analyzeOutcome.partialSources.length > 0) {
+        const gateResult = runSourceValidationGate(analyzeOutcome.partialSources, rawPrompt);
+        sources = gateResult.passedSources;
+        sourceValidationGate = gateResult.report;
       }
+      serverErrorResult = analyzeOutcome.error || {
+        message: HIGH_TRAFFIC_MESSAGE,
+        category: 'API_UNAVAILABLE',
+        retryable: true,
+        retryAfterSec: 4,
+      };
+      responseText = serverErrorResult.message;
     }
   } else if (intent === 'EDIT') {
     responseText = 'Understood. Modifying parameters to adjust color, hierarchy, and kinetic pacing.';

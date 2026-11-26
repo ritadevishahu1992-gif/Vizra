@@ -54,6 +54,8 @@ import {
 import {
   observabilityMiddleware,
   recordModelCall,
+  recordAiReliabilityOutcome,
+  syncQueueReliabilitySnapshot,
   recordSsrfBlock,
   getObservabilityMetrics,
   logStructured,
@@ -71,6 +73,19 @@ import {
   emitRetrievalTraceLog,
   type RetrievalTraceDocument,
 } from './src/server/omnia/retrievalOrchestrator';
+import {
+  chatTrafficController,
+  geminiModelHealthTracker,
+  publicBlogRetrievalCache,
+  publicChatResponseCache,
+  CapacityBackpressureError,
+  executeWithIntelligentRetry,
+  extractHttpStatusFromError,
+  isRetryableProviderError,
+  isSafeForPublicResponseCache,
+  runBoundedRetrieval,
+  type QueueAcquireResult,
+} from './src/server/reliability/trafficController';
 import {
   setupAgeAssuranceRoutes,
   enforceFeatureAccessForRequest,
@@ -139,6 +154,7 @@ function validateServerEnvironment(): { valid: boolean; warnings: string[] } {
 
 export async function createExpressApp(options?: {
   attachFrontendMiddleware?: boolean;
+  aiClientOverride?: GoogleGenAI | null;
 }): Promise<{ app: express.Express; server?: http.Server; port: number }> {
   const envCheck = validateServerEnvironment();
   if (envCheck.warnings.length > 0) {
@@ -184,20 +200,24 @@ export async function createExpressApp(options?: {
 
   // Server-side Gemini initialization
   let ai: GoogleGenAI | null = null;
-  const apiKey = getGeminiApiKey();
-  if (apiKey) {
-    try {
-      ai = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
+  if (options && 'aiClientOverride' in options) {
+    ai = options.aiClientOverride ?? null;
+  } else {
+    const apiKey = getGeminiApiKey();
+    if (apiKey) {
+      try {
+        ai = new GoogleGenAI({
+          apiKey,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build',
+            },
           },
-        },
-      });
-      console.log('[AI Engine] Initialized GoogleGenAI with server-side proxy');
-    } catch (e) {
-      console.warn('Could not initialize GoogleGenAI with provided key:', e);
+        });
+        console.log('[AI Engine] Initialized GoogleGenAI with server-side proxy');
+      } catch (e) {
+        console.warn('Could not initialize GoogleGenAI with provided key:', e);
+      }
     }
   }
 
@@ -206,12 +226,20 @@ export async function createExpressApp(options?: {
     params: { model: string; contents: any; config?: any },
     timeoutMs: number = 45000
   ): Promise<any> {
-    return Promise.race([
-      aiInstance.models.generateContent(params),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Model call to ${params.model} timed out after ${timeoutMs}ms`)), timeoutMs)
-      ),
-    ]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        aiInstance.models.generateContent(params),
+        new Promise((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error(`Model call to ${params.model} timed out after ${timeoutMs}ms`)),
+            timeoutMs
+          );
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
   }
 
   const DEFAULT_GEMINI_SAFETY_SETTINGS = [
@@ -1273,6 +1301,102 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         historyCheck.turns
       );
 
+      // Determine caller identity key for fair per-user concurrency & duplicate protection
+      const forwardedIp =
+        typeof req.headers['x-forwarded-for'] === 'string'
+          ? req.headers['x-forwarded-for'].split(',')[0].trim()
+          : req.socket.remoteAddress || '127.0.0.1';
+      const clientIdHeader =
+        typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
+      const userKey = derivePrivacySessionHash(
+        clientIdHeader ? `client:${clientIdHeader}` : `ip:${forwardedIp}`
+      );
+
+      // Check safe public response cache BEFORE acquiring a concurrency slot (strictly public, non-personalized, non-time-sensitive)
+      const isPublicCacheable = isSafeForPublicResponseCache({
+        prompt: cleanPromptText,
+        hasAttachments: attachments.length > 0,
+        hasWorkspaceRag: Boolean(ragCheck.cleanContext && ragCheck.cleanContext.trim().length > 0),
+        hasHistory: historyCheck.turns.length > 0,
+        isTemporarySession: isTempSession,
+        hasSessionInstructions: Boolean(cleanSessionInstructions),
+        isAuthenticatedUser: Boolean(req.headers.authorization),
+        mode,
+      });
+      const publicResponseCacheKey = isPublicCacheable
+        ? `chat:${mode || 'quick'}:${Boolean(needWebResearch)}:${cleanPromptText.toLowerCase().trim()}`
+        : '';
+
+      if (isPublicCacheable && publicResponseCacheKey) {
+        const cachedResp = publicChatResponseCache.get(publicResponseCacheKey);
+        if (cachedResp) {
+          recordAiReliabilityOutcome({
+            success: true,
+            publicResponseCacheHit: true,
+          });
+          syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+          res.setHeader('X-Vizra-Cache', 'HIT');
+          res.json({
+            text: cachedResp.text,
+            sources: cachedResp.sources,
+            webSearchQueries: cachedResp.webSearchQueries,
+            groundingMetadata: null,
+            retrievalSummary: cachedResp.retrievalSummary,
+            reliability: {
+              queueWaitMs: 0,
+              retriesUsed: 0,
+              fallbackActivated: false,
+              model: cachedResp.model,
+              cacheHit: true,
+              recovered: false,
+            },
+            sourceValidationGate: {
+              passed: cachedResp.sources.length > 0,
+              totalEvaluated: cachedResp.sources.length,
+              totalVerified: cachedResp.sources.length,
+              totalRejected: 0,
+              timestamp: Date.now(),
+            },
+          });
+          return;
+        }
+      }
+
+      // Acquire bounded fair concurrency slot with duplicate-submission protection and queue backpressure
+      const duplicateKey = chatTrafficController.computeDuplicateKey(userKey, cleanPromptText, mode);
+      let queueTicket: QueueAcquireResult | null = null;
+      try {
+        queueTicket = await chatTrafficController.acquire(userKey, duplicateKey);
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      } catch (capErr: any) {
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+        if (capErr instanceof CapacityBackpressureError) {
+          res.setHeader('Retry-After', String(capErr.retryAfterSec));
+          recordAiReliabilityOutcome({
+            success: false,
+            providerStatus: capErr.status,
+          });
+          sendSafeErrorResponse(res, {
+            status: capErr.status,
+            code: capErr.code,
+            category: capErr.category,
+            message: capErr.message,
+            requestId,
+            retryable: true,
+            extra: {
+              retryAfterSec: capErr.retryAfterSec,
+              queueSnapshot: {
+                active: chatTrafficController.getSnapshot().activeCount,
+                queued: chatTrafficController.getSnapshot().queuedCount,
+              },
+            },
+          });
+          return;
+        }
+        throw capErr;
+      }
+
+      try {
       // 2. Source Intelligence Planning (separates uploaded files, workspace RAG, VIZRA blog, learning, web search)
       const sourcePlan = planSourceRetrieval({
         prompt: cleanPromptText,
@@ -1285,6 +1409,10 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         hasHistory: historyCheck.turns.length > 0,
       });
 
+      const retrievalStartedAt = Date.now();
+      let retrievalFailed = false;
+      let retrievalCacheHit = false;
+      let retrievalCoalesced = false;
       const retrievalProviders: string[] = [];
       const retrievedDocsForTrace: RetrievalTraceDocument[] = [];
       const retrievalErrors: string[] = [];
@@ -1295,8 +1423,8 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           const att = attachments[i];
           if (!att) continue;
           retrievedDocsForTrace.push({
-            id: `att_${i}_${att.name || 'file'}`,
-            title: att.name || `Attachment ${i + 1}`,
+            id: `att_${i}`,
+            title: `Attachment ${i + 1}`,
             provider: 'uploaded_file',
           });
         }
@@ -1306,11 +1434,10 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         retrievalProviders.push('workspace_rag');
         const ragSourceMatches = ragCheck.cleanContext.match(/===\s*Source:\s*([^|]+?)\s*\|/g) || [];
         if (ragSourceMatches.length > 0) {
-          ragSourceMatches.forEach((m, idx) => {
-            const title = m.replace(/===\s*Source:\s*/, '').replace(/\s*\|$/, '').trim();
+          ragSourceMatches.forEach((_m, idx) => {
             retrievedDocsForTrace.push({
               id: `rag_${idx}`,
-              title,
+              title: `Workspace Chunk ${idx + 1}`,
               provider: 'workspace_rag',
             });
           });
@@ -1323,7 +1450,8 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         }
       }
 
-      // 3. Retrieve relevant Published VIZRA Website & Blog Articles (hybrid BM25 + semantic + fallback)
+      // 3. Retrieve relevant Published VIZRA Website & Blog Articles
+      //    Uses bounded retry + public TTL cache + in-flight request coalescing for identical queries
       let vizraBlogResult = {
         chunks: [] as any[],
         contextText: '',
@@ -1333,13 +1461,24 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       };
       if (sourcePlan.shouldSearchBlog) {
         retrievalProviders.push('vizra_blog');
-        try {
-          vizraBlogResult = retrieveVizraBlogSources({
-            originalQuery: cleanPromptText,
-            rewrittenQuery,
-            explicitBlogIntent: sourcePlan.explicitBlogIntent,
-            topK: 4,
-          });
+        const blogCacheKey = `blog:${sourcePlan.explicitBlogIntent ? 'exp' : 'gen'}:${rewrittenQuery.toLowerCase().trim()}`;
+        const blogExec = await runBoundedRetrieval(
+          async () =>
+            publicBlogRetrievalCache.getOrCoalesce(blogCacheKey, async () =>
+              retrieveVizraBlogSources({
+                originalQuery: cleanPromptText,
+                rewrittenQuery,
+                explicitBlogIntent: sourcePlan.explicitBlogIntent,
+                topK: 4,
+              })
+            ),
+          { maxRetries: 1, timeoutMs: 2500 }
+        );
+
+        if (blogExec.ok && blogExec.data) {
+          vizraBlogResult = blogExec.data.value;
+          retrievalCacheHit = blogExec.data.cacheHit;
+          retrievalCoalesced = blogExec.data.coalesced;
           for (const chunk of vizraBlogResult.chunks) {
             retrievedDocsForTrace.push({
               id: `${chunk.slug}#${chunk.sectionId}`,
@@ -1348,28 +1487,34 @@ Revise only where necessary. Do not expose this checklist or describe internal r
               score: chunk.score,
             });
           }
-        } catch (blogErr: any) {
-          retrievalErrors.push(`vizra_blog_retrieval: ${blogErr?.message || 'unknown error'}`);
+        } else {
+          retrievalFailed = true;
+          retrievalErrors.push(`vizra_blog_retrieval: ${blogExec.error || 'bounded retrieval error'}`);
         }
       }
 
-      // 4. Retrieve Approved Omnia Platform/Learning Knowledge (skipped in Temporary Chat)
+      // 4. Retrieve Approved Omnia Platform/Learning Knowledge (bounded & isolated; skipped in Temporary Chat)
       let approvedKnowledge = '';
       if (!isTempSession) {
         retrievalProviders.push('approved_learning');
-        try {
-          approvedKnowledge = getApprovedKnowledgeContext(rewrittenQuery, ai);
-          if (approvedKnowledge) {
-            retrievedDocsForTrace.push({
-              id: 'omnia_approved_learning',
-              title: 'Omnia Approved Knowledge Memory',
-              provider: 'approved_learning',
-            });
-          }
-        } catch (learnErr: any) {
-          retrievalErrors.push(`approved_learning: ${learnErr?.message || 'unknown error'}`);
+        const learningExec = await runBoundedRetrieval(
+          () => getApprovedKnowledgeContext(rewrittenQuery, ai),
+          { maxRetries: 1, timeoutMs: 2000 }
+        );
+        if (learningExec.ok && learningExec.data) {
+          approvedKnowledge = learningExec.data;
+          retrievedDocsForTrace.push({
+            id: 'omnia_approved_learning',
+            title: 'Omnia Approved Knowledge Memory',
+            provider: 'approved_learning',
+          });
+        } else if (!learningExec.ok) {
+          retrievalFailed = true;
+          retrievalErrors.push(`approved_learning: ${learningExec.error || 'bounded retrieval error'}`);
         }
       }
+
+      const retrievalDurationMs = Date.now() - retrievalStartedAt;
 
       // Per-request unpredictable cryptographic instruction/data boundary nonce
       const boundaryNonce = createPromptBoundaryNonce();
@@ -1548,16 +1693,20 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       const deepThink = mode === 'think';
 
       let response: any;
-      let usedModel = deepThink || mode === 'research' ? 'gemini-4-hydrogen' : 'gemini-3.1-flash-lite';
       let isFallback = false;
       let webSearchFailedFallback = false;
+      let totalRetriesUsed = 0;
+      let lastProviderStatus: number | undefined = undefined;
       const startTime = Date.now();
 
-      // Use active, verified Gemini models (fast flash-lite primary for direct queries; hydrogen primary for deep think/research)
-      const modelsToTry =
+      // Health-aware compatible Gemini fallback chain:
+      // Primary: configured active model; Secondary: healthy compatible Gemini model
+      const preferredModels =
         deepThink || mode === 'research'
           ? ['gemini-4-hydrogen', 'gemini-3.1-flash-lite']
           : ['gemini-3.1-flash-lite', 'gemini-4-hydrogen'];
+      const modelsToTry = geminiModelHealthTracker.orderCandidates(preferredModels);
+      let usedModel = modelsToTry[0];
       let lastError: any = null;
 
       const TOTAL_CHAT_BUDGET_MS = 34000;
@@ -1574,15 +1723,39 @@ Revise only where necessary. Do not expose this checklist or describe internal r
             deepThink,
             minorSafeMode: chatAgeGate.context.requiresMinorSafeDirectives,
           });
-          response = await generateContentWithTimeout(
-            ai,
-            {
-              model: m,
-              contents,
-              config: modelConfig,
+
+          const retryOutcome = await executeWithIntelligentRetry(
+            async () => {
+              const attemptBudget = Math.min(16000, getRemainingChatBudget());
+              if (attemptBudget < 3000) {
+                throw new Error('Request deadline budget exhausted before model attempt');
+              }
+              return generateContentWithTimeout(
+                ai,
+                {
+                  model: m,
+                  contents,
+                  config: modelConfig,
+                },
+                attemptBudget
+              );
             },
-            Math.min(18000, remaining)
+            {
+              maxRetries: idx === 0 ? 2 : 1,
+              baseDelayMs: 450,
+              maxDelayMs: 3200,
+              getRemainingBudgetMs: getRemainingChatBudget,
+              minBudgetForRetryMs: 3500,
+              onRetry: ({ attempt, delayMs, status, category }) => {
+                lastProviderStatus = status;
+                retrievalErrors.push(`retry_${m}_#${attempt}_${category}(${delayMs}ms)`);
+              },
+            }
           );
+
+          totalRetriesUsed += retryOutcome.retriesUsed;
+          response = retryOutcome.result;
+
           if (
             response &&
             (response.text ||
@@ -1591,15 +1764,21 @@ Revise only where necessary. Do not expose this checklist or describe internal r
               response.candidates?.[0]?.finishReason)
           ) {
             usedModel = m;
-            if (idx > 0) isFallback = true;
+            geminiModelHealthTracker.recordSuccess(m);
+            if (idx > 0 || m !== preferredModels[0]) isFallback = true;
             break;
           }
         } catch (err: any) {
           lastError = err;
-          retrievalErrors.push(`model_${m}${enableWebSearch ? '_web' : ''}: ${err?.message || 'transient error'}`);
-          const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
-          if (!isQuota) {
-            console.info(`[AI Engine] Candidate ${m} unavailable (${err.message || 'transient'}); routing to next candidate...`);
+          const errStatus = extractHttpStatusFromError(err);
+          const errClass = isRetryableProviderError(err);
+          lastProviderStatus = errStatus;
+          geminiModelHealthTracker.recordFailure(m, errStatus);
+          retrievalErrors.push(`model_${m}${enableWebSearch ? '_web' : ''}: ${errClass.category}(${errStatus || 'err'})`);
+
+          // Never retry or fall back across models for invalid user requests or auth errors
+          if (!errClass.retryable && (errStatus === 400 || errStatus === 401 || errStatus === 403)) {
+            break;
           }
         }
       }
@@ -1607,43 +1786,66 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       // If googleSearch tool failed across candidates (e.g. search quota/timeout), retry transparently WITHOUT web search
       // and explicitly instruct the model not to claim web verification or fabricate sources.
       if (!response && enableWebSearch) {
-        webSearchFailedFallback = true;
-        console.info('[AI Engine] Google Search grounding unavailable; retrying with transparent non-grounded disclosure...');
-        const fallbackInstruction = buildSystemInstructionForCall(true);
-        for (let idx = 0; idx < modelsToTry.length; idx++) {
-          const remaining = getRemainingChatBudget();
-          if (remaining < 3500) break;
-          const m = modelsToTry[idx];
-          try {
-            const standardConfig = buildConfigForModel(m, {
-              systemInstruction: fallbackInstruction,
-              enableWebSearch: false,
-              deepThink,
-              minorSafeMode: chatAgeGate.context.requiresMinorSafeDirectives,
-            });
-            response = await generateContentWithTimeout(
-              ai,
-              {
-                model: m,
-                contents,
-                config: standardConfig,
-              },
-              Math.min(12000, remaining)
-            );
-            if (
-              response &&
-              (response.text ||
-                response.candidates?.[0]?.content?.parts?.length ||
-                response.promptFeedback?.blockReason ||
-                response.candidates?.[0]?.finishReason)
-            ) {
-              usedModel = m;
-              isFallback = true;
-              break;
+        const lastClass = isRetryableProviderError(lastError);
+        if (lastClass.retryable || lastClass.status === 429 || lastClass.status === 503 || lastClass.status === 504) {
+          webSearchFailedFallback = true;
+          console.info('[AI Engine] Google Search grounding unavailable; retrying with transparent non-grounded disclosure...');
+          const fallbackInstruction = buildSystemInstructionForCall(true);
+          for (let idx = 0; idx < modelsToTry.length; idx++) {
+            const remaining = getRemainingChatBudget();
+            if (remaining < 3500) break;
+            const m = modelsToTry[idx];
+            try {
+              const standardConfig = buildConfigForModel(m, {
+                systemInstruction: fallbackInstruction,
+                enableWebSearch: false,
+                deepThink,
+                minorSafeMode: chatAgeGate.context.requiresMinorSafeDirectives,
+              });
+              const fallbackOutcome = await executeWithIntelligentRetry(
+                async () =>
+                  generateContentWithTimeout(
+                    ai,
+                    {
+                      model: m,
+                      contents,
+                      config: standardConfig,
+                    },
+                    Math.min(11000, getRemainingChatBudget())
+                  ),
+                {
+                  maxRetries: 1,
+                  baseDelayMs: 400,
+                  maxDelayMs: 2000,
+                  getRemainingBudgetMs: getRemainingChatBudget,
+                  minBudgetForRetryMs: 3000,
+                  onRetry: ({ attempt, delayMs, status, category }) => {
+                    lastProviderStatus = status;
+                    retrievalErrors.push(`fallback_retry_${m}_#${attempt}_${category}(${delayMs}ms)`);
+                  },
+                }
+              );
+              totalRetriesUsed += fallbackOutcome.retriesUsed;
+              response = fallbackOutcome.result;
+              if (
+                response &&
+                (response.text ||
+                  response.candidates?.[0]?.content?.parts?.length ||
+                  response.promptFeedback?.blockReason ||
+                  response.candidates?.[0]?.finishReason)
+              ) {
+                usedModel = m;
+                geminiModelHealthTracker.recordSuccess(m);
+                isFallback = true;
+                break;
+              }
+            } catch (fallbackErr: any) {
+              lastError = fallbackErr;
+              const fbStatus = extractHttpStatusFromError(fallbackErr);
+              lastProviderStatus = fbStatus;
+              geminiModelHealthTracker.recordFailure(m, fbStatus);
+              retrievalErrors.push(`fallback_${m}: ${fbStatus || 'transient error'}`);
             }
-          } catch (fallbackErr: any) {
-            lastError = fallbackErr;
-            retrievalErrors.push(`fallback_${m}: ${fallbackErr?.message || 'transient error'}`);
           }
         }
       }
@@ -1651,12 +1853,24 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       if (!response) {
         const classifiedErr = classifyUpstreamError(lastError);
         const latencyMs = Date.now() - startTime;
+        const retryAfterSec = classifiedErr.status === 429 ? 5 : 3;
+
         recordModelCall({
           model: usedModel,
           success: false,
           fallbackTriggered: true,
           inputChars: finalUserText.length,
           outputChars: 0,
+        });
+        recordAiReliabilityOutcome({
+          success: false,
+          retriesUsed: totalRetriesUsed,
+          fallbackActivated: true,
+          providerStatus: lastProviderStatus || classifiedErr.status,
+          retrievalDurationMs,
+          retrievalFailed,
+          retrievalCacheHit,
+          retrievalCoalesced,
         });
 
         emitRetrievalTraceLog({
@@ -1692,17 +1906,41 @@ Revise only where necessary. Do not expose this checklist or describe internal r
             outputChars: 0,
             finishReason: classifiedErr.category,
           },
+          reliability: {
+            queueDurationMs: queueTicket?.queueWaitMs || 0,
+            retrievalDurationMs,
+            retryCount: totalRetriesUsed,
+            providerStatus: lastProviderStatus || classifiedErr.status,
+            failureCategory: classifiedErr.category,
+            fallbackActivated: true,
+            cacheHit: false,
+            coalesced: retrievalCoalesced,
+          },
           errors: retrievalErrors,
         });
 
-        // Never fabricate fake answers or canned demo sources when upstream generation fails.
+        if (classifiedErr.retryable) {
+          res.setHeader('Retry-After', String(retryAfterSec));
+        }
+
+        // Graceful final fallback: NEVER fabricate answers or fake citations.
+        // Preserve verified retrieved source links if retrieval succeeded prior to generation failure.
         sendSafeErrorResponse(res, {
           status: classifiedErr.status || 503,
           code: classifiedErr.code || 'UPSTREAM_GENERATION_UNAVAILABLE',
           category: classifiedErr.category,
-          message: classifiedErr.message || HIGH_TRAFFIC_USER_MESSAGE,
+          message:
+            classifiedErr.status === 429
+              ? 'Omnia is experiencing temporary provider overload. Your message has been preserved — click Retry in a few seconds.'
+              : classifiedErr.message ||
+                'Omnia is temporarily unavailable due to upstream provider capacity. Your message is preserved — please click Retry.',
           requestId,
           retryable: classifiedErr.retryable,
+          extra: {
+            retryAfterSec,
+            retriesUsed: totalRetriesUsed,
+            partialSources: vizraBlogResult.sources.length > 0 ? vizraBlogResult.sources : undefined,
+          },
         });
         return;
       }
@@ -1762,8 +2000,36 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       }
 
       const latencyMs = Date.now() - startTime;
+      const retrievalSummaryPayload = {
+        providers: retrievalProviders,
+        blogArticlesMatched: vizraBlogResult.sources.length,
+        webSourcesMatched: webSources.length,
+        webSearchInvoked: enableWebSearch,
+        webSearchFallback: webSearchFailedFallback,
+        isFollowUp,
+        retrievalDurationMs,
+        retrievalCacheHit,
+        retrievalCoalesced,
+      };
 
-      // Structured server-side retrieval & grounding observability trace (never exposes keys or private raw content to client)
+      // Cache strictly safe public non-personalized responses for short TTL (90s)
+      if (
+        isPublicCacheable &&
+        publicResponseCacheKey &&
+        !safetyEvaluation.blocked &&
+        text.length >= 20 &&
+        !webSearchFailedFallback
+      ) {
+        publicChatResponseCache.set(publicResponseCacheKey, {
+          text,
+          sources: mergedSources,
+          webSearchQueries,
+          retrievalSummary: retrievalSummaryPayload,
+          model: usedModel,
+        });
+      }
+
+      // Structured server-side retrieval & reliability trace (never logs API keys, private prompts, or PII)
       emitRetrievalTraceLog({
         requestId,
         timestamp: new Date().toISOString(),
@@ -1797,6 +2063,16 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           outputChars: text.length,
           finishReason: finishReason || 'STOP',
         },
+        reliability: {
+          queueDurationMs: queueTicket?.queueWaitMs || 0,
+          retrievalDurationMs,
+          retryCount: totalRetriesUsed,
+          providerStatus: 200,
+          failureCategory: 'NONE',
+          fallbackActivated: isFallback,
+          cacheHit: false,
+          coalesced: retrievalCoalesced,
+        },
         errors: retrievalErrors,
       });
 
@@ -1807,19 +2083,31 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         inputChars: finalUserText.length,
         outputChars: text.length,
       });
+      recordAiReliabilityOutcome({
+        success: true,
+        retriesUsed: totalRetriesUsed,
+        fallbackActivated: isFallback,
+        providerStatus: 200,
+        retrievalDurationMs,
+        retrievalFailed,
+        retrievalCacheHit,
+        retrievalCoalesced,
+      });
 
+      res.setHeader('X-Vizra-Cache', 'MISS');
       res.json({
         text,
         sources: mergedSources,
         webSearchQueries,
         groundingMetadata: grounding,
-        retrievalSummary: {
-          providers: retrievalProviders,
-          blogArticlesMatched: vizraBlogResult.sources.length,
-          webSourcesMatched: webSources.length,
-          webSearchInvoked: enableWebSearch,
-          webSearchFallback: webSearchFailedFallback,
-          isFollowUp,
+        retrievalSummary: retrievalSummaryPayload,
+        reliability: {
+          queueWaitMs: queueTicket?.queueWaitMs || 0,
+          retriesUsed: totalRetriesUsed,
+          fallbackActivated: isFallback,
+          model: usedModel,
+          cacheHit: false,
+          recovered: totalRetriesUsed > 0 || isFallback,
         },
         sourceValidationGate: {
           passed: mergedSources.length > 0,
@@ -1829,6 +2117,10 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           timestamp: Date.now(),
         },
       });
+      } finally {
+        queueTicket?.release();
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      }
     } catch (err: any) {
       const classified = classifyUpstreamError(err);
       console.error('Server chat error:', classified.category, err?.message || err);
@@ -2117,6 +2409,46 @@ Revise only where necessary. Do not expose this checklist or describe internal r
         return;
       }
 
+      // Acquire bounded fair concurrency slot with duplicate-submission protection and queue backpressure
+      const agentForwardedIp =
+        typeof req.headers['x-forwarded-for'] === 'string'
+          ? req.headers['x-forwarded-for'].split(',')[0].trim()
+          : req.socket.remoteAddress || '127.0.0.1';
+      const agentClientId =
+        typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
+      const agentUserKey = derivePrivacySessionHash(
+        agentClientId ? `client:${agentClientId}` : `ip:${agentForwardedIp}`
+      );
+      const agentDuplicateKey = chatTrafficController.computeDuplicateKey(
+        agentUserKey,
+        `${post?.slug || 'global'}:${cleanQuestion}`,
+        'blog_agent'
+      );
+
+      let agentQueueTicket: QueueAcquireResult | null = null;
+      try {
+        agentQueueTicket = await chatTrafficController.acquire(agentUserKey, agentDuplicateKey);
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      } catch (capErr: any) {
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+        if (capErr instanceof CapacityBackpressureError) {
+          res.setHeader('Retry-After', String(capErr.retryAfterSec));
+          recordAiReliabilityOutcome({ success: false, providerStatus: capErr.status });
+          sendSafeErrorResponse(res, {
+            status: capErr.status,
+            code: capErr.code,
+            category: capErr.category,
+            message: capErr.message,
+            requestId,
+            retryable: true,
+            extra: { retryAfterSec: capErr.retryAfterSec },
+          });
+          return;
+        }
+        throw capErr;
+      }
+
+      try {
       // Resolve reader's active section strictly against the verified published article
       const requestedSectionId =
         typeof articleContext?.currentSection?.id === 'string'
@@ -2127,13 +2459,25 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           ? post.sections.find((s) => s.id === requestedSectionId) || null
           : null;
 
-      // Hybrid keyword + semantic retrieval across all published VIZRA articles
-      const corpusHits: RetrievedBlogChunk[] = blogKnowledgeBase.search(cleanQuestion, {
-        topK: 6,
-        excludeSlug: post?.slug,
-        minScore: 1.8,
-        maxPerArticle: 2,
-      });
+      // Hybrid keyword + semantic retrieval across all published VIZRA articles (bounded + cached + coalesced)
+      const retrievalStart = Date.now();
+      const agentCacheKey = `blog_agent:${post?.slug || 'any'}:${cleanQuestion.toLowerCase().trim()}`;
+      const corpusExec = await runBoundedRetrieval(
+        async () =>
+          publicBlogRetrievalCache.getOrCoalesce(agentCacheKey, async () =>
+            blogKnowledgeBase.search(cleanQuestion, {
+              topK: 6,
+              excludeSlug: post?.slug,
+              minScore: 1.8,
+              maxPerArticle: 2,
+            })
+          ),
+        { maxRetries: 1, timeoutMs: 2500 }
+      );
+      const retrievalDurationMs = Date.now() - retrievalStart;
+      const corpusHits: RetrievedBlogChunk[] = corpusExec.ok && corpusExec.data ? corpusExec.data.value : [];
+      const agentCacheHit = Boolean(corpusExec.ok && corpusExec.data?.cacheHit);
+      const agentCoalesced = Boolean(corpusExec.ok && corpusExec.data?.coalesced);
 
       // Classify user intent cleanly across general, current_article, blog_corpus, hybrid, and web_research
       const intent = classifyArticleAgentIntent({
@@ -2258,40 +2602,67 @@ Core Responsibilities:
         },
       ];
 
-      // Active Gemini models only (no invalid model names, no mock/heuristic fallback answers).
-      // Prefer ultra-fast gemini-3.1-flash-lite for interactive chat responsiveness, with gemini-4-hydrogen fallback.
-      const modelsToTry = ['gemini-3.1-flash-lite', 'gemini-4-hydrogen'];
+      // Health-aware compatible Gemini fallback chain (active models only, zero fabricated answers)
+      const preferredAgentModels = ['gemini-3.1-flash-lite', 'gemini-4-hydrogen'];
+      const modelsToTry = geminiModelHealthTracker.orderCandidates(preferredAgentModels);
       let response: any = null;
       let usedModel = modelsToTry[0];
       let usedLiveWebSearch = intent.useWebSearch;
+      let agentFallbackActivated = false;
+      let agentRetriesUsed = 0;
+      let agentLastProviderStatus: number | undefined;
       let lastError: any = null;
+      const agentStartTime = Date.now();
+      const AGENT_BUDGET_MS = 32000;
+      const getRemainingAgentBudget = () => Math.max(0, AGENT_BUDGET_MS - (Date.now() - agentStartTime));
 
-      for (const m of modelsToTry) {
+      for (let idx = 0; idx < modelsToTry.length; idx++) {
+        const remaining = getRemainingAgentBudget();
+        if (remaining < 4000) break;
+        const m = modelsToTry[idx];
         const cfg = buildConfigForModel(m, {
           systemInstruction: unifiedSystemInstruction,
           enableWebSearch: intent.useWebSearch,
           deepThink: false,
           minorSafeMode: ageGate.context.requiresMinorSafeDirectives,
         });
-        if (m === 'gemini-4-hydrogen') {
-          cfg.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
-        }
 
         try {
-          response = await generateContentWithTimeout(
-            ai,
-            { model: m, contents, config: cfg },
-            20000
+          const outcome = await executeWithIntelligentRetry(
+            async () => {
+              const attemptBudget = Math.min(15000, getRemainingAgentBudget());
+              if (attemptBudget < 3000) {
+                throw new Error('Request deadline budget exhausted before blog agent model attempt');
+              }
+              return generateContentWithTimeout(ai, { model: m, contents, config: cfg }, attemptBudget);
+            },
+            {
+              maxRetries: idx === 0 ? 2 : 1,
+              baseDelayMs: 450,
+              maxDelayMs: 3000,
+              getRemainingBudgetMs: getRemainingAgentBudget,
+              minBudgetForRetryMs: 3500,
+              onRetry: ({ status }) => {
+                agentLastProviderStatus = status;
+              },
+            }
           );
+          agentRetriesUsed += outcome.retriesUsed;
+          response = outcome.result;
           if (response && (response.text || response.candidates?.[0]?.content?.parts?.length)) {
             usedModel = m;
+            geminiModelHealthTracker.recordSuccess(m);
+            if (idx > 0 || m !== preferredAgentModels[0]) agentFallbackActivated = true;
             break;
           }
         } catch (err: any) {
           lastError = err;
-          const errStatus = Number(err?.status || err?.statusCode || 0);
-          if (errStatus === 429 || errStatus === 503) {
-            await new Promise((r) => setTimeout(r, 600));
+          const errStatus = extractHttpStatusFromError(err);
+          const errClass = isRetryableProviderError(err);
+          agentLastProviderStatus = errStatus;
+          geminiModelHealthTracker.recordFailure(m, errStatus);
+          if (!errClass.retryable && (errStatus === 400 || errStatus === 401 || errStatus === 403)) {
+            break;
           }
         }
       }
@@ -2300,36 +2671,56 @@ Core Responsibilities:
       // WITHOUT web search and explicitly instruct the model to disclose it could not verify live online
       // (never fabricating sources or claiming verification).
       if (!response && intent.useWebSearch) {
-        usedLiveWebSearch = false;
-        const transparentInstruction = `${unifiedSystemInstruction}\n\nIMPORTANT VERIFICATION NOTICE: Live web search grounding is temporarily unavailable for this request. Answer helpfully from your existing knowledge, and transparently tell the user that you could not verify live/current information online right now. Do not fabricate URLs or claim live verification.`;
-        for (const m of modelsToTry) {
-          const cfg = buildConfigForModel(m, {
-            systemInstruction: transparentInstruction,
-            enableWebSearch: false,
-            deepThink: false,
-            minorSafeMode: ageGate.context.requiresMinorSafeDirectives,
-          });
-          if (m === 'gemini-4-hydrogen') {
-            cfg.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
-          }
-          try {
-            response = await generateContentWithTimeout(
-              ai,
-              { model: m, contents, config: cfg },
-              20000
-            );
-            if (response && (response.text || response.candidates?.[0]?.content?.parts?.length)) {
-              usedModel = m;
-              break;
+        const lastClass = isRetryableProviderError(lastError);
+        if (lastClass.retryable || lastClass.status === 429 || lastClass.status === 503 || lastClass.status === 504) {
+          usedLiveWebSearch = false;
+          const transparentInstruction = `${unifiedSystemInstruction}\n\nIMPORTANT VERIFICATION NOTICE: Live web search grounding is temporarily unavailable for this request. Answer helpfully from your existing knowledge, and transparently tell the user that you could not verify live/current information online right now. Do not fabricate URLs or claim live verification.`;
+          for (const m of modelsToTry) {
+            const remaining = getRemainingAgentBudget();
+            if (remaining < 3500) break;
+            const cfg = buildConfigForModel(m, {
+              systemInstruction: transparentInstruction,
+              enableWebSearch: false,
+              deepThink: false,
+              minorSafeMode: ageGate.context.requiresMinorSafeDirectives,
+            });
+            try {
+              const fbOutcome = await executeWithIntelligentRetry(
+                async () =>
+                  generateContentWithTimeout(
+                    ai,
+                    { model: m, contents, config: cfg },
+                    Math.min(11000, getRemainingAgentBudget())
+                  ),
+                {
+                  maxRetries: 1,
+                  baseDelayMs: 400,
+                  maxDelayMs: 2000,
+                  getRemainingBudgetMs: getRemainingAgentBudget,
+                  minBudgetForRetryMs: 3000,
+                }
+              );
+              agentRetriesUsed += fbOutcome.retriesUsed;
+              response = fbOutcome.result;
+              if (response && (response.text || response.candidates?.[0]?.content?.parts?.length)) {
+                usedModel = m;
+                geminiModelHealthTracker.recordSuccess(m);
+                agentFallbackActivated = true;
+                break;
+              }
+            } catch (err: any) {
+              lastError = err;
+              const fbStatus = extractHttpStatusFromError(err);
+              agentLastProviderStatus = fbStatus;
+              geminiModelHealthTracker.recordFailure(m, fbStatus);
             }
-          } catch (err: any) {
-            lastError = err;
           }
         }
       }
 
       if (!response) {
         const classified = classifyUpstreamError(lastError);
+        const retryAfterSec = classified.status === 429 ? 5 : 3;
         recordModelCall({
           model: usedModel,
           success: false,
@@ -2337,13 +2728,30 @@ Core Responsibilities:
           inputChars: cleanQuestion.length,
           outputChars: 0,
         });
+        recordAiReliabilityOutcome({
+          success: false,
+          retriesUsed: agentRetriesUsed,
+          fallbackActivated: true,
+          providerStatus: agentLastProviderStatus || classified.status,
+          retrievalDurationMs,
+          retrievalFailed: !corpusExec.ok,
+          retrievalCacheHit: agentCacheHit,
+          retrievalCoalesced: agentCoalesced,
+        });
+        if (classified.retryable) {
+          res.setHeader('Retry-After', String(retryAfterSec));
+        }
         sendSafeErrorResponse(res, {
           status: classified.status || 503,
           code: classified.code || 'UPSTREAM_AI_UNAVAILABLE',
           category: classified.category || 'MODEL_UNAVAILABLE',
-          message: HIGH_TRAFFIC_USER_MESSAGE,
+          message:
+            classified.status === 429
+              ? 'The assistant is experiencing temporary provider overload. Please click Retry in a few seconds.'
+              : HIGH_TRAFFIC_USER_MESSAGE,
           requestId,
-          retryable: true,
+          retryable: classified.retryable,
+          extra: { retryAfterSec, retriesUsed: agentRetriesUsed },
         });
         return;
       }
@@ -2354,6 +2762,13 @@ Core Responsibilities:
         : (response.text || '').trim();
 
       if (!answerText) {
+        recordAiReliabilityOutcome({
+          success: false,
+          retriesUsed: agentRetriesUsed,
+          fallbackActivated: agentFallbackActivated,
+          providerStatus: 502,
+          retrievalDurationMs,
+        });
         sendSafeErrorResponse(res, {
           status: 502,
           code: 'EMPTY_AI_RESPONSE',
@@ -2431,9 +2846,19 @@ Core Responsibilities:
       recordModelCall({
         model: usedModel,
         success: true,
-        fallbackTriggered: usedModel !== modelsToTry[0],
+        fallbackTriggered: agentFallbackActivated,
         inputChars: cleanQuestion.length,
         outputChars: answerText.length,
+      });
+      recordAiReliabilityOutcome({
+        success: true,
+        retriesUsed: agentRetriesUsed,
+        fallbackActivated: agentFallbackActivated,
+        providerStatus: 200,
+        retrievalDurationMs,
+        retrievalFailed: !corpusExec.ok,
+        retrievalCacheHit: agentCacheHit,
+        retrievalCoalesced: agentCoalesced,
       });
 
       res.json({
@@ -2451,8 +2876,19 @@ Core Responsibilities:
         currentSectionHeading: matchedSection?.heading || null,
         referencedArticles,
         webSources,
+        reliability: {
+          queueWaitMs: agentQueueTicket?.queueWaitMs || 0,
+          retriesUsed: agentRetriesUsed,
+          fallbackActivated: agentFallbackActivated,
+          model: usedModel,
+          recovered: agentRetriesUsed > 0 || agentFallbackActivated,
+        },
         fallback: false,
       });
+      } finally {
+        agentQueueTicket?.release();
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      }
     } catch (err: any) {
       const classified = classifyUpstreamError(err);
       sendSafeErrorResponse(res, {
@@ -2461,7 +2897,7 @@ Core Responsibilities:
         category: classified.category,
         message: HIGH_TRAFFIC_USER_MESSAGE,
         requestId,
-        retryable: true,
+        retryable: classified.retryable,
       });
     }
   });
@@ -2519,14 +2955,58 @@ Core Responsibilities:
         return;
       }
 
+      const cleanResearchQuery = queryCheck.cleanText || '';
+      const resForwardedIp =
+        typeof req.headers['x-forwarded-for'] === 'string'
+          ? req.headers['x-forwarded-for'].split(',')[0].trim()
+          : req.socket.remoteAddress || '127.0.0.1';
+      const resClientId =
+        typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
+      const resUserKey = derivePrivacySessionHash(
+        resClientId ? `client:${resClientId}` : `ip:${resForwardedIp}`
+      );
+      const resDuplicateKey = chatTrafficController.computeDuplicateKey(
+        resUserKey,
+        cleanResearchQuery,
+        'research'
+      );
+
+      let researchQueueTicket: QueueAcquireResult | null = null;
+      try {
+        researchQueueTicket = await chatTrafficController.acquire(resUserKey, resDuplicateKey);
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      } catch (capErr: any) {
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+        if (capErr instanceof CapacityBackpressureError) {
+          res.setHeader('Retry-After', String(capErr.retryAfterSec));
+          recordAiReliabilityOutcome({ success: false, providerStatus: capErr.status });
+          sendSafeErrorResponse(res, {
+            status: capErr.status,
+            code: capErr.code,
+            category: capErr.category,
+            message: capErr.message,
+            requestId,
+            retryable: true,
+            extra: { retryAfterSec: capErr.retryAfterSec },
+          });
+          return;
+        }
+        throw capErr;
+      }
+
+      try {
       let response: any;
-      let usedModel = 'gemini-3.8-flash';
+      const preferredResearchModels = ['gemini-4-hydrogen', 'gemini-3.1-flash-lite'];
+      const researchModels = geminiModelHealthTracker.orderCandidates(preferredResearchModels);
+      let usedModel = researchModels[0];
       let isFallback = false;
-      const researchModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-4-argon'];
+      let researchWebFallback = false;
+      let researchRetriesUsed = 0;
+      let researchLastStatus: number | undefined;
       let lastResearchError: any = null;
 
       const researchStartTime = Date.now();
-      const TOTAL_RESEARCH_BUDGET_MS = 38000;
+      const TOTAL_RESEARCH_BUDGET_MS = 34000;
       const getRemainingResearchBudget = () =>
         Math.max(0, TOTAL_RESEARCH_BUDGET_MS - (Date.now() - researchStartTime));
 
@@ -2541,85 +3021,137 @@ Core Responsibilities:
             deepThink: false,
             minorSafeMode: researchAgeGate.context.requiresMinorSafeDirectives,
           });
-          response = await generateContentWithTimeout(
-            ai,
-            {
-              model: rm,
-              contents: `Conduct grounded web research on the following user query: "${queryCheck.cleanText}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
-              config: researchConfig,
+          const outcome = await executeWithIntelligentRetry(
+            async () => {
+              const attemptBudget = Math.min(16000, getRemainingResearchBudget());
+              if (attemptBudget < 3000) {
+                throw new Error('Request deadline budget exhausted before research attempt');
+              }
+              return generateContentWithTimeout(
+                ai,
+                {
+                  model: rm,
+                  contents: `Conduct grounded web research on the following user query: "${cleanResearchQuery}". Provide a direct, verified answer backed strictly by real retrieved sources. Do not fabricate URLs or citations.`,
+                  config: researchConfig,
+                },
+                attemptBudget
+              );
             },
-            Math.min(18000, remaining)
+            {
+              maxRetries: idx === 0 ? 2 : 1,
+              baseDelayMs: 450,
+              maxDelayMs: 3000,
+              getRemainingBudgetMs: getRemainingResearchBudget,
+              minBudgetForRetryMs: 3500,
+              onRetry: ({ status }) => {
+                researchLastStatus = status;
+              },
+            }
           );
+          researchRetriesUsed += outcome.retriesUsed;
+          response = outcome.result;
           if (response && response.text) {
             usedModel = rm;
-            if (idx > 0) isFallback = true;
+            geminiModelHealthTracker.recordSuccess(rm);
+            if (idx > 0 || rm !== preferredResearchModels[0]) isFallback = true;
             break;
           }
         } catch (err: any) {
           lastResearchError = err;
-          const isQuota = err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED');
-          if (!isQuota) {
-            console.info(`[Research Engine] Candidate ${rm} unavailable (${err.message || 'transient'}); routing to next candidate...`);
+          const errStatus = extractHttpStatusFromError(err);
+          const errClass = isRetryableProviderError(err);
+          researchLastStatus = errStatus;
+          geminiModelHealthTracker.recordFailure(rm, errStatus);
+          if (!errClass.retryable && (errStatus === 400 || errStatus === 401 || errStatus === 403)) {
+            break;
           }
         }
       }
 
       if (!response) {
-        // Fallback without search tool if search tool quota exhausted
-        for (let idx = 0; idx < researchModels.length; idx++) {
-          const remaining = getRemainingResearchBudget();
-          if (remaining < 3500) break;
-          const rm = researchModels[idx];
-          try {
-            const fallbackConfig = buildConfigForModel(rm, {
-              systemInstruction,
-              enableWebSearch: false,
-              deepThink: false,
-              minorSafeMode: researchAgeGate.context.requiresMinorSafeDirectives,
-            });
-            response = await generateContentWithTimeout(
-              ai,
-              {
-                model: rm,
-                contents: `Answer the following user query directly from verified knowledge: "${queryCheck.cleanText}".`,
-                config: fallbackConfig,
-              },
-              Math.min(12000, remaining)
-            );
-            if (response && response.text) {
-              usedModel = rm;
-              isFallback = true;
-              break;
+        const lastClass = isRetryableProviderError(lastResearchError);
+        if (lastClass.retryable || lastClass.status === 429 || lastClass.status === 503 || lastClass.status === 504) {
+          // Transparent fallback without web search tool if search grounding quota/capacity failed
+          researchWebFallback = true;
+          const transparentInstruction = `${systemInstruction}\n\nIMPORTANT VERIFICATION NOTICE: Live web search grounding is temporarily unavailable. Answer directly from established knowledge only if confident, and explicitly inform the user that live web verification could not be completed. Never fabricate URLs, citations, or claim live verification.`;
+          for (let idx = 0; idx < researchModels.length; idx++) {
+            const remaining = getRemainingResearchBudget();
+            if (remaining < 3500) break;
+            const rm = researchModels[idx];
+            try {
+              const fallbackConfig = buildConfigForModel(rm, {
+                systemInstruction: transparentInstruction,
+                enableWebSearch: false,
+                deepThink: false,
+                minorSafeMode: researchAgeGate.context.requiresMinorSafeDirectives,
+              });
+              const fbOutcome = await executeWithIntelligentRetry(
+                async () =>
+                  generateContentWithTimeout(
+                    ai,
+                    {
+                      model: rm,
+                      contents: `Answer the following user query directly and transparently note that live web search verification is temporarily unavailable: "${cleanResearchQuery}".`,
+                      config: fallbackConfig,
+                    },
+                    Math.min(11000, getRemainingResearchBudget())
+                  ),
+                {
+                  maxRetries: 1,
+                  baseDelayMs: 400,
+                  maxDelayMs: 2000,
+                  getRemainingBudgetMs: getRemainingResearchBudget,
+                  minBudgetForRetryMs: 3000,
+                }
+              );
+              researchRetriesUsed += fbOutcome.retriesUsed;
+              response = fbOutcome.result;
+              if (response && response.text) {
+                usedModel = rm;
+                geminiModelHealthTracker.recordSuccess(rm);
+                isFallback = true;
+                break;
+              }
+            } catch (fallbackErr: any) {
+              lastResearchError = fallbackErr;
+              const fbStatus = extractHttpStatusFromError(fallbackErr);
+              researchLastStatus = fbStatus;
+              geminiModelHealthTracker.recordFailure(rm, fbStatus);
             }
-          } catch (fallbackErr: any) {
-            lastResearchError = fallbackErr;
           }
         }
       }
 
       if (!response) {
+        const classified = classifyUpstreamError(lastResearchError);
+        const retryAfterSec = classified.status === 429 ? 5 : 3;
         recordModelCall({
           model: usedModel,
           success: false,
           fallbackTriggered: true,
-          inputChars: queryCheck.cleanText?.length || 0,
+          inputChars: cleanResearchQuery.length,
           outputChars: 0,
         });
-
-        const fallbackRes = generateFallbackResponse(queryCheck.cleanText || '', 'research', '');
-        res.json({
-          text: fallbackRes.text,
-          sources: fallbackRes.sources,
-          webSearchQueries: fallbackRes.webSearchQueries,
-          groundingMetadata: null,
-          sourceValidationGate: {
-            passed: fallbackRes.sources.length > 0,
-            totalEvaluated: fallbackRes.sources.length,
-            totalVerified: fallbackRes.sources.length,
-            totalRejected: 0,
-            timestamp: Date.now(),
-          },
-          fallback: true,
+        recordAiReliabilityOutcome({
+          success: false,
+          retriesUsed: researchRetriesUsed,
+          fallbackActivated: true,
+          providerStatus: researchLastStatus || classified.status,
+        });
+        if (classified.retryable) {
+          res.setHeader('Retry-After', String(retryAfterSec));
+        }
+        sendSafeErrorResponse(res, {
+          status: classified.status || 503,
+          code: classified.code || 'RESEARCH_UNAVAILABLE',
+          category: classified.category || 'MODEL_UNAVAILABLE',
+          message:
+            classified.status === 429
+              ? 'Omnia Research is experiencing temporary provider overload. Please click Retry in a few seconds.'
+              : HIGH_TRAFFIC_USER_MESSAGE,
+          requestId,
+          retryable: classified.retryable,
+          extra: { retryAfterSec, retriesUsed: researchRetriesUsed },
         });
         return;
       }
@@ -2636,49 +3168,60 @@ Core Responsibilities:
         text.replace(/\n\s*[-—~*]*\s*(?:Powered by\s+)?(?:VIZRA\s+)?Omnia(?:\s+1\.0)?\s*$/i, '').trimEnd()
       );
       const grounding = firstResearchCandidate?.groundingMetadata;
-      let { sources, webSearchQueries } = extractVerifiedWebSources(grounding, text);
-
-      if (isFallback && sources.length === 0) {
-        const fallbackRes = generateFallbackResponse(queryCheck.cleanText || '', 'research', '');
-        if (fallbackRes.sources.length > 0) {
-          sources = fallbackRes.sources;
-          webSearchQueries = fallbackRes.webSearchQueries;
-        }
-      }
+      const { sources, webSearchQueries } = extractVerifiedWebSources(grounding, text);
 
       if (sources.length === 0 && (!text || text.length < 20)) {
-        text = "I couldn't verify that from a reliable source.";
+        text = "I couldn't verify that from a reliable source right now. Please try again shortly.";
       }
 
       recordModelCall({
         model: usedModel,
         success: true,
         fallbackTriggered: isFallback,
-        inputChars: queryCheck.cleanText?.length || 0,
+        inputChars: cleanResearchQuery.length,
         outputChars: text.length,
+      });
+      recordAiReliabilityOutcome({
+        success: true,
+        retriesUsed: researchRetriesUsed,
+        fallbackActivated: isFallback,
+        providerStatus: 200,
       });
 
       res.json({
         text,
         sources,
         webSearchQueries,
+        webSearchFallback: researchWebFallback,
+        reliability: {
+          queueWaitMs: researchQueueTicket?.queueWaitMs || 0,
+          retriesUsed: researchRetriesUsed,
+          fallbackActivated: isFallback,
+          model: usedModel,
+          recovered: researchRetriesUsed > 0 || isFallback,
+        },
         sourceValidationGate: {
-          passed: sources.length > 0,
+          passed: sources.length > 0 && !researchWebFallback,
           totalEvaluated: sources.length,
           totalVerified: sources.length,
           totalRejected: 0,
           timestamp: Date.now(),
         },
       });
+      } finally {
+        researchQueueTicket?.release();
+        syncQueueReliabilitySnapshot(chatTrafficController.getSnapshot());
+      }
     } catch (err: any) {
-      console.error('Server research error:', err);
-      res.status(500).json({
-        error: {
-          code: 'RESEARCH_ERROR',
-          message: sanitizeServerError(err, 'Error conducting research'),
-          requestId,
-        },
-        fallback: true,
+      const classified = classifyUpstreamError(err);
+      console.error('Server research error:', classified.category, err?.message || err);
+      sendSafeErrorResponse(res, {
+        status: classified.status,
+        code: classified.code,
+        category: classified.category,
+        message: classified.message,
+        requestId,
+        retryable: classified.retryable,
       });
     }
   });
@@ -3055,17 +3598,47 @@ Core Responsibilities:
         return;
       }
 
-      const response = await ai.models.embedContent({
-        model: 'gemini-embedding-2-preview',
-        contents: text,
-      });
+      const embedStartedAt = Date.now();
+      const embedBudgetMs = 10000;
+      const embedOutcome = await executeWithIntelligentRetry(
+        async () => {
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            return await Promise.race([
+              ai!.models.embedContent({
+                model: 'gemini-embedding-2',
+                contents: text,
+              }),
+              new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error('Embedding call timed out after 5500ms')), 5500);
+              }),
+            ]);
+          } finally {
+            if (timer !== undefined) clearTimeout(timer);
+          }
+        },
+        {
+          maxRetries: 1,
+          baseDelayMs: 350,
+          maxDelayMs: 1500,
+          getRemainingBudgetMs: () => Math.max(0, embedBudgetMs - (Date.now() - embedStartedAt)),
+          minBudgetForRetryMs: 2000,
+        }
+      );
 
-      const respAny = response as any;
+      const respAny = embedOutcome.result as any;
       const embedding =
         respAny.embeddings?.[0]?.values || respAny.embedding?.values || [];
       res.json({ embedding });
     } catch (err: any) {
-      res.status(500).json({ fallback: true, error: sanitizeServerError(err, 'Error generating embedding') });
+      const errStatus = extractHttpStatusFromError(err) || 500;
+      if (errStatus === 429 || errStatus === 503) {
+        res.setHeader('Retry-After', '3');
+      }
+      res.status(errStatus >= 400 && errStatus < 600 ? errStatus : 500).json({
+        fallback: true,
+        error: sanitizeServerError(err, 'Error generating embedding'),
+      });
     }
   });
 
@@ -3084,18 +3657,50 @@ Core Responsibilities:
       }
 
       const embeddings: number[][] = [];
+      const batchStart = Date.now();
+      const batchBudgetMs = 20000;
       for (const t of texts.slice(0, 20)) {
         if (typeof t !== 'string' || !t.trim() || t.length > 25000 || !detectPromptInjection(t).safe) {
           embeddings.push([]);
           continue;
         }
-        const resp = await ai.models.embedContent({
-          model: 'gemini-embedding-2-preview',
-          contents: t,
-        });
-        const respAny = resp as any;
-        const vals = respAny.embeddings?.[0]?.values || respAny.embedding?.values || [];
-        embeddings.push(vals);
+        if (Date.now() - batchStart > batchBudgetMs) {
+          embeddings.push([]);
+          continue;
+        }
+        try {
+          const itemOutcome = await executeWithIntelligentRetry(
+            async () => {
+              let timer: ReturnType<typeof setTimeout> | undefined;
+              try {
+                return await Promise.race([
+                  ai!.models.embedContent({
+                    model: 'gemini-embedding-2',
+                    contents: t,
+                  }),
+                  new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error('Batch embedding call timed out after 4500ms')), 4500);
+                  }),
+                ]);
+              } finally {
+                if (timer !== undefined) clearTimeout(timer);
+              }
+            },
+            {
+              maxRetries: 1,
+              baseDelayMs: 300,
+              maxDelayMs: 1200,
+              getRemainingBudgetMs: () => Math.max(0, batchBudgetMs - (Date.now() - batchStart)),
+              minBudgetForRetryMs: 2000,
+            }
+          );
+          const respAny = itemOutcome.result as any;
+          const vals = respAny.embeddings?.[0]?.values || respAny.embedding?.values || [];
+          embeddings.push(vals);
+        } catch {
+          // Graceful partial batch survival: client local embedding fallback fills any empty vector
+          embeddings.push([]);
+        }
       }
 
       res.json({ embeddings });
@@ -3104,10 +3709,11 @@ Core Responsibilities:
     }
   });
 
-  // Health check endpoint with system metrics & zero-secret configuration status
+  // Health check endpoint with system metrics, capacity status & zero-secret configuration status
   app.get('/api/health', (_req, res) => {
     const mem = process.memoryUsage();
     const configSnapshot = getSystemConfigurationSnapshot();
+    const queueSnap = chatTrafficController.getSnapshot();
     res.json({
       status: 'ok',
       service: 'Vizra AI Creative Studio',
@@ -3115,6 +3721,16 @@ Core Responsibilities:
       hasGemini: !!ai,
       coreReadyWithMinimalConfig: configSnapshot.coreReadyWithMinimalConfig,
       configSummary: configSnapshot.summary,
+      reliability: {
+        activeAiRequests: queueSnap.activeCount,
+        maxConcurrentAiRequests: queueSnap.maxConcurrent,
+        queuedAiRequests: queueSnap.queuedCount,
+        maxQueueSize: queueSnap.maxQueueSize,
+        modelHealth: geminiModelHealthTracker.getStatus(),
+        retrievalCacheHits: publicBlogRetrievalCache.hits,
+        retrievalCoalescedHits: publicBlogRetrievalCache.coalescedHits,
+        publicResponseCacheHits: publicChatResponseCache.hits,
+      },
       uptimeSeconds: Math.floor(process.uptime()),
       environment: getNodeEnv(),
       memory: {
