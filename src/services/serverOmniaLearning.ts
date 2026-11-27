@@ -758,12 +758,14 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
     }
   });
 
-  // 7. GET KNOWLEDGE SOURCES
+  // 7. GET KNOWLEDGE SOURCES (public APPROVED sources only unless caller is authenticated admin)
   app.get('/api/omnia/knowledge', (req, res) => {
     loadStoredData();
     const { status, type } = req.query;
 
-    let sources = Array.from(sourcesMap.values());
+    let sources = Array.from(sourcesMap.values()).filter(
+      (s) => s.accessLevel === 'public' && s.status === 'APPROVED'
+    );
     if (typeof status === 'string') {
       sources = sources.filter((s) => s.status === status);
     }

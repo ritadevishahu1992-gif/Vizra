@@ -623,7 +623,9 @@ export function setupIntegrationsRoutes(app: express.Application): void {
       }
 
       if (typeof oauthError === 'string' && oauthError) {
-        res.status(400).send(`OAuth authorization cancelled or denied: ${oauthError.replace(/</g, '&lt;')}`);
+        const safeError = oauthError.replace(/[<>&"'`]/g, '').slice(0, 120);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.status(400).send(`OAuth authorization cancelled or denied: ${safeError}`);
         return;
       }
 

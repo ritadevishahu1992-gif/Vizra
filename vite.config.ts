@@ -21,6 +21,7 @@ export default defineConfig(() => {
       entries: ['src/main.tsx'],
     },
     build: {
+      sourcemap: false,
       rollupOptions: {
         output: {
           manualChunks(id) {
@@ -59,6 +60,20 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      fs: {
+        deny: [
+          '.env',
+          '.env.*',
+          '.git',
+          '.git/**',
+          '.backups',
+          '.backups/**',
+          'data',
+          'data/**',
+          'server.ts',
+          'src/server/**',
+        ],
+      },
     },
   };
 });

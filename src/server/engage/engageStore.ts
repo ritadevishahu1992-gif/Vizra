@@ -381,24 +381,48 @@ export function updateEngageConfig(
   patch: Partial<EngageGlobalConfig>,
   actor = 'admin@vizra.ai'
 ): EngageGlobalConfig {
+  const safePatch = patch && typeof patch === 'object' ? patch : {};
   state.config = {
     ...state.config,
-    ...patch,
+    enabled:
+      typeof safePatch.enabled === 'boolean' ? safePatch.enabled : state.config.enabled,
+    sponsoredEnabled:
+      typeof safePatch.sponsoredEnabled === 'boolean'
+        ? safePatch.sponsoredEnabled
+        : state.config.sponsoredEnabled,
+    affiliateEnabled:
+      typeof safePatch.affiliateEnabled === 'boolean'
+        ? safePatch.affiliateEnabled
+        : state.config.affiliateEnabled,
+    educationalEnabled:
+      typeof safePatch.educationalEnabled === 'boolean'
+        ? safePatch.educationalEnabled
+        : state.config.educationalEnabled,
+    interactiveEnabled:
+      typeof safePatch.interactiveEnabled === 'boolean'
+        ? safePatch.interactiveEnabled
+        : state.config.interactiveEnabled,
+    respectReducedMotion:
+      typeof safePatch.respectReducedMotion === 'boolean'
+        ? safePatch.respectReducedMotion
+        : state.config.respectReducedMotion,
     maxSponsoredRatio:
-      typeof patch.maxSponsoredRatio === 'number'
-        ? Math.max(0, Math.min(1, patch.maxSponsoredRatio))
+      typeof safePatch.maxSponsoredRatio === 'number' && Number.isFinite(safePatch.maxSponsoredRatio)
+        ? Math.max(0, Math.min(1, safePatch.maxSponsoredRatio))
         : state.config.maxSponsoredRatio,
     collapseOnCompleteDelayMs:
-      typeof patch.collapseOnCompleteDelayMs === 'number'
-        ? Math.max(0, Math.min(3000, patch.collapseOnCompleteDelayMs))
+      typeof safePatch.collapseOnCompleteDelayMs === 'number' &&
+      Number.isFinite(safePatch.collapseOnCompleteDelayMs)
+        ? Math.max(0, Math.min(3000, Math.round(safePatch.collapseOnCompleteDelayMs)))
         : state.config.collapseOnCompleteDelayMs,
     rotationIntervalMs:
-      typeof patch.rotationIntervalMs === 'number'
-        ? Math.max(2500, Math.min(30000, patch.rotationIntervalMs))
+      typeof safePatch.rotationIntervalMs === 'number' &&
+      Number.isFinite(safePatch.rotationIntervalMs)
+        ? Math.max(2500, Math.min(30000, Math.round(safePatch.rotationIntervalMs)))
         : state.config.rotationIntervalMs,
     defaultDisclosureText:
-      patch.defaultDisclosureText !== undefined
-        ? sanitizeEngageText(patch.defaultDisclosureText, 240)
+      safePatch.defaultDisclosureText !== undefined
+        ? sanitizeEngageText(safePatch.defaultDisclosureText, 240)
         : state.config.defaultDisclosureText,
     updatedAt: Date.now(),
     updatedBy: actor,
@@ -436,16 +460,45 @@ export function upsertEngageContent(
     const prev = state.content[existingIdx];
     const updated: EngageContentItem = {
       ...prev,
-      ...item,
       title: cleanTitle || prev.title,
       subtitle: cleanSubtitle,
       body: cleanBody || prev.body,
+      type: item.type || prev.type,
       category: cleanCategory || prev.category,
       ctaLabel: cleanCta,
       disclosureText: cleanDisclosure,
+      destinationUrl:
+        typeof item.destinationUrl === 'string' ? item.destinationUrl.trim().slice(0, 500) : prev.destinationUrl,
+      mediaUrl:
+        typeof item.mediaUrl === 'string' ? item.mediaUrl.trim().slice(0, 500) : prev.mediaUrl,
+      sponsorshipLabel:
+        item.sponsorshipLabel === 'Sponsored' ||
+        item.sponsorshipLabel === 'Affiliate' ||
+        item.sponsorshipLabel === 'Partner' ||
+        item.sponsorshipLabel === 'None'
+          ? item.sponsorshipLabel
+          : prev.sponsorshipLabel,
+      enabled: typeof item.enabled === 'boolean' ? item.enabled : prev.enabled,
+      targetModes: Array.isArray(item.targetModes) ? item.targetModes : prev.targetModes,
+      targetIntents: Array.isArray(item.targetIntents) ? item.targetIntents : prev.targetIntents,
+      takeaway:
+        typeof item.takeaway === 'string' ? sanitizeEngageText(item.takeaway, 240) : prev.takeaway,
+      shortcutKeys: Array.isArray(item.shortcutKeys) ? item.shortcutKeys : prev.shortcutKeys,
+      campaignId: typeof item.campaignId === 'string' ? item.campaignId.trim().slice(0, 80) : prev.campaignId,
+      partnerId: typeof item.partnerId === 'string' ? item.partnerId.trim().slice(0, 80) : prev.partnerId,
+      affiliateCode:
+        typeof item.affiliateCode === 'string' ? item.affiliateCode.trim().slice(0, 80) : prev.affiliateCode,
+      interactiveConfig: item.interactiveConfig ?? prev.interactiveConfig,
+      scheduleStart: typeof item.scheduleStart === 'string' ? item.scheduleStart : prev.scheduleStart,
+      scheduleEnd: typeof item.scheduleEnd === 'string' ? item.scheduleEnd : prev.scheduleEnd,
+      expiresAt: typeof item.expiresAt === 'string' ? item.expiresAt : prev.expiresAt,
+      frequencyCapPerSession:
+        typeof item.frequencyCapPerSession === 'number' && Number.isFinite(item.frequencyCapPerSession)
+          ? Math.max(1, Math.min(50, Math.round(item.frequencyCapPerSession)))
+          : prev.frequencyCapPerSession,
       priority:
-        typeof item.priority === 'number'
-          ? Math.max(1, Math.min(100, item.priority))
+        typeof item.priority === 'number' && Number.isFinite(item.priority)
+          ? Math.max(1, Math.min(100, Math.round(item.priority)))
           : prev.priority,
       updatedAt: now,
     };

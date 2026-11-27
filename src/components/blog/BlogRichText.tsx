@@ -92,6 +92,7 @@ export const BlogRichText: React.FC<BlogRichTextProps> = ({
           const html = renderLatexToHtml(token.value, {
             displayMode: false,
             throwOnError: false,
+            trust: false,
           });
           return (
             <span

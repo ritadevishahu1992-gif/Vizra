@@ -8,13 +8,17 @@ function getClientSessionHeaderId(): string {
   try {
     const key = 'vizra_client_tenant_id_v1';
     let id = localStorage.getItem(key);
-    if (!id || !/^[a-zA-Z0-9_-]{4,64}$/.test(id)) {
-      id = `cli_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    if (!id || !/^[a-zA-Z0-9_-]{16,64}$/.test(id)) {
+      const randomPart =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID().replace(/-/g, '')
+          : `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}${Math.random().toString(36).slice(2, 10)}`;
+      id = `cli_${randomPart.slice(0, 28)}`;
       localStorage.setItem(key, id);
     }
     return id;
   } catch {
-    return 'cli_anonymous';
+    return `cli_anon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   }
 }
 

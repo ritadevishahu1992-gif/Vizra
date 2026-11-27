@@ -48,19 +48,19 @@ export function getOrCreateVizraClientId(): string {
   if (memoryClientId) return memoryClientId;
   try {
     const existing = window.sessionStorage.getItem(CLIENT_ID_STORAGE_KEY);
-    if (existing && /^[a-z0-9_-]{8,64}$/i.test(existing)) {
+    if (existing && /^[a-z0-9_-]{16,64}$/i.test(existing)) {
       memoryClientId = existing;
       return existing;
     }
     const generated =
       typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID().replace(/-/g, '').slice(0, 20)
-        : `vc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+        ? crypto.randomUUID().replace(/-/g, '').slice(0, 24)
+        : `vc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}${Math.random().toString(36).slice(2, 8)}`;
     window.sessionStorage.setItem(CLIENT_ID_STORAGE_KEY, generated);
     memoryClientId = generated;
     return generated;
   } catch {
-    memoryClientId = `vc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    memoryClientId = `vc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}${Math.random().toString(36).slice(2, 8)}`;
     return memoryClientId;
   }
 }

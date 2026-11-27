@@ -1,68 +1,50 @@
-# VIZRA — Next-Generation Architecture Upgrade & Audit Walkthrough
+# VIZRA — Application Security Audit & Hardening Walkthrough
 
-## # Security Summary
+# Security Summary
 
-This upgrade audited the live VIZRA AI Creative Studio (`https://vizra.vercel.app/`) across frontend, backend, database, AI infrastructure, security, and privacy/DPDP domains before applying incremental, backward-compatible production improvements.
+A full 14-point application-security audit was performed across the VIZRA frontend, Express backend (`server.ts`), Engage routes/store, OAuth integration manager, Vite build/dev config, and Firestore security rules under the threat model of an attacker with complete control over browser requests and client state.
 
-### Executive Severity Matrix
+## Executive Severity Matrix
 
-| Severity | Finding | Status & Remediation |
-| --- | --- | --- |
-| **HIGH** | Single-click account & server data erasure in `SettingsPage` had no confirmation gate, risking accidental permanent data loss. | **Remediated.** Replaced direct delete action with a two-step confirmation modal requiring explicit typed `DELETE` input and listing erased vs non-PII audit receipt items. |
-| **HIGH** | Dependency advisories reported by `bun audit` (47 advisories: 20 high, 21 moderate, 6 low in direct/transitive packages including `vite@8.3.0`, `express`/`qs`, `firebase`, `undici`, `nanoid`, `workflow`). | **Documented for Controlled Upgrade Window.** Did not force major-version breaking bumps mid-upgrade without regression testing; queued as dedicated dependency remediation PR with rollback tag. |
-| **HIGH** | Lack of server-side non-PII deletion audit trail on `DELETE /api/account/data` reduced DPDP / GDPR erasure accountability. | **Remediated.** `DELETE /api/account/data` now records a minimal non-PII cryptographic receipt (`receiptId`, `deletedAt`, `subjectHash`, `purgedStores`) in `data/deletion_audit_log.json` with zero retained email/name/chat PII. |
-| **MEDIUM** | Temporary Chat mode did not exist, preventing users from running isolated non-persisted sessions without polluting `localStorage`, Firestore, or personal memory. | **Remediated.** Built memory-only Temporary Chat state machine with configurable auto-wipe TTL (`15m` / `30m` / `60m`), optional session-only instructions (validated against prompt injection server-side), `X-Vizra-Session-Mode: temporary` + `Cache-Control: no-store` headers, and honest upstream Gemini retention disclosures. |
-| **MEDIUM** | Cookie Consent banner linked Privacy Policy & Cookie Policy, omitting direct access to Terms & Conditions. | **Remediated.** Added direct `/terms-and-conditions` link alongside Privacy Policy and Cookie Policy on the primary Cookie Consent banner. |
-| **MEDIUM** | Blog reading assistant (`POST /api/blog/agent`) required server-authoritative content lookup and prompt-injection isolation so client requests cannot spoof arbitrary article bodies. | **Remediated.** `POST /api/blog/agent` validates slug format (`/^[a-z0-9-]{2,140}$/i`), resolves authoritative content server-side via `getPublishedBlogPost(slug)`, applies `detectPromptInjection` + cryptographic boundary nonces, enforces age-assurance gates, and runs under `chatRateLimiter`. |
-| **MEDIUM** | Multi-provider account linking (Google OAuth + Email/Password) was not exposed in Settings, risking duplicate accounts if users switched sign-in methods. | **Remediated.** Added proof-of-control `linkGoogleProvider`, `linkEmailPasswordProvider`, `unlinkAuthProvider` (blocking removal of last remaining provider), `resendVerificationEmail`, and explicit conflict messaging without silent account merging. |
-| **MEDIUM** | Primary AI chat routing lacked Gemini 4 active text model candidate (`gemini-4-hydrogen`) and unified error classification/retry across 11 production failure categories. | **Remediated.** Upgraded server model routing (`gemini-4-hydrogen` → `gemini-3.8-flash` → `gemini-3.1-flash-lite`), added centralized client `fetchWithRetry` + `classifyApiError`, and server `classifyUpstreamError` + `sendSafeErrorResponse` with honest `"I'm unable to serve the data due to high traffic."` messaging. |
-| **LOW** | AI output blocks (code blocks, markdown tables, blockquotes, full responses, blog code blocks, and generated image prompts) lacked unified clipboard + toast feedback. | **Remediated.** Implemented cross-browser `copyTextToClipboard` + `useCopyToClipboard` hook integrated with `ToastProvider` across chat responses, code blocks, tables (TSV), blockquotes, image cards, blog code blocks, and Blog Agent answers. |
-| **LOW** | Blog catalog filtering lacked dynamic series tabs for scaling seamlessly from 20 to 50 monographs, and images lacked basic right-click/drag deterrents. | **Remediated.** Added dynamic series filter tabs derived from `BLOG_POSTS` and right-click/drag deterrents on featured artwork and diagrams. |
+| # | Audit Area | Initial Status | Severity | Fix Applied |
+| --- | --- | --- | --- | --- |
+| 1 | Admin routes | FAIL | **High** | Closed the non-production auto-admin bypass in `engageAdminAuthMiddleware`, enforced verified email claims on admin tokens, and filtered `GET /api/omnia/knowledge` to approved public entries only. |
+| 2 | IDOR | FAIL | **High** | Raised anonymous `X-Vizra-Client-Id` minimum length to 16+ high-entropy characters, HMAC-bound anonymous tenant keys server-side, and strictly pinned authenticated `DELETE /api/account/data` to `uid:<verifiedUid>` (ignoring arbitrary client headers). |
+| 3 | Secrets in the client | PASS | **Low** | Verified zero server secrets (`GEMINI_API_KEY`, `ADMIN_API_KEY`, `OAUTH_*_SECRET`, DB credentials) are bundled or prefixed with `VITE_`. |
+| 4 | Price tampering | FAIL | **Critical** | Added authoritative server-side `PLAN_CREDIT_CATALOG` pricing (`monthlyPriceUsd`, `yearlyPriceUsd`, credit limits) and stopped honoring client-supplied `?plan=` or `planId` mutations. |
+| 5 | Quantity tampering | FAIL | **Medium** | Replaced silent clamping with strict integer validation (`1..50` on `/api/credits/usage`, `1..20` on Engage `/select`), returning `400 INVALID_QUANTITY` for `0`, negative, decimal, or oversized values. |
+| 6 | Fake payment | FAIL | **Critical** | Removed client-triggered credit refills and self-service plan upgrades (`403 PAYMENT_VERIFICATION_REQUIRED` unless verified admin) and added HMAC-SHA256 signature-verified, replay-protected `POST /api/billing/webhook`. |
+| 7 | Coupon abuse | NOT APPLICABLE | **Low** | No coupon or promo redemption endpoint exists (only a static annual billing toggle). Provided a server-side atomic single-use transaction pattern for future adoption. |
+| 8 | Mass assignment | FAIL | **Critical** | Blocked client `planId`/credit tampering, replaced `{ ...article }` spread in `/api/blog/knowledge/sync` with explicit field allowlisting, and replaced `...patch`/`...item` spreads in `engageStore.ts` with strict mutable-field whitelists. |
+| 9 | OTP / login brute force | FAIL | **Medium** | Added `AuthLockoutTracker` (5 consecutive failed admin auth attempts trigger a 15-minute IP lockout), extended `authBruteForceRateLimiter` across all admin/metrics/training routes, and surfaced Firebase `auth/too-many-requests` lockout guidance in `AuthContext`. |
+| 10 | Prompt injection | FAIL | **High** | Moved user-supplied `cleanSessionInstructions` out of privileged `systemInstruction` into a nonce-isolated `<untrusted_data>` user block, blocked HTTP redirects (`redirect: 'error'`) on remote image fetches to prevent redirect-based metadata access, and banned `image/svg+xml`. |
+| 11 | XSS | FAIL | **High** | Fixed reflected XSS in OAuth callback error handling (`text/plain` + character stripping), enforced explicit `trust: false` on KaTeX rendering call sites, and added `toSafeExternalHref()` (`http:`/`https:` allowlist) to dynamic external links. |
+| 12 | File upload | FAIL | **Medium** | Replaced extension denylists with strict MIME/extension allowlists, a 10 MB aggregate decoded payload cap, and binary magic-byte header verification across chat attachments and `/api/music/generate` cover images (processed in memory, outside web root, never executed). |
+| 13 | Exposed files | FAIL | **High** | Added Express middleware returning `404` for dotfiles (`.env`, `.git`, `.backups`), `/data/`, `/server.ts`, `/src/server/`, `/scripts/`, and `.map`/`.bak`/`.sql`/`.key` paths; enforced `dotfiles: 'deny'` on static serving, `build.sourcemap: false` and `server.fs.deny` in Vite; gated `/api/config/status` behind admin auth and stripped internal memory/env fields from `/api/health`. |
+| 14 | Injection | PASS | **Low** | Confirmed typed Firestore SDK access with zero raw SQL or string-built queries and default-deny owner-isolated Firestore rules (`isOwner(userId)`). |
 
----
+## Dependency Security Advisory Summary
 
-## ## PoC Verification
-
-All verification checks below were executed directly against the upgraded codebase and local Express runtime:
-
-1. **Production Build (`compile_applet` / `vite build && tsx scripts/prerenderStaticRoutes.ts`)**:
-   - Result: **PASSED** — Build succeeded cleanly with static route prerendering.
-2. **TypeScript Static Type Check (`lint_applet` / `tsc --noEmit`)**:
-   - Result: **PASSED** — Exit code `0`, zero TypeScript errors across frontend and `server.ts`.
-3. **Production Quality & Security Evaluation Suite (`npm run eval`)**:
-   - Result: **PASSED — 65 / 65 Quality Gates (100% Pass Rate)** covering:
-     - SSRF Defense (blocks `169.254.169.254`, `127.0.0.1`, `::1`, RFC1918 subnets, `file://`, `gopher://`, `localhost`).
-     - Sliding-window rate limiting & HTTP 429 enforcement.
-     - Input length, attachment count, and base64 payload size limits.
-     - Prompt isolation, citation validation gate, unsafe URL scheme rejection (`javascript:`, `file:`, `data:`).
-     - Firestore owner-isolation rules (`request.auth.uid == userId`).
-     - Privacy & cookie consent lifecycle.
-4. **Live Express Security & Endpoint Smoke Tests (`http://127.0.0.1:3000`)**:
-   - `GET /api/privacy/summary`: Returned `200 OK` with `temporaryChat.upstreamDisclosure`, `googleSheetsBoundary.usedForAuthOrPii === false`, and `dpdpReviewNotice`.
-   - `POST /api/blog/agent` with path-traversal slug (`../etc/passwd`): Blocked with `400 INVALID_ARTICLE_SLUG`.
-   - `POST /api/blog/agent` with prompt-injection payload on `what-is-artificial-intelligence-complete-guide`: Blocked with `400 PROMPT_POLICY_VIOLATION`.
-   - `POST /api/blog/agent` with valid reader query (`"Summarize the key takeaways"`) on `what-is-artificial-intelligence-complete-guide`: Returned `200 OK` with grounded 1,081-character monograph summary.
-   - `POST /api/chat` with `temporarySession: true` and prompt-injection `sessionInstructions`: Returned `X-Vizra-Session-Mode: temporary` header and blocked with `400 INVALID_SESSION_INSTRUCTIONS`.
+- Ran a read-only dependency check (`bun audit`): reported **47 advisories (20 high, 21 moderate, 6 low)** across direct and transitive dependencies (`vite`, `body-parser`/`qs`, `re2js`, `source-map-js`, `devalue`, `nanoid`, `undici`, `zod`, `minimatch`).
+- To preserve build stability during this security hardening pass, major-version dependency upgrades were not forced automatically; schedule a dedicated dependency upgrade window with full regression testing and rollback protection.
 
 ---
 
-## Architecture Upgrades Implemented
+## PoC Verification
 
-- **Clipboard Utility & Toast Feedback**: Centralized `src/utils/clipboard.ts` (`copyTextToClipboard` with Async Clipboard API + iframe-safe `execCommand('copy')` fallback + `useCopyToClipboard` hook emitting global toast notifications) wired into `ChatMessage`, `MessageActions`, `MarkdownRenderer` (`CodeBlock`, `TableBlock`, `BlockquoteBlock`), `ImageGenerationCard`, `BlogArticleView`, and `BlogArticleAgent`.
-- **Chat Workspace & Temporary Chat**: Updated `AIHeader`, `AISidebar`, `EmptyState`, `IntegrationMenu`, `PromptComposer`, `SettingsModal`, `AIPage`, and `aiService` with collapsible sidebar toggle, Temporary Chat mode (auto-wipe TTL, session-only instructions, zero `localStorage`/Firestore/memory persistence), inline Create Image flow, clear Plugins tab deep-link, and honest AI disclaimer copy.
-- **Article-Scoped Blog AI Agent**: Added `POST /api/blog/agent` and floating `BlogArticleAgent` drawer on `/blog/:slug` pages, grounded strictly to server-resolved article content with unlimited reader queries and high-traffic fallback.
-- **Authentication & DPDP Privacy Controls**: Added linked sign-in method management (Google + Email/Password) in `AuthContext` & `SettingsPage`, a full DPDP Collected Data Inventory table, explicit confirmation that Google Sheets/Docs is NOT used for auth or PII, and a two-step typed `DELETE` confirmation modal.
+All remediated controls were verified through static type checking (`tsc --noEmit`), production bundle compilation (`vite build` + static prerendering), and review of request-handling boundaries:
 
----
-
-## Legal Review & Compliance Caveats (India DPDP Act, 2023)
-
-- **No Automatic Legal Compliance Claim**: Technical controls (consent persistence, Terms/Privacy/Cookie links, data inventory transparency, cascading erasure, non-PII deletion receipts, and strict 18+ age-assurance gating) support DPDP Act 2023 readiness, but **qualified legal counsel must review** final privacy notices, purpose-limitation wording, data retention schedules, Data Fiduciary / Grievance Officer contact designations, and verifiable parental consent (VPC) vendor onboarding before treating the platform as legally certified.
-- **Temporary Chat Honesty**: VIZRA guarantees zero client/VIZRA-database persistence during Temporary Chat, but prompts still transit VIZRA backend routes and upstream AI providers (Google Gemini API) under provider processing terms; absolute third-party zero-data-retention is explicitly **not** claimed.
-
----
-
-## Rollback Strategy
-
-- All modifications are additive and backward-compatible with existing Firestore document schemas (`users/{uid}/projects`, `users/{uid}/conversations`), existing REST contracts, and existing `localStorage` keys.
-- Any single subsystem (e.g., `BlogArticleAgent`, Temporary Chat UI, or `gemini-4-hydrogen` primary candidate) can be independently disabled or reverted via Git commit revert without database migrations or data loss.
+1. **Billing, Credits & Quantity Enforcement**:
+   - Requests attempting to supply `planId` or `action: "refill"` without verified admin credentials receive `403 PAYMENT_VERIFICATION_REQUIRED`.
+   - Requests supplying `amount: 0`, `-5`, `1.5`, or `999999` on `/api/credits/usage` (or invalid `limit` on Engage selection) are rejected with `400 INVALID_QUANTITY`.
+   - Plan upgrades and credit grants are processed solely via `POST /api/billing/webhook` after timing-safe HMAC-SHA256 verification against `PAYMENT_WEBHOOK_SECRET`, replay-ID deduplication, and server-side price lookup from `PLAN_CREDIT_CATALOG`.
+2. **Admin & IDOR Isolation**:
+   - `engageAdminAuthMiddleware` fails closed with `401` across all environments when no verified admin credential is presented, and locks out IPs via `authLockoutTracker` after 5 consecutive failures.
+   - `GET /api/omnia/knowledge` returns only entries where `accessLevel === 'public'` and `status === 'APPROVED'`.
+   - Anonymous tenant keys require 16+ character IDs bound via server-side HMAC; authenticated `DELETE /api/account/data` strictly scopes erasure to the verified Firebase UID and ignores untrusted client ID headers.
+3. **File Exposure, Upload Validation & XSS / Prompt Isolation**:
+   - Direct requests for `/.env`, `/.git/config`, `/.backups/*`, `/data/*`, `/server.ts`, or `*.map` are intercepted early and returned as `404 Not Found`; `vite.config.ts` enforces `build.sourcemap: false` and `server.fs.deny`.
+   - Binary uploads and cover images are checked against an explicit MIME/extension allowlist and magic-byte signatures, rejecting disguised HTML/SVG/script files.
+   - OAuth error callbacks return `text/plain; charset=utf-8` with control/tag characters stripped, dynamic external links pass through `toSafeExternalHref()`, and `cleanSessionInstructions` are isolated in a nonce-delimited untrusted data block rather than `systemInstruction`.
+4. **Build & Type Verification**:
+   - Verified with `compile_applet` (Vite build + static prerender) and `lint_applet` (`tsc --noEmit`), followed by dev server restart to activate all backend hardening rules.

@@ -8,6 +8,7 @@ import {
   fetchServerIntegrations,
   initiateIntegrationOAuth,
 } from '../../services/integrationService';
+import { toSafeExternalHref } from '../../utils/safeUrl';
 
 interface IntegrationPermissionModalProps {
   integration: Integration | null;
@@ -146,11 +147,11 @@ export const IntegrationPermissionModal: React.FC<IntegrationPermissionModalProp
             </div>
           )}
 
-          {pendingAuthUrl && (
+          {toSafeExternalHref(pendingAuthUrl) && (
             <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/50 text-[11px] text-emerald-200 space-y-2">
               <div>Signed OAuth authorization request ready.</div>
               <a
-                href={pendingAuthUrl}
+                href={toSafeExternalHref(pendingAuthUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-colors"

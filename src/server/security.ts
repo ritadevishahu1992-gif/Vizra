@@ -339,6 +339,93 @@ export const authBruteForceRateLimiter = rateLimit({
 });
 
 // ============================================================================
+// 2b. FAILED AUTHENTICATION LOCKOUT TRACKER (BRUTE-FORCE DEFENSE)
+// ============================================================================
+
+interface FailedAuthRecord {
+  failures: number;
+  lockedUntil: number;
+  lastFailureAt: number;
+}
+
+export class AuthLockoutTracker {
+  private records = new Map<string, FailedAuthRecord>();
+  private readonly maxFailures: number;
+  private readonly lockoutMs: number;
+  private readonly resetWindowMs: number;
+
+  constructor(options?: { maxFailures?: number; lockoutMs?: number; resetWindowMs?: number }) {
+    this.maxFailures = options?.maxFailures ?? 5;
+    this.lockoutMs = options?.lockoutMs ?? 15 * 60 * 1000;
+    this.resetWindowMs = options?.resetWindowMs ?? 15 * 60 * 1000;
+    setInterval(() => this.cleanup(), 5 * 60 * 1000).unref();
+  }
+
+  public resolveIp(req: Request): string {
+    const forwarded = req.headers['x-forwarded-for'];
+    const raw =
+      typeof forwarded === 'string'
+        ? forwarded.split(',')[0].trim()
+        : req.socket.remoteAddress || 'unknown';
+    return raw || 'unknown';
+  }
+
+  public checkLocked(key: string): { locked: boolean; retryAfterSeconds: number } {
+    const now = Date.now();
+    const rec = this.records.get(key);
+    if (!rec) return { locked: false, retryAfterSeconds: 0 };
+    if (rec.lockedUntil > now) {
+      return {
+        locked: true,
+        retryAfterSeconds: Math.max(1, Math.ceil((rec.lockedUntil - now) / 1000)),
+      };
+    }
+    if (now - rec.lastFailureAt > this.resetWindowMs) {
+      this.records.delete(key);
+    }
+    return { locked: false, retryAfterSeconds: 0 };
+  }
+
+  public recordFailure(key: string): { locked: boolean; failures: number; retryAfterSeconds: number } {
+    const now = Date.now();
+    const existing = this.records.get(key);
+    const rec: FailedAuthRecord =
+      existing && now - existing.lastFailureAt <= this.resetWindowMs
+        ? { ...existing, failures: existing.failures + 1, lastFailureAt: now }
+        : { failures: 1, lockedUntil: 0, lastFailureAt: now };
+
+    if (rec.failures >= this.maxFailures) {
+      rec.lockedUntil = now + this.lockoutMs;
+    }
+    this.records.set(key, rec);
+    return {
+      locked: rec.lockedUntil > now,
+      failures: rec.failures,
+      retryAfterSeconds: rec.lockedUntil > now ? Math.ceil(this.lockoutMs / 1000) : 0,
+    };
+  }
+
+  public recordSuccess(key: string): void {
+    this.records.delete(key);
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [k, rec] of this.records.entries()) {
+      if (rec.lockedUntil <= now && now - rec.lastFailureAt > this.resetWindowMs) {
+        this.records.delete(k);
+      }
+    }
+  }
+}
+
+export const authLockoutTracker = new AuthLockoutTracker({
+  maxFailures: 5,
+  lockoutMs: 15 * 60 * 1000,
+  resetWindowMs: 15 * 60 * 1000,
+});
+
+// ============================================================================
 // 3. ADMIN & CRON AUTHENTICATION MIDDLEWARES
 // ============================================================================
 
@@ -382,6 +469,20 @@ export function derivePrivacySessionHashCandidates(rawIdentifier: string): strin
  * OR cryptographically verified Firebase ID token matching ADMIN_ALLOWLIST_EMAILS.
  */
 export async function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const lockKey = `admin:${authLockoutTracker.resolveIp(req)}`;
+  const lockStatus = authLockoutTracker.checkLocked(lockKey);
+  if (lockStatus.locked) {
+    res.setHeader('Retry-After', String(lockStatus.retryAfterSeconds));
+    res.status(429).json({
+      error: {
+        code: 'AUTH_LOCKED_OUT',
+        message: `Too many failed administrator authentication attempts. Try again in ${lockStatus.retryAfterSeconds} seconds.`,
+        retryAfterSeconds: lockStatus.retryAfterSeconds,
+      },
+    });
+    return;
+  }
+
   const { key: configuredAdminKey } = getConfiguredAdminKey();
 
   const authHeader = req.headers.authorization;
@@ -395,6 +496,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
   }
 
   if (!token) {
+    authLockoutTracker.recordFailure(lockKey);
     res.status(401).json({
       error: {
         code: 'UNAUTHORIZED_ADMIN',
@@ -406,6 +508,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
 
   // 1. Accept configured server Admin API Key via constant-time comparison
   if (configuredAdminKey && safeCompare(token, configuredAdminKey)) {
+    authLockoutTracker.recordSuccess(lockKey);
     (req as any).adminActor = 'admin_api_key';
     next();
     return;
@@ -431,6 +534,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
       !allowedEmails.includes(userEmail) ||
       authResult.emailVerified === false
     ) {
+      authLockoutTracker.recordFailure(lockKey);
       res.status(403).json({
         error: {
           code: 'FORBIDDEN_ADMIN',
@@ -440,12 +544,14 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
       return;
     }
 
+    authLockoutTracker.recordSuccess(lockKey);
     (req as any).user = authResult;
     (req as any).adminActor = userEmail;
     next();
     return;
   }
 
+  authLockoutTracker.recordFailure(lockKey);
   res.status(401).json({
     error: {
       code: 'UNAUTHORIZED_ADMIN',
@@ -879,35 +985,184 @@ export function validateRagContext(ragContext: any): {
   return { valid: true, cleanContext: sanitizeUntrustedContext(ragContext.trim()) };
 }
 
-const FORBIDDEN_ATTACHMENT_EXTENSIONS = new Set([
-  '.svg',
-  '.svgz',
-  '.html',
-  '.htm',
-  '.xhtml',
-  '.shtml',
-  '.exe',
-  '.dll',
-  '.bat',
-  '.cmd',
-  '.sh',
-  '.bash',
-  '.ps1',
-  '.vbs',
-  '.msi',
-  '.com',
-  '.scr',
-  '.php',
-  '.jsp',
-  '.asp',
-  '.aspx',
-  '.cgi',
-  '.jar',
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.gif',
+  '.pdf',
+  '.txt',
+  '.md',
+  '.csv',
+  '.json',
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.py',
+  '.css',
+  '.yml',
+  '.yaml',
+  '.mp3',
+  '.wav',
+  '.ogg',
+  '.flac',
+  '.m4a',
+  '.aac',
+  '.webm',
+]);
+
+const ALLOWED_DATA_URI_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/ogg',
+  'audio/flac',
+  'audio/mp4',
+  'audio/aac',
+  'audio/webm',
+]);
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
 ]);
 
 /**
- * Validates uploaded attachments to prevent memory exhaustion, active XSS payloads (SVG/HTML),
- * executable uploads, and path traversal.
+ * Verifies binary magic-byte signatures against the claimed MIME type so renamed
+ * HTML/SVG/script/executable files cannot masquerade as images, PDFs, or audio.
+ */
+export function verifyBinaryMagicBytes(mimeType: string, base64Data: string): boolean {
+  try {
+    const cleanB64 = base64Data.replace(/\s+/g, '');
+    if (!cleanB64 || !/^[A-Za-z0-9+/]+={0,2}$/.test(cleanB64)) {
+      return false;
+    }
+    const headerBuf = Buffer.from(cleanB64.slice(0, 64), 'base64');
+    if (headerBuf.length < 4) return false;
+
+    // Immediately reject disguised HTML/SVG/XML/executable signatures
+    const asciiPrefix = headerBuf.toString('utf8').trimStart().toLowerCase();
+    if (
+      asciiPrefix.startsWith('<!doctype') ||
+      asciiPrefix.startsWith('<html') ||
+      asciiPrefix.startsWith('<svg') ||
+      asciiPrefix.startsWith('<script') ||
+      asciiPrefix.startsWith('<?xml') ||
+      (headerBuf[0] === 0x4d && headerBuf[1] === 0x5a) || // MZ (PE/EXE)
+      (headerBuf[0] === 0x7f && headerBuf[1] === 0x45 && headerBuf[2] === 0x4c && headerBuf[3] === 0x46) // ELF
+    ) {
+      return false;
+    }
+
+    const mime = mimeType.toLowerCase();
+    if (mime === 'image/png') {
+      return (
+        headerBuf.length >= 8 &&
+        headerBuf[0] === 0x89 &&
+        headerBuf[1] === 0x50 &&
+        headerBuf[2] === 0x4e &&
+        headerBuf[3] === 0x47
+      );
+    }
+    if (mime === 'image/jpeg' || mime === 'image/jpg') {
+      return headerBuf[0] === 0xff && headerBuf[1] === 0xd8 && headerBuf[2] === 0xff;
+    }
+    if (mime === 'image/gif') {
+      const sig = headerBuf.subarray(0, 6).toString('ascii');
+      return sig === 'GIF87a' || sig === 'GIF89a';
+    }
+    if (mime === 'image/webp') {
+      return (
+        headerBuf.length >= 12 &&
+        headerBuf.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        headerBuf.subarray(8, 12).toString('ascii') === 'WEBP'
+      );
+    }
+    if (mime === 'application/pdf') {
+      return headerBuf.subarray(0, 5).toString('ascii') === '%PDF-';
+    }
+    if (mime === 'audio/wav' || mime === 'audio/x-wav') {
+      return (
+        headerBuf.length >= 12 &&
+        headerBuf.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        headerBuf.subarray(8, 12).toString('ascii') === 'WAVE'
+      );
+    }
+    if (mime === 'audio/mpeg' || mime === 'audio/mp3') {
+      const isId3 = headerBuf.subarray(0, 3).toString('ascii') === 'ID3';
+      const isMpegFrame = headerBuf[0] === 0xff && (headerBuf[1] & 0xe0) === 0xe0;
+      return isId3 || isMpegFrame;
+    }
+    if (mime === 'audio/ogg') {
+      return headerBuf.subarray(0, 4).toString('ascii') === 'OggS';
+    }
+    if (mime === 'audio/flac') {
+      return headerBuf.subarray(0, 4).toString('ascii') === 'fLaC';
+    }
+    if (mime === 'audio/mp4' || mime === 'audio/aac') {
+      const isFtyp = headerBuf.length >= 8 && headerBuf.subarray(4, 8).toString('ascii') === 'ftyp';
+      const isAdts = headerBuf[0] === 0xff && (headerBuf[1] & 0xf6) === 0xf0;
+      return isFtyp || isAdts;
+    }
+    if (mime === 'audio/webm') {
+      return (
+        headerBuf[0] === 0x1a &&
+        headerBuf[1] === 0x45 &&
+        headerBuf[2] === 0xdf &&
+        headerBuf[3] === 0xa3
+      );
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates raw base64 image payloads (e.g., /api/music/generate image-to-music).
+ */
+export function validateImageBase64Payload(
+  base64Data: unknown,
+  mimeType: unknown
+): { valid: boolean; error?: string; normalizedMime?: string } {
+  if (typeof base64Data !== 'string' || !base64Data.trim()) {
+    return { valid: false, error: 'Image payload must be a non-empty base64 string.' };
+  }
+  const normalizedMime = typeof mimeType === 'string' ? mimeType.trim().toLowerCase() : '';
+  if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMime)) {
+    return {
+      valid: false,
+      error: 'Unsupported image MIME type. Only PNG, JPEG, WebP, and GIF images are allowed.',
+    };
+  }
+  const decodedEstimateBytes = Math.ceil((base64Data.length * 3) / 4);
+  if (decodedEstimateBytes > 10 * 1024 * 1024) {
+    return { valid: false, error: 'Uploaded image exceeds the 10MB decoded size limit.' };
+  }
+  if (!verifyBinaryMagicBytes(normalizedMime, base64Data)) {
+    return {
+      valid: false,
+      error: 'Image binary content does not match the declared MIME type.',
+    };
+  }
+  return { valid: true, normalizedMime };
+}
+
+/**
+ * Validates uploaded attachments with strict extension + MIME allowlists,
+ * aggregate decoded byte caps, magic-byte content verification, and path traversal blocks.
  */
 export function validateAttachments(attachments: any): { valid: boolean; error?: string } {
   if (!attachments) return { valid: true };
@@ -918,13 +1173,16 @@ export function validateAttachments(attachments: any): { valid: boolean; error?:
     return { valid: false, error: 'Maximum 5 attachments allowed per message.' };
   }
 
+  let totalDecodedBytes = 0;
+  const MAX_TOTAL_DECODED_BYTES = 10 * 1024 * 1024;
+
   for (let i = 0; i < attachments.length; i++) {
     const att = attachments[i];
     if (!att || typeof att !== 'object') {
       return { valid: false, error: `Attachment at index ${i} is invalid.` };
     }
 
-    // Validate filename against path traversal and dangerous executable/script extensions
+    // Validate filename against path traversal and enforce strict extension allowlist
     if (att.name !== undefined) {
       if (typeof att.name !== 'string' || att.name.length > 255) {
         return { valid: false, error: `Attachment filename at index ${i} is invalid.` };
@@ -936,30 +1194,47 @@ export function validateAttachments(attachments: any): { valid: boolean; error?:
       const dotIdx = lowerName.lastIndexOf('.');
       if (dotIdx !== -1) {
         const ext = lowerName.slice(dotIdx);
-        if (FORBIDDEN_ATTACHMENT_EXTENSIONS.has(ext)) {
+        if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(ext)) {
           return {
             valid: false,
-            error: `Attachment "${att.name}" uses a restricted executable or active-script file type (${ext}).`,
+            error: `Attachment "${att.name}" uses an unsupported or restricted file extension (${ext}).`,
           };
         }
       }
     }
 
-    // Check base64 size limits (< 15MB string length which corresponds to ~10MB binary)
+    // Validate data URI MIME allowlist, size limits, and binary magic bytes
     if (att.previewUrl && typeof att.previewUrl === 'string') {
-      if (att.previewUrl.length > 15 * 1024 * 1024) {
+      if (att.previewUrl.length > 14 * 1024 * 1024) {
         return { valid: false, error: `Attachment "${att.name || i}" exceeds 10MB size limit.` };
       }
-      const lowerUrl = att.previewUrl.slice(0, 64).toLowerCase();
-      if (
-        lowerUrl.startsWith('data:image/svg') ||
-        lowerUrl.startsWith('data:text/html') ||
-        lowerUrl.startsWith('data:application/xhtml') ||
-        lowerUrl.startsWith('javascript:')
-      ) {
+      const match = att.previewUrl.match(/^data:([a-zA-Z0-9.+/-]+);base64,(.+)$/);
+      if (!match) {
         return {
           valid: false,
-          error: `Attachment "${att.name || i}" contains an active script or SVG/HTML data URI that is not permitted.`,
+          error: `Attachment "${att.name || i}" must use a valid base64 data URI.`,
+        };
+      }
+      const declaredMime = match[1].toLowerCase();
+      const base64Body = match[2];
+      if (!ALLOWED_DATA_URI_MIME_TYPES.has(declaredMime)) {
+        return {
+          valid: false,
+          error: `Attachment "${att.name || i}" uses a disallowed MIME type (${declaredMime}).`,
+        };
+      }
+      const decodedBytes = Math.ceil((base64Body.length * 3) / 4);
+      totalDecodedBytes += decodedBytes;
+      if (decodedBytes > MAX_TOTAL_DECODED_BYTES || totalDecodedBytes > MAX_TOTAL_DECODED_BYTES) {
+        return {
+          valid: false,
+          error: 'Total attachment payload exceeds the 10MB decoded limit.',
+        };
+      }
+      if (!verifyBinaryMagicBytes(declaredMime, base64Body)) {
+        return {
+          valid: false,
+          error: `Attachment "${att.name || i}" failed server-side binary signature verification for ${declaredMime}.`,
         };
       }
     }

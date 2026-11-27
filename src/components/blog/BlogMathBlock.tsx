@@ -15,6 +15,7 @@ export const BlogMathBlock: React.FC<BlogMathBlockProps> = ({
       renderLatexToHtml(latex, {
         displayMode: true,
         throwOnError: false,
+        trust: false,
       }),
     [latex]
   );

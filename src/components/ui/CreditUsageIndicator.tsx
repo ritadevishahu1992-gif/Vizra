@@ -11,6 +11,7 @@ import {
   Layers,
   Plus,
 } from 'lucide-react';
+import { getOrCreateVizraClientId } from '../../utils/apiErrorHandler';
 
 export type CreditIndicatorVariant = 'header' | 'sidebar' | 'rail';
 
@@ -137,20 +138,18 @@ export function recordAICreditUsage(
     // Ignore storage error
   }
 
-  // Synchronize with authoritative backend ledger asynchronously
-  const savedPlan =
-    typeof window !== 'undefined'
-      ? localStorage.getItem(PLAN_STORAGE_KEY) || undefined
-      : undefined;
-
+  // Synchronize with authoritative backend ledger asynchronously (server owns plan/tier & pricing)
+  const clientId = getOrCreateVizraClientId();
   fetch('/api/credits/usage', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Vizra-Client-Id': clientId,
+    },
     body: JSON.stringify({
       action,
-      amount,
+      amount: Math.max(1, Math.min(50, Math.trunc(amount))),
       category,
-      planId: savedPlan,
       description,
     }),
   })
@@ -162,6 +161,13 @@ export function recordAICreditUsage(
             CREDITS_USED_STORAGE_KEY,
             String(payload.balance.used)
           );
+          if (
+            payload.balance.planId === 'starter' ||
+            payload.balance.planId === 'pro' ||
+            payload.balance.planId === 'studio'
+          ) {
+            localStorage.setItem(PLAN_STORAGE_KEY, payload.balance.planId);
+          }
           window.dispatchEvent(
             new CustomEvent(CREDITS_EVENT_NAME, { detail: payload })
           );
@@ -277,16 +283,24 @@ export const CreditUsageIndicator: React.FC<CreditUsageIndicatorProps> = ({
   const syncWithBackendCredits = useCallback(async () => {
     setIsSyncing(true);
     try {
-      const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY) || 'starter';
-      const res = await fetch(
-        `/api/credits/usage?plan=${encodeURIComponent(savedPlan)}`
-      );
+      const res = await fetch('/api/credits/usage', {
+        headers: {
+          'X-Vizra-Client-Id': getOrCreateVizraClientId(),
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         const serverUsed = Number(data?.balance?.used);
         if (Number.isFinite(serverUsed) && serverUsed >= 0) {
           try {
             localStorage.setItem(CREDITS_USED_STORAGE_KEY, String(serverUsed));
+            if (
+              data?.balance?.planId === 'starter' ||
+              data?.balance?.planId === 'pro' ||
+              data?.balance?.planId === 'studio'
+            ) {
+              localStorage.setItem(PLAN_STORAGE_KEY, data.balance.planId);
+            }
             window.dispatchEvent(
               new CustomEvent(CREDITS_EVENT_NAME, { detail: data })
             );

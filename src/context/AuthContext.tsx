@@ -79,6 +79,9 @@ function formatFirebaseAuthError(err: any): string {
   if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
     return 'Invalid email or password. Please verify your credentials.';
   }
+  if (code === 'auth/too-many-requests') {
+    return 'Too many failed sign-in attempts. Access is temporarily locked—please wait a few minutes or reset your password.';
+  }
   if (code === 'auth/email-already-in-use') {
     return 'An account with this email already exists. Try signing in instead.';
   }

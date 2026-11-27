@@ -151,7 +151,7 @@ interface PaletteRowItem {
 
 export const GlobalCommandPalette: React.FC = () => {
   const { isOpen, closePalette } = useCommandPalette();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -255,7 +255,7 @@ export const GlobalCommandPalette: React.FC = () => {
       !trimmed ||
       themeKeywords.some((kw) => kw.includes(trimmed.toLowerCase()) || trimmed.toLowerCase().includes(kw));
     if (activeTab === 'All' && wantsTheme) {
-      const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+      const nextTheme = theme === 'dark' ? 'light' : 'dark';
       rows.push({
         id: 'quick-toggle-theme',
         title: nextTheme === 'light' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
@@ -275,7 +275,7 @@ export const GlobalCommandPalette: React.FC = () => {
     }
 
     return rows;
-  }, [query, activeTab, recentIds, resolvedTheme, executeNavigation, setTheme, closePalette]);
+  }, [query, activeTab, recentIds, theme, executeNavigation, setTheme, closePalette]);
 
   // Reset active highlight when list changes
   useEffect(() => {

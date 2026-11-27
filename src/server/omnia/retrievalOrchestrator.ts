@@ -277,12 +277,14 @@ export function planSourceRetrieval(params: {
   //   or purely asking about a VIZRA blog article without external web intent.
   const explicitWebIntent = EXPLICIT_WEB_SEARCH_PATTERN.test(lower);
   const factualExternalIntent = EXTERNAL_FACTUAL_PATTERN.test(lower);
+  const isSimpleArithmetic =
+    /^(?:what\s+is\s+|calculate\s+|compute\s+|solve\s+)?[\d\s+\-*/^().=%]+[\s?]*$/i.test(lower);
 
   let shouldUseWebSearch = false;
   if (mode === 'research' || explicitWebIntent) {
     shouldUseWebSearch = true;
     reasons.push('Explicit web research / time-sensitive query');
-  } else if (isPureChatOrCreative || isInternalIdentity) {
+  } else if (isPureChatOrCreative || isInternalIdentity || isSimpleArithmetic) {
     shouldUseWebSearch = false;
   } else if (hasAttachments && DOCUMENT_REFERENCE_PATTERN.test(lower)) {
     shouldUseWebSearch = false;
@@ -564,9 +566,18 @@ export function buildOmniaGroundingDirective(params: {
   return lines.join('\n');
 }
 
+const MAX_RETRIEVAL_TRACES = 60;
+const recentRetrievalTraces: Record<string, unknown>[] = [];
+
+export function getRecentRetrievalTraces(limit = 20): Record<string, unknown>[] {
+  const safeLimit = Math.min(MAX_RETRIEVAL_TRACES, Math.max(1, Math.floor(limit)));
+  return recentRetrievalTraces.slice(-safeLimit).reverse();
+}
+
 /**
- * Emits a structured server-side retrieval & reliability trace log.
- * Privacy rule: NEVER logs API keys, private user prompts, emails, or raw private documents.
+ * Records a structured server-side retrieval & reliability trace in a bounded memory ring buffer.
+ * Privacy rule: NEVER records API keys, private user prompts, emails, or raw private documents.
+ * Avoids flooding stdout with verbose JSON containing `"errors":[]` on healthy 200 responses.
  */
 export function emitRetrievalTraceLog(trace: OmniaRetrievalTrace): void {
   const queryHash = crypto
@@ -589,7 +600,7 @@ export function emitRetrievalTraceLog(trace: OmniaRetrievalTrace): void {
     retrievedDocuments: trace.retrievedDocuments.slice(0, 15).map((doc) => ({
       id: String(doc.id).slice(0, 80),
       provider: doc.provider,
-      // Only log public titles (never private uploaded filenames/user doc text)
+      // Only store public titles (never private uploaded filenames/user doc text)
       ...(doc.provider === 'vizra_blog' || doc.provider === 'google_search' || doc.provider === 'approved_learning'
         ? { title: scrubLogText(doc.title, 100) }
         : {}),
@@ -603,8 +614,17 @@ export function emitRetrievalTraceLog(trace: OmniaRetrievalTrace): void {
     },
     generation: trace.generation,
     reliability: trace.reliability,
-    errors: trace.errors.slice(0, 8).map((e) => scrubLogText(e, 180)),
+    diagnostics: trace.errors.slice(0, 8).map((e) => scrubLogText(e, 180)),
   };
 
-  console.info('[Omnia Reliability & Retrieval Trace]', JSON.stringify(safePayload));
+  recentRetrievalTraces.push(safePayload);
+  if (recentRetrievalTraces.length > MAX_RETRIEVAL_TRACES) {
+    recentRetrievalTraces.shift();
+  }
+
+  if (process.env.DEBUG_OMNIA_TRACE === 'true') {
+    console.log(
+      `[Omnia Trace] ${trace.requestId} model=${trace.generation.model} docs=${trace.documentsRetrievedCount} latency=${trace.generation.latencyMs}ms`
+    );
+  }
 }

@@ -452,6 +452,7 @@ export interface IntelligentRetryOptions {
   maxDelayMs?: number;
   getRemainingBudgetMs: () => number;
   minBudgetForRetryMs?: number;
+  failFastOnTimeout?: boolean;
   onRetry?: (info: { attempt: number; delayMs: number; status?: number; category: FailureCategory }) => void;
 }
 
@@ -470,6 +471,7 @@ export async function executeWithIntelligentRetry<T>(
     maxDelayMs = 4500,
     getRemainingBudgetMs,
     minBudgetForRetryMs = 3000,
+    failFastOnTimeout = false,
     onRetry,
   } = options;
 
@@ -484,7 +486,9 @@ export async function executeWithIntelligentRetry<T>(
       lastError = err;
       const classification = isRetryableProviderError(err);
 
-      if (!classification.retryable || attempt >= maxRetries) {
+      const isTimeoutFailure =
+        classification.status === 504 || classification.category === 'REQUEST_TIMEOUT';
+      if (!classification.retryable || attempt >= maxRetries || (failFastOnTimeout && isTimeoutFailure)) {
         throw err;
       }
 

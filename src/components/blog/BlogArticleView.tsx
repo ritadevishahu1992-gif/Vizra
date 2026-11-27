@@ -18,6 +18,7 @@ import { BlogMathBlock } from './BlogMathBlock';
 import { BlogTableOfContents, type TocEntry } from './BlogTableOfContents';
 import { BlogArticleAgent } from './BlogArticleAgent';
 import { useCopyToClipboard } from '../../utils/clipboard';
+import { toSafeExternalHref } from '../../utils/safeUrl';
 
 interface BlogArticleViewProps {
   post: BlogPost;
@@ -553,15 +554,21 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                           {source.venue ? ` — ${source.venue}` : ''}
                           {source.date ? ` (${source.date})` : ''}.
                         </div>
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 font-mono text-[12px] text-neutral-500 hover:text-[#EB3B2D] transition-colors break-all"
-                        >
-                          <span>{source.url}</span>
-                          <ExternalLink size={11} className="shrink-0" />
-                        </a>
+                        {toSafeExternalHref(source.url) ? (
+                          <a
+                            href={toSafeExternalHref(source.url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 font-mono text-[12px] text-neutral-500 hover:text-[#EB3B2D] transition-colors break-all"
+                          >
+                            <span>{source.url}</span>
+                            <ExternalLink size={11} className="shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="font-mono text-[12px] text-neutral-500 break-all">
+                            {source.url}
+                          </span>
+                        )}
                         {source.verificationNote && (
                           <div className="text-[12px] font-mono text-amber-600 dark:text-amber-400/90">
                             Editorial note: {source.verificationNote}

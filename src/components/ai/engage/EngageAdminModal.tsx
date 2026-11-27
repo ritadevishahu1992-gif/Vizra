@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../../../context/AuthContext';
 import { auth } from '../../../lib/firebase';
 import { AIMode } from '../../../types/ai';
+import { toSafeExternalHref } from '../../../utils/safeUrl';
 import {
   EngageContentItem,
   EngageCampaign,
@@ -1190,15 +1191,19 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
                         <div className="text-xs text-neutral-400 flex items-center gap-2">
                           <span>Partner: {camp.partnerName}</span>
                           <span>•</span>
-                          <a
-                            href={camp.destinationUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#eb3b2d] hover:underline inline-flex items-center gap-1"
-                          >
-                            <span>{camp.destinationUrl}</span>
-                            <ExternalLink size={10} />
-                          </a>
+                          {toSafeExternalHref(camp.destinationUrl) ? (
+                            <a
+                              href={toSafeExternalHref(camp.destinationUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#eb3b2d] hover:underline inline-flex items-center gap-1"
+                            >
+                              <span>{camp.destinationUrl}</span>
+                              <ExternalLink size={10} />
+                            </a>
+                          ) : (
+                            <span className="text-neutral-500">{camp.destinationUrl}</span>
+                          )}
                         </div>
                         <div className="text-[11px] font-mono text-neutral-500">
                           Spend: ${camp.spentUsd.toFixed(2)} / ${camp.budgetUsd.toFixed(2)} • CPM: $

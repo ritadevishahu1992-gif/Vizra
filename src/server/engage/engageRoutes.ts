@@ -3,13 +3,13 @@ import crypto from 'crypto';
 import {
   SlidingWindowRateLimiter,
   validateExternalUrlForSSRF,
+  authLockoutTracker,
 } from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
 import { resolveRequestAgePolicyContext } from '../compliance/ageAssurance';
 import {
   getConfiguredAdminKey,
   getAdminAllowlistEmails,
-  isProductionEnv,
 } from '../config/envConfig';
 import {
   getEngageConfig,
@@ -98,17 +98,30 @@ function safeCompareStrings(a: string, b: string): boolean {
 
 /**
  * Server-side Role-Based Authorization for VIZRA Engage Administration.
+ * Always fails closed when credentials are missing or invalid.
  * Supports:
  * 1. Valid server ADMIN_API_KEY via X-Admin-Key or Authorization Bearer header.
- * 2. Verified Firebase ID Token belonging to the configured administrator email.
- * 3. In non-production preview mode when no ADMIN_API_KEY is enforced and no forged token is sent,
- *    permits studio preview governance while still rejecting any explicitly invalid/forged tokens.
+ * 2. Verified Firebase ID Token with verified email belonging to ADMIN_ALLOWLIST_EMAILS.
  */
 export async function engageAdminAuthMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  const lockKey = `engage_admin:${authLockoutTracker.resolveIp(req)}`;
+  const lockStatus = authLockoutTracker.checkLocked(lockKey);
+  if (lockStatus.locked) {
+    res.setHeader('Retry-After', String(lockStatus.retryAfterSeconds));
+    res.status(429).json({
+      error: {
+        code: 'AUTH_LOCKED_OUT',
+        message: `Too many failed administrator authentication attempts. Try again in ${lockStatus.retryAfterSeconds} seconds.`,
+        retryAfterSeconds: lockStatus.retryAfterSeconds,
+      },
+    });
+    return;
+  }
+
   const allowedAdminEmails = getAdminAllowlistEmails();
   const { key: configuredAdminKey } = getConfiguredAdminKey();
 
@@ -127,6 +140,7 @@ export async function engageAdminAuthMiddleware(
     ((xAdminKey && safeCompareStrings(xAdminKey, configuredAdminKey)) ||
       (bearerToken && safeCompareStrings(bearerToken, configuredAdminKey)))
   ) {
+    authLockoutTracker.recordSuccess(lockKey);
     (req as any).engageActor = 'admin-key@vizra.ai';
     next();
     return;
@@ -134,6 +148,7 @@ export async function engageAdminAuthMiddleware(
 
   // If X-Admin-Key was explicitly provided but did not match, reject immediately
   if (xAdminKey) {
+    authLockoutTracker.recordFailure(lockKey);
     res.status(401).json({
       error: {
         code: 'UNAUTHORIZED_ENGAGE_ADMIN',
@@ -147,6 +162,7 @@ export async function engageAdminAuthMiddleware(
   if (bearerToken) {
     const verified = await verifyFirebaseIdToken(bearerToken);
     if (!verified.valid || !verified.email) {
+      authLockoutTracker.recordFailure(lockKey);
       res.status(401).json({
         error: {
           code: 'UNAUTHORIZED_ENGAGE_TOKEN',
@@ -156,35 +172,35 @@ export async function engageAdminAuthMiddleware(
       return;
     }
 
-    if (allowedAdminEmails.length === 0 || !allowedAdminEmails.includes(verified.email.toLowerCase())) {
+    if (
+      verified.emailVerified === false ||
+      allowedAdminEmails.length === 0 ||
+      !allowedAdminEmails.includes(verified.email.toLowerCase())
+    ) {
+      authLockoutTracker.recordFailure(lockKey);
       res.status(403).json({
         error: {
           code: 'FORBIDDEN_ENGAGE_ROLE',
-          message: 'Forbidden: Administrator role required to manage VIZRA Engage.',
+          message: 'Forbidden: Administrator role with verified email is required to manage VIZRA Engage.',
         },
       });
       return;
     }
 
+    authLockoutTracker.recordSuccess(lockKey);
     (req as any).engageActor = verified.email.toLowerCase();
     next();
     return;
   }
 
-  // 3. No credentials provided: reject in production
-  if (isProductionEnv()) {
-    res.status(401).json({
-      error: {
-        code: 'ENGAGE_AUTH_REQUIRED',
-        message: 'Unauthorized: Administrator credentials required.',
-      },
-    });
-    return;
-  }
-
-  // Studio development preview fallback
-  (req as any).engageActor = allowedAdminEmails[0] || 'studio-preview-admin@vizra.local';
-  next();
+  // 3. Fail closed in ALL environments when no credentials are supplied
+  authLockoutTracker.recordFailure(lockKey);
+  res.status(401).json({
+    error: {
+      code: 'ENGAGE_AUTH_REQUIRED',
+      message: 'Unauthorized: Administrator credentials required.',
+    },
+  });
 }
 
 export function setupVizraEngageRoutes(app: Express): void {
@@ -211,12 +227,26 @@ export function setupVizraEngageRoutes(app: Express): void {
         : [];
 
       const ageCtx = await resolveRequestAgePolicyContext(req);
-      const limit = Number(req.query.limit || req.body?.limit || 5);
+      const rawLimit = req.query.limit ?? req.body?.limit;
+      let validatedLimit = 5;
+      if (rawLimit !== undefined && rawLimit !== '') {
+        const parsedLimit = Number(rawLimit);
+        if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 20) {
+          res.status(400).json({
+            error: {
+              code: 'INVALID_QUANTITY',
+              message: 'limit must be an integer between 1 and 20.',
+            },
+          });
+          return;
+        }
+        validatedLimit = parsedLimit;
+      }
       const selection = selectEngageInventory({
         mode,
         sessionHash,
         excludeIds,
-        limit: Number.isFinite(limit) ? limit : 5,
+        limit: validatedLimit,
         minorSafeMode: ageCtx.requiresMinorSafeDirectives,
         minorBlocked: ageCtx.isMinorBlocked,
       });

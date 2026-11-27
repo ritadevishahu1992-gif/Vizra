@@ -21,6 +21,7 @@ import { MarkdownRenderer } from '../ai/MarkdownRenderer';
 import { useCopyToClipboard } from '../../utils/clipboard';
 import { fetchWithRetry, HIGH_TRAFFIC_MESSAGE } from '../../utils/apiErrorHandler';
 import { generateArticleSuggestions } from '../../utils/articleSuggestions';
+import { toSafeExternalHref } from '../../utils/safeUrl';
 
 interface ReferencedArticle {
   slug: string;
@@ -494,18 +495,22 @@ export const BlogArticleAgent: React.FC<BlogArticleAgentProps> = ({
                                 Verified Web Sources
                               </div>
                               <div className="flex flex-wrap gap-1.5">
-                                {msg.webSources.map((src, sIdx) => (
-                                  <a
-                                    key={`${src.url}-${sIdx}`}
-                                    href={src.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-white/[0.05] hover:bg-neutral-100 dark:hover:bg-white/[0.1] border border-neutral-200 dark:border-white/10 hover:border-[#EB3B2D]/60 text-[11px] text-neutral-700 dark:text-neutral-300 hover:text-[#EB3B2D] transition-colors max-w-full"
-                                  >
-                                    <span className="truncate max-w-[13rem]">{src.title}</span>
-                                    <ExternalLink size={10} className="shrink-0" />
-                                  </a>
-                                ))}
+                                {msg.webSources.map((src, sIdx) => {
+                                  const safeHref = toSafeExternalHref(src.url);
+                                  if (!safeHref) return null;
+                                  return (
+                                    <a
+                                      key={`${src.url}-${sIdx}`}
+                                      href={safeHref}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-white/[0.05] hover:bg-neutral-100 dark:hover:bg-white/[0.1] border border-neutral-200 dark:border-white/10 hover:border-[#EB3B2D]/60 text-[11px] text-neutral-700 dark:text-neutral-300 hover:text-[#EB3B2D] transition-colors max-w-full"
+                                    >
+                                      <span className="truncate max-w-[13rem]">{src.title}</span>
+                                      <ExternalLink size={10} className="shrink-0" />
+                                    </a>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}

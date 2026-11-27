@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Atom, Search, ExternalLink, Dna, Database, BookOpen, Layers, Check, Loader2 } from 'lucide-react';
 import { fetchAlphaFoldStructure, fetchPubChemCompound, searchPubMedLiterature, ProteinStructureData, CompoundData, PubMedArticle } from '../../services/scienceService';
+import { toSafeExternalHref } from '../../utils/safeUrl';
 
 interface ScienceHubModalProps {
   isOpen: boolean;
@@ -281,13 +282,13 @@ export const ScienceHubModal: React.FC<ScienceHubModalProps> = ({ isOpen, onClos
                   </div>
                   <div className="p-2.5 rounded-lg bg-neutral-950/60 border border-neutral-850">
                     <span className="text-[10px] uppercase font-mono text-neutral-500 block">Coordinate PDB</span>
-                    <a href={proteinResult.pdbUrl} target="_blank" rel="noreferrer" className="text-xs text-[#eb3b2d] hover:underline truncate block">
+                    <a href={toSafeExternalHref(proteinResult.pdbUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-[#eb3b2d] hover:underline truncate block">
                       Download .pdb
                     </a>
                   </div>
                   <div className="p-2.5 rounded-lg bg-neutral-950/60 border border-neutral-850">
                     <span className="text-[10px] uppercase font-mono text-neutral-500 block">mmCIF Model</span>
-                    <a href={proteinResult.cifUrl} target="_blank" rel="noreferrer" className="text-xs text-[#eb3b2d] hover:underline truncate block">
+                    <a href={toSafeExternalHref(proteinResult.cifUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-[#eb3b2d] hover:underline truncate block">
                       Download .cif
                     </a>
                   </div>
@@ -399,9 +400,9 @@ export const ScienceHubModal: React.FC<ScienceHubModalProps> = ({ isOpen, onClos
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="text-xs font-semibold text-white leading-snug">{art.title}</h4>
                       <a
-                        href={art.url}
+                        href={toSafeExternalHref(art.url)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="text-[11px] text-[#eb3b2d] hover:underline shrink-0 flex items-center gap-1"
                       >
                         <span>PMID {art.pmid}</span>

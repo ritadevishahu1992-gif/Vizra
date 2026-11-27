@@ -68,15 +68,18 @@ const ASSETS_STORAGE_KEY = 'vizra_workspace_uploaded_assets_v1';
 function getOrCreateWorkspaceClientId(): string {
   try {
     let cid = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
-    if (cid && /^[a-zA-Z0-9_-]{4,64}$/.test(cid)) {
+    if (cid && /^[a-zA-Z0-9_-]{16,64}$/.test(cid)) {
       return cid;
     }
-    const rand = Math.random().toString(36).slice(2, 10);
-    cid = `ws_${Date.now().toString(36)}_${rand}`;
+    const randomPart =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID().replace(/-/g, '')
+        : `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}_${Math.random().toString(36).slice(2, 12)}`;
+    cid = `ws_${randomPart.slice(0, 28)}`;
     localStorage.setItem(CLIENT_ID_STORAGE_KEY, cid);
     return cid;
   } catch {
-    return 'ws_default_session';
+    return `ws_${Date.now().toString(36)}_fallback_session`;
   }
 }
 
