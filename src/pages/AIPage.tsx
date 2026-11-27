@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AIHeader } from '../components/ai/AIHeader';
 import { AISidebar } from '../components/ai/AISidebar';
 import { EmptyState } from '../components/ai/EmptyState';
@@ -59,6 +60,7 @@ import {
 export const AIPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>(() => createInitialConversations());
   const [activeConversationId, setActiveConversationId] = useState<string | null>('conv-1');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -105,6 +107,34 @@ export const AIPage: React.FC = () => {
     setSettingsInitialTab(tab);
     setIsSettingsOpen(true);
   };
+
+  // Handle direct deep links from Global Search Command Palette (?hub=... or ?mode=...)
+  useEffect(() => {
+    const hub = searchParams.get('hub');
+    const requestedMode = searchParams.get('mode');
+    if (!hub && !requestedMode) return;
+
+    if (hub === 'science') setIsScienceHubOpen(true);
+    else if (hub === 'music') setIsMusicStudioOpen(true);
+    else if (hub === 'voice') setIsLiveVoiceOpen(true);
+    else if (hub === 'create') setIsCreateHubOpen(true);
+    else if (hub === 'knowledge') setIsKnowledgeBaseOpen(true);
+    else if (hub === 'tools') setIsCreationToolsOpen(true);
+
+    if (
+      requestedMode &&
+      ['quick', 'think', 'research', 'science', 'create', 'code', 'analyze'].includes(
+        requestedMode
+      )
+    ) {
+      setCurrentMode(requestedMode as AIMode);
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('hub');
+    nextParams.delete('mode');
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Temporary Chat Auto-Wipe Countdown Timer & Unmount Cleanup
   useEffect(() => {

@@ -5081,6 +5081,12 @@ Core Responsibilities:
     res.sendFile(path.resolve(__dirname, 'public', 'BingSiteAuth.xml'));
   });
 
+  app.get('/5ca94201a0d04f8ea805259202bffce5.txt', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.sendFile(path.resolve(__dirname, 'public', '5ca94201a0d04f8ea805259202bffce5.txt'));
+  });
+
   // Explicit ads.txt, robots.txt, sitemap.xml & og-image.png handlers guaranteeing exact MIME types
   app.get('/ads.txt', (_req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');

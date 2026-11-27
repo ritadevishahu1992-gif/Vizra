@@ -11,6 +11,7 @@ const SpeedInsights = () => null;
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SystemStatusProvider } from './context/SystemStatusContext';
+import { CommandPaletteProvider } from './context/CommandPaletteContext';
 import { ToastProvider } from './components/ui/Toast';
 import {
   CookieConsent,
@@ -18,6 +19,7 @@ import {
   getSavedCookieConsent,
 } from './components/ui/CookieConsent';
 import { AppErrorBoundary } from './components/ui/AppErrorBoundary';
+import { GlobalCommandPalette } from './components/ui/GlobalCommandPalette';
 import { LoginModal } from './components/auth/LoginModal';
 import {
   resolveRouteSeoPayload,
@@ -110,7 +112,8 @@ export default function App() {
         <AuthProvider>
           <ToastProvider>
             <BrowserRouter>
-            <RouteMetadataSync />
+              <CommandPaletteProvider>
+                <RouteMetadataSync />
             <AppErrorBoundary>
               <Suspense fallback={<RouteLoadingFallback />}>
                 <Routes>
@@ -165,6 +168,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </AppErrorBoundary>
+            <GlobalCommandPalette />
             <LoginModal />
             <CookieConsent onConsentChange={setCookieConsent} />
 
@@ -173,8 +177,9 @@ export default function App() {
 
             {/* Optional Speed Insights telemetry strictly gated behind Analytics consent */}
             {allowOptionalAnalytics && <SpeedInsights />}
-          </BrowserRouter>
-        </ToastProvider>
+              </CommandPaletteProvider>
+            </BrowserRouter>
+          </ToastProvider>
       </AuthProvider>
       </SystemStatusProvider>
     </ThemeProvider>

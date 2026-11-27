@@ -16,11 +16,14 @@ import {
   Info,
   Mail,
   Newspaper,
+  Search,
 } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
 import { NotificationCenterTrigger } from './ui/Toast';
 import { LiquidGlassToggle } from './ui/LiquidGlassToggle';
 import { SystemStatusIndicator } from './ui/SystemStatusIndicator';
+import { useCommandPalette } from '../context/CommandPaletteContext';
+import { modKey } from '../hooks/useKeyboardShortcuts';
 
 export interface NavbarProps {
   onLaunchOmnia?: () => void;
@@ -31,6 +34,7 @@ type OpenDropdown = 'platform' | 'company' | null;
 export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { openPalette } = useCommandPalette();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<OpenDropdown>(null);
@@ -367,6 +371,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
 
         {/* Right Zone: Harmonized Utility Controls, Auth & Restrained Workspace Action */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={openPalette}
+            aria-label={`Open global search command palette (${modKey}K)`}
+            title={`Quick Search (${modKey}K)`}
+            className="hidden sm:inline-flex items-center gap-2 h-9 px-2.5 rounded-lg bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] hover:border-white/[0.18] text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eb3b2d]"
+          >
+            <Search size={13} className="text-neutral-400 shrink-0" />
+            <span className="hidden xl:inline text-neutral-400">Search...</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-neutral-400 bg-[#0A0A0C] border border-[#23232A] rounded">
+              {modKey}K
+            </kbd>
+          </button>
           <SystemStatusIndicator variant="compact" shape="rounded" className="sm:hidden" />
           <div className="hidden sm:flex items-center gap-1.5">
             <SystemStatusIndicator shape="rounded" labelClassName="hidden md:inline" />
@@ -410,6 +427,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
             transition={{ duration: 0.18 }}
             className="lg:hidden bg-[#09090B]/98 backdrop-blur-xl border-b border-white/[0.08] px-5 py-5 space-y-5 overflow-y-auto max-h-[calc(100vh-4rem)]"
           >
+            {/* Mobile Quick Search Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openPalette();
+              }}
+              className="w-full h-10 px-3 rounded-xl bg-[#141418] hover:bg-[#1B1B21] border border-[#23232A] flex items-center justify-between text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Search size={14} className="text-[#EB3B2D]" />
+                <span>Search routes, tools &amp; docs...</span>
+              </span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#0A0A0C] border border-[#23232A] rounded text-neutral-400">
+                {modKey}K
+              </kbd>
+            </button>
+
             {/* Mobile Utilities Row (Theme + Notifications on xs screens) */}
             <div className="sm:hidden space-y-2.5">
               <SystemStatusIndicator variant="row" />

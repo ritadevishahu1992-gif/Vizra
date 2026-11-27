@@ -24,9 +24,11 @@ import {
   Download,
   Check,
   Cpu,
+  Compass,
 } from 'lucide-react';
 import { AIMode, OmniaModel } from '../../types/ai';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
+import { useCommandPalette } from '../../context/CommandPaletteContext';
 
 export interface CommandPaletteAction {
   id: string;
@@ -88,11 +90,27 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { openPalette: openGlobalPalette } = useCommandPalette();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   // Define full command actions registry
   const actions: CommandPaletteAction[] = useMemo(() => [
+    // Global Routes & Documentation Switcher
+    {
+      id: 'nav-global-search',
+      title: 'Global Search: Routes, Tools & Docs',
+      subtitle: 'Jump to Workspace Dashboard, System Logs, History, Settings, or any Documentation page',
+      category: 'Navigation & Hubs',
+      shortcut: `${modKey}+Shift+P`,
+      icon: <Compass size={16} className="text-[#eb3b2d]" />,
+      iconBg: 'bg-[#eb3b2d]/10',
+      keywords: ['global', 'routes', 'workspace', 'dashboard', 'docs', 'documentation', 'history', 'pricing', 'blog', 'logs'],
+      onSelect: () => {
+        onClose();
+        openGlobalPalette();
+      },
+    },
     // Navigation & Hubs
     {
       id: 'nav-science',
@@ -441,6 +459,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     onOpenShortcutsHelp,
     onExportConversation,
     onClearHistory,
+    openGlobalPalette,
   ]);
 
   // Filter actions based on query and category chip

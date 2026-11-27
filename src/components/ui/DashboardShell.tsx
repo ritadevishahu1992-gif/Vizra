@@ -24,6 +24,8 @@ import { NotificationCenterTrigger } from './Toast';
 import { CreditUsageIndicator } from './CreditUsageIndicator';
 import { LiquidGlassToggle } from './LiquidGlassToggle';
 import { SystemStatusIndicator } from './SystemStatusIndicator';
+import { useCommandPalette } from '../../context/CommandPaletteContext';
+import { modKey } from '../../hooks/useKeyboardShortcuts';
 
 export type DashboardSectionId =
   | 'overview'
@@ -74,6 +76,8 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
+  const { openPalette } = useCommandPalette();
+  const handleOpenPalette = onOpenCommandPalette ?? openPalette;
   const [isPinnedExpanded, setIsPinnedExpanded] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -307,20 +311,19 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
               limitOverride={creditLimit}
               planNameOverride={planName}
             />
-            {onOpenCommandPalette && (
-              <button
-                type="button"
-                onClick={onOpenCommandPalette}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#111111] hover:bg-[#171717] border border-white/[0.08] text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                title="Open Command Palette (⌘K)"
-              >
-                <Command size={12} className="text-[#EB3B2D]" />
-                <span>Command</span>
-                <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#090909] border border-white/[0.08] rounded text-neutral-400">
-                  ⌘K
-                </kbd>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleOpenPalette}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#111111] hover:bg-[#171717] border border-white/[0.08] text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              title={`Open Global Search Command Palette (${modKey}K)`}
+              aria-label={`Open Global Search Command Palette (${modKey}K)`}
+            >
+              <Command size={12} className="text-[#EB3B2D]" />
+              <span>Search</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#090909] border border-white/[0.08] rounded text-neutral-400">
+                {modKey}K
+              </kbd>
+            </button>
             {headerActions}
             <LiquidGlassToggle size="sm" className="hidden sm:inline-flex" />
             <NotificationCenterTrigger />

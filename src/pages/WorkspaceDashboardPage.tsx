@@ -153,6 +153,22 @@ export const WorkspaceDashboardPage: React.FC = () => {
     setSearchParams({ tab: sec });
   };
 
+  // Sync section tab and System Logs panel when navigated via Global Command Palette
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as DashboardSectionId | null;
+    if (
+      tabParam &&
+      ['overview', 'projects', 'assets', 'analytics', 'developer', 'team', 'settings'].includes(
+        tabParam
+      )
+    ) {
+      setActiveSection(tabParam);
+    }
+    if (searchParams.get('logs') === '1') {
+      setShowSystemLogs(true);
+    }
+  }, [searchParams]);
+
   // Sync route SEO metadata (noindex, nofollow)
   useEffect(() => {
     applySeoToDocument(resolveRouteSeoPayload('/workspace'));
