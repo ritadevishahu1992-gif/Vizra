@@ -41,6 +41,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     title: 'Company',
     links: [
       { label: 'About VIZRA', to: '/about' },
+      { label: 'The People Behind VIZRA', to: '/about#developers' },
       { label: 'Philosophy & Creed', to: '/about?section=philosophy' },
       { label: 'Contact / Privacy Requests', to: '/contact' },
     ],

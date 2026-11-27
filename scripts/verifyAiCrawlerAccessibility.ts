@@ -139,14 +139,34 @@ async function runTests() {
   );
 
   const sitemapRes = await httpGet('/sitemap.xml', 'Googlebot/2.1');
-  const locs = (sitemapRes.body.match(/<loc>(.*?)<\/loc>/g) || []).map((x) =>
+  const rawLocs = (sitemapRes.body.match(/<loc>(.*?)<\/loc>/g) || []).map((x) =>
     x.replace(/<\/?loc>/g, '').trim()
   );
+  let locs: string[] = rawLocs;
+  let allChildrenOk = true;
+  if (sitemapRes.body.includes('<sitemapindex')) {
+    locs = [];
+    for (const childUrl of rawLocs) {
+      const childPath = new URL(childUrl).pathname;
+      const childRes = await httpGet(childPath, 'Googlebot/2.1');
+      if (
+        childRes.status !== 200 ||
+        !String(childRes.headers['content-type']).includes('application/xml')
+      ) {
+        allChildrenOk = false;
+      }
+      const childLocs = (childRes.body.match(/<loc>(.*?)<\/loc>/g) || []).map((x) =>
+        x.replace(/<\/?loc>/g, '').trim()
+      );
+      locs.push(...childLocs);
+    }
+  }
   record(
     'Sitemap.xml',
-    `Returns valid XML with strictly ${PUBLIC_INDEXABLE_ROUTES.length} canonical public URLs`,
+    `Returns valid XML sitemap index & child sitemaps with strictly ${PUBLIC_INDEXABLE_ROUTES.length} canonical public URLs`,
     sitemapRes.status === 200 &&
       String(sitemapRes.headers['content-type']).includes('application/xml') &&
+      allChildrenOk &&
       locs.length === PUBLIC_INDEXABLE_ROUTES.length &&
       !locs.some((u) => u.includes('/ai') || u.includes('/workspace') || u.includes('localhost')),
     `HTTP ${sitemapRes.status} | Count=${locs.length}`

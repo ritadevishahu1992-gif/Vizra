@@ -42,8 +42,11 @@ function main() {
   const seenSlugs = new Set<string>();
   const seenSeoTitles = new Set<string>();
   const seenDescriptions = new Set<string>();
+  const articlesSitemapPath = path.join(rootDir, 'public/sitemaps/articles.xml');
   const sitemapXml = fs.readFileSync(
-    path.join(rootDir, 'public/sitemap.xml'),
+    fs.existsSync(articlesSitemapPath)
+      ? articlesSitemapPath
+      : path.join(rootDir, 'public/sitemap.xml'),
     'utf-8'
   );
 

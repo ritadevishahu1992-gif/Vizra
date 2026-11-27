@@ -539,12 +539,38 @@ async function runVerification() {
     );
   }
 
-  // 9. Verify Sitemap Completeness & Hygiene (Strictly canonical public indexable pages)
+  // 9. Verify Sitemap Index & Child Sitemaps Completeness & Hygiene (Strictly canonical public indexable pages)
   const sitemapRes = await httpGet('/sitemap.xml');
   const sitemapXml = sitemapRes.body.toString('utf-8');
-  const sitemapLocs = (sitemapXml.match(/<loc>(.*?)<\/loc>/g) || []).map((m) =>
+  const isSitemapIndex = sitemapXml.includes('<sitemapindex');
+  const rawIndexLocs = (sitemapXml.match(/<loc>(.*?)<\/loc>/g) || []).map((m) =>
     m.replace(/<\/?loc>/g, '').trim()
   );
+
+  let sitemapLocs: string[] = [];
+  let allChildrenValid = true;
+  if (isSitemapIndex) {
+    for (const childUrl of rawIndexLocs) {
+      const childPath = new URL(childUrl).pathname;
+      const childRes = await httpGet(childPath);
+      const childBody = childRes.body.toString('utf-8');
+      if (
+        childRes.status !== 200 ||
+        !String(childRes.headers['content-type']).includes('application/xml') ||
+        !childBody.includes('<urlset')
+      ) {
+        allChildrenValid = false;
+      }
+      const childLocs = (childBody.match(/<loc>(.*?)<\/loc>/g) || []).map((m) =>
+        m.replace(/<\/?loc>/g, '').trim()
+      );
+      sitemapLocs.push(...childLocs);
+    }
+  } else {
+    sitemapLocs = rawIndexLocs;
+  }
+
+  const uniqueLocCount = new Set(sitemapLocs).size;
   const allPublicRoutesInSitemap = PUBLIC_INDEXABLE_ROUTES.every((route) => {
     const fullUrl = `https://vizra.vercel.app${route === '/' ? '/' : route}`;
     return sitemapLocs.includes(fullUrl);
@@ -555,13 +581,15 @@ async function runVerification() {
 
   record(
     'Sitemap Hygiene & Coverage',
-    `/sitemap.xml contains strictly the ${expectedPublicCount} canonical indexable public URLs`,
+    `/sitemap.xml index + child sitemaps contain strictly the ${expectedPublicCount} canonical indexable public URLs`,
     sitemapRes.status === 200 &&
       String(sitemapRes.headers['content-type']).includes('application/xml') &&
+      allChildrenValid &&
       sitemapLocs.length === expectedPublicCount &&
+      uniqueLocCount === sitemapLocs.length &&
       allPublicRoutesInSitemap &&
       excludesNonIndexable,
-    `HTTP ${sitemapRes.status} | Total URLs=${sitemapLocs.length}/${expectedPublicCount} | Public present=${allPublicRoutesInSitemap} | Excludes private=${excludesNonIndexable}`
+    `HTTP ${sitemapRes.status} | Index=${isSitemapIndex} | ChildSitemaps=${isSitemapIndex ? rawIndexLocs.length : 0} | Total URLs=${sitemapLocs.length}/${expectedPublicCount} | Unique=${uniqueLocCount} | Public present=${allPublicRoutesInSitemap} | Excludes private=${excludesNonIndexable}`
   );
 
   // 10. Verify Pre-Rendered Static Route Files in dist/ (Initial HTML before hydration on Vercel CDN)

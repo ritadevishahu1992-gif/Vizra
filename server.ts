@@ -118,6 +118,10 @@ import {
   getBrandAssetBuffer,
 } from './src/server/seo/brandAssetsGenerator';
 import {
+  getSitemapXmlByPath,
+  writePublicSitemaps,
+} from './src/server/seo/sitemapGenerator';
+import {
   getPort,
   getNodeEnv,
   isProductionEnv,
@@ -5319,9 +5323,10 @@ Core Responsibilities:
   try {
     ensurePublicOgImageExists(__dirname);
     ensurePublicBrandAssets(__dirname);
+    writePublicSitemaps(__dirname);
     ogImageBufferCache = generateVizraOgImageBuffer();
   } catch (ogErr) {
-    console.warn('[SEO] Could not write public brand assets, using in-memory buffers:', ogErr);
+    console.warn('[SEO] Could not write public brand/sitemap assets, using dynamic in-memory responses:', ogErr);
     ogImageBufferCache = generateVizraOgImageBuffer();
   }
 
@@ -5363,9 +5368,36 @@ Core Responsibilities:
   });
 
   app.get('/sitemap.xml', (_req, res) => {
+    const xml = getSitemapXmlByPath('/sitemap.xml');
+    if (!xml) {
+      res.status(404).end();
+      return;
+    }
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-    res.sendFile(path.resolve(__dirname, 'public', 'sitemap.xml'));
+    res.setHeader(
+      'Cache-Control',
+      'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400'
+    );
+    res.status(200).send(xml);
+  });
+
+  app.get('/sitemaps/:fileName', (req, res) => {
+    const fileName = String(req.params.fileName || '');
+    if (!/^[a-z0-9-]+\.xml$/i.test(fileName)) {
+      res.status(404).end();
+      return;
+    }
+    const xml = getSitemapXmlByPath(`/sitemaps/${fileName}`);
+    if (!xml) {
+      res.status(404).end();
+      return;
+    }
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader(
+      'Cache-Control',
+      'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400'
+    );
+    res.status(200).send(xml);
   });
 
   app.get('/llms.txt', (_req, res) => {

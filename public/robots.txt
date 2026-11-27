@@ -35,6 +35,7 @@ Allow: /ads.txt
 Allow: /llms.txt
 Allow: /llms-full.txt
 Allow: /sitemap.xml
+Allow: /sitemaps/
 Allow: /og-image.png
 Disallow: /api/
 Disallow: /live

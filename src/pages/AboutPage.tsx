@@ -1,19 +1,29 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
   ArrowRight,
   ShieldCheck,
-  Sparkles,
-  Layers,
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { BrandStatement } from '../components/BrandStatement';
+import { AboutDevelopersSection } from '../components/AboutDevelopersSection';
 
 export const AboutPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const section = params.get('section') || location.hash.replace(/^#/, '');
+    if (!section) return;
+    const target = document.getElementById(section);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location.search, location.hash]);
 
   const corePrinciples = [
     {
@@ -41,7 +51,7 @@ export const AboutPage: React.FC = () => {
   return (
     <PageLayout
       title="About VIZRA & Core Philosophy — Vizra AI Creative Studio"
-      description="Learn about Vizra’s mission, the Omnia 1.0 philosophy, and our commitment to response proportionality, verified citations, and persistent studio context."
+      description="Learn about Vizra’s mission, the founders behind VIZRA, the Omnia 1.0 philosophy, and our commitment to response proportionality, verified citations, and persistent studio context."
       canonicalPath="/about"
     >
       {/* Page Hero */}
@@ -81,6 +91,9 @@ export const AboutPage: React.FC = () => {
       <div id="philosophy">
         <BrandStatement />
       </div>
+
+      {/* About the Developers — The People Behind VIZRA */}
+      <AboutDevelopersSection />
 
       {/* Core Architectural Principles */}
       <section className="py-20 md:py-24 px-6 sm:px-10 lg:px-16 max-w-7xl mx-auto border-t border-white/[0.06]">

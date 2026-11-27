@@ -11,6 +11,7 @@ import {
   BRAND_STATIC_ASSET_FILES,
   ensurePublicBrandAssets,
 } from '../src/server/seo/brandAssetsGenerator';
+import { writePublicSitemaps } from '../src/server/seo/sitemapGenerator';
 
 /**
  * Post-build static route HTML pre-renderer for Edge CDN.
@@ -27,6 +28,10 @@ function prerenderStaticRoutes() {
 
   const publicOgPath = ensurePublicOgImageExists(rootDir, { force: true });
   ensurePublicBrandAssets(rootDir, { force: true });
+  const sitemapBundle = writePublicSitemaps(
+    rootDir,
+    fs.existsSync(distDir) ? distDir : undefined
+  );
 
   if (fs.existsSync(distDir)) {
     fs.copyFileSync(publicOgPath, path.join(distDir, 'og-image.png'));
@@ -37,6 +42,10 @@ function prerenderStaticRoutes() {
       }
     }
   }
+
+  console.log(
+    `[Sitemap] Generated /sitemap.xml index + ${sitemapBundle.stats.childSitemapCount} child sitemaps (${sitemapBundle.stats.totalSitemapUrls} canonical URLs).`
+  );
 
   if (!fs.existsSync(distIndexPath)) {
     console.warn('[Prerender] dist/index.html not found; skipping static route pre-rendering.');

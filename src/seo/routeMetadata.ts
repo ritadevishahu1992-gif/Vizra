@@ -1,4 +1,8 @@
-import { BLOG_POSTS, getPublishedBlogPost } from '../data/blogPosts';
+import {
+  BLOG_POSTS,
+  getPublishedBlogPost,
+  getPublishedBlogPosts,
+} from '../data/blogPosts';
 
 export const SITE_ORIGIN = 'https://vizra.vercel.app';
 export const SITE_NAME = 'VIZRA';
@@ -32,7 +36,7 @@ export const PUBLIC_INDEXABLE_ROUTES: readonly string[] = [
   '/contact',
   '/docs',
   '/blog',
-  ...BLOG_POSTS.map((post) => `/blog/${post.slug}`),
+  ...getPublishedBlogPosts().map((post) => `/blog/${post.slug}`),
   '/terms-and-conditions',
   '/privacy-policy',
   '/cookie-policy',
@@ -181,6 +185,23 @@ const ORGANIZATION_SCHEMA: Record<string, unknown> = {
   image: {
     '@id': `${SITE_ORIGIN}/#logo`,
   },
+  founder: [
+    {
+      '@type': 'Person',
+      name: 'Aditya',
+      jobTitle: 'Founder — AI Developer, Product Architect, Creator',
+      description:
+        "Aditya is an AI enthusiast, developer, and creator working at the intersection of artificial intelligence, software engineering, and creative technology. He leads VIZRA's product vision, architecture, AI development, and overall engineering direction.",
+    },
+    {
+      '@type': 'Person',
+      name: 'Anish',
+      jobTitle: 'Co-Founder — Development Collaborator',
+      description:
+        "Anish is the Co-Founder of VIZRA and contributes to the platform's development through technical collaboration, identifying and reporting bugs, testing features, and helping develop and improve the overall product.",
+      sameAs: ['https://www.instagram.com/_anish._exe/'],
+    },
+  ],
   description:
     'An intelligent AI creative studio and multimodal workflow platform powered by Omnia 1.0.',
 };
@@ -544,6 +565,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
     breadcrumbLabel: 'About VIZRA',
     jsonLd: [
       buildBreadcrumbSchema('About VIZRA', '/about'),
+      ORGANIZATION_SCHEMA,
       {
         '@context': 'https://schema.org',
         '@type': 'AboutPage',
@@ -569,6 +591,14 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
             '2. Zero Fabricated Citations: When external search grounding fails to confirm a source or query targets an unannounced product, Omnia states the uncertainty candidly.',
             '3. Persistent Studio Context: Long-running creative work persists across 10 project stages, design decisions, and research sources without losing thread coherence.',
             '4. Architectural Honesty: Live production capabilities are strictly separated in UI and documentation from staging prototypes and future R&D concepts.',
+          ],
+        },
+        {
+          heading: 'The People Behind VIZRA — Two Minds. One Vision. Building VIZRA.',
+          body: 'Building a shared vision through technology and innovation.',
+          bullets: [
+            "Aditya (Founder — AI Developer, Product Architect, Creator): Aditya is an AI enthusiast, developer, and creator working at the intersection of artificial intelligence, software engineering, and creative technology. He leads VIZRA's product vision, architecture, AI development, and overall engineering direction.",
+            "Anish (Co-Founder — Development Collaborator, Instagram @_anish._exe): Anish is the Co-Founder of VIZRA and contributes to the platform's development through technical collaboration, identifying and reporting bugs, testing features, and helping develop and improve the overall product.",
           ],
         },
         {
