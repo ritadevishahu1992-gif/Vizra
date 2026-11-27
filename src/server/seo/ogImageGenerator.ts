@@ -136,34 +136,40 @@ function drawText(
   }
 }
 
-function pointInTriangle(
+function pointInPolygon(
   px: number,
   py: number,
-  ax: number,
-  ay: number,
-  bx: number,
-  by: number,
-  cx: number,
-  cy: number
+  poly: readonly (readonly [number, number])[]
 ): boolean {
-  const v0x = cx - ax;
-  const v0y = cy - ay;
-  const v1x = bx - ax;
-  const v1y = by - ay;
-  const v2x = px - ax;
-  const v2y = py - ay;
-
-  const dot00 = v0x * v0x + v0y * v0y;
-  const dot01 = v0x * v1x + v0y * v1y;
-  const dot02 = v0x * v2x + v0y * v2y;
-  const dot11 = v1x * v1x + v1y * v1y;
-  const dot12 = v1x * v2x + v1y * v2y;
-
-  const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-  const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-  const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-  return u >= 0 && v >= 0 && u + v <= 1;
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0];
+    const yi = poly[i][1];
+    const xj = poly[j][0];
+    const yj = poly[j][1];
+    const intersects =
+      yi > py !== yj > py &&
+      px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
 }
+
+const OFFICIAL_OUTER_V: readonly (readonly [number, number])[] = [
+  [4, 6],
+  [16, 26],
+  [28, 6],
+  [21.5, 6],
+  [16, 17.5],
+  [10.5, 6],
+];
+
+const OFFICIAL_INNER_DIAMOND: readonly (readonly [number, number])[] = [
+  [16, 26],
+  [19, 20],
+  [16, 15],
+  [13, 20],
+];
 
 export function generateVizraOgImageBuffer(): Buffer {
   const rgb = new Uint8Array(WIDTH * HEIGHT * 3);
@@ -199,13 +205,37 @@ export function generateVizraOgImageBuffer(): Buffer {
   // Top Crimson Accent Bar
   fillRect(rgb, 48, 48, 280, 4, 235, 59, 45, 1);
 
-  // 3. Right-hand VIZRA Geometric Emblem (x: 820..1060, y: 180..450)
-  for (let y = 170; y <= 460; y++) {
-    for (let x = 800; x <= 1080; x++) {
-      const inOuterV = pointInTriangle(x, y, 810, 185, 1070, 185, 940, 445);
-      const inInnerCutout = pointInTriangle(x, y, 895, 185, 985, 185, 940, 295);
-      if (inOuterV && !inInnerCutout) {
-        blendPixel(rgb, x, y, 235, 59, 45, 0.92);
+  // 3. Right-hand Official VIZRA Geometric Emblem (exact VizraLogo.tsx geometry, 3x3 supersampled)
+  const logoLeft = 795;
+  const logoTop = 165;
+  const logoSize = 300;
+  const samples = 3;
+  const sampleCount = samples * samples;
+  for (let y = logoTop; y < logoTop + logoSize; y++) {
+    for (let x = logoLeft; x < logoLeft + logoSize; x++) {
+      let whiteHits = 0;
+      let redHits = 0;
+      for (let sy = 0; sy < samples; sy++) {
+        const vy = ((y - logoTop + (sy + 0.5) / samples) / logoSize) * 32;
+        for (let sx = 0; sx < samples; sx++) {
+          const vx = ((x - logoLeft + (sx + 0.5) / samples) / logoSize) * 32;
+          const dx = vx - 16;
+          const dy = vy - 7;
+          if (
+            pointInPolygon(vx, vy, OFFICIAL_INNER_DIAMOND) ||
+            dx * dx + dy * dy <= 1.5 * 1.5
+          ) {
+            redHits++;
+          } else if (pointInPolygon(vx, vy, OFFICIAL_OUTER_V)) {
+            whiteHits++;
+          }
+        }
+      }
+      if (whiteHits > 0) {
+        blendPixel(rgb, x, y, 255, 255, 255, (whiteHits / sampleCount) * 0.92);
+      }
+      if (redHits > 0) {
+        blendPixel(rgb, x, y, 235, 59, 45, redHits / sampleCount);
       }
     }
   }
@@ -248,11 +278,11 @@ export function generateVizraOgImageBuffer(): Buffer {
     1
   );
 
-  // 8. Bottom Divider & Domain Stamp (y: 495..535)
+  // 8. Bottom Divider & White-Label Brand Stamp (y: 495..535)
   fillRect(rgb, 96, 484, 640, 1, 255, 255, 255, 0.1);
   drawText(
     rgb,
-    'VIZRA.VERCEL.APP',
+    'VIZRA  ·  AI CREATIVE STUDIO',
     96,
     512,
     3,
@@ -292,13 +322,16 @@ export function generateVizraOgImageBuffer(): Buffer {
   ]);
 }
 
-export function ensurePublicOgImageExists(rootDir: string): string {
+export function ensurePublicOgImageExists(
+  rootDir: string,
+  options: { force?: boolean } = {}
+): string {
   const publicDir = path.resolve(rootDir, 'public');
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
   }
   const targetPath = path.join(publicDir, 'og-image.png');
-  if (fs.existsSync(targetPath)) {
+  if (!options.force && fs.existsSync(targetPath)) {
     try {
       const existing = fs.readFileSync(targetPath);
       const isPng =

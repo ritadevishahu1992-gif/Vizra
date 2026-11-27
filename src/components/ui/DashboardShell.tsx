@@ -24,6 +24,7 @@ import { NotificationCenterTrigger } from './Toast';
 import { CreditUsageIndicator } from './CreditUsageIndicator';
 import { LiquidGlassToggle } from './LiquidGlassToggle';
 import { SystemStatusIndicator } from './SystemStatusIndicator';
+import { StudioPresenceIndicator } from '../studio/StudioPresenceOverlay';
 import { useCommandPalette } from '../../context/CommandPaletteContext';
 import { modKey } from '../../hooks/useKeyboardShortcuts';
 
@@ -304,6 +305,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <StudioPresenceIndicator variant="header" />
             <SystemStatusIndicator shape="rounded" labelClassName="hidden lg:inline" />
             <CreditUsageIndicator
               variant="header"

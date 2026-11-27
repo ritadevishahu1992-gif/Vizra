@@ -113,6 +113,11 @@ import {
   generateVizraOgImageBuffer,
 } from './src/server/seo/ogImageGenerator';
 import {
+  BRAND_STATIC_ASSET_FILES,
+  ensurePublicBrandAssets,
+  getBrandAssetBuffer,
+} from './src/server/seo/brandAssetsGenerator';
+import {
   getPort,
   getNodeEnv,
   isProductionEnv,
@@ -5309,13 +5314,14 @@ Core Responsibilities:
     });
   });
 
-  // Ensure 1200x630 Open Graph preview image exists in public/og-image.png
+  // Ensure 1200x630 Open Graph preview image & official VIZRA favicons/PWA icons exist in public/
   let ogImageBufferCache: Buffer | null = null;
   try {
     ensurePublicOgImageExists(__dirname);
+    ensurePublicBrandAssets(__dirname);
     ogImageBufferCache = generateVizraOgImageBuffer();
   } catch (ogErr) {
-    console.warn('[SEO] Could not write public/og-image.png, using in-memory buffer:', ogErr);
+    console.warn('[SEO] Could not write public brand assets, using in-memory buffers:', ogErr);
     ogImageBufferCache = generateVizraOgImageBuffer();
   }
 
@@ -5386,6 +5392,25 @@ Core Responsibilities:
       res.status(404).end();
     }
   });
+
+  // Explicit official VIZRA favicon, Apple Touch Icon, PWA icon & Web Manifest handlers
+  for (const asset of BRAND_STATIC_ASSET_FILES) {
+    app.get(`/${asset.fileName}`, (_req, res) => {
+      res.setHeader('Content-Type', asset.contentType);
+      res.setHeader('Cache-Control', asset.cacheControl);
+      const diskPath = path.resolve(__dirname, 'public', asset.fileName);
+      if (fs.existsSync(diskPath)) {
+        res.sendFile(diskPath);
+        return;
+      }
+      const fallbackBuf = getBrandAssetBuffer(asset.fileName);
+      if (fallbackBuf) {
+        res.status(200).send(fallbackBuf);
+      } else {
+        res.status(404).end();
+      }
+    });
+  }
 
   // Permanent HTTP 301 Redirects for Legacy & Short Alias Routes (preserving query parameters)
   app.use((req, res, next) => {

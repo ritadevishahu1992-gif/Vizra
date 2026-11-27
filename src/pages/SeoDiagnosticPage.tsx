@@ -498,7 +498,7 @@ ${rec.codeSnippet}
                   </span>
                 </div>
                 <div className="mt-1 text-xs text-neutral-400">
-                  Vercel Edge ({report.httpDiagnostics.vercelCacheState})
+                  Edge CDN ({report.httpDiagnostics.vercelCacheState})
                 </div>
               </div>
 
@@ -648,7 +648,7 @@ ${rec.codeSnippet}
                     <div className="p-3 rounded-lg bg-neutral-900/60 border border-white/5 flex items-start gap-2.5">
                       <span className="text-emerald-400 mt-0.5">✓</span>
                       <div>
-                        <div className="font-medium text-white">Vercel Server Operational</div>
+                        <div className="font-medium text-white">Edge Server Operational</div>
                         <div className="text-neutral-400 mt-0.5">
                           HTTP 200 returned within ~80ms across all geographic edge nodes.
                         </div>
@@ -856,7 +856,7 @@ ${rec.codeSnippet}
                   {report.robotsAnalysis.isHtmlFallback && (
                     <div className="p-3.5 rounded-lg bg-amber-950/40 border border-amber-500/30 mb-4 text-xs text-amber-200">
                       <strong>Warning:</strong> /robots.txt is serving an HTML page instead of plain text.
-                      Because Vercel rewrites non-existent static paths to index.html, strict AI crawlers
+                      Because the edge router rewrites non-existent static paths to index.html, strict AI crawlers
                       receive <code className="font-mono text-white">&lt;!doctype html&gt;</code> and flag
                       the robots file as unparseable.
                     </div>
@@ -949,7 +949,7 @@ ${rec.codeSnippet}
                           <th className="py-2.5 pr-4">Route</th>
                           <th className="py-2.5 px-4">Status</th>
                           <th className="py-2.5 px-4">Content-Type</th>
-                          <th className="py-2.5 px-4">Vercel Cache</th>
+                          <th className="py-2.5 px-4">Edge Cache</th>
                           <th className="py-2.5 px-4">Latency</th>
                           <th className="py-2.5 pl-4">SPA Fallback</th>
                         </tr>
@@ -1080,7 +1080,7 @@ ${rec.codeSnippet}
                   </h3>
                   <p className="text-xs text-neutral-400 mb-4">
                     Real HTTP GET requests sent with official crawler User-Agent headers to verify if
-                    Vercel or Cloudflare bot defense blocks external AI fetching engines.
+                    edge CDN or WAF bot defense blocks external AI fetching engines.
                   </p>
 
                   <div className="overflow-x-auto">

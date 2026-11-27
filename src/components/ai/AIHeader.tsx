@@ -30,6 +30,7 @@ import { Tooltip } from '../ui/Tooltip';
 import { CreditUsageIndicator } from '../ui/CreditUsageIndicator';
 import { LiquidGlassToggle } from '../ui/LiquidGlassToggle';
 import { SystemStatusIndicator } from '../ui/SystemStatusIndicator';
+import { StudioPresenceIndicator } from '../studio/StudioPresenceOverlay';
 
 interface AIHeaderProps {
   currentModel: OmniaModel;
@@ -621,8 +622,9 @@ export const AIHeader: React.FC<AIHeaderProps> = ({
           )}
         </div>
 
-        {/* Right: Actions (System Status, Credits, Width Toggle, Command Palette, New Chat, Temp Chat, Settings, Profile) */}
+        {/* Right: Actions (Live Presence, System Status, Credits, Width Toggle, Command Palette, New Chat, Temp Chat, Settings, Profile) */}
         <div className="flex items-center gap-2 shrink-0">
+          <StudioPresenceIndicator variant="header" />
           <SystemStatusIndicator shape="pill" labelClassName="hidden 2xl:inline" />
           <div>
             <CreditUsageIndicator variant="header" />

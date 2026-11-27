@@ -81,6 +81,42 @@
       "destination": "/og-image.png"
     },
     {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": "/favicon.svg"
+    },
+    {
+      "source": "/favicon-32x32.png",
+      "destination": "/favicon-32x32.png"
+    },
+    {
+      "source": "/favicon-48x48.png",
+      "destination": "/favicon-48x48.png"
+    },
+    {
+      "source": "/favicon-96x96.png",
+      "destination": "/favicon-96x96.png"
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "destination": "/apple-touch-icon.png"
+    },
+    {
+      "source": "/icon-192.png",
+      "destination": "/icon-192.png"
+    },
+    {
+      "source": "/icon-512.png",
+      "destination": "/icon-512.png"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
@@ -89,7 +125,7 @@
       "destination": "/$1/index.html"
     },
     {
-      "source": "/((?!ads\\.txt|sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|googlee265bfc7c69fa8d5\\.html|BingSiteAuth\\.xml|5ca94201a0d04f8ea805259202bffce5\\.txt|og-image\\.png).*)",
+      "source": "/((?!ads\\.txt|sitemap\\.xml|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|googlee265bfc7c69fa8d5\\.html|BingSiteAuth\\.xml|5ca94201a0d04f8ea805259202bffce5\\.txt|og-image\\.png|favicon\\.ico|favicon\\.svg|favicon-32x32\\.png|favicon-48x48\\.png|favicon-96x96\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|manifest\\.json).*)",
       "destination": "/index.html"
     }
   ],
@@ -161,6 +197,34 @@
       "headers": [
         { "key": "Content-Type", "value": "image/png" },
         { "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=604800" }
+      ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        { "key": "Content-Type", "value": "image/x-icon" },
+        { "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=604800" }
+      ]
+    },
+    {
+      "source": "/favicon.svg",
+      "headers": [
+        { "key": "Content-Type", "value": "image/svg+xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=604800" }
+      ]
+    },
+    {
+      "source": "/(favicon-32x32|favicon-48x48|favicon-96x96|apple-touch-icon|icon-192|icon-512)\\.png",
+      "headers": [
+        { "key": "Content-Type", "value": "image/png" },
+        { "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=604800" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=86400" }
       ]
     },
     {

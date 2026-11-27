@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowRight, Cpu, Layers } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { StudioEngines } from '../components/StudioEngines';
 import { VizraComingSoon } from '../components/VizraComingSoon';
+import { StudioPresenceIndicator } from '../components/studio/StudioPresenceOverlay';
 
 export const StudioPage: React.FC = () => {
   const navigate = useNavigate();
@@ -55,6 +56,9 @@ export const StudioPage: React.FC = () => {
       <div id="roadmap">
         <VizraComingSoon />
       </div>
+
+      {/* Live Firebase RTDB Presence Control */}
+      <StudioPresenceIndicator variant="floating" />
     </PageLayout>
   );
 };

@@ -1,7 +1,8 @@
 import { BLOG_POSTS, getPublishedBlogPost } from '../data/blogPosts';
 
 export const SITE_ORIGIN = 'https://vizra.vercel.app';
-export const SITE_NAME = 'VIZRA — AI Creative Studio';
+export const SITE_NAME = 'VIZRA';
+export const BRAND_LOGO_URL = `${SITE_ORIGIN}/icon-512.png`;
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`;
 export const OG_IMAGE_WIDTH = '1200';
 export const OG_IMAGE_HEIGHT = '630';
@@ -165,13 +166,20 @@ const ORGANIZATION_SCHEMA: Record<string, unknown> = {
   '@type': 'Organization',
   '@id': `${SITE_ORIGIN}/#organization`,
   name: 'VIZRA',
+  alternateName: 'VIZRA AI Creative Studio',
   legalName: LEGAL_ENTITY_NAME,
   url: `${SITE_ORIGIN}/`,
   logo: {
     '@type': 'ImageObject',
-    url: DEFAULT_OG_IMAGE,
-    width: 1200,
-    height: 630,
+    '@id': `${SITE_ORIGIN}/#logo`,
+    url: BRAND_LOGO_URL,
+    contentUrl: BRAND_LOGO_URL,
+    width: 512,
+    height: 512,
+    caption: 'VIZRA',
+  },
+  image: {
+    '@id': `${SITE_ORIGIN}/#logo`,
   },
   description:
     'An intelligent AI creative studio and multimodal workflow platform powered by Omnia 1.0.',
@@ -182,7 +190,8 @@ const WEBSITE_SCHEMA: Record<string, unknown> = {
   '@type': 'WebSite',
   '@id': `${SITE_ORIGIN}/#website`,
   url: `${SITE_ORIGIN}/`,
-  name: 'Vizra — AI Creative Studio & Omnia 1.0',
+  name: 'VIZRA',
+  alternateName: ['VIZRA AI Creative Studio', 'Vizra'],
   description:
     'A modern AI creative studio built to make AI-powered creation simpler for creators, animators, motion designers, developers, and beginners.',
   inLanguage: 'en-US',
@@ -1114,7 +1123,16 @@ export function resolveRouteSeoPayload(
             name: publishedPost.author,
           },
           publisher: {
+            '@type': 'Organization',
             '@id': `${SITE_ORIGIN}/#organization`,
+            name: 'VIZRA',
+            url: `${SITE_ORIGIN}/`,
+            logo: {
+              '@type': 'ImageObject',
+              url: BRAND_LOGO_URL,
+              width: 512,
+              height: 512,
+            },
           },
         },
       ];

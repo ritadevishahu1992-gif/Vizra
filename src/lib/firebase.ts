@@ -27,6 +27,7 @@ import {
   getDocFromServer,
   Firestore,
 } from 'firebase/firestore';
+import { getDatabase, Database } from 'firebase/database';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize the Firebase application
@@ -40,6 +41,29 @@ export const db: Firestore = initializeFirestore(
   },
   firebaseConfig.firestoreDatabaseId
 );
+
+// Resolve Firebase Realtime Database URL (supports explicit VITE_FIREBASE_DATABASE_URL override)
+const envDatabaseUrl =
+  typeof import.meta !== 'undefined' &&
+  typeof (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_FIREBASE_DATABASE_URL ===
+    'string'
+    ? (import.meta as { env?: Record<string, string | undefined> }).env!.VITE_FIREBASE_DATABASE_URL!.trim()
+    : '';
+
+export const realtimeDatabaseUrl: string =
+  envDatabaseUrl ||
+  (firebaseConfig as { databaseURL?: string }).databaseURL ||
+  `https://${firebaseConfig.projectId}-default-rtdb.firebaseio.com`;
+
+let rtdbInstance: Database | null = null;
+try {
+  rtdbInstance = getDatabase(app, realtimeDatabaseUrl);
+} catch (err) {
+  console.warn('[Firebase RTDB] Initialization warning:', err);
+  rtdbInstance = null;
+}
+
+export const rtdb: Database | null = rtdbInstance;
 
 // Initialize Firebase Authentication with persistent IndexedDB / localStorage session storage
 export const auth = getAuth(app);

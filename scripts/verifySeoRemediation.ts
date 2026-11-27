@@ -420,7 +420,7 @@ async function runVerification() {
       ogWidth === expected.ogImageWidth &&
       ogHeight === expected.ogImageHeight &&
       Boolean(ogAlt && ogAlt.length > 10) &&
-      ogSiteName === 'VIZRA — AI Creative Studio' &&
+      ogSiteName === 'VIZRA' &&
       ogLocale === 'en_US';
 
     const twitterValuesOk =

@@ -281,7 +281,7 @@ export const OmniaLearningPanel: React.FC = () => {
           <div className="flex items-center justify-between text-xs font-mono">
             <div className="flex items-center gap-2 text-white">
               <span className="w-2 h-2 rounded-full bg-[#eb3b2d] animate-ping" />
-              <span className="font-semibold">Vercel Workflow Execution: {trainingStage}</span>
+              <span className="font-semibold">VIZRA Workflow Execution: {trainingStage}</span>
             </div>
             <span className="text-[#eb3b2d] font-bold">{trainingPercent}%</span>
           </div>
@@ -357,7 +357,7 @@ export const OmniaLearningPanel: React.FC = () => {
           <span>Last Successful Training: <strong className="text-neutral-200">{formatDate(metrics.lastSuccessfulTrainingTime)}</strong></span>
         </div>
         <div className="text-[11px] text-neutral-500">
-          Vercel Cron: <span className="text-[#eb3b2d]">0 */6 * * *</span> (24/7 Automated Sync)
+          Automated Sync: <span className="text-[#eb3b2d]">0 */6 * * *</span> (24/7 Automated Sync)
         </div>
       </div>
 

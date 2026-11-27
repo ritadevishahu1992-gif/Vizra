@@ -7,13 +7,17 @@ import {
   injectSeoIntoHtml,
 } from '../src/seo/routeMetadata';
 import { ensurePublicOgImageExists } from '../src/server/seo/ogImageGenerator';
+import {
+  BRAND_STATIC_ASSET_FILES,
+  ensurePublicBrandAssets,
+} from '../src/server/seo/brandAssetsGenerator';
 
 /**
- * Post-build static route HTML pre-renderer for Vercel CDN.
+ * Post-build static route HTML pre-renderer for Edge CDN.
  *
  * Generates `dist/<route>/index.html` for all public indexable routes (with
  * self-referencing canonicals, `index, follow`, and AdSense head script) and all utility/private/diagnostic
- * routes (with `noindex, nofollow` and strict AdSense exclusion) so Vercel's static CDN serves accurate
+ * routes (with `noindex, nofollow` and strict AdSense exclusion) so static CDN serves accurate
  * route-level metadata on initial HTTP fetch before JavaScript hydration.
  */
 function prerenderStaticRoutes() {
@@ -21,11 +25,16 @@ function prerenderStaticRoutes() {
   const distDir = path.resolve(rootDir, 'dist');
   const distIndexPath = path.join(distDir, 'index.html');
 
-  const publicOgPath = ensurePublicOgImageExists(rootDir);
+  const publicOgPath = ensurePublicOgImageExists(rootDir, { force: true });
+  ensurePublicBrandAssets(rootDir, { force: true });
+
   if (fs.existsSync(distDir)) {
-    const distOgPath = path.join(distDir, 'og-image.png');
-    if (!fs.existsSync(distOgPath)) {
-      fs.copyFileSync(publicOgPath, distOgPath);
+    fs.copyFileSync(publicOgPath, path.join(distDir, 'og-image.png'));
+    for (const asset of BRAND_STATIC_ASSET_FILES) {
+      const srcPath = path.resolve(rootDir, 'public', asset.fileName);
+      if (fs.existsSync(srcPath)) {
+        fs.copyFileSync(srcPath, path.join(distDir, asset.fileName));
+      }
     }
   }
 

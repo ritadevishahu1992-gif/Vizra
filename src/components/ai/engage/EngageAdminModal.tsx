@@ -122,10 +122,10 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
 
   // Campaign Form State
   const [campName, setCampName] = useState('');
-  const [campPartnerId, setCampPartnerId] = useState('partner-vercel');
+  const [campPartnerId, setCampPartnerId] = useState('partner-vizra-studio');
   const [campType, setCampType] =
     useState<EngageCampaign['type']>('direct_sponsorship');
-  const [campDestination, setCampDestination] = useState('https://vercel.com/ai');
+  const [campDestination, setCampDestination] = useState('https://vizra.vercel.app/studio');
   const [campAffiliateParams, setCampAffiliateParams] = useState(
     'utm_source=vizra_engage'
   );
@@ -929,7 +929,7 @@ export const EngageAdminModal: React.FC<EngageAdminModalProps> = ({
                         type="url"
                         value={contentDestination}
                         onChange={(e) => setContentDestination(e.target.value)}
-                        placeholder="https://vercel.com/ai"
+                        placeholder="https://vizra.vercel.app/studio"
                         className="w-full px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-white"
                       />
                     </div>

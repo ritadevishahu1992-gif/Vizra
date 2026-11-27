@@ -1,4 +1,3 @@
-import { sleep } from 'workflow';
 import {
   LearningSource,
   WorkflowLog,
@@ -13,17 +12,26 @@ import { OmniaIntelligenceService } from '../src/services/omniaIntelligenceServi
 
 export { computeStringHash };
 
+function parseDurationMs(duration: string | number): number {
+  if (typeof duration === 'number' && Number.isFinite(duration)) {
+    return Math.max(0, duration);
+  }
+  const str = String(duration).trim().toLowerCase();
+  const match = str.match(/^(\d+(?:\.\d+)?)\s*(ms|s|m)?$/);
+  if (!match) return 100;
+  const value = Number(match[1]);
+  const unit = match[2] || 'ms';
+  if (unit === 'm') return Math.round(value * 60_000);
+  if (unit === 's') return Math.round(value * 1_000);
+  return Math.round(value);
+}
+
 /**
- * Resilient sleep that uses Vercel Workflow's serverless sleep when inside the Workflow VM,
- * or gracefully falls back to setTimeout in local/Express environments.
+ * Lightweight async delay for pacing multi-stage Omnia learning steps.
  */
 async function durableSleep(duration: string | number): Promise<void> {
-  try {
-    await sleep(duration as any);
-  } catch {
-    const ms = typeof duration === 'number' ? duration : 100;
-    await new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  const ms = parseDurationMs(duration);
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export interface OmniaWorkflowContext {

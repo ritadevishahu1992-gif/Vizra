@@ -40,7 +40,7 @@ export default defineConfig(() => {
             if (id.includes('node_modules/d3') || id.includes('node_modules/internmap')) {
               return 'vendor-d3';
             }
-            if (id.includes('node_modules/motion/') || id.includes('node_modules/framer-motion/')) {
+            if (id.includes('node_modules/motion/')) {
               return 'vendor-motion';
             }
             if (id.includes('node_modules/lucide-react/')) {

@@ -1,0 +1,29 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "studio_presence": {
+      "$roomId": {
+        ".read": "auth != null",
+        "$sessionId": {
+          ".write": "auth != null && $roomId.matches(/^[a-zA-Z0-9_-]{1,64}$/) && $sessionId.matches(/^[a-zA-Z0-9_-]{1,96}$/) && (!data.exists() || data.child('uid').val() === auth.uid) && (!newData.exists() || newData.child('uid').val() === auth.uid)",
+          ".validate": "!newData.exists() || (newData.hasChildren(['uid', 'sessionId', 'displayName', 'color', 'x', 'y', 'visible', 'route', 'lastActive']) && newData.child('uid').val() === auth.uid && newData.child('sessionId').val() === $sessionId && newData.child('displayName').isString() && newData.child('displayName').val().length > 0 && newData.child('displayName').val().length <= 48 && newData.child('color').isString() && newData.child('color').val().matches(/^#[0-9a-fA-F]{6}$/) && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 1 && newData.child('y').isNumber() && newData.child('y').val() >= 0 && newData.child('y').val() <= 1 && newData.child('visible').isBoolean() && newData.child('route').isString() && newData.child('route').val().length <= 120 && newData.child('lastActive').isNumber())",
+          "uid": { ".validate": "newData.isString() && newData.val() === auth.uid" },
+          "sessionId": { ".validate": "newData.isString() && newData.val() === $sessionId" },
+          "displayName": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 48" },
+          "initials": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 4" },
+          "photoURL": { ".validate": "newData.isString() && newData.val().length <= 1024" },
+          "color": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+          "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },
+          "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },
+          "visible": { ".validate": "newData.isBoolean()" },
+          "isClicking": { ".validate": "newData.isBoolean()" },
+          "route": { ".validate": "newData.isString() && newData.val().length <= 120" },
+          "activeArea": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "lastActive": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}

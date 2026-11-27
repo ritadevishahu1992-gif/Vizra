@@ -40,14 +40,18 @@ const DEFAULT_CONFIG: EngageGlobalConfig = {
 
 const DEFAULT_PARTNERS: EngagePartner[] = [
   {
-    id: 'partner-vercel',
-    name: 'Vercel Cloud Platform',
-    domain: 'vercel.com',
-    contactEmail: 'partnerships@vercel.com',
+    id: 'partner-vizra-compute',
+    name: 'VIZRA Studio Compute',
+    domain: 'vizra.vercel.app',
+    contactEmail: 'studio@vizra.ai',
     verified: true,
     status: 'active',
-    tier: 'direct_brand',
-    allowedDestinations: ['https://vercel.com', 'https://vercel.com/ai'],
+    tier: 'ecosystem_partner',
+    allowedDestinations: [
+      'https://vizra.vercel.app',
+      'https://vizra.vercel.app/studio',
+      'https://vizra.vercel.app/pricing',
+    ],
     createdAt: Date.now() - 86400000 * 14,
     updatedAt: Date.now() - 86400000 * 2,
   },
@@ -66,12 +70,12 @@ const DEFAULT_PARTNERS: EngagePartner[] = [
   {
     id: 'partner-vizra-studio',
     name: 'VIZRA Creative Ecosystem',
-    domain: 'vizra.ai',
+    domain: 'vizra.vercel.app',
     contactEmail: 'studio@vizra.ai',
     verified: true,
     status: 'active',
     tier: 'ecosystem_partner',
-    allowedDestinations: ['https://vizra.ai', 'https://docs.vizra.ai'],
+    allowedDestinations: ['https://vizra.vercel.app', 'https://vizra.vercel.app/docs'],
     createdAt: Date.now() - 86400000 * 30,
     updatedAt: Date.now(),
   },
@@ -79,13 +83,13 @@ const DEFAULT_PARTNERS: EngagePartner[] = [
 
 const DEFAULT_CAMPAIGNS: EngageCampaign[] = [
   {
-    id: 'camp-vercel-edge-2026',
-    name: 'Vercel AI Cloud & Fluid Compute',
-    partnerId: 'partner-vercel',
-    partnerName: 'Vercel Cloud Platform',
-    type: 'direct_sponsorship',
-    sponsorshipLabel: 'Sponsored',
-    destinationUrl: 'https://vercel.com/ai',
+    id: 'camp-vizra-studio-2026',
+    name: 'VIZRA Studio Engines & 10-Stage Pipelines',
+    partnerId: 'partner-vizra-compute',
+    partnerName: 'VIZRA Studio Compute',
+    type: 'house_educational',
+    sponsorshipLabel: 'Partner',
+    destinationUrl: 'https://vizra.vercel.app/studio',
     affiliateParams: 'utm_source=vizra_engage&utm_medium=chat_wait',
     status: 'active',
     approvalStatus: 'approved',
@@ -218,20 +222,20 @@ const DEFAULT_CONTENT: EngageContentItem[] = [
     updatedAt: Date.now() - 86400000 * 1,
   },
   {
-    id: 'eng-spon-vercel-ai',
-    title: 'Deploy Low-Latency AI Workloads on Vercel Fluid Compute',
-    subtitle: 'Vercel Cloud Platform',
-    body: 'Scale streaming inference routes, background queues, and edge middleware with zero cold-start penalties.',
-    type: 'sponsored_card',
-    category: 'Cloud Infrastructure',
+    id: 'eng-spon-vizra-studio',
+    title: 'Explore 60fps Studio Engines & 10-Stage Creative Pipelines',
+    subtitle: 'VIZRA Creative Studio',
+    body: 'Move seamlessly from Omnia 1.0 synthesis to procedural shaders, kinetic spatial typography, and persistent multi-stage workflows.',
+    type: 'knowledge_card',
+    category: 'Studio Ecosystem',
     targetModes: ['code', 'quick', 'think', 'analyze'],
-    ctaLabel: 'Explore Vercel AI',
-    destinationUrl: 'https://vercel.com/ai',
-    sponsorshipLabel: 'Sponsored',
+    ctaLabel: 'Open VIZRA Studio',
+    destinationUrl: 'https://vizra.vercel.app/studio',
+    sponsorshipLabel: 'Partner',
     disclosureText:
-      'Sponsored Partner Placement • Independent of Omnia 1.0 reasoning & citations.',
-    campaignId: 'camp-vercel-edge-2026',
-    partnerId: 'partner-vercel',
+      'VIZRA Ecosystem Spotlight • Independent of Omnia 1.0 reasoning & citations.',
+    campaignId: 'camp-vizra-studio-2026',
+    partnerId: 'partner-vizra-compute',
     priority: 78,
     approvalStatus: 'approved',
     enabled: true,
@@ -337,13 +341,21 @@ function loadEngageStore(): void {
       const parsed = JSON.parse(raw) as Partial<EngagePersistedState>;
       if (parsed.config) state.config = { ...DEFAULT_CONFIG, ...parsed.config };
       if (Array.isArray(parsed.partners) && parsed.partners.length > 0) {
-        state.partners = parsed.partners;
+        state.partners = parsed.partners.map((p) =>
+          p.id === 'partner-vercel' ? DEFAULT_PARTNERS[0] : p
+        );
       }
       if (Array.isArray(parsed.campaigns) && parsed.campaigns.length > 0) {
-        state.campaigns = parsed.campaigns;
+        state.campaigns = parsed.campaigns.map((c) =>
+          c.id === 'camp-vercel-edge-2026' ? DEFAULT_CAMPAIGNS[0] : c
+        );
       }
       if (Array.isArray(parsed.content) && parsed.content.length > 0) {
-        state.content = parsed.content;
+        state.content = parsed.content.map((item) =>
+          item.id === 'eng-spon-vercel-ai'
+            ? DEFAULT_CONTENT.find((d) => d.id === 'eng-spon-vizra-studio') || item
+            : item
+        );
       }
       if (Array.isArray(parsed.events)) {
         state.events = parsed.events.slice(-2500);

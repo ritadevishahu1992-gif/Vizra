@@ -159,7 +159,7 @@ async function runVizraEngageTests() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: 'Malicious Metadata Campaign',
-        partnerId: 'partner-vercel',
+        partnerId: 'partner-vizra-studio',
         destinationUrl: 'http://169.254.169.254/latest/meta-data/',
       }),
     });
