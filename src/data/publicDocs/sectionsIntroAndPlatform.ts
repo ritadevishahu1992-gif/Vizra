@@ -170,7 +170,7 @@ export const INTRO_AND_PLATFORM_DOCS: DocArticle[] = [
         id: 'what-stays-human',
         heading: 'Human Creative Ownership',
         paragraphs: [
-          'AI outputs in VIZRA are meant to accelerate drafting, structuring, exploration, and prototyping. You decide what to edit, approve, combine, or export—and you retain ownership over your original human-authored inputs as set out in the Terms & Conditions.',
+          'AI outputs in VIZRA are meant to accelerate drafting, structuring, exploration, and prototyping. You retain ownership over your original human-authored inputs, while copyrightability of AI-assisted outputs depends on applicable jurisdiction and sufficient human creative authorship as detailed in the Terms & Conditions.',
         ],
       },
     ],
@@ -186,19 +186,19 @@ export const INTRO_AND_PLATFORM_DOCS: DocArticle[] = [
     sectionTitle: 'Section A · Introduction',
     title: 'Who Can Use VIZRA?',
     summary:
-      'Eligibility requirements (18+ adult creative studio), guest access versus signed-in accounts, and creator audiences.',
+      'Omnia Adult (18+) and Omnia Youth (verified parental consent) eligibility, guest access versus signed-in accounts, and creator audiences.',
     blocks: [
       {
         id: 'eligibility',
-        heading: 'Age & Eligibility Policy',
+        heading: 'Age Assurance & Parental Consent Policy',
         paragraphs: [
-          'VIZRA currently operates strictly as an 18+ adult creative studio. Under-18 onboarding is not enabled, and users must meet the 18+ age requirement described in the Terms & Conditions to access AI workspace capabilities.',
-          'Additional protective restrictions also limit sensitive real-time voice, unverified third-party connectors, and promotional placements when any session is flagged as age-restricted.',
+          'VIZRA operates the Age Assurance & Parental Consent Framework supporting Omnia Adult (eligible users aged 18+) and Omnia Youth (eligible users under 18 with jurisdiction-appropriate verifiable parental consent and mandatory safeguards).',
+          'Age declaration is used only for initial routing, never as proof of age, and VIZRA performs zero behavioral age inference. For Omnia Youth accounts, Live Voice, unrestricted audio synthesis, paid upgrades, external connectors, and targeted ads remain disabled even with parental consent.',
         ],
         callout: {
           variant: 'warning',
-          title: 'Adult Eligibility Notice (18+)',
-          body: 'You must be at least 18 years old to use interactive AI features on VIZRA. Please review Section 2 of the Terms & Conditions for full regional eligibility disclosures.',
+          title: 'Omnia Adult & Omnia Youth Eligibility',
+          body: 'Adults aged 18+ access Omnia Adult. Minors under 18 require verified parental consent under applicable law via /parental-consent (fail-closed until independent parent identity verification is completed).',
         },
       },
       {

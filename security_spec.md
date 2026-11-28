@@ -1,47 +1,35 @@
-# VIZRA AI Creative Studio — Firebase Security Specification
+# VIZRA Firestore Security Specification & Red-Team TDD Matrix
 
-## 1. Firebase Architecture & Access Control Matrix
+## Phase 0: Data Invariants & Trust Boundaries
 
-- **Project ID**: `nice-dolphin-n7c1c`
-- **Firestore Database ID**: `ai-studio-vizraaicreatives-526756ea-8369-4e64-bb74-541d358e399a`
-- **Realtime Database**: Configured for `/studio_presence/$roomId/$sessionId` (`database.rules.json`)
-- **Firebase Storage**: Configured in `firebase-applet-config.json` (`nice-dolphin-n7c1c.firebasestorage.app`), **unused in application code** (recommend deploying default-deny `storage.rules` if Storage is activated in Firebase Console).
-- **Firebase App Check**: **Not yet enabled** (`recaptchaSiteKey: ""`).
-
-| Collection / Path | Get | List | Create | Update | Delete |
-| --- | --- | --- | --- | --- | --- |
-| `/{document=**}` | DENY | DENY | DENY | DENY | DENY |
-| `/users/{userId}` | Owner only | **DENY** (no enumeration) | Owner + strict schema | Owner + `affectedKeys().hasOnly(['email','displayName','photoURL','lastLoginAt'])` + immutable `uid`/`createdAt` | Owner only |
-| `/users/{userId}/projects/{projectId}` | Owner only | Owner only | Owner + strict schema + `id == projectId` | Owner + `affectedKeys().hasOnly(['title','category','description','status','stages','updatedAt'])` + immutable `id`/`ownerId`/`createdAt` | Owner only |
-| `/users/{userId}/conversations/{convId}/messages/{msgId}` | Owner only | Owner only | Owner + strict schema + `id == msgId` + `conversationId == convId` | **DENY** (immutable history) | Owner only |
-| `/test/connection` | Read-only diagnostic sentinel | DENY | DENY | DENY | DENY |
-| RTDB `/studio_presence/$roomId/$sessionId` | Signed-in user (room-scoped) | Signed-in user | Own `uid === auth.uid` + strict coordinate/type bounds | Own `uid === auth.uid` | Own `uid === auth.uid` |
+1. **Identity & Ownership**:
+   - Firebase Authentication UID (`request.auth.uid`) is the sole trusted client identity.
+   - Client applications CANNOT self-assert `ageStatus`, `consentStatus`, `accountAccessState`, `role`, or `isAdmin` inside Firestore documents.
+2. **Collection Invariants**:
+   - `/users/{userId}`: Strict owner-only `get`, `create`, `update`, `delete`. `list` is universally `false`. Strict `hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'lastLoginAt'])` prevents injecting spoofed age/consent/role fields. `uid` and `createdAt` are immutable.
+   - `/users/{userId}/projects/{projectId}`: Strict owner-only CRUD. `id == projectId`, `ownerId == userId`, `createdAt` immutable.
+   - `/users/{userId}/conversations/{conversationId}/messages/{messageId}`: Strict owner-only `get`, `list`, `create`, `delete`. `update` is universally `false` (immutable history). **Minor Data Protection Invariant**: Parents/guardians do NOT have Firestore read access to a child's conversations or messages.
+   - `/parental_consents/{consentId}`: **Server-authoritative only.** `allow create, update, delete: if false;` prevents any client (minor, parent, or attacker) from forging, modifying, self-approving, or erasing parental consent records. `allow get, list:` strictly scoped to the two named parties (`request.auth.uid == resource.data.child_uid || request.auth.uid == resource.data.parent_uid`).
+   - `/parent_child_relationships/{relationshipId}`: **Server-authoritative only.** `allow create, update, delete: if false;`. `allow get, list:` strictly scoped to the linked parties (`request.auth.uid == resource.data.child_uid || request.auth.uid == resource.data.parent_uid`).
+   - `/consent_audit_logs/{eventId}`: **Strictly server-only.** `allow read, write: if false;`. Zero client read, list, create, update, or delete access.
+   - `/test/{docId}`: Diagnostic `get` strictly scoped to `docId == 'connection'`.
+   - Default catch-all `/{document=**}`: `allow read, write: if false;`.
 
 ---
 
-## 2. Core Data Invariants
+## Dirty Dozen Red-Team Attack Matrix (All Must Be DENIED)
 
-1. **Zero Privilege/Billing Shadow Fields in Firestore**: Client writes to `/users/{userId}` are strictly restricted to `['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'lastLoginAt']`. Any attempt to inject `role`, `isAdmin`, `plan`, `planId`, `subscription`, or `credits` is denied.
-2. **Ownership Binding**: Every document under `/users/{userId}` enforces `request.auth.uid == userId` AND matches the internal ownership field (`uid`, `ownerId`, or `userId`).
-3. **Immutable Audit & Identity Fields**: `uid`, `ownerId`, `id`, and `createdAt` cannot be modified after creation. Chat messages are append-only (`allow update: if false`).
-4. **URI & Size Safety**: `photoURL` must be `null`, empty, or `https://...` (no `javascript:` or `data:` URIs); `content` is bounded to `1..20000` chars; `stages` <= 25 items; `sources` <= 50 items.
-5. **Email Integrity**: If `request.auth.token.email` is present, a user's Firestore profile `email` must match their authenticated Firebase token email (preventing email impersonation).
-
----
-
-## 3. Adversarial Test Payloads ("Dirty Dozen")
-
-Every payload below MUST be **DENIED** by `DRAFT_firestore.rules`:
-
-1. **Unauthenticated Profile Read**: `GET /users/user_a` with `auth == null` -> **DENY**.
-2. **User Directory Enumeration**: `LIST /users` as authenticated `user_a` -> **DENY** (`allow list: if false`).
-3. **Cross-User Profile Read (IDOR)**: `GET /users/user_b` as authenticated `user_a` -> **DENY**.
-4. **Cross-User Project Creation**: `CREATE /users/user_b/projects/p1` as `user_a` -> **DENY**.
-5. **Privilege Escalation (Mass Assignment)**: `UPDATE /users/user_a` adding `{ isAdmin: true, role: "admin" }` -> **DENY** (`hasOnly` & `affectedKeys` fail).
-6. **Subscription/Credits Tampering**: `UPDATE /users/user_a` adding `{ planId: "studio", credits: 999999 }` -> **DENY**.
-7. **Immutable Identity Hijack**: `UPDATE /users/user_a/projects/p1` changing `ownerId: "user_b"` or `createdAt: "1999-01-01T00:00:00Z"` -> **DENY**.
-8. **Document ID / Foreign Key Mismatch**: `CREATE /users/user_a/projects/proj_1` with `{ id: "proj_other", ... }` -> **DENY**.
-9. **Stored XSS via Profile Photo URI**: `UPDATE /users/user_a` with `{ photoURL: "javascript:alert(1)" }` -> **DENY** (`^https://.*` regex fails).
-10. **Chat History Tampering**: `UPDATE /users/user_a/conversations/c1/messages/m1` modifying `content` -> **DENY** (`allow update: if false`).
-11. **Oversized Storage Exhaustion**: `CREATE /users/user_a/conversations/c1/messages/m2` with `content.size() == 25000` -> **DENY** (`<= 20000`).
-12. **Path/ID Poisoning & Arbitrary Collection Write**: `CREATE /admin_config/global` or `CREATE /users/user_a/projects/bad..id` -> **DENY** (default-deny + `isValidId`).
+| # | Attack Vector | Target Path | Actor | Payload / Operation | Expected Result | Rule Enforcement |
+|---|---|---|---|---|---|---|
+| 1 | Self-approve parental consent from client SDK | `/parental_consents/pc_forged` | Minor (`uid: child_1`) | `create` `{ child_uid: 'child_1', parent_uid: 'child_1', consent_status: 'VERIFIED' }` | **DENY** | `allow create: if false;` |
+| 2 | Parent directly flips `PENDING_VERIFICATION` to `VERIFIED` via client SDK | `/parental_consents/pc_123` | Parent (`uid: parent_1`) | `update` `{ consent_status: 'VERIFIED' }` | **DENY** | `allow update: if false;` |
+| 3 | Client deletes consent record to erase compliance history | `/parental_consents/pc_123` | Minor or Parent | `delete` | **DENY** | `allow delete: if false;` |
+| 4 | Unrelated authenticated user reads another family's consent doc | `/parental_consents/pc_123` | Stranger (`uid: stranger_9`) | `get` | **DENY** | `isConsentParty(existing())` fails |
+| 5 | Unrelated user runs unscoped collection query on `parental_consents` | `/parental_consents` | Stranger (`uid: stranger_9`) | `list` (no `where` filter matching `uid`) | **DENY** | `allow list` requires rule-provable `resource.data.child_uid == uid \|\| resource.data.parent_uid == uid` |
+| 6 | Client forges a parent-child relationship link | `/parent_child_relationships/rel_forged` | Attacker (`uid: attacker_1`) | `create` `{ parent_uid: 'attacker_1', child_uid: 'child_1', relationship_status: 'ACTIVE' }` | **DENY** | `allow create: if false;` |
+| 7 | Client tampers with or reads `consent_audit_logs` | `/consent_audit_logs/evt_1` | Any authenticated client | `get`, `list`, `create`, `update`, `delete` | **DENY** | `allow read, write: if false;` |
+| 8 | Parent tries to read minor's private Omnia conversations directly | `/users/child_1/conversations/c1/messages/m1` | Parent (`uid: parent_1`) | `get` or `list` | **DENY** | `isOwner('child_1')` requires `request.auth.uid == 'child_1'` |
+| 9 | Shadow field privilege escalation on `/users/{uid}` | `/users/child_1` | Minor (`uid: child_1`) | `update` `{ ..., ageStatus: 'ADULT_DECLARED', accountAccessState: 'ADULT_ACCESS', role: 'admin' }` | **DENY** | `isValidUserProfile` enforces `hasOnly([...])` |
+| 10 | Immutable field tampering (`createdAt` / `uid` hijack) | `/users/child_1` | Minor (`uid: child_1`) | `update` `{ uid: 'adult_1', createdAt: '2020-01-01T00:00:00Z' }` | **DENY** | `incoming().uid == userId && incoming().createdAt == existing().createdAt` |
+| 11 | Global user enumeration | `/users` | Any authenticated user | `list` | **DENY** | `allow list: if false;` |
+| 12 | Malformed / path-injection document ID | `/users/child_1/projects/../../admin` | Any authenticated user | `create` / `get` | **DENY** | `isValidId(projectId)` regex `^[a-zA-Z0-9_\-]+$` |

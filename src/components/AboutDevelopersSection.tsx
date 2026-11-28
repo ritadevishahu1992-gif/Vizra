@@ -45,7 +45,7 @@ const FOUNDER_PROFILES: readonly FounderProfile[] = [
     ],
     instagram: {
       handle: '@_anish._exe',
-      url: 'https://www.instagram.com/_anish._exe/',
+      url: 'https://www.instagram.com/__anish._exe?bqrl=MWl5MnIyd3YxbmRzaQ==',
     },
   },
 ];

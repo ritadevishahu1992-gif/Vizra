@@ -14,7 +14,8 @@
     "test": "tsx scripts/runEvaluation.ts",
     "test:e2e": "tsx scripts/e2eReleaseValidation.ts",
     "test:notif": "tsx scripts/testLoginNotification.ts",
-    "test:engage": "tsx scripts/testVizraEngage.ts"
+    "test:engage": "tsx scripts/testVizraEngage.ts",
+    "test:security": "tsx scripts/testAgeAssuranceAndSecurity.ts"
   },
   "dependencies": {
     "@fontsource/instrument-serif": "^5.3.0",

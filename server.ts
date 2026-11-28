@@ -94,10 +94,18 @@ import {
 import {
   setupAgeAssuranceRoutes,
   enforceFeatureAccessForRequest,
+  enforceFeatureAccessForUid,
+  validateYouthAttachmentRestrictions,
   purgeAgeAssuranceRecordsForSubjects,
   MINOR_SAFE_GEMINI_SAFETY_SETTINGS,
   MINOR_SAFE_SYSTEM_DIRECTIVE,
 } from './src/server/compliance/ageAssurance';
+import {
+  VIZRA_CAPABILITY_REGISTRY,
+  getCapabilityById,
+  getCapabilitySummaryCounts,
+  buildNoPowersSystemDirective,
+} from './src/shared/capabilityRegistry';
 import {
   setupIntegrationsRoutes,
   purgeVaultRecordsForUser,
@@ -864,10 +872,52 @@ export async function createExpressApp(options?: {
   // Mount VIZRA Privacy & Consent Management API routes (with optional Google Sheets audit export)
   setupConsentRoutes(app);
 
-  // Mount Operator Legal Readiness (REC-13), Age Assurance (Option 2 Dormant / Option 5 Rejected) & OAuth Integration Catalog
+  // Mount Operator Legal Readiness (REC-13), Age Assurance & Parental Consent Framework & OAuth Integration Catalog
   setupOperatorComplianceRoutes(app);
   setupAgeAssuranceRoutes(app);
   setupIntegrationsRoutes(app);
+
+  // Centralized NO POWERS Capability Registry Endpoints (Read-Only Public Source of Truth)
+  app.get('/api/capabilities', generalApiRateLimiter.getMiddleware(), (_req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.json({
+      success: true,
+      framework: 'VIZRA_NO_POWERS_FRAMEWORK',
+      version: '1.0.0',
+      summary: getCapabilitySummaryCounts(),
+      capabilities: VIZRA_CAPABILITY_REGISTRY,
+      generatedAt: new Date().toISOString(),
+    });
+  });
+
+  app.get('/api/capabilities/:capabilityId', generalApiRateLimiter.getMiddleware(), (req, res) => {
+    const rawId = String(req.params.capabilityId || '').trim();
+    if (!/^[a-z0-9_]{2,64}$/.test(rawId)) {
+      res.status(400).json({
+        error: {
+          code: 'INVALID_CAPABILITY_ID',
+          message: 'Capability ID must be lowercase alphanumeric/underscore.',
+        },
+      });
+      return;
+    }
+    const capability = getCapabilityById(rawId);
+    if (!capability) {
+      res.status(404).json({
+        error: {
+          code: 'CAPABILITY_NOT_FOUND',
+          message: `Capability "${rawId}" is not registered in VIZRA's capability registry.`,
+        },
+      });
+      return;
+    }
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.json({
+      success: true,
+      framework: 'VIZRA_NO_POWERS_FRAMEWORK',
+      capability,
+    });
+  });
 
   // System instruction for Omnia enforcing core Vizra identity, architecture, and behavior
   const systemInstruction = `You are OMNIA, the intelligent AI operating layer and assistant created by VIZRA.
@@ -1031,14 +1081,16 @@ When scientific, biomedical, pharmacological, genomic, structural, or biochemica
 - For biomedical literature: Ground citations in verifiable PubMed literature with exact PMIDs, primary journal citations, and publication dates.
 
 ==================================================
-12. SAFETY & RESPONSIBLE ASSISTANCE
+13. SAFETY & RESPONSIBLE ASSISTANCE
 ==================================================
 - Provide helpful information while respecting applicable safety requirements.
 - Do not facilitate harmful, illegal, deceptive, or dangerous activity. When a request cannot be fulfilled safely, explain the limitation briefly and offer a relevant safe alternative when appropriate.
 - For high-stakes medical, legal, financial, or safety-related questions, use appropriate caution, reliable sources, and clear boundaries.
 
+${buildNoPowersSystemDirective()}
+
 ==================================================
-13. FINAL QUALITY CHECK
+15. FINAL QUALITY CHECK
 ==================================================
 Before sending a response, silently check:
 [ ] Did I answer the actual question?
@@ -1046,7 +1098,7 @@ Before sending a response, silently check:
 [ ] Is the response the right length?
 [ ] Does the wording sound natural rather than mechanically templated?
 [ ] Are the headings and examples genuinely useful?
-[ ] Have I avoided unsupported claims and fabricated sources?
+[ ] Have I avoided unsupported claims, fabricated sources, and false capability claims?
 [ ] Have I followed the user's instructions and preserved relevant context?
 Revise only where necessary. Do not expose this checklist or describe internal reasoning to the user.`;
 
@@ -1332,6 +1384,31 @@ Revise only where necessary. Do not expose this checklist or describe internal r
           code: chatAgeGate.code || 'AGE_ASSURANCE_ACCESS_DENIED',
           category: 'INSUFFICIENT_PERMISSIONS',
           message: chatAgeGate.message || 'Access restricted by age assurance policy.',
+          requestId,
+        });
+        return;
+      }
+
+      // Enforce Omnia Youth tighter prompt length & restricted file analysis limits server-side
+      const promptLen = (promptCheck.cleanText || prompt || '').length;
+      if (promptLen > chatAgeGate.context.resourceLimits.maxPromptChars) {
+        sendSafeErrorResponse(res, {
+          status: 400,
+          code: 'YOUTH_PROMPT_LIMIT_EXCEEDED',
+          category: 'INVALID_REQUEST',
+          message: `Prompt exceeds the maximum allowed length (${chatAgeGate.context.resourceLimits.maxPromptChars.toLocaleString()} characters) for your current access environment.`,
+          requestId,
+        });
+        return;
+      }
+
+      const youthAttachmentCheck = validateYouthAttachmentRestrictions(attachments, chatAgeGate.context);
+      if (!youthAttachmentCheck.valid) {
+        sendSafeErrorResponse(res, {
+          status: 403,
+          code: youthAttachmentCheck.code || 'YOUTH_ATTACHMENT_RESTRICTED',
+          category: 'INSUFFICIENT_PERMISSIONS',
+          message: youthAttachmentCheck.error || 'Attachment restricted under Omnia Youth file policy.',
           requestId,
         });
         return;
@@ -3738,6 +3815,17 @@ Core Responsibilities:
   // RAG Embedding single endpoint
   app.post('/api/rag/embed', ragRateLimiter.getMiddleware(), async (req, res) => {
     try {
+      const ragAgeGate = await enforceFeatureAccessForRequest(req, 'rag_local_restricted');
+      if (!ragAgeGate.allowed) {
+        res.status(ragAgeGate.status).json({
+          error: {
+            code: ragAgeGate.code || 'AGE_ASSURANCE_ACCESS_DENIED',
+            message: ragAgeGate.message || 'Local RAG embedding access is restricted under age assurance policy.',
+          },
+        });
+        return;
+      }
+
       const { text } = req.body || {};
       if (!text || typeof text !== 'string') {
         res.status(400).json({ error: 'Text string is required' });
@@ -3810,6 +3898,17 @@ Core Responsibilities:
   // RAG Embedding batch endpoint
   app.post('/api/rag/embed/batch', ragRateLimiter.getMiddleware(), async (req, res) => {
     try {
+      const ragBatchAgeGate = await enforceFeatureAccessForRequest(req, 'rag_local_restricted');
+      if (!ragBatchAgeGate.allowed) {
+        res.status(ragBatchAgeGate.status).json({
+          error: {
+            code: ragBatchAgeGate.code || 'AGE_ASSURANCE_ACCESS_DENIED',
+            message: ragBatchAgeGate.message || 'Local RAG batch embedding access is restricted under age assurance policy.',
+          },
+        });
+        return;
+      }
+
       const { texts } = req.body || {};
       if (!Array.isArray(texts) || texts.length === 0) {
         res.status(400).json({ error: 'Texts array is required' });
@@ -4762,6 +4861,20 @@ Core Responsibilities:
       return;
     }
 
+    // Server-side age-assurance enforcement: Omnia Youth / minor accounts cannot receive paid upgrades
+    const billingAgeGate = enforceFeatureAccessForUid(uid, 'paid_billing');
+    if (!billingAgeGate.allowed) {
+      res.status(billingAgeGate.status).json({
+        error: {
+          code: billingAgeGate.code || 'MINOR_PAID_BILLING_FORBIDDEN',
+          message:
+            billingAgeGate.message ||
+            'Paid upgrades are disabled for Omnia Youth and unverified minor accounts.',
+        },
+      });
+      return;
+    }
+
     // Recompute authoritative server-side price from PLAN_CREDIT_CATALOG
     const authoritativePlan = PLAN_CREDIT_CATALOG[planId as 'starter' | 'pro' | 'studio'];
     const expectedPriceUsd =
@@ -5167,24 +5280,31 @@ Core Responsibilities:
 
       // Cascade erasure strictly scoped to the verified caller (never let an authenticated caller purge an arbitrary X-Vizra-Client-Id)
       const ageSeedsToPurge: string[] = [];
+      const workspaceTenantKeysToPurge: string[] = [];
       if (verifiedUid) {
         ageSeedsToPurge.push(`uid:${verifiedUid}`);
+        workspaceTenantKeysToPurge.push(`uid:${verifiedUid}`);
       } else if (
         typeof clientTenantHeader === 'string' &&
         /^[a-zA-Z0-9_-]{16,64}$/.test(clientTenantHeader.trim())
       ) {
-        ageSeedsToPurge.push(`client:${derivePrivacySessionHash(clientTenantHeader.trim())}`);
+        const trimmedClientId = clientTenantHeader.trim();
+        // Raw client seed matches ageAssurance.ts hashing; hashed key matches workspaceTokenStore & legacy entries
+        ageSeedsToPurge.push(`client:${trimmedClientId}`);
+        const hashedClientTenantKey = `client:${derivePrivacySessionHash(trimmedClientId)}`;
+        ageSeedsToPurge.push(hashedClientTenantKey);
+        workspaceTenantKeysToPurge.push(hashedClientTenantKey);
       }
       const purgedAgeCount = purgeAgeAssuranceRecordsForSubjects(ageSeedsToPurge);
       if (purgedAgeCount > 0) {
-        purgedKeys.push('age_assurance_records');
+        purgedKeys.push('age_assurance_and_parental_consent_records');
       }
 
       // Cascade erasure into Workspace API tokens, OAuth token vault & unlink matching safety report session hashes
-      if (ageSeedsToPurge.length > 0) {
+      if (workspaceTenantKeysToPurge.length > 0) {
         const beforeTokCount = workspaceTokenStore.length;
         workspaceTokenStore = workspaceTokenStore.filter(
-          (tok) => !ageSeedsToPurge.includes(tok.tenantKey)
+          (tok) => !workspaceTenantKeysToPurge.includes(tok.tenantKey)
         );
         if (workspaceTokenStore.length !== beforeTokCount) {
           saveWorkspaceTokenStore();
@@ -5282,8 +5402,10 @@ Core Responsibilities:
       platform: 'Vizra AI Creative Studio',
       assistant: 'Omnia 1.0',
       dataStorage: {
-        conversations: 'Browser localStorage (anonymous); Firestore users/{userId}/conversations (authenticated)',
+        conversations: 'Browser localStorage (anonymous); Firestore users/{userId}/conversations (authenticated). Child conversations are NOT automatically exposed to parents.',
         projects: 'Browser localStorage (anonymous); Firestore users/{userId}/projects (authenticated)',
+        parentalConsents: 'Server-managed Firestore schema /parental_consents/{consentId} and /parent_child_relationships/{relationshipId} (clients cannot write or tamper with consent records)',
+        consentAuditLogs: 'Append-only server-managed /consent_audit_logs/{eventId} storing non-PII hashes and compliance event types',
         personalMemory: 'Browser localStorage scoped per user ID (vizra_omnia_personal_memories_v1_{uid}) via user-controlled toggle with zero-persistence wipe and PII scrubbing',
         learningGraph: 'Local data store (data/omnia_learning_store.json) for admin-approved non-personal benchmarks',
         creditLedger: 'Per-tenant credit ledger (data/credit_ledger_store.json) keyed by verified UID or client ID',
@@ -5300,8 +5422,8 @@ Core Responsibilities:
         note: 'Google Sheets/Docs are NOT used as an authentication, user profile, or personal data store.',
       },
       isolation: {
-        tenantIsolation: 'Strict user-specific Firestore security rules (request.auth.uid == userId)',
-        crossUserAccess: 'Forbidden. No global collection list permissions exist for user profiles or private documents.',
+        tenantIsolation: 'Strict user-specific Firestore security rules (request.auth.uid == userId); parental consent collections are server-write-only',
+        crossUserAccess: 'Forbidden. No global collection list permissions exist for user profiles, private documents, or parental consent records.',
         promptExfiltration: 'Project assets and personal memories are isolated per user and scrubbed for PII prior to model context assembly.',
       },
       thirdPartyModelProviders: [
@@ -5312,8 +5434,8 @@ Core Responsibilities:
         },
         {
           provider: 'Google Firebase (Authentication & Cloud Firestore)',
-          purpose: 'Identity verification, session management, and user-scoped cloud workspace sync',
-          dataRetention: 'Retained until user initiates Delete Account & Cloud Data erasure',
+          purpose: 'Identity verification, session management, user-scoped cloud workspace sync, and parental consent relationship storage',
+          dataRetention: 'Retained until user or parent/guardian initiates withdrawal or Delete Account & Cloud Data erasure',
         },
         {
           provider: 'Transactional Email (Resend SDK, optional via RESEND_API_KEY)',
@@ -5333,11 +5455,13 @@ Core Responsibilities:
       ],
       rights: {
         deletionEndpoint: 'DELETE /api/account/data',
-        minimumAgeRequirement: 18,
+        ageAssurancePolicy: 'VIZRA_AGE_ASSURANCE_PARENTAL_CONSENT',
+        accessEnvironments: ['OMNIA_ADULT (18+)', 'OMNIA_YOUTH (eligible minors with verified parental consent & strict safeguards)'],
+        capabilityRegistryEndpoint: 'GET /api/capabilities',
       },
       complianceAndControls: {
-        instantPurge: 'Users can delete individual conversations, memories, or execute full account & cloud erasure via DELETE /api/account/data',
-        telemetry: 'No third-party behavioral ad trackers; essential operational metrics and security rate-limiting only',
+        instantPurge: 'Users and verified parents/guardians can revoke consent immediately via POST /api/compliance/parental-consent/revoke or execute full account & cloud erasure via DELETE /api/account/data',
+        telemetry: 'No third-party behavioral ad trackers, zero behavioral age inference, and zero targeted advertising for Omnia Youth accounts',
         dpdpReviewNotice:
           'Technical privacy safeguards are implemented to support India Digital Personal Data Protection Act, 2023 (DPDP Act) principles, but final legal sufficiency of notices, retention periods, Grievance Officer designations, and verifiable parental consent workflows requires qualified legal counsel review.',
       },
@@ -5699,6 +5823,15 @@ Core Responsibilities:
         liveSessionTickets.delete(ticketParam);
       }
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    // Upgrade-time age-assurance & consent re-verification (eliminates TOCTOU window for Live Voice)
+    const wsVoiceGate = enforceFeatureAccessForUid(ticketRecord.uid, 'voice_live');
+    if (!wsVoiceGate.allowed) {
+      liveSessionTickets.delete(ticketParam);
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
       socket.destroy();
       return;
     }

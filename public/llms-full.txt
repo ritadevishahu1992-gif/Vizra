@@ -30,7 +30,7 @@ Core Operating Principles (from `/about`):
 8. `/blog` — VIZRA Technical Editorial Blog: 20 published, source-verified long-form monographs spanning Batch 1 (AI Foundations, Articles 01–10: evolution of AI, AI complete guide, machine learning, deep learning, neural networks, computing history, learning paradigms, data engineering, NLP, computer vision) and Batch 2 (Machine Learning & Advanced AI, Articles 11–20: ML model training, algorithms, gradient descent & backpropagation, overfitting & underfitting, foundation models, transformers, evaluation & inference, ANI vs. AGI vs. ASI, edge AI, and the future of intelligent computing), each published at `/blog/<slug>`.
 9. `/about` — About VIZRA: Philosophy creed, core engineering principles, and target creator disciplines.
 10. `/contact` — Contact & Studio Inquiries: Direct studio inquiry form, early-access beta request form, and response SLAs.
-11. `/terms-and-conditions` — Legal Terms & Conditions (`STRICT_18_PLUS` adult studio policy, acceptable use, USCO AI copyrightability notice, DMCA 17 U.S.C. § 512 procedure, EU AI Act Art. 50(2) provenance, and third-party Google AdSense advertising disclosures).
+11. `/terms-and-conditions` — Legal Terms & Conditions (VIZRA Age Assurance & Parental Consent Framework for Omnia Adult & Omnia Youth, acceptable use, jurisdiction-dependent AI copyrightability disclosure with no guaranteed exclusive ownership, DMCA 17 U.S.C. § 512 procedure, EU AI Act Art. 50(2) provenance, and third-party Google AdSense advertising disclosures).
 12. `/privacy-policy` — Privacy Policy & Data Protection (data minimization, legal bases, retention, subprocessors, Google AdSense advertising cookies & choices, GDPR/CCPA/DPDP rights, `DELETE /api/account/data`).
 13. `/cookie-policy` — Cookie & Storage Policy (storage inventory table, cookieless `@vercel/analytics` separation, Google AdSense advertising cookies & Privacy & Messaging choices, default-off opt-in consent & withdrawal).
 
@@ -46,8 +46,9 @@ Core Operating Principles (from `/about`):
 
 ### 3.2 Omnia 1.0 Capabilities & Security Controls
 - **Conversational & Reasoning Modes**: Adapts dynamically between concise Quick replies, deep analytical Think reasoning, grounded web Research, Writing, Design, Code, and Multimodal File Analysis.
-- **Live Voice Mode** (`LIMITED`): Authenticated, 18+ real-time voice conversations inside `/ai` (requires signed-in account and microphone permission).
-- **AI Music Studio** (`AVAILABLE`): Original 5–120 second instrumental WAV compositions generated server-side with provenance metadata.
+- **Live Voice Mode** (`LIMITED`): Authenticated **Omnia Adult (18+)** real-time voice conversations inside `/ai` (requires signed-in adult account and microphone permission; disabled for Omnia Youth).
+- **AI Music Studio** (`AVAILABLE`): Original 5–120 second instrumental WAV compositions generated server-side with provenance metadata (Omnia Adult only; unrestricted synthesis disabled for Omnia Youth).
+- **NO POWERS Capability Registry** (`AVAILABLE`): Centralized machine-readable source of truth at `GET /api/capabilities` separating `LIVE`, `STAGED`, `UNAVAILABLE`, and `RESTRICTED` capabilities.
 - **Science Hub** (`AVAILABLE`): Educational scientific retrieval referencing EMBL-EBI AlphaFold DB, NCBI PubChem, and NCBI PubMed.
 - **Deterministic URL & SSRF Verification**: Web URL inspection endpoints validate HTTP/HTTPS protocols, perform DNS resolution, and block RFC1918 private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.1`, `::1`), and cloud metadata IPs (`169.254.169.254`).
 
@@ -128,13 +129,14 @@ Frequently Asked Questions (verbatim summary):
 ## 7. Operational Limits & Private Boundaries (`/docs`)
 
 - **Web-First Studio Delivery**: Interactive creation, grounded research, and 10-stage project workflows operate directly inside the VIZRA web workspace (`/ai` and `/workspace`).
-- **Prompt Character Cap**: Maximum `50,000` characters per prompt.
-- **Multimodal Attachments**: Up to `5` files per prompt turn (`10 MB` max per file; binary video uploads are not supported in chat); Knowledge Base Explorer local index accepts up to `25 MB`.
-- **Interactive Abuse Protection**: Sliding-window rate limiting across server endpoints, plus authenticated 18+ account checks and concurrency caps (`max 2` concurrent sessions, `10-minute` session cap) on interactive Live Voice Mode.
+- **Prompt Character Cap**: Maximum `50,000` characters per prompt (`25,000` for Omnia Youth).
+- **Multimodal Attachments**: Adult: up to `5` files per prompt turn (`10 MB` max per file; binary video uploads are not supported in chat). Omnia Youth: up to `2` files per turn (`5 MB` max; audio uploads blocked). Knowledge Base Explorer local index accepts up to `25 MB`.
+- **Interactive Abuse Protection & Age Assurance**: Sliding-window rate limiting across server endpoints, plus server-enforced Age Assurance & Parental Consent Framework separating Omnia Adult (18+) and Omnia Youth (verified parental consent, fail-closed external VPC verification, zero behavioral profiling, zero targeted ads, child conversations isolated from parents) and concurrency caps (`max 2` concurrent sessions, `10-minute` session cap) on Live Voice Mode.
 - **Non-Public / Authenticated Routes (Excluded from Crawling & Indexing)**:
   - `/ai` (Interactive Omnia Workspace)
   - `/history` (Saved Conversation Threads)
   - `/settings` (User Preferences & Self-Service Deletion)
+  - `/parental-consent` (Age Assurance & Parental Consent Workflow Portal)
   - `/workspace` (Workspace & Project Manager)
   - `/seo-diagnostics` (Restricted Admin Diagnostic Console)
   - `/api/*` and `/live`

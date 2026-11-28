@@ -11,17 +11,50 @@ import {
 } from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
 import { getParentalConsentConfig } from '../config/envConfig';
+import {
+  APPROVED_YOUTH_CONSENT_SCOPES,
+  AccountAccessState,
+  CONSENT_POLICY_VERSION,
+  ConsentScope,
+  appendConsentAuditLog,
+  createOrReuseParentalInvitation,
+  finalizeVerifiedParentalConsent,
+  getConsentPersistenceStatus,
+  getInvitationByRawToken,
+  getLatestParentalConsentForChild,
+  listParentalConsentsForActor,
+  purgeParentalConsentDataForUid,
+  recordParentApprovalAttempt,
+  revokeParentalConsent,
+} from './parentalConsentStore';
 
 /**
- * Policy governance flags.
- * ACTIVE_AGE_POLICY stays 'STRICT_18_PLUS' until formal legal approval and
- * an accredited external verifiable parental consent vendor are integrated.
- * OPTION_2_ACTIVE stays FALSE (dormant preparatory engineering).
- * OPTION_5_REJECTED stays TRUE (permanently rejected by project owner).
+ * VIZRA AGE ASSURANCE & PARENTAL CONSENT FRAMEWORK
+ *
+ * Replaces the universal STRICT_18_PLUS gate with a dual-environment architecture:
+ * - OMNIA ADULT (`ADULT_ACCESS`): Eligible users aged 18+.
+ * - OMNIA YOUTH (`MINOR_RESTRICTED_ACCESS` / `PARENTAL_CONSENT_VERIFIED`): Eligible users under 18
+ *   subject to applicable law, independently verified parental consent, and mandatory age-appropriate safeguards.
+ *
+ * Core Governance Rules:
+ * - Age declaration is an initial routing signal only, never certified proof of adulthood.
+ * - Zero behavioural age inference and zero persistent behavioural profiling of minors.
+ * - Parental consent can NEVER override mandatory legal/safety restrictions (Live Voice,
+ *   unrestricted audio synthesis, paid commercial upgrades, external connectors, targeted ads remain disabled).
+ * - External identity/authority verification fails closed unless a real verification provider is configured.
+ * - Option 5 (unrestricted passive access) remains permanently rejected.
  */
-export const ACTIVE_AGE_POLICY = 'STRICT_18_PLUS' as const;
-export const OPTION_2_ACTIVE = false;
+export const ACTIVE_AGE_POLICY = 'VIZRA_AGE_ASSURANCE_PARENTAL_CONSENT' as const;
+export const LEGACY_SUPERSEDED_POLICY = 'STRICT_18_PLUS' as const;
+export const OMNIA_YOUTH_ENABLED = true;
+export const OPTION_2_ACTIVE = true;
 export const OPTION_5_REJECTED = true;
+export const BEHAVIOURAL_AGE_INFERENCE_ENABLED = false;
+export const MINOR_BEHAVIOURAL_PROFILING_ENABLED = false;
+
+export type OmniaAccessEnvironment = 'OMNIA_ADULT' | 'OMNIA_YOUTH' | 'BLOCKED';
+
+export type AgeStatus = 'ADULT_18_PLUS' | 'MINOR_13_17' | 'UNDER_13' | 'UNDECLARED';
 
 export type AgeBracket =
   | 'UNDER_13_BLOCKED'
@@ -30,11 +63,16 @@ export type AgeBracket =
 
 export type ConsentLifecycleStatus =
   | 'NOT_REQUIRED'
+  | 'PARENTAL_CONSENT_PENDING'
   | 'PENDING_VENDOR_VERIFICATION'
   | 'BLOCKED_BY_EXTERNAL_DEPENDENCY'
+  | 'PARENTAL_CONSENT_VERIFIED'
   | 'VERIFIED'
+  | 'PARENTAL_CONSENT_REVOKED'
   | 'WITHDRAWN'
-  | 'REVOKED';
+  | 'REVOKED'
+  | 'EXPIRED'
+  | 'DENIED';
 
 export type MinorProtectionTier =
   | 'ADULT_STANDARD'
@@ -43,13 +81,41 @@ export type MinorProtectionTier =
 
 export type FeatureAccessKey =
   | 'chat_basic'
+  | 'educational_assistance'
+  | 'coding_assistance_youth'
   | 'web_research_safe'
+  | 'restricted_file_analysis'
   | 'science_educational'
+  | 'rag_local_restricted'
   | 'voice_live'
   | 'unrestricted_creative_studio'
   | 'third_party_workspace_oauth'
   | 'paid_billing'
   | 'commercial_engage_targeting';
+
+export interface ResourceBoundaryPolicy {
+  maxPromptChars: number;
+  maxAttachments: number;
+  maxDecodedAttachmentBytes: number;
+  allowAudioAttachments: boolean;
+  maxLocalRagBytes: number;
+}
+
+export const ADULT_RESOURCE_LIMITS: ResourceBoundaryPolicy = {
+  maxPromptChars: 50_000,
+  maxAttachments: 5,
+  maxDecodedAttachmentBytes: 10 * 1024 * 1024,
+  allowAudioAttachments: true,
+  maxLocalRagBytes: 25 * 1024 * 1024,
+};
+
+export const YOUTH_RESOURCE_LIMITS: ResourceBoundaryPolicy = {
+  maxPromptChars: 25_000,
+  maxAttachments: 2,
+  maxDecodedAttachmentBytes: 5 * 1024 * 1024,
+  allowAudioAttachments: false,
+  maxLocalRagBytes: 25 * 1024 * 1024,
+};
 
 export interface JurisdictionConsentRule {
   code: string;
@@ -58,32 +124,59 @@ export interface JurisdictionConsentRule {
   adultMajorityAge: number;
   applicableStatutes: string[];
   parentalConsentRuleSummary: string;
+  verificationStandardNote: string;
   counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF';
 }
 
 /**
  * International statutory digital consent age reference table.
- * Prevents assuming a single global threshold across US, EU member states, UK, India, etc.
+ * Explicitly differentiates India DPDP Act & DPDP Rules, US COPPA, EU GDPR Art. 8 member states,
+ * UK AADC, and conservative global baseline — never assuming one global consent workflow suffices.
  */
 export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsentRule> = {
+  IN: {
+    code: 'IN',
+    label: 'India (DPDP Act 2023 & DPDP Rules)',
+    digitalConsentAge: 18,
+    adultMajorityAge: 18,
+    applicableStatutes: [
+      'India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)',
+      'DPDP Rules (Verifiable Parental Consent & Commencement Provisions)',
+    ],
+    parentalConsentRuleSummary:
+      'Defines any individual under 18 as a child, requires verifiable parental consent via reliable identity/age verification or virtual tokens (e.g., DigiLocker/authorized entity) once commenced, and prohibits tracking, behavioral monitoring, and targeted advertising directed at children.',
+    verificationStandardNote:
+      'Ordinary email confirmation or unchecked checkboxes are legally insufficient. Requires independent parent identity & guardianship verification via an accredited provider or DPDP-authorized virtual token mechanism.',
+    counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
+  },
   US: {
     code: 'US',
-    label: 'United States',
+    label: 'United States (COPPA & Youth Privacy Protections)',
     digitalConsentAge: 13,
     adultMajorityAge: 18,
-    applicableStatutes: ['US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)'],
+    applicableStatutes: [
+      'US COPPA (15 U.S.C. §§ 6501–6506; 16 CFR Part 312)',
+      'State youth privacy & age-appropriate design protections (CA, etc.)',
+    ],
     parentalConsentRuleSummary:
-      'Verifiable Parental Consent (VPC) mandatory for personal data collection from children under 13.',
+      'Verifiable Parental Consent (VPC) mandatory for personal data collection from children under 13; VIZRA additionally requires verified parental consent and Omnia Youth safeguards for ages 13–17.',
+    verificationStandardNote:
+      'Under COPPA 16 CFR § 312.5, verifiable parental consent requires an FTC-recognized method (e.g., accredited VPC provider, ID verification with immediate disposal, or knowledge-based/payment verification)—not plain email confirmation.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   EU: {
     code: 'EU',
-    label: 'European Union (GDPR Art. 8 Default)',
+    label: 'European Union (GDPR Art. 8 & DSA Minor Protections)',
     digitalConsentAge: 16,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8'],
+    applicableStatutes: [
+      'EU GDPR Article 8',
+      'EU Digital Services Act (DSA) Article 28 (Protection of Minors)',
+    ],
     parentalConsentRuleSummary:
-      'Default GDPR Art. 8 digital consent age is 16 unless lowered by member-state law (range 13–16).',
+      'Default GDPR Art. 8 digital consent age is 16 unless lowered by member-state law (13–16); DSA Art. 28 bans profiling-based advertising to minors and mandates proportionate high-privacy defaults.',
+    verificationStandardNote:
+      'Requires reasonable, proportionate efforts to verify holder of parental responsibility using available privacy-preserving technology.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   DE: {
@@ -91,9 +184,11 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'Germany (EU GDPR Art. 8)',
     digitalConsentAge: 16,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 (Germany retains age 16 threshold)'],
+    applicableStatutes: ['EU GDPR Article 8 (Germany 16-year threshold)', 'EU DSA Article 28'],
     parentalConsentRuleSummary:
-      'Verifiable holder-of-parental-responsibility consent required under age 16.',
+      'Verifiable holder-of-parental-responsibility consent required under age 16, plus under-18 Omnia Youth safeguards.',
+    verificationStandardNote:
+      'Proportionate independent verification of parental authority required; zero profiling ads.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   NL: {
@@ -101,8 +196,11 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'Netherlands (EU GDPR Art. 8 / UAVG)',
     digitalConsentAge: 16,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 & Dutch UAVG Art. 5'],
-    parentalConsentRuleSummary: 'Verifiable parental consent required under age 16.',
+    applicableStatutes: ['EU GDPR Article 8 & Dutch UAVG Art. 5', 'EU DSA Article 28'],
+    parentalConsentRuleSummary:
+      'Verifiable parental consent required under age 16, with Omnia Youth safeguards through age 17.',
+    verificationStandardNote:
+      'Proportionate independent verification of parental responsibility required.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   FR: {
@@ -110,9 +208,11 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'France (EU GDPR Art. 8 / Loi Informatique et Libertés)',
     digitalConsentAge: 15,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 & French Data Protection Act Art. 45'],
+    applicableStatutes: ['EU GDPR Article 8 & French Data Protection Act Art. 45', 'EU DSA Article 28'],
     parentalConsentRuleSummary:
-      'Joint/parental authorization required below age 15 (plus French digital majority rules under 15).',
+      'Parental authorization required below age 15 (French digital majority), with Omnia Youth safeguards through age 17.',
+    verificationStandardNote:
+      'Independent guardian authentication & external identity verification required.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   IT: {
@@ -120,8 +220,10 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'Italy (EU GDPR Art. 8 / Codice Privacy)',
     digitalConsentAge: 14,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 & Italian Legislative Decree 101/2018'],
-    parentalConsentRuleSummary: 'Parental authorization required below age 14.',
+    applicableStatutes: ['EU GDPR Article 8 & Italian Legislative Decree 101/2018', 'EU DSA Article 28'],
+    parentalConsentRuleSummary:
+      'Parental authorization required below age 14, with Omnia Youth safeguards through age 17.',
+    verificationStandardNote: 'Proportionate independent verification of parental authority required.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   ES: {
@@ -129,8 +231,10 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'Spain (EU GDPR Art. 8 / LOPDGDD)',
     digitalConsentAge: 14,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 & Spanish LOPDGDD Art. 7'],
-    parentalConsentRuleSummary: 'Holder-of-parental-responsibility consent required below age 14.',
+    applicableStatutes: ['EU GDPR Article 8 & Spanish LOPDGDD Art. 7', 'EU DSA Article 28'],
+    parentalConsentRuleSummary:
+      'Holder-of-parental-responsibility consent required below age 14, with Omnia Youth safeguards through age 17.',
+    verificationStandardNote: 'Proportionate independent verification of parental authority required.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   SE: {
@@ -138,8 +242,10 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     label: 'Sweden (EU GDPR Art. 8)',
     digitalConsentAge: 13,
     adultMajorityAge: 18,
-    applicableStatutes: ['EU GDPR Article 8 (Sweden 13-year threshold)'],
-    parentalConsentRuleSummary: 'Parental consent required below age 13.',
+    applicableStatutes: ['EU GDPR Article 8 (Sweden 13-year threshold)', 'EU DSA Article 28'],
+    parentalConsentRuleSummary:
+      'Parental consent required below age 13, with Omnia Youth safeguards through age 17.',
+    verificationStandardNote: 'Proportionate independent verification of parental authority required.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   UK: {
@@ -149,10 +255,13 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     adultMajorityAge: 18,
     applicableStatutes: [
       'UK GDPR Article 8',
-      'UK ICO Age Appropriate Design Code (Children\'s Code, under 18)',
+      "UK ICO Age Appropriate Design Code (Children's Code, under 18)",
+      'UK Online Safety Act (Age Assurance duties)',
     ],
     parentalConsentRuleSummary:
-      'Parental consent below 13 plus mandatory Age Appropriate Design Code high-privacy & safety defaults for all users under 18.',
+      'Parental consent below 13 plus mandatory Age Appropriate Design Code high-privacy defaults, zero behavioral profiling, and age-appropriate feature boundaries for all users under 18.',
+    verificationStandardNote:
+      'Proportionate age assurance and guardian verification without invasive data retention.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   GB: {
@@ -162,20 +271,13 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     adultMajorityAge: 18,
     applicableStatutes: [
       'UK GDPR Article 8',
-      'UK ICO Age Appropriate Design Code (Children\'s Code, under 18)',
+      "UK ICO Age Appropriate Design Code (Children's Code, under 18)",
+      'UK Online Safety Act (Age Assurance duties)',
     ],
     parentalConsentRuleSummary:
-      'Parental consent below 13 plus mandatory Age Appropriate Design Code high-privacy & safety defaults for all users under 18.',
-    counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
-  },
-  IN: {
-    code: 'IN',
-    label: 'India (DPDP Act 2023)',
-    digitalConsentAge: 18,
-    adultMajorityAge: 18,
-    applicableStatutes: ['India Digital Personal Data Protection Act, 2023 (Section 2(f) & Section 9)'],
-    parentalConsentRuleSummary:
-      'Section 9 defines any individual under 18 as a child and requires Verifiable Parental Consent plus bans behavioral monitoring/targeted advertising aimed at children.',
+      'Parental consent below 13 plus mandatory Age Appropriate Design Code high-privacy defaults for all users under 18.',
+    verificationStandardNote:
+      'Proportionate age assurance and guardian verification without invasive data retention.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
   GLOBAL: {
@@ -184,10 +286,12 @@ export const JURISDICTION_CONSENT_THRESHOLDS: Record<string, JurisdictionConsent
     digitalConsentAge: 18,
     adultMajorityAge: 18,
     applicableStatutes: [
-      'Conservative Baseline (COPPA / GDPR Art. 8 / UK AADC / India DPDP Sec. 9)',
+      'Conservative Baseline (India DPDP Sec. 9 / COPPA / EU GDPR Art. 8 & DSA / UK AADC)',
     ],
     parentalConsentRuleSummary:
-      'Defaults to the strictest 18+ statutory standard unless a jurisdiction-specific verified workflow is approved by counsel.',
+      'Defaults to the strictest under-18 verifiable parental consent requirement and Omnia Youth safeguards unless overridden by verified jurisdiction rules.',
+    verificationStandardNote:
+      'Applies strict verifiable guardian identity checks and zero behavioral profiling of minors.',
     counselReviewStatus: 'STATUTORY_REFERENCE_REQUIRES_COUNSEL_SIGN_OFF',
   },
 };
@@ -206,13 +310,21 @@ export interface AgeEvaluationResult {
   valid: boolean;
   error?: string;
   ageYears?: number;
+  ageStatus: AgeStatus;
   bracket?: AgeBracket;
   jurisdiction: string;
   digitalConsentAge: number;
   belowDigitalConsentThreshold: boolean;
   applicableStatutes: string[];
   legalBasisNote: string;
-  activePolicyDecision: 'ALLOW_ADULT_18_PLUS' | 'DENY_UNDER_18_ACTIVE_POLICY';
+  verificationStandardNote: string;
+  ageAssuranceMethod: 'SELF_DECLARATION_ROUTING_ONLY';
+  recommendedEnvironment: OmniaAccessEnvironment;
+  accountAccessState: AccountAccessState;
+  activePolicyDecision:
+    | 'ALLOW_OMNIA_ADULT'
+    | 'ROUTE_OMNIA_YOUTH_PARENTAL_CONSENT'
+    | 'DENY_UNDER_13_INELIGIBLE';
   option2PreparatoryDecision:
     | 'BLOCKED_UNDER_13'
     | 'REQUIRES_VERIFIABLE_PARENTAL_CONSENT'
@@ -220,6 +332,7 @@ export interface AgeEvaluationResult {
   parentalVerificationRequired: boolean;
   parentalVerificationStatus:
     | 'NOT_REQUIRED'
+    | 'PARENTAL_CONSENT_PENDING'
     | 'BLOCKED_BY_EXTERNAL_DEPENDENCY';
 }
 
@@ -260,7 +373,7 @@ export class UnconfiguredParentalVerificationProvider implements ParentalVerific
       status: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
       code: 'PARENTAL_VERIFICATION_VENDOR_NOT_CONFIGURED',
       message:
-        'Verifiable parental consent requires an external age/guardian verification provider (e.g., Yoti, KWS, PRIVO) and formal counsel sign-off. Live teen onboarding remains dormant.',
+        'External identity & guardianship verification provider (e.g., Yoti, KWS, PRIVO, or India DPDP virtual token verifier) is not configured. Omnia Youth remains fail-closed until verified.',
       providerName: this.providerName,
     };
   }
@@ -273,23 +386,30 @@ export class UnconfiguredParentalVerificationProvider implements ParentalVerific
 export interface AgeAssuranceConsentRecord {
   recordId: string;
   subjectHash: string;
+  childUid?: string;
   parentEmailHash?: string;
+  ageStatus: AgeStatus;
   bracket: AgeBracket;
   jurisdiction: string;
   digitalConsentAge: number;
   applicableStatutes: string[];
-  activePolicy: typeof ACTIVE_AGE_POLICY;
+  activePolicy: string;
+  accountAccessState: AccountAccessState;
+  environment: OmniaAccessEnvironment;
   option2ActiveAtEvaluation: boolean;
   parentalConsentVerified: boolean;
   consentStatus: ConsentLifecycleStatus;
   minorProtectionTier: MinorProtectionTier;
+  suspended?: boolean;
+  suspensionReason?: string;
   recordedAt: string;
   updatedAt: string;
   withdrawnAt?: string;
 }
 
 /**
- * Authoritative server-enforced Option 4 Feature Policy Matrix.
+ * Authoritative server-enforced Omnia Adult vs Omnia Youth Feature Policy Matrix.
+ * Parental consent can NEVER override mandatory disabled features for minors.
  */
 export const AGE_FEATURE_POLICY_MATRIX: Record<
   FeatureAccessKey,
@@ -299,26 +419,59 @@ export const AGE_FEATURE_POLICY_MATRIX: Record<
     allowedForUnder13: false;
     allowedForMinorSafeVerified: boolean;
     allowedForAdult18Plus: true;
+    parentalOverridePermitted: boolean;
     safeguardDescription: string;
   }
 > = {
   chat_basic: {
-    label: 'Omnia Supervised Text Chat',
+    label: 'Omnia Core Conversational AI',
     endpointOrSubsystem: 'POST /api/chat',
     allowedForUnder13: false,
     allowedForMinorSafeVerified: true,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Enforces MINOR_SAFE_GEMINI_SAFETY_SETTINGS (BLOCK_LOW_AND_ABOVE) and MINOR_SAFE_SYSTEM_DIRECTIVE when minor-safe tier is active.',
+      'Permitted in Omnia Youth with verified parental consent; enforces MINOR_SAFE_GEMINI_SAFETY_SETTINGS (BLOCK_LOW_AND_ABOVE) and MINOR_SAFE_SYSTEM_DIRECTIVE.',
+  },
+  educational_assistance: {
+    label: 'Educational Assistance & Study Support',
+    endpointOrSubsystem: 'POST /api/chat (educational modes)',
+    allowedForUnder13: false,
+    allowedForMinorSafeVerified: true,
+    allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
+    safeguardDescription:
+      'Approved core capability for Omnia Youth accounts with age-appropriate educational guardrails.',
+  },
+  coding_assistance_youth: {
+    label: 'Age-Appropriate Coding & Shader Assistance',
+    endpointOrSubsystem: 'POST /api/chat (code mode)',
+    allowedForUnder13: false,
+    allowedForMinorSafeVerified: true,
+    allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
+    safeguardDescription:
+      'Approved educational programming assistance for Omnia Youth; blocks malicious cyber/exploit code.',
   },
   web_research_safe: {
-    label: 'Grounded Web Research',
+    label: 'Filtered Grounded Web Research',
     endpointOrSubsystem: 'POST /api/research',
     allowedForUnder13: false,
     allowedForMinorSafeVerified: true,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Enforces MINOR_SAFE_GEMINI_SAFETY_SETTINGS and educational citation hygiene; blocks ungrounded unsafe content.',
+      'Permitted in Omnia Youth with strict BLOCK_LOW_AND_ABOVE safety filtering and verified HTTPS citation hygiene.',
+  },
+  restricted_file_analysis: {
+    label: 'Restricted File Analysis',
+    endpointOrSubsystem: 'POST /api/chat (attachments)',
+    allowedForUnder13: false,
+    allowedForMinorSafeVerified: true,
+    allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
+    safeguardDescription:
+      'Omnia Youth restricts uploads to max 2 attachments, <= 5 MB total decoded payload, educational document/image formats only, and no raw audio uploads.',
   },
   science_educational: {
     label: 'Science Explorer (AlphaFold / PubChem / PubMed)',
@@ -326,8 +479,19 @@ export const AGE_FEATURE_POLICY_MATRIX: Record<
     allowedForUnder13: false,
     allowedForMinorSafeVerified: true,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Permitted for educational molecular/literature lookup under verified minor-safe mode.',
+      'Permitted for educational molecular and biomedical literature lookup under Omnia Youth.',
+  },
+  rag_local_restricted: {
+    label: 'Local RAG Embeddings (25 MB Browser Index)',
+    endpointOrSubsystem: 'POST /api/rag/embed & /api/rag/embed/batch',
+    allowedForUnder13: false,
+    allowedForMinorSafeVerified: true,
+    allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
+    safeguardDescription:
+      'Permitted for verified Omnia Youth accounts with prompt-injection screening; blocked when parental consent is pending or revoked.',
   },
   voice_live: {
     label: 'Live Multimodal Voice WebSocket',
@@ -335,17 +499,19 @@ export const AGE_FEATURE_POLICY_MATRIX: Record<
     allowedForUnder13: false,
     allowedForMinorSafeVerified: false,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Restricted for all users under 18 to prevent unmoderated real-time audio interactions.',
+      'Strictly disabled for all Omnia Youth / under-18 accounts to prevent unmoderated real-time audio interactions. Parental consent cannot override.',
   },
   unrestricted_creative_studio: {
-    label: 'Unrestricted Creative & Lyria Audio Synthesis',
+    label: 'Unrestricted Audio & Lyria Music Synthesis',
     endpointOrSubsystem: 'POST /api/music/generate',
     allowedForUnder13: false,
     allowedForMinorSafeVerified: false,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Restricted for users under 18 under Option 4 age-appropriate creative safeguards.',
+      'Strictly disabled for Omnia Youth initially. Parental consent cannot override.',
   },
   third_party_workspace_oauth: {
     label: 'External Workspace OAuth Connectors',
@@ -353,17 +519,19 @@ export const AGE_FEATURE_POLICY_MATRIX: Record<
     allowedForUnder13: false,
     allowedForMinorSafeVerified: false,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Disabled for users under 18 to prevent third-party data sharing and external account linking.',
+      'Disabled for all Omnia Youth accounts to prevent third-party data sharing and external account linking.',
   },
   paid_billing: {
     label: 'Commercial Plans, Upgrades & Paid Credit Refills',
-    endpointOrSubsystem: 'POST /api/credits/usage (pro/studio/refill)',
+    endpointOrSubsystem: 'POST /api/credits/usage & POST /api/billing/webhook',
     allowedForUnder13: false,
     allowedForMinorSafeVerified: false,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Financial upgrades and commercial credit refills disabled for users under 18.',
+      'Financial upgrades and commercial credit refills strictly disabled for Omnia Youth / minor accounts.',
   },
   commercial_engage_targeting: {
     label: 'VIZRA Engage Sponsored & Affiliate Placements',
@@ -371,8 +539,9 @@ export const AGE_FEATURE_POLICY_MATRIX: Record<
     allowedForUnder13: false,
     allowedForMinorSafeVerified: false,
     allowedForAdult18Plus: true,
+    parentalOverridePermitted: false,
     safeguardDescription:
-      'Suppresses all sponsored_card, affiliate_card, and commercial placements (UK AADC & India DPDP Sec. 9 alignment).',
+      'Suppresses all sponsored_card, affiliate_card, behavioral profiling, and targeted advertising for minors (India DPDP Sec. 9, EU DSA Art. 28, UK AADC).',
   },
 };
 
@@ -395,32 +564,83 @@ export const MINOR_SAFE_GEMINI_SAFETY_SETTINGS = [
   },
 ];
 
-export const MINOR_SAFE_SYSTEM_DIRECTIVE = `[AGE-APPROPRIATE MINOR-SAFE GUARDRAIL]: You are operating under VIZRA's strict minor-protection policy. Do NOT generate sexually explicit/suggestive content, romantic roleplay, self-harm ideation, dangerous physical challenges, substance-use encouragement, gambling advice, financial solicitation, or age-inappropriate horror/violence. Maintain a constructive, educational, and supportive tone. Refuse unsafe requests calmly and redirect to safe educational topics.`;
+export const MINOR_SAFE_SYSTEM_DIRECTIVE = `[OMNIA YOUTH AGE-APPROPRIATE GUARDRAIL]: You are operating in OMNIA YOUTH mode under VIZRA's mandatory minor-protection framework. Do NOT generate sexually explicit/suggestive content, romantic roleplay, self-harm ideation, dangerous physical challenges, substance-use encouragement, gambling advice, financial solicitation, targeted advertising, or age-inappropriate horror/violence. Do NOT attempt to infer the user's age from writing style or build behavioral profiles. Never bypass age restrictions or parental consent requirements. Maintain a constructive, educational, and supportive tone. Refuse unsafe or age-restricted requests calmly and redirect to safe educational topics.`;
+
+export const PARENTAL_CONSENT_DISCLOSURE_PAYLOAD = {
+  policyVersion: CONSENT_POLICY_VERSION,
+  environment: 'OMNIA_YOUTH',
+  whatOmniaYouthCanDo: [
+    'Core conversational AI for learning, writing, and brainstorming under strict safety filtering.',
+    'Educational assistance across STEM, humanities, and study planning.',
+    'Age-appropriate coding and creative technology guidance.',
+    'Filtered grounded web research with verified HTTPS citations.',
+    'Restricted file analysis (max 2 attachments, <= 5 MB total, educational text/document/image files only).',
+    'Science Explorer access (public AlphaFold DB, PubChem, and PubMed databases).',
+  ],
+  whatIsRestricted: [
+    'Live Multimodal Voice (/live) is strictly disabled.',
+    'Unrestricted audio & Lyria music synthesis (/api/music/generate) is disabled.',
+    'Paid upgrades, subscriptions, and commercial credit refills are disabled.',
+    'External third-party OAuth connectors (Google Drive, Docs, Sheets, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disabled.',
+    'Targeted advertising, sponsored/affiliate Engage cards, and behavioral tracking/profiling are permanently disabled.',
+    'Parental consent cannot override mandatory legal or safety restrictions.',
+  ],
+  dataCollected: [
+    'Firebase Authentication account identifier (UID) and email verification state.',
+    'Jurisdiction code and age-bracket classification (raw date of birth is never stored).',
+    'Parental consent record, parent-child relationship verification reference, policy version, and non-PII consent audit timestamps.',
+    'Zero raw identity documents, facial images, biometric templates, passwords, OTPs, or payment details are stored in Firestore.',
+  ],
+  howDataIsProcessed: [
+    'Prompts are processed server-side to generate educational/creative responses with strict BLOCK_LOW_AND_ABOVE safety settings.',
+    'No behavioural age inference is performed; no persistent behavioural profiles of minors are built.',
+    'Temporary chats are never written to browser localStorage or cloud persistence.',
+  ],
+  dataRetentionPractices: [
+    'Consent records remain active until withdrawn, expired (1-year review cycle), or account deletion.',
+    'On consent withdrawal, Omnia Youth access is revoked immediately across all API endpoints.',
+    'On account deletion (DELETE /api/account/data), workspace records, age-assurance records, and parental consent records are purged, retaining only a non-personal cryptographic erasure receipt hash for statutory compliance.',
+  ],
+  parentAndChildPrivacyRights: [
+    'Parents/guardians may review consent status, scopes, and audit timestamps at any time via /parental-consent.',
+    'Private child conversations are NOT automatically exposed to parents/guardians; any future parental access to child content requires separate legal evaluation and explicit disclosure.',
+    'Both parents/guardians and account holders have rights of access, correction, consent withdrawal, and full data erasure under applicable law (India DPDP Act 2023, COPPA, EU GDPR, UK GDPR/AADC).',
+  ],
+  howToWithdrawConsent: [
+    'Sign in to /parental-consent with the verified parent/guardian account and click "Withdraw Consent", or invoke POST /api/compliance/parental-consent/revoke.',
+    'Revocation takes effect immediately on the server and invalidates Omnia Youth API access.',
+  ],
+};
 
 const AGE_RECORDS_PATH = path.resolve(process.cwd(), 'data', 'age_assurance_records.json');
+let inMemoryAgeRecords: AgeAssuranceConsentRecord[] | null = null;
 
 function loadAgeRecords(): AgeAssuranceConsentRecord[] {
+  if (inMemoryAgeRecords) return inMemoryAgeRecords;
   try {
     if (fs.existsSync(AGE_RECORDS_PATH)) {
       const raw = fs.readFileSync(AGE_RECORDS_PATH, 'utf-8');
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      inMemoryAgeRecords = Array.isArray(parsed) ? parsed : [];
+      return inMemoryAgeRecords;
     }
   } catch {
     // Fallback empty
   }
-  return [];
+  inMemoryAgeRecords = [];
+  return inMemoryAgeRecords;
 }
 
 function saveAgeRecords(records: AgeAssuranceConsentRecord[]): void {
+  inMemoryAgeRecords = records.slice(0, 500);
   try {
     const dir = path.dirname(AGE_RECORDS_PATH);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(AGE_RECORDS_PATH, JSON.stringify(records.slice(0, 500), null, 2), 'utf-8');
+    fs.writeFileSync(AGE_RECORDS_PATH, JSON.stringify(inMemoryAgeRecords, null, 2), 'utf-8');
   } catch {
-    // Read-only fallback
+    // Read-only fallback stays in memory
   }
 }
 
@@ -431,26 +651,41 @@ function upsertAgeRecord(record: AgeAssuranceConsentRecord): void {
 }
 
 /**
- * Removes all persisted age-assurance records matching any of the supplied raw subject seeds
- * (e.g. `uid:${uid}`, `client:${clientId}`, etc.) across active and rotated SESSION_HASH_SECRET_PREVIOUS
- * salts so GDPR/DPDP account deletion cascades cleanly even after key rotation.
+ * Removes all persisted age-assurance and parental-consent records matching any supplied raw subject seeds
+ * across active and rotated SESSION_HASH_SECRET_PREVIOUS salts so GDPR/DPDP account deletion cascades cleanly.
  */
 export function purgeAgeAssuranceRecordsForSubjects(subjectSeeds: string[]): number {
   const targetHashes = new Set<string>();
+  const targetUids = new Set<string>();
+
   for (const seed of subjectSeeds) {
     if (typeof seed !== 'string' || !seed.trim()) continue;
-    for (const candidateHash of derivePrivacySessionHashCandidates(seed)) {
+    const trimmed = seed.trim();
+    if (trimmed.startsWith('uid:')) {
+      targetUids.add(trimmed.slice(4));
+    }
+    for (const candidateHash of derivePrivacySessionHashCandidates(trimmed)) {
       targetHashes.add(candidateHash);
     }
   }
-  if (targetHashes.size === 0) return 0;
 
-  const existing = loadAgeRecords();
-  const filtered = existing.filter((r) => !targetHashes.has(r.subjectHash));
-  const removedCount = existing.length - filtered.length;
-  if (removedCount > 0) {
-    saveAgeRecords(filtered);
+  let removedCount = 0;
+  if (targetHashes.size > 0) {
+    const existing = loadAgeRecords();
+    const filtered = existing.filter(
+      (r) => !targetHashes.has(r.subjectHash) && (!r.childUid || !targetUids.has(r.childUid))
+    );
+    removedCount = existing.length - filtered.length;
+    if (removedCount > 0) {
+      saveAgeRecords(filtered);
+    }
   }
+
+  for (const uid of targetUids) {
+    const purgedParental = purgeParentalConsentDataForUid(uid);
+    removedCount += purgedParental.purgedConsents;
+  }
+
   return removedCount;
 }
 
@@ -470,8 +705,78 @@ export function getLatestRecordForSubjectSeed(
 }
 
 /**
+ * Helper to compute the complete server-side featurePermissions map for an environment & state.
+ */
+export function buildFeaturePermissionsMap(
+  environment: OmniaAccessEnvironment,
+  accountAccessState: AccountAccessState
+): Record<FeatureAccessKey, boolean> {
+  const keys = Object.keys(AGE_FEATURE_POLICY_MATRIX) as FeatureAccessKey[];
+  const result = {} as Record<FeatureAccessKey, boolean>;
+
+  for (const key of keys) {
+    if (accountAccessState === 'ACCESS_SUSPENDED' || environment === 'BLOCKED') {
+      result[key] = false;
+    } else if (environment === 'OMNIA_ADULT' && accountAccessState === 'ADULT_ACCESS') {
+      result[key] = true;
+    } else if (
+      environment === 'OMNIA_YOUTH' &&
+      (accountAccessState === 'MINOR_RESTRICTED_ACCESS' ||
+        accountAccessState === 'PARENTAL_CONSENT_VERIFIED')
+    ) {
+      result[key] = Boolean(AGE_FEATURE_POLICY_MATRIX[key].allowedForMinorSafeVerified);
+    } else {
+      result[key] = false;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Detects client attempts to spoof authorization roles or age/consent verification via HTTP headers or body fields.
+ */
+export function detectSpoofedAccessClaims(req: express.Request): {
+  spoofed: boolean;
+  reason?: string;
+} {
+  const forbiddenHeaders = [
+    'x-age-verified',
+    'x-parental-consent-verified',
+    'x-vizra-role',
+    'x-omnia-environment-override',
+    'x-bypass-age-gate',
+  ];
+  for (const h of forbiddenHeaders) {
+    if (req.headers[h] !== undefined) {
+      return {
+        spoofed: true,
+        reason: `Client-supplied authorization header "${h}" is forbidden. Access control is enforced strictly server-side.`,
+      };
+    }
+  }
+  const body = (req.body || {}) as Record<string, unknown>;
+  if (
+    body.verified === true ||
+    body.bypass === true ||
+    body.autoApprove === true ||
+    body.emailConfirmedOnly === true ||
+    body.checkboxOnly === true ||
+    body.forceAdult === true
+  ) {
+    return {
+      spoofed: true,
+      reason:
+        'Client-supplied verification overrides, plain email confirmations, or checkbox-only claims are forbidden.',
+    };
+  }
+  return { spoofed: false };
+}
+
+/**
  * Computes exact UTC age in completed calendar years from an ISO YYYY-MM-DD date string
  * and applies jurisdiction-specific digital consent thresholds.
+ * Age declaration is treated strictly as an initial routing mechanism, NEVER proof of adulthood.
  */
 export function evaluateDateOfBirth(
   dobIso: string,
@@ -480,20 +785,27 @@ export function evaluateDateOfBirth(
 ): AgeEvaluationResult {
   const rule = resolveJurisdictionRule(jurisdictionInput);
 
+  const invalidResult = (error: string): AgeEvaluationResult => ({
+    valid: false,
+    error,
+    ageStatus: 'UNDECLARED',
+    jurisdiction: rule.code,
+    digitalConsentAge: rule.digitalConsentAge,
+    belowDigitalConsentThreshold: true,
+    applicableStatutes: rule.applicableStatutes,
+    legalBasisNote: rule.parentalConsentRuleSummary,
+    verificationStandardNote: rule.verificationStandardNote,
+    ageAssuranceMethod: 'SELF_DECLARATION_ROUTING_ONLY',
+    recommendedEnvironment: 'BLOCKED',
+    accountAccessState: 'AGE_VERIFICATION_REQUIRED',
+    activePolicyDecision: 'DENY_UNDER_13_INELIGIBLE',
+    option2PreparatoryDecision: 'BLOCKED_UNDER_13',
+    parentalVerificationRequired: true,
+    parentalVerificationStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
+  });
+
   if (typeof dobIso !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dobIso.trim())) {
-    return {
-      valid: false,
-      error: 'Date of birth must be formatted strictly as YYYY-MM-DD.',
-      jurisdiction: rule.code,
-      digitalConsentAge: rule.digitalConsentAge,
-      belowDigitalConsentThreshold: true,
-      applicableStatutes: rule.applicableStatutes,
-      legalBasisNote: rule.parentalConsentRuleSummary,
-      activePolicyDecision: 'DENY_UNDER_18_ACTIVE_POLICY',
-      option2PreparatoryDecision: 'BLOCKED_UNDER_13',
-      parentalVerificationRequired: true,
-      parentalVerificationStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
-    };
+    return invalidResult('Date of birth must be formatted strictly as YYYY-MM-DD.');
   }
 
   const [yStr, mStr, dStr] = dobIso.trim().split('-');
@@ -508,35 +820,11 @@ export function evaluateDateOfBirth(
     dobDate.getUTCMonth() !== month - 1 ||
     dobDate.getUTCDate() !== day
   ) {
-    return {
-      valid: false,
-      error: 'Invalid calendar date of birth.',
-      jurisdiction: rule.code,
-      digitalConsentAge: rule.digitalConsentAge,
-      belowDigitalConsentThreshold: true,
-      applicableStatutes: rule.applicableStatutes,
-      legalBasisNote: rule.parentalConsentRuleSummary,
-      activePolicyDecision: 'DENY_UNDER_18_ACTIVE_POLICY',
-      option2PreparatoryDecision: 'BLOCKED_UNDER_13',
-      parentalVerificationRequired: true,
-      parentalVerificationStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
-    };
+    return invalidResult('Invalid calendar date of birth.');
   }
 
   if (dobDate.getTime() > referenceDate.getTime()) {
-    return {
-      valid: false,
-      error: 'Date of birth cannot be in the future.',
-      jurisdiction: rule.code,
-      digitalConsentAge: rule.digitalConsentAge,
-      belowDigitalConsentThreshold: true,
-      applicableStatutes: rule.applicableStatutes,
-      legalBasisNote: rule.parentalConsentRuleSummary,
-      activePolicyDecision: 'DENY_UNDER_18_ACTIVE_POLICY',
-      option2PreparatoryDecision: 'BLOCKED_UNDER_13',
-      parentalVerificationRequired: true,
-      parentalVerificationStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
-    };
+    return invalidResult('Date of birth cannot be in the future.');
   }
 
   const refYear = referenceDate.getUTCFullYear();
@@ -549,82 +837,110 @@ export function evaluateDateOfBirth(
   }
 
   if (age < 0 || age > 130) {
-    return {
-      valid: false,
-      error: 'Date of birth is outside acceptable biological bounds.',
-      jurisdiction: rule.code,
-      digitalConsentAge: rule.digitalConsentAge,
-      belowDigitalConsentThreshold: true,
-      applicableStatutes: rule.applicableStatutes,
-      legalBasisNote: rule.parentalConsentRuleSummary,
-      activePolicyDecision: 'DENY_UNDER_18_ACTIVE_POLICY',
-      option2PreparatoryDecision: 'BLOCKED_UNDER_13',
-      parentalVerificationRequired: true,
-      parentalVerificationStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
-    };
+    return invalidResult('Date of birth is outside acceptable biological bounds.');
   }
 
   let bracket: AgeBracket;
+  let ageStatus: AgeStatus;
   let option2Decision: AgeEvaluationResult['option2PreparatoryDecision'];
+  let activePolicyDecision: AgeEvaluationResult['activePolicyDecision'];
+  let recommendedEnvironment: OmniaAccessEnvironment;
+  let accountAccessState: AccountAccessState;
+
   if (age < 13) {
     bracket = 'UNDER_13_BLOCKED';
+    ageStatus = 'UNDER_13';
     option2Decision = 'BLOCKED_UNDER_13';
+    activePolicyDecision = 'DENY_UNDER_13_INELIGIBLE';
+    recommendedEnvironment = 'BLOCKED';
+    accountAccessState = 'AGE_VERIFICATION_REQUIRED';
   } else if (age < 18) {
     bracket = 'TEEN_13_17_PENDING_PARENTAL_CONSENT';
+    ageStatus = 'MINOR_13_17';
     option2Decision = 'REQUIRES_VERIFIABLE_PARENTAL_CONSENT';
+    activePolicyDecision = 'ROUTE_OMNIA_YOUTH_PARENTAL_CONSENT';
+    recommendedEnvironment = 'OMNIA_YOUTH';
+    accountAccessState = 'PARENTAL_CONSENT_PENDING';
   } else {
     bracket = 'ADULT_18_PLUS';
+    ageStatus = 'ADULT_18_PLUS';
     option2Decision = 'ELIGIBLE_ADULT';
+    activePolicyDecision = 'ALLOW_OMNIA_ADULT';
+    recommendedEnvironment = 'OMNIA_ADULT';
+    accountAccessState = 'ADULT_ACCESS';
   }
 
   const belowJurisdictionThreshold = age < rule.digitalConsentAge;
-  // Require verifiable parental consent if below jurisdictional consent threshold (e.g. <13 US, <16 EU/DE, <18 IN)
-  // OR if teen 13-17 while active/preparatory guardian policies apply.
-  const parentalVerificationRequired =
-    age < 18 && (belowJurisdictionThreshold || (age >= 13 && age < 18));
+  const parentalVerificationRequired = age < 18;
 
   return {
     valid: true,
     ageYears: age,
+    ageStatus,
     bracket,
     jurisdiction: rule.code,
     digitalConsentAge: rule.digitalConsentAge,
     belowDigitalConsentThreshold: belowJurisdictionThreshold,
     applicableStatutes: rule.applicableStatutes,
     legalBasisNote: rule.parentalConsentRuleSummary,
-    activePolicyDecision:
-      age >= 18 ? 'ALLOW_ADULT_18_PLUS' : 'DENY_UNDER_18_ACTIVE_POLICY',
+    verificationStandardNote: rule.verificationStandardNote,
+    ageAssuranceMethod: 'SELF_DECLARATION_ROUTING_ONLY',
+    recommendedEnvironment,
+    accountAccessState,
+    activePolicyDecision,
     option2PreparatoryDecision: option2Decision,
     parentalVerificationRequired,
     parentalVerificationStatus:
-      age >= 18 ? 'NOT_REQUIRED' : 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
+      age >= 18
+        ? 'NOT_REQUIRED'
+        : age < 13
+        ? 'BLOCKED_BY_EXTERNAL_DEPENDENCY'
+        : 'PARENTAL_CONSENT_PENDING',
   };
 }
 
 /**
- * Evaluates feature restrictions under Option 4 age-appropriate safeguards and dormant Option 2 rules.
- * Preserves backward compatibility with existing calls while enforcing the full FeatureAccessKey matrix.
+ * Evaluates feature restrictions under VIZRA Age Assurance & Parental Consent Framework.
+ * Keeps age status, consent status, and feature permissions strictly separate.
  */
 export function evaluateMinorFeatureAccess(
   bracket: AgeBracket,
   feature: FeatureAccessKey,
   parentalConsentVerified: boolean,
-  options?: { allowOption4Simulation?: boolean }
+  options?: {
+    allowOption4Simulation?: boolean;
+    consentStatus?: ConsentLifecycleStatus;
+    suspended?: boolean;
+  }
 ): {
   allowed: boolean;
   reason: string;
   code: string;
   tierApplied: MinorProtectionTier;
+  accountAccessState: AccountAccessState;
+  environment: OmniaAccessEnvironment;
   requiresMinorSafeSafetySettings: boolean;
 } {
-  const allowSimulation = Boolean(options?.allowOption4Simulation);
+  if (options?.suspended) {
+    return {
+      allowed: false,
+      reason: 'Account access is currently suspended pending policy or safety review.',
+      code: 'ACCESS_SUSPENDED',
+      tierApplied: 'BLOCKED',
+      accountAccessState: 'ACCESS_SUSPENDED',
+      environment: 'BLOCKED',
+      requiresMinorSafeSafetySettings: true,
+    };
+  }
 
   if (bracket === 'ADULT_18_PLUS') {
     return {
       allowed: true,
-      reason: 'Permitted under active adult policy.',
-      code: 'ALLOWED_ADULT',
+      reason: 'Permitted under Omnia Adult access policy.',
+      code: 'ALLOWED_OMNIA_ADULT',
       tierApplied: 'ADULT_STANDARD',
+      accountAccessState: 'ADULT_ACCESS',
+      environment: 'OMNIA_ADULT',
       requiresMinorSafeSafetySettings: false,
     };
   }
@@ -632,19 +948,39 @@ export function evaluateMinorFeatureAccess(
   if (bracket === 'UNDER_13_BLOCKED') {
     return {
       allowed: false,
-      reason: 'Users under 13 are ineligible to register or use any workspace capability.',
+      reason: 'Users under 13 are ineligible for Omnia Youth workspace capabilities.',
       code: 'UNDER_13_BLOCKED',
       tierApplied: 'BLOCKED',
+      accountAccessState: 'AGE_VERIFICATION_REQUIRED',
+      environment: 'BLOCKED',
       requiresMinorSafeSafetySettings: true,
     };
   }
 
-  if (!OPTION_2_ACTIVE && !allowSimulation) {
+  if (
+    options?.consentStatus === 'PARENTAL_CONSENT_REVOKED' ||
+    options?.consentStatus === 'WITHDRAWN' ||
+    options?.consentStatus === 'REVOKED'
+  ) {
     return {
       allowed: false,
-      reason: 'Active platform policy requires users to be at least 18 years old.',
-      code: 'AGE_REQUIREMENT_18_PLUS_NOT_MET',
+      reason: 'Parental consent has been revoked. Omnia Youth access is disabled.',
+      code: 'PARENTAL_CONSENT_REVOKED',
       tierApplied: 'BLOCKED',
+      accountAccessState: 'PARENTAL_CONSENT_REVOKED',
+      environment: 'BLOCKED',
+      requiresMinorSafeSafetySettings: true,
+    };
+  }
+
+  if (options?.consentStatus === 'EXPIRED') {
+    return {
+      allowed: false,
+      reason: 'Parental consent has expired and must be renewed by a verified parent or guardian.',
+      code: 'PARENTAL_CONSENT_EXPIRED',
+      tierApplied: 'BLOCKED',
+      accountAccessState: 'PARENTAL_CONSENT_PENDING',
+      environment: 'BLOCKED',
       requiresMinorSafeSafetySettings: true,
     };
   }
@@ -652,9 +988,11 @@ export function evaluateMinorFeatureAccess(
   if (!parentalConsentVerified) {
     return {
       allowed: false,
-      reason: 'Verified parental consent is required prior to granting teen workspace access.',
+      reason: 'Verified parental consent is required prior to granting Omnia Youth workspace access.',
       code: 'PARENTAL_CONSENT_REQUIRED',
       tierApplied: 'BLOCKED',
+      accountAccessState: 'PARENTAL_CONSENT_PENDING',
+      environment: 'BLOCKED',
       requiresMinorSafeSafetySettings: true,
     };
   }
@@ -663,31 +1001,335 @@ export function evaluateMinorFeatureAccess(
   if (!rule || !rule.allowedForMinorSafeVerified) {
     return {
       allowed: false,
-      reason: `Feature "${feature}" is disabled under Option 4 under-18 minor protection safeguards.`,
+      reason: `Capability "${feature}" is disabled for Omnia Youth accounts. Parental consent cannot override mandatory minor safeguards.`,
       code: 'FEATURE_RESTRICTED_FOR_MINOR',
       tierApplied: 'RESTRICTED_MINOR_SAFE',
+      accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+      environment: 'OMNIA_YOUTH',
       requiresMinorSafeSafetySettings: true,
     };
   }
 
   return {
     allowed: true,
-    reason: `Feature "${feature}" permitted only under Option 4 MINOR_SAFE_RESTRICTED safeguards.`,
-    code: 'ALLOWED_MINOR_SAFE_RESTRICTED',
+    reason: `Capability "${feature}" permitted under Omnia Youth verified minor-safe safeguards.`,
+    code: 'ALLOWED_OMNIA_YOUTH',
     tierApplied: 'RESTRICTED_MINOR_SAFE',
+    accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+    environment: 'OMNIA_YOUTH',
     requiresMinorSafeSafetySettings: true,
   };
 }
 
 export interface RequestAgePolicyContext {
   identified: boolean;
+  authenticated: boolean;
+  uid?: string;
   subjectSeed?: string;
   subjectHash?: string;
   record: AgeAssuranceConsentRecord | null;
+  ageStatus: AgeStatus;
+  consentStatus: ConsentLifecycleStatus;
+  accountAccessState: AccountAccessState;
+  environment: OmniaAccessEnvironment;
+  jurisdiction: string;
   tier: MinorProtectionTier;
   isMinorBlocked: boolean;
   requiresMinorSafeDirectives: boolean;
+  featurePermissions: Record<FeatureAccessKey, boolean>;
+  resourceLimits: ResourceBoundaryPolicy;
+  parentalConsentId?: string | null;
+  parentUid?: string | null;
   reason?: string;
+}
+
+/**
+ * Resolves the authoritative server-side age-assurance & parental-consent policy context
+ * directly from a verified UID or subject seed (shared by HTTP routes and WebSocket upgrades).
+ */
+export function resolvePolicyContextForIdentity(params: {
+  uid?: string;
+  subjectSeed?: string;
+  authenticated: boolean;
+}): RequestAgePolicyContext {
+  const subjectSeed = params.uid ? `uid:${params.uid}` : params.subjectSeed;
+
+  if (!subjectSeed) {
+    return {
+      identified: false,
+      authenticated: false,
+      record: null,
+      ageStatus: 'UNDECLARED',
+      consentStatus: 'NOT_REQUIRED',
+      accountAccessState: 'ADULT_ACCESS',
+      environment: 'OMNIA_ADULT',
+      jurisdiction: 'GLOBAL',
+      tier: 'ADULT_STANDARD',
+      isMinorBlocked: false,
+      requiresMinorSafeDirectives: false,
+      featurePermissions: buildFeaturePermissionsMap('OMNIA_ADULT', 'ADULT_ACCESS'),
+      resourceLimits: ADULT_RESOURCE_LIMITS,
+    };
+  }
+
+  const subjectHash = derivePrivacySessionHash(subjectSeed);
+  const record = getLatestRecordForSubjectSeed(subjectSeed);
+
+  // Check authoritative Firestore-aligned parental_consents + parent_child_relationships store for authenticated UIDs
+  const parentalState = params.uid ? getLatestParentalConsentForChild(params.uid) : null;
+
+  if (record?.suspended) {
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record,
+      ageStatus: record.ageStatus || 'UNDECLARED',
+      consentStatus: record.consentStatus,
+      accountAccessState: 'ACCESS_SUSPENDED',
+      environment: 'BLOCKED',
+      jurisdiction: record.jurisdiction || 'GLOBAL',
+      tier: 'BLOCKED',
+      isMinorBlocked: true,
+      requiresMinorSafeDirectives: true,
+      featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'ACCESS_SUSPENDED'),
+      resourceLimits: YOUTH_RESOURCE_LIMITS,
+      reason: record.suspensionReason || 'Account access suspended.',
+    };
+  }
+
+  // If parental consent store has a record for this UID, it is the authoritative source of consent status!
+  if (parentalState?.consent) {
+    const pConsent = parentalState.consent;
+    const isRevoked =
+      pConsent.status === 'PARENTAL_CONSENT_REVOKED' ||
+      record?.consentStatus === 'WITHDRAWN' ||
+      record?.consentStatus === 'REVOKED' ||
+      record?.consentStatus === 'PARENTAL_CONSENT_REVOKED';
+
+    if (isRevoked) {
+      return {
+        identified: true,
+        authenticated: params.authenticated,
+        uid: params.uid,
+        subjectSeed,
+        subjectHash,
+        record,
+        ageStatus: record?.ageStatus || 'MINOR_13_17',
+        consentStatus: 'PARENTAL_CONSENT_REVOKED',
+        accountAccessState: 'PARENTAL_CONSENT_REVOKED',
+        environment: 'BLOCKED',
+        jurisdiction: pConsent.jurisdiction || record?.jurisdiction || 'GLOBAL',
+        tier: 'BLOCKED',
+        isMinorBlocked: true,
+        requiresMinorSafeDirectives: true,
+        featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'PARENTAL_CONSENT_REVOKED'),
+        resourceLimits: YOUTH_RESOURCE_LIMITS,
+        parentalConsentId: pConsent.consent_id,
+        parentUid: pConsent.parent_uid,
+        reason: 'Parental consent has been revoked; Omnia Youth access is disabled.',
+      };
+    }
+
+    if (parentalState.isExpired || pConsent.status === 'EXPIRED') {
+      return {
+        identified: true,
+        authenticated: params.authenticated,
+        uid: params.uid,
+        subjectSeed,
+        subjectHash,
+        record,
+        ageStatus: record?.ageStatus || 'MINOR_13_17',
+        consentStatus: 'EXPIRED',
+        accountAccessState: 'PARENTAL_CONSENT_PENDING',
+        environment: 'BLOCKED',
+        jurisdiction: pConsent.jurisdiction || record?.jurisdiction || 'GLOBAL',
+        tier: 'BLOCKED',
+        isMinorBlocked: true,
+        requiresMinorSafeDirectives: true,
+        featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'PARENTAL_CONSENT_PENDING'),
+        resourceLimits: YOUTH_RESOURCE_LIMITS,
+        parentalConsentId: pConsent.consent_id,
+        parentUid: pConsent.parent_uid,
+        reason: 'Parental consent has expired and requires guardian renewal.',
+      };
+    }
+
+    // Verified consent + active verified parent-child relationship → OMNIA YOUTH restricted access!
+    // Never grant access if user was evaluated UNDER_13_BLOCKED.
+    if (
+      parentalState.isVerifiedAndActive &&
+      record?.bracket !== 'UNDER_13_BLOCKED'
+    ) {
+      return {
+        identified: true,
+        authenticated: params.authenticated,
+        uid: params.uid,
+        subjectSeed,
+        subjectHash,
+        record,
+        ageStatus: record?.ageStatus || 'MINOR_13_17',
+        consentStatus: 'PARENTAL_CONSENT_VERIFIED',
+        accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+        environment: 'OMNIA_YOUTH',
+        jurisdiction: pConsent.jurisdiction || record?.jurisdiction || 'GLOBAL',
+        tier: 'RESTRICTED_MINOR_SAFE',
+        isMinorBlocked: false,
+        requiresMinorSafeDirectives: true,
+        featurePermissions: buildFeaturePermissionsMap('OMNIA_YOUTH', 'MINOR_RESTRICTED_ACCESS'),
+        resourceLimits: YOUTH_RESOURCE_LIMITS,
+        parentalConsentId: pConsent.consent_id,
+        parentUid: pConsent.parent_uid,
+        reason: 'Omnia Youth restricted minor-safe workspace active with verified parental consent.',
+      };
+    }
+
+    // Pending or denied consent
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record,
+      ageStatus: record?.ageStatus || 'MINOR_13_17',
+      consentStatus: pConsent.status,
+      accountAccessState: 'PARENTAL_CONSENT_PENDING',
+      environment: 'BLOCKED',
+      jurisdiction: pConsent.jurisdiction || record?.jurisdiction || 'GLOBAL',
+      tier: 'BLOCKED',
+      isMinorBlocked: true,
+      requiresMinorSafeDirectives: true,
+      featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'PARENTAL_CONSENT_PENDING'),
+      resourceLimits: YOUTH_RESOURCE_LIMITS,
+      parentalConsentId: pConsent.consent_id,
+      parentUid: pConsent.parent_uid,
+      reason: 'Parental consent is pending independent guardian identity verification.',
+    };
+  }
+
+  if (!record) {
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record: null,
+      ageStatus: 'UNDECLARED',
+      consentStatus: 'NOT_REQUIRED',
+      accountAccessState: 'ADULT_ACCESS',
+      environment: 'OMNIA_ADULT',
+      jurisdiction: 'GLOBAL',
+      tier: 'ADULT_STANDARD',
+      isMinorBlocked: false,
+      requiresMinorSafeDirectives: false,
+      featurePermissions: buildFeaturePermissionsMap('OMNIA_ADULT', 'ADULT_ACCESS'),
+      resourceLimits: ADULT_RESOURCE_LIMITS,
+    };
+  }
+
+  if (
+    record.consentStatus === 'WITHDRAWN' ||
+    record.consentStatus === 'REVOKED' ||
+    record.consentStatus === 'PARENTAL_CONSENT_REVOKED'
+  ) {
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record,
+      ageStatus: record.ageStatus || 'MINOR_13_17',
+      consentStatus: 'PARENTAL_CONSENT_REVOKED',
+      accountAccessState: 'PARENTAL_CONSENT_REVOKED',
+      environment: 'BLOCKED',
+      jurisdiction: record.jurisdiction || 'GLOBAL',
+      tier: 'BLOCKED',
+      isMinorBlocked: true,
+      requiresMinorSafeDirectives: true,
+      featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'PARENTAL_CONSENT_REVOKED'),
+      resourceLimits: YOUTH_RESOURCE_LIMITS,
+      reason: 'Parental consent has been withdrawn/revoked; minor workspace access is disabled.',
+    };
+  }
+
+  if (record.bracket === 'UNDER_13_BLOCKED') {
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record,
+      ageStatus: 'UNDER_13',
+      consentStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
+      accountAccessState: 'AGE_VERIFICATION_REQUIRED',
+      environment: 'BLOCKED',
+      jurisdiction: record.jurisdiction || 'GLOBAL',
+      tier: 'BLOCKED',
+      isMinorBlocked: true,
+      requiresMinorSafeDirectives: true,
+      featurePermissions: buildFeaturePermissionsMap('BLOCKED', 'AGE_VERIFICATION_REQUIRED'),
+      resourceLimits: YOUTH_RESOURCE_LIMITS,
+      reason: 'Users under 13 are ineligible to use Omnia workspace services.',
+    };
+  }
+
+  if (record.bracket !== 'ADULT_18_PLUS') {
+    const isVerified =
+      record.parentalConsentVerified &&
+      (record.consentStatus === 'VERIFIED' || record.consentStatus === 'PARENTAL_CONSENT_VERIFIED');
+    const environment: OmniaAccessEnvironment = isVerified ? 'OMNIA_YOUTH' : 'BLOCKED';
+    const accountAccessState: AccountAccessState = isVerified
+      ? 'MINOR_RESTRICTED_ACCESS'
+      : 'PARENTAL_CONSENT_PENDING';
+    const tier: MinorProtectionTier = isVerified ? 'RESTRICTED_MINOR_SAFE' : 'BLOCKED';
+
+    return {
+      identified: true,
+      authenticated: params.authenticated,
+      uid: params.uid,
+      subjectSeed,
+      subjectHash,
+      record,
+      ageStatus: 'MINOR_13_17',
+      consentStatus: isVerified ? 'PARENTAL_CONSENT_VERIFIED' : 'PARENTAL_CONSENT_PENDING',
+      accountAccessState,
+      environment,
+      jurisdiction: record.jurisdiction || 'GLOBAL',
+      tier,
+      isMinorBlocked: !isVerified,
+      requiresMinorSafeDirectives: true,
+      featurePermissions: buildFeaturePermissionsMap(environment, accountAccessState),
+      resourceLimits: YOUTH_RESOURCE_LIMITS,
+      reason: isVerified
+        ? 'Omnia Youth restricted minor-safe protections active.'
+        : 'Access restricted: verified parental consent required for Omnia Youth.',
+    };
+  }
+
+  return {
+    identified: true,
+    authenticated: params.authenticated,
+    uid: params.uid,
+    subjectSeed,
+    subjectHash,
+    record,
+    ageStatus: 'ADULT_18_PLUS',
+    consentStatus: 'NOT_REQUIRED',
+    accountAccessState: 'ADULT_ACCESS',
+    environment: 'OMNIA_ADULT',
+    jurisdiction: record.jurisdiction || 'GLOBAL',
+    tier: 'ADULT_STANDARD',
+    isMinorBlocked: false,
+    requiresMinorSafeDirectives: false,
+    featurePermissions: buildFeaturePermissionsMap('OMNIA_ADULT', 'ADULT_ACCESS'),
+    resourceLimits: ADULT_RESOURCE_LIMITS,
+  };
 }
 
 /**
@@ -698,14 +1340,18 @@ export interface RequestAgePolicyContext {
 export async function resolveRequestAgePolicyContext(
   req: express.Request
 ): Promise<RequestAgePolicyContext> {
+  let uid: string | undefined;
   let subjectSeed: string | undefined;
+  let authenticated = false;
 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim();
     const verified = await verifyFirebaseIdToken(token);
     if (verified.valid && verified.uid) {
+      uid = verified.uid;
       subjectSeed = `uid:${verified.uid}`;
+      authenticated = true;
     }
   }
 
@@ -719,81 +1365,13 @@ export async function resolveRequestAgePolicyContext(
     }
   }
 
-  if (!subjectSeed) {
-    return {
-      identified: false,
-      record: null,
-      tier: 'ADULT_STANDARD',
-      isMinorBlocked: false,
-      requiresMinorSafeDirectives: false,
-    };
-  }
-
-  const subjectHash = derivePrivacySessionHash(subjectSeed);
-  const record = getLatestRecordForSubjectSeed(subjectSeed);
-
-  if (!record) {
-    return {
-      identified: true,
-      subjectSeed,
-      subjectHash,
-      record: null,
-      tier: 'ADULT_STANDARD',
-      isMinorBlocked: false,
-      requiresMinorSafeDirectives: false,
-    };
-  }
-
-  if (record.consentStatus === 'WITHDRAWN' || record.consentStatus === 'REVOKED') {
-    return {
-      identified: true,
-      subjectSeed,
-      subjectHash,
-      record,
-      tier: 'BLOCKED',
-      isMinorBlocked: true,
-      requiresMinorSafeDirectives: true,
-      reason: 'Parental or user consent has been withdrawn/revoked; minor workspace access is disabled.',
-    };
-  }
-
-  if (record.bracket !== 'ADULT_18_PLUS') {
-    const tier: MinorProtectionTier =
-      record.minorProtectionTier === 'RESTRICTED_MINOR_SAFE' &&
-      OPTION_2_ACTIVE &&
-      record.parentalConsentVerified
-        ? 'RESTRICTED_MINOR_SAFE'
-        : 'BLOCKED';
-
-    return {
-      identified: true,
-      subjectSeed,
-      subjectHash,
-      record,
-      tier,
-      isMinorBlocked: tier === 'BLOCKED',
-      requiresMinorSafeDirectives: true,
-      reason:
-        tier === 'BLOCKED'
-          ? 'Access restricted: active 18+ policy or pending/unverified parental consent.'
-          : 'Minor-safe restricted protections active.',
-    };
-  }
-
-  return {
-    identified: true,
-    subjectSeed,
-    subjectHash,
-    record,
-    tier: 'ADULT_STANDARD',
-    isMinorBlocked: false,
-    requiresMinorSafeDirectives: false,
-  };
+  return resolvePolicyContextForIdentity({ uid, subjectSeed, authenticated });
 }
 
 /**
- * Live Option 4 feature-gate helper for Express API endpoints.
- * Enforces both STRICT_18_PLUS lock and Option 4 age-appropriate feature restrictions server-side.
+ * Centralized server-side access-control enforcement for Express API endpoints.
+ * Verifies: authentication context, account status, age eligibility, parental consent,
+ * feature permissions, jurisdictional restrictions, safety policy, and anti-spoofing guards.
  */
 export async function enforceFeatureAccessForRequest(
   req: express.Request,
@@ -805,16 +1383,49 @@ export async function enforceFeatureAccessForRequest(
   message?: string;
   context: RequestAgePolicyContext;
 }> {
+  const spoofCheck = detectSpoofedAccessClaims(req);
   const ctx = await resolveRequestAgePolicyContext(req);
-  if (!ctx.record || ctx.record.bracket === 'ADULT_18_PLUS') {
+
+  if (spoofCheck.spoofed) {
+    return {
+      allowed: false,
+      status: 403,
+      code: 'SPOOFED_AUTHORIZATION_CLAIM_REJECTED',
+      message: spoofCheck.reason,
+      context: ctx,
+    };
+  }
+
+  if (ctx.accountAccessState === 'ACCESS_SUSPENDED') {
+    return {
+      allowed: false,
+      status: 403,
+      code: 'ACCESS_SUSPENDED',
+      message: ctx.reason || 'Account access is suspended.',
+      context: ctx,
+    };
+  }
+
+  if (ctx.environment === 'OMNIA_ADULT' && ctx.accountAccessState === 'ADULT_ACCESS') {
     return { allowed: true, status: 200, context: ctx };
   }
 
+  const bracket: AgeBracket =
+    ctx.ageStatus === 'UNDER_13'
+      ? 'UNDER_13_BLOCKED'
+      : ctx.ageStatus === 'ADULT_18_PLUS'
+      ? 'ADULT_18_PLUS'
+      : 'TEEN_13_17_PENDING_PARENTAL_CONSENT';
+
   const decision = evaluateMinorFeatureAccess(
-    ctx.record.bracket,
+    bracket,
     feature,
-    ctx.record.parentalConsentVerified &&
-      ctx.record.consentStatus === 'VERIFIED'
+    ctx.consentStatus === 'PARENTAL_CONSENT_VERIFIED' &&
+      ctx.environment === 'OMNIA_YOUTH',
+    {
+      consentStatus: ctx.consentStatus,
+      suspended: ctx.record?.suspended,
+    }
   );
 
   if (!decision.allowed) {
@@ -830,15 +1441,129 @@ export async function enforceFeatureAccessForRequest(
   return { allowed: true, status: 200, context: ctx };
 }
 
+/**
+ * Direct UID enforcement helper for WebSocket /live upgrades and server-to-server billing webhooks.
+ */
+export function enforceFeatureAccessForUid(
+  uid: string,
+  feature: FeatureAccessKey
+): {
+  allowed: boolean;
+  code?: string;
+  message?: string;
+  context: RequestAgePolicyContext;
+} {
+  const ctx = resolvePolicyContextForIdentity({ uid, authenticated: true });
+  if (ctx.accountAccessState === 'ACCESS_SUSPENDED') {
+    return {
+      allowed: false,
+      code: 'ACCESS_SUSPENDED',
+      message: ctx.reason || 'Account access suspended.',
+      context: ctx,
+    };
+  }
+  if (ctx.environment === 'OMNIA_ADULT' && ctx.accountAccessState === 'ADULT_ACCESS') {
+    return { allowed: true, context: ctx };
+  }
+  const allowed = Boolean(ctx.featurePermissions[feature]);
+  if (!allowed) {
+    return {
+      allowed: false,
+      code:
+        ctx.consentStatus === 'PARENTAL_CONSENT_REVOKED'
+          ? 'PARENTAL_CONSENT_REVOKED'
+          : ctx.environment === 'OMNIA_YOUTH'
+          ? 'FEATURE_RESTRICTED_FOR_MINOR'
+          : 'PARENTAL_CONSENT_REQUIRED',
+      message:
+        ctx.environment === 'OMNIA_YOUTH'
+          ? `Capability "${feature}" is disabled for Omnia Youth accounts.`
+          : ctx.reason || 'Verified parental consent is required.',
+      context: ctx,
+    };
+  }
+  return { allowed: true, context: ctx };
+}
+
+/**
+ * Validates Omnia Youth restricted file-processing limits on chat attachments.
+ */
+export function validateYouthAttachmentRestrictions(
+  attachments: any[],
+  context: RequestAgePolicyContext
+): { valid: boolean; error?: string; code?: string } {
+  if (!Array.isArray(attachments) || attachments.length === 0) {
+    return { valid: true };
+  }
+  if (context.environment !== 'OMNIA_YOUTH') {
+    return { valid: true };
+  }
+
+  const limits = context.resourceLimits;
+  if (attachments.length > limits.maxAttachments) {
+    return {
+      valid: false,
+      code: 'YOUTH_ATTACHMENT_LIMIT_EXCEEDED',
+      error: `Omnia Youth restricts file analysis to a maximum of ${limits.maxAttachments} attachments per message.`,
+    };
+  }
+
+  const disallowedYouthExtensions = new Set(['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.webm']);
+  let totalDecodedBytes = 0;
+
+  for (let i = 0; i < attachments.length; i += 1) {
+    const att = attachments[i];
+    if (!att || typeof att !== 'object') continue;
+    const name = typeof att.name === 'string' ? att.name.toLowerCase().trim() : '';
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx !== -1 && disallowedYouthExtensions.has(name.slice(dotIdx))) {
+      return {
+        valid: false,
+        code: 'YOUTH_AUDIO_UPLOAD_RESTRICTED',
+        error: 'Raw audio file uploads are disabled in Omnia Youth mode.',
+      };
+    }
+    if (typeof att.previewUrl === 'string') {
+      const match = att.previewUrl.match(/^data:([a-zA-Z0-9.+/-]+);base64,(.+)$/);
+      if (match) {
+        const mime = match[1].toLowerCase();
+        if (mime.startsWith('audio/')) {
+          return {
+            valid: false,
+            code: 'YOUTH_AUDIO_UPLOAD_RESTRICTED',
+            error: 'Raw audio file uploads are disabled in Omnia Youth mode.',
+          };
+        }
+        totalDecodedBytes += Math.ceil((match[2].length * 3) / 4);
+        if (totalDecodedBytes > limits.maxDecodedAttachmentBytes) {
+          return {
+            valid: false,
+            code: 'YOUTH_ATTACHMENT_SIZE_EXCEEDED',
+            error: 'Omnia Youth restricts total attachment size to 5MB per prompt.',
+          };
+        }
+      }
+    }
+  }
+
+  return { valid: true };
+}
+
 async function resolveBoundSubjectSeed(
   req: express.Request,
   explicitSessionIdentifier?: unknown
-): Promise<{ seed: string; authenticated: boolean }> {
+): Promise<{ seed: string; uid?: string; email?: string; emailVerified?: boolean; authenticated: boolean }> {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const verified = await verifyFirebaseIdToken(authHeader.slice(7).trim());
     if (verified.valid && verified.uid) {
-      return { seed: `uid:${verified.uid}`, authenticated: true };
+      return {
+        seed: `uid:${verified.uid}`,
+        uid: verified.uid,
+        email: verified.email,
+        emailVerified: verified.emailVerified,
+        authenticated: true,
+      };
     }
   }
   const clientTenantHeader = req.headers['x-vizra-client-id'];
@@ -854,31 +1579,93 @@ async function resolveBoundSubjectSeed(
   return { seed: `dob:${req.ip || 'local'}`, authenticated: false };
 }
 
+export function _resetAgeAssuranceRecordsForTests(): void {
+  inMemoryAgeRecords = [];
+}
+
 export function setupAgeAssuranceRoutes(app: express.Application): void {
   const parentalProvider: ParentalVerificationProvider =
     new UnconfiguredParentalVerificationProvider();
 
   app.get('/api/compliance/age-assurance/policy', generalApiRateLimiter.getMiddleware(), (_req, res) => {
+    const { webhookSecret } = getParentalConsentConfig();
+    const externalProviderConfigured = Boolean(webhookSecret);
+    const persistence = getConsentPersistenceStatus();
+
     res.json({
       success: true,
       activePolicy: ACTIVE_AGE_POLICY,
-      minimumActiveAge: 18,
+      supersededPolicy: LEGACY_SUPERSEDED_POLICY,
+      policyVersion: CONSENT_POLICY_VERSION,
+      environments: {
+        OMNIA_ADULT: {
+          minimumAge: 18,
+          accessState: 'ADULT_ACCESS',
+          description: 'Eligible adult users (18+) with full verified production capabilities.',
+        },
+        OMNIA_YOUTH: {
+          eligibleAgeRange: '13-17 (subject to jurisdiction law & verified parental consent)',
+          accessState: 'MINOR_RESTRICTED_ACCESS',
+          enabled: OMNIA_YOUTH_ENABLED,
+          allowedCapabilities: [
+            'Core conversational AI (strict BLOCK_LOW_AND_ABOVE safety)',
+            'Educational assistance',
+            'Age-appropriate coding assistance',
+            'Filtered grounded web research',
+            'Restricted file analysis (max 2 files, <= 5 MB, no raw audio)',
+            'Science Explorer (AlphaFold / PubChem / PubMed)',
+          ],
+          disabledCapabilities: [
+            'Live Multimodal Voice (/live)',
+            'Unrestricted audio & Lyria music synthesis',
+            'Paid upgrades & commercial credit refills',
+            'External third-party workspace OAuth connectors',
+            'Sponsored/affiliate Engage targeting & behavioral profiling',
+          ],
+          parentalOverrideOfLegalRestrictionsAllowed: false,
+        },
+      },
+      accountAccessStates: [
+        'ADULT_ACCESS',
+        'MINOR_RESTRICTED_ACCESS',
+        'PARENTAL_CONSENT_PENDING',
+        'PARENTAL_CONSENT_VERIFIED',
+        'PARENTAL_CONSENT_REVOKED',
+        'AGE_VERIFICATION_REQUIRED',
+        'ACCESS_SUSPENDED',
+      ],
+      privacyFirstGuarantees: {
+        ageDeclarationIsRoutingOnly: true,
+        behaviouralAgeInferenceEnabled: BEHAVIOURAL_AGE_INFERENCE_ENABLED,
+        minorBehaviouralProfilingEnabled: MINOR_BEHAVIOURAL_PROFILING_ENABLED,
+        rawBirthdatesStored: false,
+        rawIdentityDocumentsStored: false,
+        childConversationsPrivateFromParentByDefault: true,
+        ordinaryEmailOrCheckboxSufficient: false,
+      },
+      firebaseConsentInfrastructure: persistence,
       option2Preparatory: {
         active: OPTION_2_ACTIVE,
-        status: 'DORMANT_PREPARATORY_ONLY',
-        parentalVerificationProvider: parentalProvider.providerName,
-        parentalVendorConfigured: parentalProvider.configured,
+        status: 'ACTIVE_FRAMEWORK_FAIL_CLOSED_EXTERNAL_VERIFICATION',
+        parentalVerificationProvider: externalProviderConfigured
+          ? 'Configured Signed External VPC Webhook'
+          : parentalProvider.providerName,
+        parentalVendorConfigured: externalProviderConfigured,
       },
       option3ParentalConsent: {
-        status: 'IMPLEMENTED_WITH_EXTERNAL_VENDOR_BLOCKERS',
+        status: externalProviderConfigured
+          ? 'CONFIGURED_SIGNED_WEBHOOK'
+          : 'IMPLEMENTED_FAIL_CLOSED_REQUIRES_EXTERNAL_VPC_PROVIDER',
         jurisdictionsSupported: Object.keys(JURISDICTION_CONSENT_THRESHOLDS),
-        parentalVendorConfigured: parentalProvider.configured,
+        parentalVendorConfigured: externalProviderConfigured,
         failClosed: true,
         supportsConsentWithdrawalAndCascadeErasure: true,
-        externalBlockers: [
-          'Accredited external Verifiable Parental Consent provider (Yoti / KWS / PRIVO) credentials & signed webhook secret not configured.',
-          'Formal legal counsel sign-off required per jurisdiction before activating Option 2/3 onboarding.',
-        ],
+        externalBlockers: externalProviderConfigured
+          ? []
+          : [
+              'Accredited external Verifiable Parental Consent identity/authority provider (e.g., Yoti, KWS, PRIVO, or India DPDP DigiLocker/Virtual Token verifier) credentials & PARENTAL_CONSENT_WEBHOOK_SECRET not configured.',
+              'Formal regional legal counsel review required prior to enabling live production minor verification.',
+            ],
       },
       option4FeatureRestrictions: {
         status: 'IMPLEMENTED_SERVER_ENFORCED',
@@ -886,19 +1673,19 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         geminiSafetyThreshold: 'BLOCK_LOW_AND_ABOVE',
         enforcedEndpoints: [
           'POST /api/chat',
+          'POST /api/blog/agent',
           'POST /api/research',
           'POST /api/science/query',
+          'POST /api/rag/embed',
+          'POST /api/rag/embed/batch',
           'POST /api/music/generate',
           'POST /api/live/session',
+          'WS /live (upgrade re-verification)',
           'GET /api/integrations/:provider/auth-url',
           'POST /api/credits/usage',
+          'POST /api/billing/webhook',
           'GET/POST /api/engage/select',
         ],
-      },
-      option3And4: {
-        status: 'IMPLEMENTED_WITH_EXTERNAL_VENDOR_BLOCKERS',
-        option3: 'PARTIALLY_IMPLEMENTED_EXTERNAL_VENDOR_REQUIRED',
-        option4: 'SERVER_ENFORCED_IN_ACTIVE_AND_PREPARATORY_TIERS',
       },
       option5: {
         rejected: OPTION_5_REJECTED,
@@ -911,7 +1698,6 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     res.json({
       success: true,
       activePolicy: ACTIVE_AGE_POLICY,
-      option2Active: OPTION_2_ACTIVE,
       jurisdictions: Object.values(JURISDICTION_CONSENT_THRESHOLDS),
     });
   });
@@ -920,14 +1706,26 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     res.json({
       success: true,
       activePolicy: ACTIVE_AGE_POLICY,
-      option2Active: OPTION_2_ACTIVE,
       option5Rejected: OPTION_5_REJECTED,
+      adultResourceLimits: ADULT_RESOURCE_LIMITS,
+      youthResourceLimits: YOUTH_RESOURCE_LIMITS,
       featureMatrix: AGE_FEATURE_POLICY_MATRIX,
     });
   });
 
   app.post('/api/compliance/age-assurance/evaluate-feature', generalApiRateLimiter.getMiddleware(), (req, res) => {
-    const { bracket, feature, parentalConsentVerified = false } = req.body || {};
+    const spoofCheck = detectSpoofedAccessClaims(req);
+    if (spoofCheck.spoofed) {
+      res.status(403).json({
+        error: {
+          code: 'SPOOFED_AUTHORIZATION_CLAIM_REJECTED',
+          message: spoofCheck.reason,
+        },
+      });
+      return;
+    }
+
+    const { bracket, feature, parentalConsentVerified = false, consentStatus } = req.body || {};
     if (
       bracket !== 'UNDER_13_BLOCKED' &&
       bracket !== 'TEEN_13_17_PENDING_PARENTAL_CONSENT' &&
@@ -952,25 +1750,18 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       return;
     }
 
-    const activeDecision = evaluateMinorFeatureAccess(
+    const decision = evaluateMinorFeatureAccess(
       bracket,
       feature as FeatureAccessKey,
       Boolean(parentalConsentVerified),
-      { allowOption4Simulation: false }
-    );
-    const preparatoryOption4Decision = evaluateMinorFeatureAccess(
-      bracket,
-      feature as FeatureAccessKey,
-      Boolean(parentalConsentVerified),
-      { allowOption4Simulation: true }
+      { consentStatus }
     );
 
     res.json({
       success: true,
       activePolicy: ACTIVE_AGE_POLICY,
-      option2Active: OPTION_2_ACTIVE,
-      activeDecision,
-      preparatoryOption4Decision,
+      activeDecision: decision,
+      preparatoryOption4Decision: decision,
     });
   });
 
@@ -980,7 +1771,8 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       res.status(401).json({
         error: {
           code: 'SUBJECT_IDENTIFICATION_REQUIRED',
-          message: 'Authenticated Bearer token or X-Vizra-Client-Id header required to query session age-assurance status.',
+          message:
+            'Authenticated Bearer token or X-Vizra-Client-Id header required to query session age-assurance status.',
         },
       });
       return;
@@ -988,19 +1780,30 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     res.json({
       success: true,
       activePolicy: ACTIVE_AGE_POLICY,
-      option2Active: OPTION_2_ACTIVE,
+      policyVersion: CONSENT_POLICY_VERSION,
+      ageStatus: ctx.ageStatus,
+      consentStatus: ctx.consentStatus,
+      accountAccessState: ctx.accountAccessState,
+      environment: ctx.environment,
+      jurisdiction: ctx.jurisdiction,
       tier: ctx.tier,
       isMinorBlocked: ctx.isMinorBlocked,
       requiresMinorSafeDirectives: ctx.requiresMinorSafeDirectives,
+      featurePermissions: ctx.featurePermissions,
+      resourceLimits: ctx.resourceLimits,
+      parentalConsentId: ctx.parentalConsentId || null,
       record: ctx.record
         ? {
             recordId: ctx.record.recordId,
+            ageStatus: ctx.record.ageStatus,
             bracket: ctx.record.bracket,
             jurisdiction: ctx.record.jurisdiction,
             digitalConsentAge: ctx.record.digitalConsentAge,
-            consentStatus: ctx.record.consentStatus,
-            minorProtectionTier: ctx.record.minorProtectionTier,
-            parentalConsentVerified: ctx.record.parentalConsentVerified,
+            consentStatus: ctx.consentStatus,
+            accountAccessState: ctx.accountAccessState,
+            environment: ctx.environment,
+            minorProtectionTier: ctx.tier,
+            parentalConsentVerified: ctx.consentStatus === 'PARENTAL_CONSENT_VERIFIED',
             recordedAt: ctx.record.recordedAt,
             updatedAt: ctx.record.updatedAt,
             withdrawnAt: ctx.record.withdrawnAt,
@@ -1009,7 +1812,20 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     });
   });
 
+  // STEP 1: Privacy-First Age Declaration & Jurisdiction Routing
   app.post('/api/compliance/age-assurance/evaluate', generalApiRateLimiter.getMiddleware(), async (req, res) => {
+    const spoofCheck = detectSpoofedAccessClaims(req);
+    if (spoofCheck.spoofed) {
+      res.status(403).json({
+        allowed: false,
+        error: {
+          code: 'SPOOFED_AUTHORIZATION_CLAIM_REJECTED',
+          message: spoofCheck.reason,
+        },
+      });
+      return;
+    }
+
     const { dateOfBirth, jurisdiction = 'GLOBAL', sessionIdentifier } = req.body || {};
     const evaluation = evaluateDateOfBirth(dateOfBirth, new Date(), jurisdiction);
 
@@ -1031,18 +1847,19 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         req.headers['x-vizra-client-id'].trim().length >= 4) ||
       (typeof sessionIdentifier === 'string' && sessionIdentifier.trim().length > 0);
 
-    // Anti-circumvention guard for named/authenticated subjects: once evaluated under-18,
-    // prevent instant "self-aging up" on a subsequent request to bypass minor protection.
+    // Anti-circumvention guard: once evaluated under-18, block upward self-declaration revision
     if (hasExplicitIdentity) {
       const priorRecord = getLatestRecordForSubjectSeed(boundSubject.seed);
       if (
         priorRecord &&
         priorRecord.bracket !== 'ADULT_18_PLUS' &&
         priorRecord.consentStatus !== 'WITHDRAWN' &&
+        priorRecord.consentStatus !== 'PARENTAL_CONSENT_REVOKED' &&
         evaluation.bracket === 'ADULT_18_PLUS'
       ) {
         res.status(403).json({
           allowed: false,
+          accountAccessState: 'AGE_VERIFICATION_REQUIRED',
           error: {
             code: 'SELF_DECLARATION_CIRCUMVENTION_BLOCKED',
             message:
@@ -1059,17 +1876,21 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         ? 'NOT_REQUIRED'
         : evaluation.bracket === 'UNDER_13_BLOCKED'
         ? 'BLOCKED_BY_EXTERNAL_DEPENDENCY'
-        : 'PENDING_VENDOR_VERIFICATION';
+        : 'PARENTAL_CONSENT_PENDING';
 
-    // Record only non-PII bracket + salted hash + threshold metadata (zero raw DOB persisted)
+    // Record only non-PII bracket + salted hash + threshold metadata (ZERO raw DOB persisted)
     const record: AgeAssuranceConsentRecord = {
       recordId: `age_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`,
       subjectHash,
+      childUid: boundSubject.uid,
+      ageStatus: evaluation.ageStatus,
       bracket: evaluation.bracket!,
       jurisdiction: evaluation.jurisdiction,
       digitalConsentAge: evaluation.digitalConsentAge,
       applicableStatutes: evaluation.applicableStatutes,
       activePolicy: ACTIVE_AGE_POLICY,
+      accountAccessState: evaluation.accountAccessState,
+      environment: evaluation.bracket === 'ADULT_18_PLUS' ? 'OMNIA_ADULT' : 'BLOCKED',
       option2ActiveAtEvaluation: OPTION_2_ACTIVE,
       parentalConsentVerified: false,
       consentStatus,
@@ -1079,79 +1900,646 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
     };
     upsertAgeRecord(record);
 
-    if (evaluation.activePolicyDecision !== 'ALLOW_ADULT_18_PLUS') {
+    if (evaluation.bracket === 'UNDER_13_BLOCKED') {
       res.status(403).json({
         allowed: false,
         activePolicy: ACTIVE_AGE_POLICY,
-        option2Active: OPTION_2_ACTIVE,
-        evaluation: {
-          bracket: evaluation.bracket,
-          jurisdiction: evaluation.jurisdiction,
-          digitalConsentAge: evaluation.digitalConsentAge,
-          belowDigitalConsentThreshold: evaluation.belowDigitalConsentThreshold,
-          applicableStatutes: evaluation.applicableStatutes,
-          legalBasisNote: evaluation.legalBasisNote,
-          activePolicyDecision: evaluation.activePolicyDecision,
-          option2PreparatoryDecision: evaluation.option2PreparatoryDecision,
-          parentalVerificationRequired: evaluation.parentalVerificationRequired,
-          parentalVerificationStatus: evaluation.parentalVerificationStatus,
-        },
+        environment: 'BLOCKED',
+        accountAccessState: 'AGE_VERIFICATION_REQUIRED',
+        evaluation,
         recordId: record.recordId,
         error: {
-          code: 'AGE_REQUIREMENT_18_PLUS_NOT_MET',
+          code: 'UNDER_13_INELIGIBLE',
           message:
-            'VIZRA currently requires users to be 18+ years old. Minor onboarding & Option 3 verifiable parental consent remain blocked pending external provider and counsel sign-off.',
+            'Users under 13 are not eligible for Omnia workspace accounts under VIZRA age-assurance safeguards.',
         },
+      });
+      return;
+    }
+
+    if (evaluation.bracket === 'TEEN_13_17_PENDING_PARENTAL_CONSENT') {
+      res.status(200).json({
+        allowed: false,
+        requiresParentalConsent: true,
+        activePolicy: ACTIVE_AGE_POLICY,
+        environment: 'OMNIA_YOUTH',
+        accountAccessState: 'PARENTAL_CONSENT_PENDING',
+        nextStep: {
+          action: 'INITIATE_PARENTAL_CONSENT_INVITATION',
+          endpoint: 'POST /api/compliance/parental-consent/invitations',
+          portalPath: '/parental-consent',
+          message:
+            'Eligible for Omnia Youth upon independently verified parent or guardian consent. Sign in and generate a secure parent invitation.',
+        },
+        evaluation,
+        recordId: record.recordId,
       });
       return;
     }
 
     res.json({
       allowed: true,
+      requiresParentalConsent: false,
       activePolicy: ACTIVE_AGE_POLICY,
-      option2Active: OPTION_2_ACTIVE,
-      evaluation: {
-        bracket: evaluation.bracket,
-        jurisdiction: evaluation.jurisdiction,
-        digitalConsentAge: evaluation.digitalConsentAge,
-        belowDigitalConsentThreshold: evaluation.belowDigitalConsentThreshold,
-        applicableStatutes: evaluation.applicableStatutes,
-        legalBasisNote: evaluation.legalBasisNote,
-        activePolicyDecision: evaluation.activePolicyDecision,
-        option2PreparatoryDecision: evaluation.option2PreparatoryDecision,
-        parentalVerificationRequired: evaluation.parentalVerificationRequired,
-        parentalVerificationStatus: evaluation.parentalVerificationStatus,
-      },
+      environment: 'OMNIA_ADULT',
+      accountAccessState: 'ADULT_ACCESS',
+      evaluation,
       recordId: record.recordId,
     });
   });
 
+  // STEPS 2–3: Authenticated Minor Requests Omnia Youth & Creates Secure Expiring Parent Invitation
   app.post(
-    '/api/compliance/age-assurance/parental-consent',
+    '/api/compliance/parental-consent/invitations',
     generalApiRateLimiter.getMiddleware(),
     async (req, res) => {
-      const {
-        parentEmail,
-        jurisdiction = 'GLOBAL',
-        sessionIdentifier,
-        verified,
-        bypass,
-        autoApprove,
-      } = req.body || {};
-
-      // Reject any client attempt to self-approve or spoof parental consent
-      if (verified === true || bypass === true || autoApprove === true) {
+      const spoofCheck = detectSpoofedAccessClaims(req);
+      if (spoofCheck.spoofed) {
         res.status(403).json({
-          verified: false,
           error: {
-            code: 'SPOOFED_VERIFICATION_REJECTED',
-            message:
-              'Client-supplied verification overrides are forbidden. Parental consent requires signed external provider verification.',
+            code: 'SPOOFED_AUTHORIZATION_CLAIM_REJECTED',
+            message: spoofCheck.reason,
           },
         });
         return;
       }
 
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({
+          error: {
+            code: 'AUTHENTICATION_REQUIRED',
+            message: 'Sign in with Firebase Authentication to initiate a parental consent request.',
+          },
+        });
+        return;
+      }
+
+      const verified = await verifyFirebaseIdToken(authHeader.slice(7).trim());
+      if (!verified.valid || !verified.uid) {
+        res.status(401).json({
+          error: {
+            code: 'INVALID_AUTH_TOKEN',
+            message: verified.error || 'Invalid or expired authentication token.',
+          },
+        });
+        return;
+      }
+
+      const { parentEmail, jurisdiction = 'GLOBAL', requestedScopes } = req.body || {};
+      if (
+        typeof parentEmail !== 'string' ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail.trim())
+      ) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_PARENT_EMAIL',
+            message: 'A valid parent or guardian email address is required.',
+          },
+        });
+        return;
+      }
+
+      const normalizedParentEmail = parentEmail.trim().toLowerCase();
+      if (verified.email && verified.email.trim().toLowerCase() === normalizedParentEmail) {
+        res.status(403).json({
+          error: {
+            code: 'PARENT_CHILD_EMAIL_CONFLICT',
+            message:
+              'Parent/guardian email must be distinct from the minor account email. Self-invitation is prohibited.',
+          },
+        });
+        return;
+      }
+
+      // Verify child is not under-13 blocked
+      const existingAgeRecord = getLatestRecordForSubjectSeed(`uid:${verified.uid}`);
+      if (existingAgeRecord?.bracket === 'UNDER_13_BLOCKED') {
+        res.status(403).json({
+          error: {
+            code: 'UNDER_13_INELIGIBLE',
+            message: 'Accounts declared under 13 are ineligible for Omnia Youth onboarding.',
+          },
+        });
+        return;
+      }
+
+      const rule = resolveJurisdictionRule(jurisdiction);
+      const parentEmailHash = derivePrivacySessionHash(normalizedParentEmail);
+
+      // Ensure a minor age-assurance record is bound to this UID if not yet present
+      if (!existingAgeRecord || existingAgeRecord.bracket === 'ADULT_18_PLUS') {
+        const nowIso = new Date().toISOString();
+        upsertAgeRecord({
+          recordId: `age_${Date.now().toString(36)}_${crypto.randomBytes(2).toString('hex')}`,
+          subjectHash: derivePrivacySessionHash(`uid:${verified.uid}`),
+          childUid: verified.uid,
+          parentEmailHash,
+          ageStatus: 'MINOR_13_17',
+          bracket: 'TEEN_13_17_PENDING_PARENTAL_CONSENT',
+          jurisdiction: rule.code,
+          digitalConsentAge: rule.digitalConsentAge,
+          applicableStatutes: rule.applicableStatutes,
+          activePolicy: ACTIVE_AGE_POLICY,
+          accountAccessState: 'PARENTAL_CONSENT_PENDING',
+          environment: 'BLOCKED',
+          option2ActiveAtEvaluation: OPTION_2_ACTIVE,
+          parentalConsentVerified: false,
+          consentStatus: 'PARENTAL_CONSENT_PENDING',
+          minorProtectionTier: 'BLOCKED',
+          recordedAt: nowIso,
+          updatedAt: nowIso,
+        });
+      }
+
+      const created = createOrReuseParentalInvitation({
+        childUid: verified.uid,
+        parentEmailHash,
+        jurisdiction: rule.code,
+        requestedScopes,
+      });
+
+      res.status(created.reusedExisting ? 200 : 201).json({
+        success: true,
+        reusedExistingInvitation: created.reusedExisting,
+        consentId: created.consent.consent_id,
+        invitationId: created.invitation.invitation_id,
+        invitationToken: created.rawToken,
+        invitationPath: `/parental-consent?invite=${encodeURIComponent(created.rawToken)}`,
+        jurisdiction: rule.code,
+        digitalConsentAge: rule.digitalConsentAge,
+        applicableStatutes: rule.applicableStatutes,
+        status: created.consent.status,
+        expiresAt: created.invitation.expires_at,
+        policyVersion: CONSENT_POLICY_VERSION,
+        disclosureNote:
+          'Share this expiring invitation link with your parent or legal guardian. They must sign in with their own separate account and complete independent verification.',
+      });
+    }
+  );
+
+  // STEPS 4–5: Inspect Parent Invitation + Full Transparent Consent Disclosure
+  app.get(
+    '/api/compliance/parental-consent/invitations/:token',
+    generalApiRateLimiter.getMiddleware(),
+    (req, res) => {
+      const rawToken = String(req.params.token || '').trim();
+      const { invitation, expired } = getInvitationByRawToken(rawToken);
+      if (!invitation) {
+        res.status(404).json({
+          error: {
+            code: 'INVITATION_NOT_FOUND',
+            message: 'Parental consent invitation was not found or is invalid.',
+          },
+        });
+        return;
+      }
+
+      if (expired || invitation.status === 'EXPIRED') {
+        res.status(410).json({
+          expired: true,
+          error: {
+            code: 'INVITATION_EXPIRED',
+            message: 'This parental consent invitation has expired. Ask the minor to create a new invitation.',
+          },
+        });
+        return;
+      }
+
+      if (invitation.status !== 'PENDING') {
+        res.status(409).json({
+          error: {
+            code: `INVITATION_${invitation.status}`,
+            message: `This invitation is no longer active (status: ${invitation.status}).`,
+          },
+        });
+        return;
+      }
+
+      const rule = resolveJurisdictionRule(invitation.jurisdiction);
+      const { webhookSecret } = getParentalConsentConfig();
+
+      res.json({
+        success: true,
+        invitation: {
+          invitationId: invitation.invitation_id,
+          consentId: invitation.consent_id,
+          jurisdiction: invitation.jurisdiction,
+          jurisdictionLabel: rule.label,
+          applicableStatutes: rule.applicableStatutes,
+          verificationStandardNote: rule.verificationStandardNote,
+          requestedScopes: invitation.requested_scopes,
+          status: invitation.status,
+          expiresAt: invitation.expires_at,
+          policyVersion: invitation.policy_version,
+        },
+        externalVerificationProviderConfigured: Boolean(webhookSecret),
+        disclosure: PARENTAL_CONSENT_DISCLOSURE_PAYLOAD,
+      });
+    }
+  );
+
+  // STEPS 6–7: Independent Parent Authentication & Explicit Approval
+  app.post(
+    '/api/compliance/parental-consent/approve',
+    generalApiRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const spoofCheck = detectSpoofedAccessClaims(req);
+      if (spoofCheck.spoofed) {
+        res.status(403).json({
+          verified: false,
+          error: {
+            code: 'SPOOFED_AUTHORIZATION_CLAIM_REJECTED',
+            message: spoofCheck.reason,
+          },
+        });
+        return;
+      }
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({
+          error: {
+            code: 'PARENT_AUTHENTICATION_REQUIRED',
+            message: 'Parent or legal guardian must independently sign in with Firebase Authentication.',
+          },
+        });
+        return;
+      }
+
+      const verifiedParent = await verifyFirebaseIdToken(authHeader.slice(7).trim());
+      if (!verifiedParent.valid || !verifiedParent.uid) {
+        res.status(401).json({
+          error: {
+            code: 'INVALID_PARENT_AUTH_TOKEN',
+            message: verifiedParent.error || 'Invalid or expired parent authentication token.',
+          },
+        });
+        return;
+      }
+
+      if (!verifiedParent.email || verifiedParent.emailVerified !== true) {
+        res.status(403).json({
+          error: {
+            code: 'PARENT_EMAIL_VERIFICATION_REQUIRED',
+            message:
+              'Parent account must have a verified email address as a baseline authentication requirement before proceeding to identity verification.',
+          },
+        });
+        return;
+      }
+
+      // Prevent a minor-flagged account from approving another minor's consent
+      const parentAgeCtx = resolvePolicyContextForIdentity({
+        uid: verifiedParent.uid,
+        authenticated: true,
+      });
+      if (parentAgeCtx.ageStatus === 'MINOR_13_17' || parentAgeCtx.ageStatus === 'UNDER_13') {
+        res.status(403).json({
+          error: {
+            code: 'PARENT_MUST_BE_ADULT',
+            message: 'A minor account cannot grant parental consent.',
+          },
+        });
+        return;
+      }
+
+      const {
+        invitationToken,
+        approvedScopes,
+        acknowledgedDisclosures,
+        policyVersion,
+        providerAssertion,
+        providerSignature,
+      } = req.body || {};
+
+      if (typeof invitationToken !== 'string' || !invitationToken.trim()) {
+        res.status(400).json({
+          error: {
+            code: 'MISSING_INVITATION_TOKEN',
+            message: 'A valid parental consent invitationToken is required.',
+          },
+        });
+        return;
+      }
+
+      if (acknowledgedDisclosures !== true) {
+        res.status(400).json({
+          error: {
+            code: 'DISCLOSURE_ACKNOWLEDGMENT_REQUIRED',
+            message:
+              'Parent/guardian must explicitly review and acknowledge the Omnia Youth privacy and restriction disclosures.',
+          },
+        });
+        return;
+      }
+
+      if (policyVersion && policyVersion !== CONSENT_POLICY_VERSION) {
+        res.status(409).json({
+          error: {
+            code: 'POLICY_VERSION_MISMATCH',
+            message: `Consent disclosure version mismatch. Refresh to review current policy version ${CONSENT_POLICY_VERSION}.`,
+          },
+        });
+        return;
+      }
+
+      // Check optional server-verified external VPC provider cryptographic assertion
+      const { webhookSecret } = getParentalConsentConfig();
+      let externalVerificationProof: {
+        verified: boolean;
+        providerReference: string;
+        verificationMethod: 'SIGNED_EXTERNAL_VPC_PROVIDER';
+        expiresAtIso?: string;
+      } | null = null;
+
+      if (providerAssertion !== undefined || providerSignature !== undefined) {
+        if (!webhookSecret) {
+          res.status(424).json({
+            verified: false,
+            error: {
+              code: 'EXTERNAL_VPC_PROVIDER_NOT_CONFIGURED',
+              message:
+                'Server external verification provider secret is not configured; cannot accept verification assertions.',
+            },
+          });
+          return;
+        }
+        const serializedAssertion =
+          typeof providerAssertion === 'string'
+            ? providerAssertion
+            : JSON.stringify(providerAssertion || {});
+        const expectedSig = crypto
+          .createHmac('sha256', webhookSecret)
+          .update(serializedAssertion)
+          .digest('hex');
+
+        if (
+          typeof providerSignature !== 'string' ||
+          !safeCompare(providerSignature.trim(), expectedSig)
+        ) {
+          res.status(401).json({
+            verified: false,
+            error: {
+              code: 'INVALID_VERIFICATION_SIGNATURE',
+              message: 'External parental verification cryptographic signature is invalid.',
+            },
+          });
+          return;
+        }
+
+        let parsedAssertion: any = {};
+        try {
+          parsedAssertion =
+            typeof providerAssertion === 'string' ? JSON.parse(providerAssertion) : providerAssertion;
+        } catch {
+          res.status(400).json({
+            error: {
+              code: 'INVALID_PROVIDER_ASSERTION',
+              message: 'Malformed external verification assertion payload.',
+            },
+          });
+          return;
+        }
+
+        if (
+          parsedAssertion?.verified === true &&
+          typeof parsedAssertion?.providerReference === 'string' &&
+          parsedAssertion.providerReference.trim().length > 0
+        ) {
+          externalVerificationProof = {
+            verified: true,
+            providerReference: parsedAssertion.providerReference.trim().slice(0, 128),
+            verificationMethod: 'SIGNED_EXTERNAL_VPC_PROVIDER',
+            expiresAtIso:
+              typeof parsedAssertion.expiresAt === 'string' ? parsedAssertion.expiresAt : undefined,
+          };
+        }
+      }
+
+      const parentEmailHash = derivePrivacySessionHash(verifiedParent.email.trim().toLowerCase());
+      const outcome = recordParentApprovalAttempt({
+        rawToken: invitationToken.trim(),
+        parentUid: verifiedParent.uid,
+        parentEmailHash,
+        approvedScopes: Array.isArray(approvedScopes)
+          ? (approvedScopes as ConsentScope[])
+          : [...APPROVED_YOUTH_CONSENT_SCOPES],
+        externalVerificationProof,
+      });
+
+      if (!outcome.ok) {
+        res.status(outcome.status).json({
+          verified: false,
+          status: outcome.consent?.status || 'PARENTAL_CONSENT_PENDING',
+          consentId: outcome.consent?.consent_id,
+          relationshipStatus: outcome.relationship?.relationship_verification_status,
+          error: {
+            code: outcome.code,
+            message: outcome.message,
+          },
+        });
+        return;
+      }
+
+      // Sync the child's age-assurance record to verified MINOR_RESTRICTED_ACCESS
+      if (outcome.consent) {
+        const childSeed = `uid:${outcome.consent.child_uid}`;
+        const existingChildRec = getLatestRecordForSubjectSeed(childSeed);
+        const nowIso = new Date().toISOString();
+        const rule = resolveJurisdictionRule(outcome.consent.jurisdiction);
+        upsertAgeRecord({
+          recordId: existingChildRec?.recordId || `age_${Date.now().toString(36)}`,
+          subjectHash: derivePrivacySessionHash(childSeed),
+          childUid: outcome.consent.child_uid,
+          parentEmailHash,
+          ageStatus: 'MINOR_13_17',
+          bracket: 'TEEN_13_17_PENDING_PARENTAL_CONSENT',
+          jurisdiction: rule.code,
+          digitalConsentAge: rule.digitalConsentAge,
+          applicableStatutes: rule.applicableStatutes,
+          activePolicy: ACTIVE_AGE_POLICY,
+          accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+          environment: 'OMNIA_YOUTH',
+          option2ActiveAtEvaluation: true,
+          parentalConsentVerified: true,
+          consentStatus: 'PARENTAL_CONSENT_VERIFIED',
+          minorProtectionTier: 'RESTRICTED_MINOR_SAFE',
+          recordedAt: existingChildRec?.recordedAt || nowIso,
+          updatedAt: nowIso,
+        });
+      }
+
+      res.json({
+        success: true,
+        verified: true,
+        accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+        environment: 'OMNIA_YOUTH',
+        consent: outcome.consent,
+        relationship: outcome.relationship,
+        message: outcome.message,
+      });
+    }
+  );
+
+  // STEP 9: Review Consent Status (Strictly scoped to authenticated parent or child; zero child chat exposure)
+  app.get(
+    '/api/compliance/parental-consent/status',
+    generalApiRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({
+          error: {
+            code: 'AUTHENTICATION_REQUIRED',
+            message: 'Sign in to view parental consent records associated with your account.',
+          },
+        });
+        return;
+      }
+
+      const verified = await verifyFirebaseIdToken(authHeader.slice(7).trim());
+      if (!verified.valid || !verified.uid) {
+        res.status(401).json({
+          error: {
+            code: 'INVALID_AUTH_TOKEN',
+            message: verified.error || 'Invalid or expired authentication token.',
+          },
+        });
+        return;
+      }
+
+      const ctx = resolvePolicyContextForIdentity({ uid: verified.uid, authenticated: true });
+      const records = listParentalConsentsForActor(verified.uid);
+
+      res.json({
+        success: true,
+        policyVersion: CONSENT_POLICY_VERSION,
+        accountSummary: {
+          ageStatus: ctx.ageStatus,
+          consentStatus: ctx.consentStatus,
+          accountAccessState: ctx.accountAccessState,
+          environment: ctx.environment,
+          jurisdiction: ctx.jurisdiction,
+          featurePermissions: ctx.featurePermissions,
+          resourceLimits: ctx.resourceLimits,
+        },
+        asChild: records.asChild,
+        asParent: records.asParent,
+        relationships: records.relationships,
+        auditLogs: records.auditLogs,
+        privacyGuarantee:
+          'Private child conversations are not automatically disclosed to parents/guardians.',
+      });
+    }
+  );
+
+  // STEP 10: Prompt Consent Withdrawal / Revocation (Invalidates Omnia Youth access immediately)
+  app.post(
+    '/api/compliance/parental-consent/revoke',
+    generalApiRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({
+          error: {
+            code: 'AUTHENTICATION_REQUIRED',
+            message: 'Authenticated parent/guardian or account holder sign-in is required to revoke consent.',
+          },
+        });
+        return;
+      }
+
+      const verified = await verifyFirebaseIdToken(authHeader.slice(7).trim());
+      if (!verified.valid || !verified.uid) {
+        res.status(401).json({
+          error: {
+            code: 'INVALID_AUTH_TOKEN',
+            message: verified.error || 'Invalid or expired authentication token.',
+          },
+        });
+        return;
+      }
+
+      const { consentId, childUid, reason } = req.body || {};
+      const result = revokeParentalConsent({
+        actorUid: verified.uid,
+        consentId: typeof consentId === 'string' ? consentId.trim() : undefined,
+        childUid: typeof childUid === 'string' ? childUid.trim() : undefined,
+        reason: typeof reason === 'string' ? reason : undefined,
+      });
+
+      if (!result.ok) {
+        res.status(result.status).json({
+          error: {
+            code: result.code,
+            message: result.message,
+          },
+        });
+        return;
+      }
+
+      // Synchronously update age_assurance_records for every revoked child UID so all endpoints deny immediately
+      const nowIso = new Date().toISOString();
+      for (const revoked of result.revokedConsents) {
+        const childSeed = `uid:${revoked.child_uid}`;
+        const existingRec = getLatestRecordForSubjectSeed(childSeed);
+        const rule = resolveJurisdictionRule(revoked.jurisdiction);
+        upsertAgeRecord({
+          recordId: existingRec?.recordId || `age_rev_${Date.now().toString(36)}`,
+          subjectHash: derivePrivacySessionHash(childSeed),
+          childUid: revoked.child_uid,
+          ageStatus: 'MINOR_13_17',
+          bracket: 'TEEN_13_17_PENDING_PARENTAL_CONSENT',
+          jurisdiction: rule.code,
+          digitalConsentAge: rule.digitalConsentAge,
+          applicableStatutes: rule.applicableStatutes,
+          activePolicy: ACTIVE_AGE_POLICY,
+          accountAccessState: 'PARENTAL_CONSENT_REVOKED',
+          environment: 'BLOCKED',
+          option2ActiveAtEvaluation: true,
+          parentalConsentVerified: false,
+          consentStatus: 'PARENTAL_CONSENT_REVOKED',
+          minorProtectionTier: 'BLOCKED',
+          recordedAt: existingRec?.recordedAt || nowIso,
+          updatedAt: nowIso,
+          withdrawnAt: nowIso,
+        });
+      }
+
+      res.json({
+        success: true,
+        accountAccessState: 'PARENTAL_CONSENT_REVOKED',
+        revokedCount: result.revokedConsents.length,
+        revokedConsentIds: result.revokedConsents.map((c) => c.consent_id),
+        revokedAt: nowIso,
+        dataDeletionWorkflow: {
+          endpoint: 'DELETE /api/account/data',
+          settingsPath: '/settings',
+          note: 'Omnia Youth workspace access has been invalidated immediately. The account holder may invoke DELETE /api/account/data to purge all stored data.',
+        },
+      });
+    }
+  );
+
+  // Legacy endpoint retained with fail-closed behavior and explicit guidance to the invitation workflow
+  app.post(
+    '/api/compliance/age-assurance/parental-consent',
+    generalApiRateLimiter.getMiddleware(),
+    async (req, res) => {
+      const spoofCheck = detectSpoofedAccessClaims(req);
+      if (spoofCheck.spoofed) {
+        res.status(403).json({
+          verified: false,
+          error: {
+            code: 'SPOOFED_VERIFICATION_REJECTED',
+            message: spoofCheck.reason,
+          },
+        });
+        return;
+      }
+
+      const { parentEmail, jurisdiction = 'GLOBAL', sessionIdentifier } = req.body || {};
       if (typeof parentEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail.trim())) {
         res.status(400).json({
           error: {
@@ -1178,12 +2566,16 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       upsertAgeRecord({
         recordId,
         subjectHash: subjectSessionHash,
+        childUid: boundSubject.uid,
         parentEmailHash,
+        ageStatus: 'MINOR_13_17',
         bracket: 'TEEN_13_17_PENDING_PARENTAL_CONSENT',
         jurisdiction: rule.code,
         digitalConsentAge: rule.digitalConsentAge,
         applicableStatutes: rule.applicableStatutes,
         activePolicy: ACTIVE_AGE_POLICY,
+        accountAccessState: 'PARENTAL_CONSENT_PENDING',
+        environment: 'BLOCKED',
         option2ActiveAtEvaluation: OPTION_2_ACTIVE,
         parentalConsentVerified: false,
         consentStatus: 'BLOCKED_BY_EXTERNAL_DEPENDENCY',
@@ -1192,26 +2584,22 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         updatedAt: nowIso,
       });
 
-      if (!outcome.verified) {
-        res.status(424).json({
-          verified: false,
-          recordId,
-          jurisdiction: rule.code,
-          digitalConsentAge: rule.digitalConsentAge,
-          status: outcome.status,
-          error: {
-            code: outcome.code,
-            message: outcome.message,
-          },
-        });
-        return;
-      }
-
-      res.json({ ...outcome, recordId });
+      res.status(424).json({
+        verified: false,
+        recordId,
+        jurisdiction: rule.code,
+        digitalConsentAge: rule.digitalConsentAge,
+        status: outcome.status,
+        recommendedEndpoint: 'POST /api/compliance/parental-consent/invitations',
+        error: {
+          code: outcome.code,
+          message: outcome.message,
+        },
+      });
     }
   );
 
-  // Fail-closed webhook callback endpoint for future accredited Verifiable Parental Consent vendor
+  // Signed External Verifiable Parental Consent Provider Webhook Callback (HMAC-SHA256 verified)
   app.post(
     '/api/compliance/age-assurance/parental-consent/callback',
     generalApiRateLimiter.getMiddleware(),
@@ -1222,7 +2610,7 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
           error: {
             code: 'PARENTAL_VERIFICATION_VENDOR_NOT_CONFIGURED',
             message:
-              'External parental verification webhook secret is not configured. Signed callbacks remain disabled.',
+              'External parental verification webhook secret is not configured. Signed callbacks remain fail-closed.',
           },
         });
         return;
@@ -1248,16 +2636,74 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         return;
       }
 
-      res.status(424).json({
-        error: {
-          code: 'OPTION_2_DORMANT_LEGAL_SIGN_OFF_REQUIRED',
-          message: 'Signature verified, but Option 2 minor onboarding remains dormant pending counsel authorization.',
-        },
+      const { consentId, parentUid, providerReference, verified, expiresAt } = req.body || {};
+      if (
+        verified !== true ||
+        typeof consentId !== 'string' ||
+        typeof parentUid !== 'string' ||
+        typeof providerReference !== 'string'
+      ) {
+        res.status(400).json({
+          error: {
+            code: 'INVALID_WEBHOOK_PAYLOAD',
+            message: 'Signed callback requires verified: true, consentId, parentUid, and providerReference.',
+          },
+        });
+        return;
+      }
+
+      const finalized = finalizeVerifiedParentalConsent({
+        consentId: consentId.trim(),
+        parentUid: parentUid.trim(),
+        providerReference: providerReference.trim(),
+        expiresAtIso: typeof expiresAt === 'string' ? expiresAt : undefined,
+      });
+
+      if (!finalized.ok || !finalized.consent) {
+        res.status(400).json({
+          error: {
+            code: finalized.code,
+            message: finalized.message,
+          },
+        });
+        return;
+      }
+
+      const childSeed = `uid:${finalized.consent.child_uid}`;
+      const existingRec = getLatestRecordForSubjectSeed(childSeed);
+      const nowIso = new Date().toISOString();
+      const rule = resolveJurisdictionRule(finalized.consent.jurisdiction);
+      upsertAgeRecord({
+        recordId: existingRec?.recordId || `age_vpc_${Date.now().toString(36)}`,
+        subjectHash: derivePrivacySessionHash(childSeed),
+        childUid: finalized.consent.child_uid,
+        ageStatus: 'MINOR_13_17',
+        bracket: 'TEEN_13_17_PENDING_PARENTAL_CONSENT',
+        jurisdiction: rule.code,
+        digitalConsentAge: rule.digitalConsentAge,
+        applicableStatutes: rule.applicableStatutes,
+        activePolicy: ACTIVE_AGE_POLICY,
+        accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+        environment: 'OMNIA_YOUTH',
+        option2ActiveAtEvaluation: true,
+        parentalConsentVerified: true,
+        consentStatus: 'PARENTAL_CONSENT_VERIFIED',
+        minorProtectionTier: 'RESTRICTED_MINOR_SAFE',
+        recordedAt: existingRec?.recordedAt || nowIso,
+        updatedAt: nowIso,
+      });
+
+      res.json({
+        success: true,
+        accountAccessState: 'MINOR_RESTRICTED_ACCESS',
+        environment: 'OMNIA_YOUTH',
+        consent: finalized.consent,
+        relationship: finalized.relationship,
       });
     }
   );
 
-  // Guardian or Account Holder Parental Consent Withdrawal & Revocation Workflow (Option 3)
+  // Backward-compatible withdrawal route synced with parental_consents revocation
   app.post(
     '/api/compliance/age-assurance/parental-consent/withdraw',
     generalApiRateLimiter.getMiddleware(),
@@ -1279,6 +2725,10 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
           },
         });
         return;
+      }
+
+      if (boundSubject.uid) {
+        revokeParentalConsent({ actorUid: boundSubject.uid, reason: 'legacy_withdraw_endpoint' });
       }
 
       const candidateSubjectHashes = new Set(derivePrivacySessionHashCandidates(boundSubject.seed));
@@ -1331,7 +2781,9 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
         return {
           ...rec,
           parentalConsentVerified: false,
-          consentStatus: 'WITHDRAWN' as ConsentLifecycleStatus,
+          consentStatus: 'PARENTAL_CONSENT_REVOKED' as ConsentLifecycleStatus,
+          accountAccessState: 'PARENTAL_CONSENT_REVOKED' as AccountAccessState,
+          environment: 'BLOCKED' as OmniaAccessEnvironment,
           minorProtectionTier: 'BLOCKED' as MinorProtectionTier,
           updatedAt: nowIso,
           withdrawnAt: nowIso,
@@ -1353,20 +2805,21 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       res.json({
         success: true,
         withdrawnRecords: updatedCount,
-        consentStatus: 'WITHDRAWN',
+        consentStatus: 'PARENTAL_CONSENT_REVOKED',
+        accountAccessState: 'PARENTAL_CONSENT_REVOKED',
         minorProtectionTier: 'BLOCKED',
         withdrawnAt: nowIso,
       });
     }
   );
 
-  // Explicit guard proving Option 5 (unrestricted minor access / passive terms) stays rejected
+  // Explicit guard proving Option 5 (unrestricted minor access / passive terms) stays permanently rejected
   app.post('/api/compliance/age-assurance/option-5-bypass', (_req, res) => {
     res.status(403).json({
       rejected: OPTION_5_REJECTED,
       error: {
         code: 'POLICY_OPTION_5_REJECTED',
-        message: 'Option 5 (Unrestricted Access / Passive Terms Only) is permanently rejected by the Project Owner.',
+        message: 'Option 5 (Unrestricted Access / Passive Terms Only) is permanently rejected.',
       },
     });
   });

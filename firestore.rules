@@ -29,7 +29,16 @@ service cloud.firestore {
       return resource.data;
     }
 
-    // Validation Blueprint for UserProfile
+    function isConsentParty(data) {
+      return isSignedIn()
+        && data != null
+        && (
+          ('child_uid' in data && data.child_uid is string && data.child_uid == request.auth.uid)
+          || ('parent_uid' in data && data.parent_uid is string && data.parent_uid == request.auth.uid)
+        );
+    }
+
+    // Validation Blueprint for UserProfile (blocks shadow fields such as ageStatus/consentStatus/role)
     function isValidUserProfile(data) {
       return data.keys().hasAll(['uid', 'createdAt', 'lastLoginAt'])
         && data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'lastLoginAt'])
@@ -64,7 +73,7 @@ service cloud.firestore {
         && (!('sources' in data) || (data.sources is list && data.sources.size() <= 50));
     }
 
-    // User Profile: Strict PII Isolation
+    // User Profile: Strict PII Isolation (parents cannot access child profile or conversations)
     match /users/{userId} {
       allow get: if isOwner(userId) && isValidId(userId);
       allow list: if false; // Blanket user enumeration strictly denied
@@ -86,7 +95,7 @@ service cloud.firestore {
         allow delete: if isOwner(userId) && isValidId(projectId);
       }
 
-      // User Omnia Conversations & Messages
+      // User Omnia Conversations & Messages (strictly owner-only; NOT auto-exposed to parents)
       match /conversations/{conversationId}/messages/{messageId} {
         allow get: if isOwner(userId) && isValidId(conversationId) && isValidId(messageId);
         allow list: if isOwner(userId) && isValidId(conversationId);
@@ -94,6 +103,25 @@ service cloud.firestore {
         allow update: if false; // Conversation history is immutable
         allow delete: if isOwner(userId) && isValidId(conversationId) && isValidId(messageId);
       }
+    }
+
+    // Parental Consent Records: Server-authoritative writes only; strictly party-scoped reads
+    match /parental_consents/{consentId} {
+      allow get: if isValidId(consentId) && isConsentParty(existing());
+      allow list: if isConsentParty(existing());
+      allow create, update, delete: if false; // Clients can NEVER forge, modify, self-approve, or delete consent records
+    }
+
+    // Parent-Child Relationships: Server-authoritative writes only; strictly party-scoped reads
+    match /parent_child_relationships/{relationshipId} {
+      allow get: if isValidId(relationshipId) && isConsentParty(existing());
+      allow list: if isConsentParty(existing());
+      allow create, update, delete: if false; // Clients can NEVER create, tamper with, or erase verified relationships
+    }
+
+    // Consent Audit Logs: Append-only server-written compliance records; zero client access
+    match /consent_audit_logs/{eventId} {
+      allow read, write: if false;
     }
 
     // Connection testing endpoint for boot diagnostic (restricted strictly to docId == 'connection')

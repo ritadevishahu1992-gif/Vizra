@@ -210,7 +210,7 @@ const ORGANIZATION_SCHEMA: Record<string, unknown> = {
       jobTitle: 'Co-Founder — Development Collaborator',
       description:
         "Anish is the Co-Founder of VIZRA and contributes to the platform's development through technical collaboration, identifying and reporting bugs, testing features, and helping develop and improve the overall product.",
-      sameAs: ['https://www.instagram.com/_anish._exe/'],
+      sameAs: ['https://www.instagram.com/__anish._exe?bqrl=MWl5MnIyd3YxbmRzaQ=='],
     },
   ],
   description:
@@ -693,11 +693,11 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
           heading: '1. Complete Documentation Structure (Sections A–H)',
           body: 'Browse 49 public reference topics and 17 dedicated feature guides organized across eight clear sections:',
           bullets: [
-            'Section A — Introduction (Topics 01–08): What VIZRA is, core philosophy, 18+ adult studio eligibility, getting started, and terminology.',
+            'Section A — Introduction (Topics 01–08): What VIZRA is, core philosophy, Omnia Adult & Omnia Youth age assurance eligibility, getting started, and terminology.',
             'Section B — Understanding the Platform (Topics 09–15): Platform overview, how Omnia 1.0 assists users, project workflows, navigation, and device compatibility.',
-            'Section C — Features & Tools (17 Feature Guides): Clear availability statuses (AVAILABLE, LIMITED, UNAVAILABLE, COMING SOON) across Chat, Live Web Research, Design, Code, Visual Canvas, AI Music Studio, Science Hub, Live Voice, and Knowledge Base.',
+            'Section C — Features & Tools (17 Feature Guides): Clear availability statuses (LIVE, STAGED, UNAVAILABLE, RESTRICTED) backed by /api/capabilities across Chat, Live Web Research, Design, Code, Visual Canvas, AI Music Studio, Science Hub, Live Voice, and Knowledge Base.',
             'Section D & E — OMNIA Prompting & User Guides (Topics 16–29): Effective prompting habits, multimodal file workflows, citations, and 10-stage studio walkthroughs.',
-            'Section F, G & H — Security, Troubleshooting & Technical Info (Topics 30–49): Privacy controls, 18+ safety safeguards, FAQs, compatibility, system limits, and version history.',
+            'Section F, G & H — Security, Troubleshooting & Technical Info (Topics 30–49): Privacy controls, Age Assurance & Parental Consent safeguards, FAQs, compatibility, system limits, and version history.',
           ],
         },
         {
@@ -786,24 +786,35 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       lead: 'Effective Date: November 11, 2026 · Updated: November 18, 2026. Official Terms and Conditions governing access to VIZRA AI Creative Studio, Omnia 1.0, and advertising-supported public pages.',
       sections: [
         {
-          heading: '1. Age Eligibility (`STRICT_18_PLUS`) & Child Online Safety Controls',
-          body: 'VIZRA currently operates strictly as an 18+ adult creative studio (`STRICT_18_PLUS`), with minor-safe safeguards enforced in server middleware:',
+          heading: '1. VIZRA Age Assurance & Parental Consent Framework',
+          body: 'VIZRA operates two distinct access environments — Omnia Adult (18+) and Omnia Youth (eligible minors with verified parental consent and strict safeguards):',
           bullets: [
-            'Active Operating Policy: 18+ minimum age requirement; passive minor access is rejected.',
-            'Jurisdictional Verifiable Parental Consent Readiness (Option 3): Designed without storing raw minor birthdates or unhashed guardian emails; live external parental verification remains blocked (`HTTP 424`) pending accredited vendor integration.',
-            'Age-Appropriate Feature Restrictions (Option 4): Middleware blocks under-18 flagged sessions from Live Voice (`/live`), external workspace OAuth connectors, unrestricted audio synthesis, paid upgrades, and sponsored VIZRA Engage cards, paired with strict `BLOCK_LOW_AND_ABOVE` safety thresholds.',
+            'Privacy-First Age Assurance: Age declaration is used for routing only, never as proof of age, with zero behavioral age inference or targeted advertising.',
+            'Jurisdiction-Aware Verifiable Parental Consent: Supports India DPDP Act & Rules, US COPPA, EU GDPR Art. 8 & DSA, and UK AADC via independent parent Firebase Auth, 7-point consent disclosures, fail-closed verification, and instant withdrawal at /parental-consent.',
+            'Mandatory Omnia Youth Safeguards: Live Voice (/live), unrestricted audio synthesis, external OAuth connectors, commercial Engage placements, and paid upgrades remain disabled for Omnia Youth even with consent. Child chats are never automatically exposed to parents.',
           ],
         },
         {
           heading: '2. Intellectual Property, AI Copyrightability & DMCA Procedure',
-          body: 'Users retain ownership of original human inputs. Under USCO guidance, purely AI-generated outputs without sufficient human authorship may not qualify for copyright registration. Copyright takedown notices under 17 U.S.C. § 512 may be submitted via /contact.',
+          body: 'Users retain ownership of original human inputs. VIZRA makes no guarantee of copyrightability or universal exclusive ownership over AI-generated outputs; copyright protection depends on jurisdiction and sufficient human authorship. Copyright takedown notices under 17 U.S.C. § 512 may be submitted via /contact.',
         },
         {
           heading: '3. Acceptable Use, API Limits, AI Provenance & Third-Party Advertising',
-          body: 'Requests must respect the 50,000-character prompt limit, 15MB attachment cap, and safety prohibitions against CSAM/CSAE, self-harm, CBRN, and non-consensual synthetic media. Exported visuals and audio include machine-readable AI provenance aligned with EU AI Act Article 50(2). Public informational pages integrate Google AdSense (publisher pub-2808034055890408); VIZRA does not endorse third-party advertisers, external ad links are governed by third-party terms, and ad availability is not guaranteed.',
+          body: 'Requests must respect the 50,000-character prompt limit (25,000 for Youth), 15MB payload cap, and safety prohibitions against CSAM/CSAE, self-harm, CBRN, and non-consensual synthetic media. Exported visuals and audio include machine-readable AI provenance aligned with EU AI Act Article 50(2). Public informational pages integrate Google AdSense (publisher pub-2808034055890408) with zero targeted advertising for Youth accounts.',
         },
       ],
     },
+  },
+  '/parental-consent': {
+    canonicalPath: '/parental-consent',
+    title: 'Age Assurance & Parental Consent Portal — VIZRA',
+    description:
+      'Manage VIZRA Age Assurance routing, Omnia Youth guardian invitations, 7-point parental consent disclosures, and immediate consent withdrawal.',
+    isIndexable: false,
+    robots: 'noindex, nofollow',
+    ogType: 'website',
+    breadcrumbLabel: 'Parental Consent',
+    jsonLd: [],
   },
   '/privacy-policy': {
     canonicalPath: '/privacy-policy',

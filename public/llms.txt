@@ -27,16 +27,17 @@
 ## Policy & Governance
 
 - [Privacy Policy](https://vizra.vercel.app/privacy-policy): Minimal data collection, user-isolated cloud storage, consent records, self-service account deletion (`DELETE /api/account/data`), and subprocessors.
-- [Terms & Conditions](https://vizra.vercel.app/terms-and-conditions): Active 18+ operating policy (`STRICT_18_PLUS`), acceptable use, AI copyrightability notice, DMCA procedure, and EU AI Act Article 50(2) provenance disclosures.
+- [Terms & Conditions](https://vizra.vercel.app/terms-and-conditions): VIZRA Age Assurance & Parental Consent Framework (Omnia Adult & Omnia Youth), acceptable use, AI copyrightability notice (no guaranteed copyright or universal exclusive ownership), DMCA procedure, and EU AI Act Article 50(2) provenance disclosures.
 - [Cookie & Storage Policy](https://vizra.vercel.app/cookie-policy): Default-off optional categories (`Analytics`, `Functional`, `Marketing`), cookieless Vercel Web Analytics separation, and storage inventory.
 
 ## Extended AI Reference
 
 - [Full Structured Reference (/llms-full.txt)](https://vizra.vercel.app/llms-full.txt): Complete factual specification of Omnia 1.0 capabilities, live vs. staging availability, workspace boundaries, safety posture, and non-indexed routes.
+- [Live Capability Registry (`/api/capabilities`)](https://vizra.vercel.app/api/capabilities): Machine-readable NO POWERS capability registry listing LIVE, STAGED, UNAVAILABLE, and RESTRICTED capabilities.
 
 ## Key Factual Boundaries
 
-- **Age Policy**: VIZRA operates strictly as an 18+ adult creative studio (`STRICT_18_PLUS`).
-- **Live vs. Staging Status**: Conversational reasoning, grounded Google Search citations, React/TypeScript/GLSL code synthesis, Science Hub queries (AlphaFold DB, PubChem, PubMed), AI Music Studio (5–120s instrumental WAV audio), and authenticated Live Voice Mode are live inside the web studio. Temporal Video & Scene Synthesis (`COMING SOON`) and third-party external OAuth connectors (Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disclosed in the UI and docs as `UNAVAILABLE` / In Staging pending external approval.
+- **Age Assurance & Parental Consent Framework**: VIZRA supports **Omnia Adult** (18+) and **Omnia Youth** (eligible minors under 18 with jurisdiction-compliant verifiable parental consent via `/parental-consent` and strict fail-closed verification). Live Voice, unrestricted audio synthesis, paid upgrades, external connectors, behavioral age inference, and targeted advertising are disabled for Youth accounts even with consent. Child conversations are not automatically exposed to parents.
+- **Live vs. Staging Status**: Conversational reasoning, grounded Google Search citations, React/TypeScript/GLSL code synthesis, Science Hub queries (AlphaFold DB, PubChem, PubMed), AI Music Studio (5–120s instrumental WAV audio, Adult only), and authenticated Live Voice Mode (Adult only) are live inside the web studio. Temporal Video & Scene Synthesis (`STAGED`) and third-party external OAuth connectors (Google Drive/Docs/Sheets, GitHub, Figma, Canva, YouTube, Notion, Dropbox) are disclosed in the UI, `/api/capabilities`, and docs as `STAGED` / `UNAVAILABLE` pending external approval.
 - **Web-First Studio Delivery**: Interactive studio capabilities operate inside the VIZRA web workspace (`/ai` and `/workspace`).
-- **Non-Indexed Private Routes**: `/ai`, `/history`, `/settings`, `/workspace`, `/seo-diagnostics`, `/live`, and `/api/*` are user-specific, authenticated, or operational routes marked `noindex, nofollow` and excluded from crawling.
+- **Non-Indexed Private Routes**: `/ai`, `/history`, `/settings`, `/parental-consent`, `/workspace`, `/seo-diagnostics`, `/live`, and `/api/*` are user-specific, authenticated, or operational routes marked `noindex, nofollow` and excluded from crawling.

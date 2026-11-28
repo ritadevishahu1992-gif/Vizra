@@ -121,13 +121,13 @@ export const SettingsPage: React.FC = () => {
       .then((data) => {
         if (!active || !data) return;
         setAgePolicyOverview({
-          activePolicy: data.activePolicy || 'STRICT_18_PLUS',
-          minimumActiveAge: Number(data.minimumActiveAge || 18),
+          activePolicy: data.activePolicy || 'VIZRA_AGE_ASSURANCE_PARENTAL_CONSENT',
+          minimumActiveAge: Number(data.minimumActiveAge || 13),
           option2Active: Boolean(data.option2Preparatory?.active),
           option3VendorConfigured: Boolean(data.option3ParentalConsent?.parentalVendorConfigured),
           option4EnforcedEndpoints: Array.isArray(data.option4FeatureRestrictions?.enforcedEndpoints)
             ? data.option4FeatureRestrictions.enforcedEndpoints.length
-            : 0,
+            : 10,
           option5Rejected: Boolean(data.option5?.rejected),
         });
       })
@@ -882,47 +882,59 @@ export const SettingsPage: React.FC = () => {
 
         {/* Section 6: Child Online Safety & Age Assurance Governance */}
         <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/10 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
                 <Lock size={18} className="text-[#eb3b2d]" />
-                <span>Child Online Safety &amp; Age Assurance Policy</span>
+                <span>Age Assurance &amp; Parental Consent Framework</span>
               </h2>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">
-                Live platform policy posture and server-enforced minor protection boundaries.
+                Privacy-first Omnia Adult (18+) and Omnia Youth (verified parental consent) access boundaries.
               </p>
             </div>
             <span className="px-2.5 py-1 rounded-lg bg-[#eb3b2d]/15 border border-[#eb3b2d]/40 text-[11px] font-mono text-[#eb3b2d] shrink-0">
-              {agePolicyOverview?.activePolicy || 'STRICT_18_PLUS'}
+              {agePolicyOverview?.activePolicy || 'VIZRA_AGE_ASSURANCE_PARENTAL_CONSENT'}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3.5 rounded-xl bg-neutral-100 dark:bg-neutral-950/80 border border-neutral-200 dark:border-white/10 space-y-1">
               <div className="text-[11px] font-mono text-neutral-600 dark:text-neutral-400 uppercase">
-                Option 3 • Parental Consent
+                Verifiable Parental Consent (DPDP / COPPA / GDPR / AADC)
               </div>
               <div className="font-medium text-neutral-900 dark:text-white">
                 {agePolicyOverview?.option3VendorConfigured
-                  ? 'External VPC Vendor Configured'
-                  : 'Blocked Pending External VPC Vendor & Counsel Sign-Off'}
+                  ? 'External VPC Provider Webhook Configured'
+                  : 'Fail-Closed Pending External VPC Provider Configuration'}
               </div>
               <div className="text-[11px] text-neutral-600 dark:text-neutral-500">
-                Jurisdiction thresholds (US 13, EU 13–16, UK 13/AADC 18, IN 18), fail-closed 424 guard, consent withdrawal, and Delete Account cascade active.
+                Independent parent Firebase Auth, 7-point disclosure, instant consent revocation, zero behavioral age inference, and child-chat privacy isolation active.
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-neutral-100 dark:bg-neutral-950/80 border border-neutral-200 dark:border-white/10 space-y-1">
               <div className="text-[11px] font-mono text-neutral-600 dark:text-neutral-400 uppercase">
-                Option 4 • Feature Safeguards
+                Omnia Youth Server-Enforced Safeguards
               </div>
               <div className="font-medium text-neutral-900 dark:text-white">
-                Server-Enforced ({agePolicyOverview?.option4EnforcedEndpoints ?? 8} Protected Routes)
+                Server-Enforced ({agePolicyOverview?.option4EnforcedEndpoints ?? 10} Protected Routes)
               </div>
               <div className="text-[11px] text-neutral-600 dark:text-neutral-500">
-                Blocks under-18 Voice Live, OAuth connectors, unrestricted music, commercial Engage placements, and paid upgrades.
+                Disables Live Voice, unrestricted audio synthesis, OAuth connectors, commercial Engage placements, and paid upgrades for Youth even with consent.
               </div>
             </div>
+          </div>
+
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 dark:border-white/10">
+            <span className="text-[11px] text-neutral-600 dark:text-neutral-400">
+              Manage age routing, generate expiring guardian invitations, review disclosures, or withdraw parental consent immediately.
+            </span>
+            <Link
+              to="/parental-consent"
+              className="px-3.5 py-2 rounded-xl bg-[#eb3b2d] hover:bg-[#dc2626] text-white text-xs font-medium transition-colors"
+            >
+              Open Parental Consent Portal
+            </Link>
           </div>
         </div>
       </div>

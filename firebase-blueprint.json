@@ -131,20 +131,229 @@
         }
       },
       "required": ["id", "userId", "conversationId", "role", "content", "timestamp"]
+    },
+    "ParentalConsent": {
+      "title": "ParentalConsent",
+      "description": "Server-authoritative verifiable parental consent record under the VIZRA Age Assurance & Parental Consent Framework. Clients cannot create, update, or delete this document.",
+      "type": "object",
+      "properties": {
+        "consent_id": {
+          "type": "string",
+          "description": "Unique consent record identifier",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "child_uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the minor account",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "parent_uid": {
+          "type": "string",
+          "description": "Independently authenticated Firebase Auth UID of the parent or legal guardian (must differ from child_uid)",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "guardian_contact_hash": {
+          "type": "string",
+          "description": "HMAC-SHA256 hash of guardian email/contact; no raw unnecessary PII stored",
+          "maxLength": 128
+        },
+        "jurisdiction": {
+          "type": "string",
+          "enum": ["IN", "US", "EU", "UK", "OTHER"],
+          "maxLength": 16
+        },
+        "consent_status": {
+          "type": "string",
+          "enum": [
+            "NOT_REQUIRED",
+            "CONSENT_REQUIRED",
+            "INVITATION_SENT",
+            "PARENT_AUTHENTICATED",
+            "PENDING_VERIFICATION",
+            "VERIFIED",
+            "REVOKED",
+            "EXPIRED",
+            "REJECTED"
+          ],
+          "maxLength": 40
+        },
+        "verification_method": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "DIGILOCKER_DPDP_TOKEN",
+            "INDEPENDENT_VPC_PROVIDER",
+            "SIGNED_WEBHOOK_ATTESTATION"
+          ],
+          "maxLength": 48
+        },
+        "verification_provider": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "verification_reference_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "disclosure_version": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "consent_granted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consent_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consent_revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "consent_id",
+        "child_uid",
+        "parent_uid",
+        "guardian_contact_hash",
+        "jurisdiction",
+        "consent_status",
+        "verification_method",
+        "disclosure_version",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "ParentChildRelationship": {
+      "title": "ParentChildRelationship",
+      "description": "Server-authoritative link between a verified parent/guardian UID and a minor UID. Does NOT grant parents automatic access to child conversations.",
+      "type": "object",
+      "properties": {
+        "relationship_id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "parent_uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "child_uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "consent_id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "relationship_status": {
+          "type": "string",
+          "enum": ["PENDING", "ACTIVE", "REVOKED", "SUSPENDED"],
+          "maxLength": 24
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "relationship_id",
+        "parent_uid",
+        "child_uid",
+        "consent_id",
+        "relationship_status"
+      ]
+    },
+    "ConsentAuditLog": {
+      "title": "ConsentAuditLog",
+      "description": "Append-only, server-written, non-PII compliance audit trail for parental consent events. Clients have zero read or write access.",
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "consent_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "event_type": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "actor_role": {
+          "type": "string",
+          "enum": ["minor", "parent", "system", "verification_provider"],
+          "maxLength": 32
+        },
+        "actor_uid_hash": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata_hash": {
+          "type": "string",
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "event_id",
+        "consent_id",
+        "event_type",
+        "actor_role",
+        "actor_uid_hash",
+        "timestamp",
+        "metadata_hash"
+      ]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "Private creator profile document containing user info"
+      "description": "Private creator profile document containing user info (strict owner-only access)"
     },
     "/users/{userId}/projects/{projectId}": {
       "schema": "Project",
-      "description": "Subcollection of creative projects owned by the user"
+      "description": "Subcollection of creative projects owned by the user (strict owner-only access)"
     },
     "/users/{userId}/conversations/{conversationId}/messages/{messageId}": {
       "schema": "ChatMessage",
-      "description": "Subcollection of Omnia chat history messages for a user conversation"
+      "description": "Subcollection of Omnia chat history messages for a user conversation (strict owner-only; NOT automatically exposed to parents)"
+    },
+    "/parental_consents/{consentId}": {
+      "schema": "ParentalConsent",
+      "description": "Server-authoritative verifiable parental consent records (party-scoped read only; client writes strictly denied)"
+    },
+    "/parent_child_relationships/{relationshipId}": {
+      "schema": "ParentChildRelationship",
+      "description": "Server-authoritative parent-child account links (party-scoped read only; client writes strictly denied)"
+    },
+    "/consent_audit_logs/{eventId}": {
+      "schema": "ConsentAuditLog",
+      "description": "Append-only server-written compliance audit log (all client reads and writes strictly denied)"
     }
   }
 }

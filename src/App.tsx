@@ -79,6 +79,11 @@ const PromptOptimizerPage = lazy(() =>
     default: m.PromptOptimizerPage,
   }))
 );
+const ParentalConsentPage = lazy(() =>
+  import('./pages/ParentalConsentPage').then((m) => ({
+    default: m.ParentalConsentPage,
+  }))
+);
 
 const RouteMetadataSync: React.FC = () => {
   const location = useLocation();
@@ -192,6 +197,7 @@ export default function App() {
                 <Route path="/ai" element={<AIPage />} />
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/parental-consent" element={<ParentalConsentPage />} />
                 <Route path="/workspace" element={<WorkspaceDashboardPage />} />
                 <Route
                   path="/dashboard"
