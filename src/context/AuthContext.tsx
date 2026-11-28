@@ -18,6 +18,7 @@ import {
   ensureAuthPersistence,
 } from '../lib/firebase';
 import { syncUserProfile } from '../services/firestoreService';
+import { setMonitoringUser } from '../lib/monitoring';
 
 export interface PersistedAuthSessionSnapshot {
   uid: string;
@@ -219,6 +220,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       unsubscribe = onAuthStateChanged(auth, async (currentUser: FirebaseUser | null) => {
         if (!isMounted) return;
+        setMonitoringUser(currentUser?.uid ?? null);
 
         // Cross-user browser storage isolation: if a different user signs in on a shared browser,
         // purge the previous user's local workspace cache before initializing the new session.

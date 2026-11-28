@@ -64,6 +64,21 @@ const WorkspaceDashboardPage = lazy(() =>
     default: m.WorkspaceDashboardPage,
   }))
 );
+const SeoLandingPage = lazy(() =>
+  import('./pages/SeoLandingPage').then((m) => ({
+    default: m.SeoLandingPage,
+  }))
+);
+const ComparisonPage = lazy(() =>
+  import('./pages/ComparisonPage').then((m) => ({
+    default: m.ComparisonPage,
+  }))
+);
+const PromptOptimizerPage = lazy(() =>
+  import('./pages/PromptOptimizerPage').then((m) => ({
+    default: m.PromptOptimizerPage,
+  }))
+);
 
 const RouteMetadataSync: React.FC = () => {
   const location = useLocation();
@@ -133,6 +148,28 @@ export default function App() {
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPage />} />
+
+                {/* High-Intent Commercial Landing Pages, Comparisons & Free Utility */}
+                <Route path="/ai-creative-studio" element={<SeoLandingPage />} />
+                <Route path="/ai-workspace-for-creators" element={<SeoLandingPage />} />
+                <Route path="/ai-tools-for-motion-designers" element={<SeoLandingPage />} />
+                <Route path="/ai-assistant-for-creative-work" element={<SeoLandingPage />} />
+                <Route path="/alternatives" element={<ComparisonPage />} />
+                <Route path="/vizra-vs-canva" element={<ComparisonPage />} />
+                <Route path="/vizra-vs-runway" element={<ComparisonPage />} />
+                <Route path="/vizra-vs-krea-ai" element={<ComparisonPage />} />
+                <Route
+                  path="/canva-alternative"
+                  element={<RedirectAlias to="/vizra-vs-canva" />}
+                />
+                <Route
+                  path="/runway-alternative"
+                  element={<RedirectAlias to="/vizra-vs-runway" />}
+                />
+                <Route
+                  path="/free-ai-prompt-optimizer"
+                  element={<PromptOptimizerPage />}
+                />
 
                 {/* Legal, Privacy & Cookie Policy Routes (including legacy aliases) */}
                 <Route path="/terms-and-conditions" element={<LegalPage />} />

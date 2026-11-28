@@ -16,6 +16,7 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     title: 'Platform',
     links: [
       { label: 'Home', to: '/' },
+      { label: 'AI Creative Studio', to: '/ai-creative-studio' },
       { label: 'Features Overview', to: '/features' },
       { label: 'Explore Showcase', to: '/explore' },
       { label: 'Pricing & Plans', to: '/pricing' },
@@ -25,8 +26,21 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
     title: 'Products / Tools',
     links: [
       { label: 'AI Tools & Create Hub', to: '/tools' },
+      { label: 'Free Prompt Optimizer', to: '/free-ai-prompt-optimizer' },
       { label: 'Creative Studio Engines', to: '/studio' },
+      { label: 'Motion Designer Tools', to: '/ai-tools-for-motion-designers' },
       { label: 'Coming Soon Roadmap', to: '/studio?section=roadmap' },
+    ],
+  },
+  {
+    title: 'Use Cases & Compare',
+    links: [
+      { label: 'AI Workspace for Creators', to: '/ai-workspace-for-creators' },
+      { label: 'AI Assistant for Creative Work', to: '/ai-assistant-for-creative-work' },
+      { label: 'All Platform Alternatives', to: '/alternatives' },
+      { label: 'VIZRA vs Canva', to: '/vizra-vs-canva' },
+      { label: 'VIZRA vs Runway', to: '/vizra-vs-runway' },
+      { label: 'VIZRA vs Krea AI', to: '/vizra-vs-krea-ai' },
     ],
   },
   {
@@ -35,15 +49,8 @@ const FOOTER_SECTIONS: { title: string; links: FooterLinkItem[] }[] = [
       { label: 'Documentation', to: '/docs' },
       { label: 'Blog & Updates', to: '/blog' },
       { label: 'Security & Governance', to: '/docs?section=security' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
       { label: 'About VIZRA', to: '/about' },
       { label: 'The People Behind VIZRA', to: '/about#developers' },
-      { label: 'Philosophy & Creed', to: '/about?section=philosophy' },
-      { label: 'Contact / Privacy Requests', to: '/contact' },
     ],
   },
   {

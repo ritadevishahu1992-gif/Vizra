@@ -73,8 +73,13 @@ function prerenderStaticRoutes() {
     generatedCount++;
   }
 
+  // Generate dedicated static 404.html with noindex, nofollow for edge CDN 404 responses
+  const notFoundPayload = resolveRouteSeoPayload('/__404__');
+  const notFoundHtml = injectSeoIntoHtml(baseHtml, notFoundPayload);
+  fs.writeFileSync(path.join(distDir, '404.html'), notFoundHtml, 'utf-8');
+
   console.log(
-    `[Prerender] Generated route-specific static HTML for ${generatedCount} routes in dist/ (${PUBLIC_INDEXABLE_ROUTES.length} indexable + ${PRIVATE_OR_UTILITY_ROUTES.length} noindex utility/diagnostic).`
+    `[Prerender] Generated route-specific static HTML for ${generatedCount} routes + 404.html in dist/ (${PUBLIC_INDEXABLE_ROUTES.length} indexable + ${PRIVATE_OR_UTILITY_ROUTES.length} noindex utility/diagnostic).`
   );
 }
 

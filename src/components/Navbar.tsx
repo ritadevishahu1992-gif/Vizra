@@ -17,6 +17,8 @@ import {
   Mail,
   Newspaper,
   Search,
+  Wand2,
+  Scale,
 } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
 import { NotificationCenterTrigger } from './ui/Toast';
@@ -110,6 +112,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchOmnia }) => {
       href: '/explore',
       icon: Compass,
       tag: '3D Gallery',
+    },
+    {
+      label: 'Free Prompt Optimizer',
+      desc: 'Structure motion, shader, art direction, and music prompts with zero sign-up.',
+      href: '/free-ai-prompt-optimizer',
+      icon: Wand2,
+      tag: 'Free Tool',
+    },
+    {
+      label: 'Compare Platforms',
+      desc: 'Honest 2026 comparisons against Canva, Runway, Krea AI, and Adobe Express.',
+      href: '/alternatives',
+      icon: Scale,
+      tag: 'Alternatives',
     },
   ];
 

@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { EngageLifecycleState } from '../../../types/engage';
 import { logSafeInteractionEvent } from '../../../services/engageEventLogger';
+import { captureFrontendException } from '../../../lib/monitoring';
 
 interface EngageErrorBoundaryProps {
   children: ReactNode;
@@ -47,6 +48,17 @@ export class EngageErrorBoundary extends Component<
       hasStreamedTokens: Boolean(this.props.hasStreamedTokens),
       fallbackRendered: isWaitingForFirstToken,
       reason: error.name || 'RenderError',
+    });
+
+    captureFrontendException(error, {
+      component: 'EngageErrorBoundary',
+      area: 'engage_banner',
+      level: 'warning',
+      componentStack: errorInfo.componentStack ?? undefined,
+      tags: {
+        lifecycleState: this.props.lifecycleState,
+        hasStreamedTokens: Boolean(this.props.hasStreamedTokens),
+      },
     });
 
     console.warn(

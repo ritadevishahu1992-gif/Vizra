@@ -13,11 +13,17 @@ import {
 } from 'lucide-react';
 import { PageLayout } from '../components/PageLayout';
 import { HeroSection } from '../components/HeroSection';
+import { trackConversionEvent } from '../services/conversionTracking';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNavigateToAI = () => {
+    trackConversionEvent('signup_cta_click', {
+      source: '/',
+      location: 'landing_omnia_cta',
+      target: '/ai',
+    });
     navigate('/ai');
   };
 
@@ -99,22 +105,22 @@ export const LandingPage: React.FC = () => {
 
   const secondaryRoutes = [
     {
-      title: 'Pricing & Compute Tiers',
-      desc: 'Compare Creator Free, Omnia Pro, and VIZRA Studio plans.',
-      to: '/pricing',
+      title: 'Free AI Prompt Optimizer',
+      desc: 'Structure motion, art direction, shader, and music prompts — zero sign-up required.',
+      to: '/free-ai-prompt-optimizer',
+      icon: Sparkles,
+    },
+    {
+      title: 'Compare Platforms (2026)',
+      desc: 'Honest side-by-side comparisons against Canva, Runway, Krea AI, and Adobe Express.',
+      to: '/alternatives',
       icon: CreditCard,
     },
     {
       title: 'Platform Documentation',
-      desc: 'Omnia 1.0 guides, 10-stage workflows, and platform security.',
+      desc: 'Omnia 1.0 guides, 10-stage workflows, pricing tiers, and platform security.',
       to: '/docs',
       icon: BookOpen,
-    },
-    {
-      title: 'About VIZRA & Core Creed',
-      desc: 'Explore our mission, response proportionality, and studio philosophy.',
-      to: '/about',
-      icon: Sparkles,
     },
   ];
 

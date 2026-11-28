@@ -19,6 +19,7 @@ import { BlogTableOfContents, type TocEntry } from './BlogTableOfContents';
 import { BlogArticleAgent } from './BlogArticleAgent';
 import { useCopyToClipboard } from '../../utils/clipboard';
 import { toSafeExternalHref } from '../../utils/safeUrl';
+import { trackConversionEvent } from '../../services/conversionTracking';
 
 interface BlogArticleViewProps {
   post: BlogPost;
@@ -389,6 +390,7 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                 width={1280}
                 height={720}
                 loading="eager"
+                fetchPriority="high"
                 draggable={false}
                 referrerPolicy="no-referrer"
                 onError={() => setHeroImgFailed(true)}
@@ -581,9 +583,69 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
               </section>
             )}
 
+            {/* Contextual VIZRA Product Discovery CTA */}
+            <aside
+              aria-label="Try VIZRA AI Creative Studio"
+              className="mt-14 rounded-2xl border border-neutral-200 dark:border-white/[0.1] bg-neutral-50 dark:bg-[#111111] p-6 sm:p-7 space-y-4"
+            >
+              <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#EB3B2D]">
+                Put These Concepts Into Practice
+              </div>
+              <div className="space-y-2">
+                <h2 className="font-display text-xl font-semibold text-neutral-950 dark:text-white">
+                  Explore AI Workflows Inside VIZRA &amp; Omnia 1.0
+                </h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed max-w-2xl">
+                  Test structured prompting with our zero-signup AI Prompt Optimizer, or open Omnia 1.0 on the Creator Free tier for verified Google Search citations, 5-file document auditing, React/GLSL code synthesis, and instrumental audio.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Link
+                  to="/ai"
+                  onClick={() =>
+                    trackConversionEvent('article_to_product_click', {
+                      articleSlug: post.slug,
+                      target: '/ai',
+                      placement: 'article_footer_cta',
+                    })
+                  }
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white dark:bg-white dark:text-black font-display font-semibold text-xs sm:text-sm hover:opacity-90 transition-opacity"
+                >
+                  <span>Launch Omnia 1.0 Free</span>
+                  <ArrowRight size={14} />
+                </Link>
+                <Link
+                  to="/free-ai-prompt-optimizer"
+                  onClick={() =>
+                    trackConversionEvent('article_to_product_click', {
+                      articleSlug: post.slug,
+                      target: '/free-ai-prompt-optimizer',
+                      placement: 'article_footer_cta',
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-white/[0.14] text-neutral-900 dark:text-white font-display font-medium text-xs sm:text-sm hover:border-[#EB3B2D] transition-colors"
+                >
+                  <span>Try Free AI Prompt Optimizer</span>
+                </Link>
+                <Link
+                  to="/ai-creative-studio"
+                  onClick={() =>
+                    trackConversionEvent('article_to_product_click', {
+                      articleSlug: post.slug,
+                      target: '/ai-creative-studio',
+                      placement: 'article_footer_cta',
+                    })
+                  }
+                  className="text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-[#EB3B2D] transition-colors px-2 py-2"
+                >
+                  Explore AI Creative Studio →
+                </Link>
+              </div>
+            </aside>
+
             {/* Internal VIZRA Links */}
             {post.internalLinks.length > 0 && (
-              <section className="mt-16 pt-10 border-t border-neutral-200 dark:border-white/[0.1] space-y-5">
+              <section className="mt-14 pt-10 border-t border-neutral-200 dark:border-white/[0.1] space-y-5">
                 <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400">
                   Continue Exploring on VIZRA
                 </div>
@@ -592,6 +654,13 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                     <Link
                       key={link.href}
                       to={link.href}
+                      onClick={() =>
+                        trackConversionEvent('article_to_product_click', {
+                          articleSlug: post.slug,
+                          target: link.href,
+                          placement: 'article_internal_links',
+                        })
+                      }
                       className="p-4 rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-[#111111] hover:border-[#EB3B2D]/60 transition-colors group space-y-1.5"
                     >
                       <div className="flex items-center justify-between gap-2 text-sm font-display font-semibold text-neutral-950 dark:text-white group-hover:text-[#EB3B2D] transition-colors">
@@ -624,6 +693,8 @@ export const BlogArticleView: React.FC<BlogArticleViewProps> = ({
                         <img
                           src={rel.featuredImage}
                           alt={rel.featuredImageAlt}
+                          width={1280}
+                          height={720}
                           loading="lazy"
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"

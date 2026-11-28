@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { VizraLogo } from '../VizraLogo';
 import { useAuth } from '../../context/AuthContext';
+import { trackConversionEvent } from '../../services/conversionTracking';
 
 export type AuthTabMode = 'signin' | 'signup' | 'forgot';
 
@@ -120,7 +121,17 @@ export const LoginModal: React.FC = () => {
         return;
       }
       setIsSubmitting(true);
-      await signUpWithEmail(name, trimmedEmail, password);
+      trackConversionEvent('registration_started', {
+        method: 'email',
+        source: 'login_modal',
+      });
+      const succeeded = await signUpWithEmail(name, trimmedEmail, password);
+      if (succeeded) {
+        trackConversionEvent('registration_completed', {
+          method: 'email',
+          source: 'login_modal',
+        });
+      }
       setIsSubmitting(false);
       return;
     }
@@ -290,7 +301,13 @@ export const LoginModal: React.FC = () => {
               <>
                 <button
                   type="button"
-                  onClick={signInWithGoogle}
+                  onClick={async () => {
+                    trackConversionEvent('registration_started', {
+                      method: 'google',
+                      source: mode === 'signup' ? 'login_modal_signup' : 'login_modal_signin',
+                    });
+                    await signInWithGoogle();
+                  }}
                   className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-neutral-200 transition-all duration-200 shadow-md cursor-pointer group"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">

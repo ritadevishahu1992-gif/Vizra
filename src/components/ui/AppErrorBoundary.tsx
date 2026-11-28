@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
+import { captureFrontendException } from '../../lib/monitoring';
 
 interface AppErrorBoundaryProps {
   children: React.ReactNode;
@@ -31,6 +32,11 @@ export class AppErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('[VIZRA ErrorBoundary] Uncaught UI exception:', error, errorInfo);
+    captureFrontendException(error, {
+      component: 'AppErrorBoundary',
+      area: 'root_ui',
+      componentStack: errorInfo.componentStack ?? undefined,
+    });
   }
 
   private handleReload = () => {

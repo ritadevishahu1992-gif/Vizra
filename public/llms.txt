@@ -15,6 +15,15 @@
 - [About VIZRA & Core Creed](https://vizra.vercel.app/about): Mission ("Don't just ask AI. Work with it."), response proportionality, zero fabricated citations, and studio philosophy.
 - [Contact & Studio Inquiries](https://vizra.vercel.app/contact): Enterprise studio onboarding, technical support, partnerships, and early-access beta requests.
 
+## Solutions, Comparisons & Free Tools
+
+- [Free AI Prompt Optimizer](https://vizra.vercel.app/free-ai-prompt-optimizer): Zero-signup browser tool structuring creative prompts across 7 disciplines (motion design, art direction, GLSL/WebGL code, storyboards, brand systems, grounded research, and Lyria 3 music) with a 6-point structural rubric audit and one-click Omnia 1.0 launch.
+- [AI Creative Studio](https://vizra.vercel.app/ai-creative-studio): End-to-end overview of VIZRA's browser studio uniting Omnia 1.0, code/shaders, visual synthesis, WAV audio, and 10-stage workflows.
+- [AI Workspace for Creators](https://vizra.vercel.app/ai-workspace-for-creators): Persistent 10-stage project tracking, 5-file brief auditing, and 25 MB local RAG explorer.
+- [AI Tools for Motion Designers](https://vizra.vercel.app/ai-tools-for-motion-designers): GLSL/WebGL shader prototyping, storyboarding, and WAV scratch soundtracks (with transparent disclosure that Temporal Video is in staging).
+- [AI Assistant for Creative Work](https://vizra.vercel.app/ai-assistant-for-creative-work): Omnia 1.0 adaptive reasoning modes, live verified HTTPS citations, and English/Hindi/Hinglish fluency.
+- [Platform Alternatives & Comparisons](https://vizra.vercel.app/alternatives): Honest, verification-dated comparisons against [Canva](https://vizra.vercel.app/vizra-vs-canva), [Runway](https://vizra.vercel.app/vizra-vs-runway), [Krea AI](https://vizra.vercel.app/vizra-vs-krea-ai), and Adobe Express.
+
 ## Policy & Governance
 
 - [Privacy Policy](https://vizra.vercel.app/privacy-policy): Minimal data collection, user-isolated cloud storage, consent records, self-service account deletion (`DELETE /api/account/data`), and subprocessors.

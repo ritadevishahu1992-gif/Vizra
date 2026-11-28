@@ -49,6 +49,15 @@ const VERIFIED_STATIC_PAGE_LASTMOD: Readonly<Record<string, string>> = {
   '/terms-and-conditions': '2026-11-18', // Policy v2026-11 effective update
   '/privacy-policy': '2026-11-18', // Policy v2026-11 effective update
   '/cookie-policy': '2026-11-18', // Policy v2026-11 effective update
+  '/ai-creative-studio': '2026-11-28',
+  '/ai-workspace-for-creators': '2026-11-28',
+  '/ai-tools-for-motion-designers': '2026-11-28',
+  '/ai-assistant-for-creative-work': '2026-11-28',
+  '/alternatives': '2026-11-28',
+  '/vizra-vs-canva': '2026-11-28',
+  '/vizra-vs-runway': '2026-11-28',
+  '/vizra-vs-krea-ai': '2026-11-28',
+  '/free-ai-prompt-optimizer': '2026-11-28',
 };
 
 function escapeXml(value: string): string {

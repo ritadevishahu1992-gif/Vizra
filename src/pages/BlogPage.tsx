@@ -306,6 +306,8 @@ export const BlogPage: React.FC = () => {
                         <img
                           src={post.featuredImage}
                           alt={post.featuredImageAlt}
+                          width={1280}
+                          height={720}
                           loading="lazy"
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
@@ -367,6 +369,8 @@ export const BlogPage: React.FC = () => {
                         <img
                           src={post.featuredImage}
                           alt={post.featuredImageAlt}
+                          width={1280}
+                          height={720}
                           loading="lazy"
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
@@ -425,6 +429,8 @@ export const BlogPage: React.FC = () => {
                         <img
                           src={post.featuredImage}
                           alt={post.featuredImageAlt}
+                          width={1280}
+                          height={720}
                           loading="lazy"
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
@@ -480,6 +486,8 @@ export const BlogPage: React.FC = () => {
                         <img
                           src={post.featuredImage}
                           alt={post.featuredImageAlt}
+                          width={1280}
+                          height={720}
                           loading="lazy"
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"

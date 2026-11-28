@@ -23,6 +23,8 @@ export const REDIRECT_ALIASES: Record<string, string> = {
   '/cookies': '/cookie-policy',
   '/dashboard': '/workspace',
   '/crawler-audit': '/seo-diagnostics',
+  '/canva-alternative': '/vizra-vs-canva',
+  '/runway-alternative': '/vizra-vs-runway',
 };
 
 export const PUBLIC_INDEXABLE_ROUTES: readonly string[] = [
@@ -35,6 +37,15 @@ export const PUBLIC_INDEXABLE_ROUTES: readonly string[] = [
   '/about',
   '/contact',
   '/docs',
+  '/ai-creative-studio',
+  '/ai-workspace-for-creators',
+  '/ai-tools-for-motion-designers',
+  '/ai-assistant-for-creative-work',
+  '/alternatives',
+  '/vizra-vs-canva',
+  '/vizra-vs-runway',
+  '/vizra-vs-krea-ai',
+  '/free-ai-prompt-optimizer',
   '/blog',
   ...getPublishedBlogPosts().map((post) => `/blog/${post.slug}`),
   '/terms-and-conditions',
@@ -1006,7 +1017,7 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
             },
           ],
           prehydration: {
-            eyebrow: `VIZRA BLOG · ${post.series} · ARTICLE ${String(post.number).padStart(2, '0')} OF 10`,
+            eyebrow: `VIZRA BLOG · ${post.series} · ARTICLE ${String(post.number).padStart(2, '0')} OF ${BLOG_POSTS.length}`,
             h1: post.title,
             lead: post.excerpt,
             sections: prehydrationSections,
@@ -1015,6 +1026,548 @@ export const ROUTE_DEFINITIONS: Record<string, RouteSeoDefinition> = {
       ];
     })
   ),
+  '/ai-creative-studio': {
+    canonicalPath: '/ai-creative-studio',
+    title: 'AI Creative Studio for Modern Workflows — VIZRA',
+    description:
+      'Discover VIZRA, a browser-based AI creative studio uniting Omnia 1.0 chat, verified citations, React/GLSL shaders, visual synthesis, Lyria 3 audio, and 10-stage workflows.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'AI Creative Studio',
+    jsonLd: [
+      buildWebPageSchema(
+        'AI Creative Studio for Modern Workflows — VIZRA',
+        'Browser-based AI creative studio uniting Omnia 1.0 multimodal reasoning, visual synthesis, React/GLSL code, Lyria 3 audio, and 10-stage project pipelines.',
+        '/ai-creative-studio'
+      ),
+      buildBreadcrumbSchema('AI Creative Studio', '/ai-creative-studio'),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What makes VIZRA different from a standard AI chatbot?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'VIZRA combines Omnia 1.0 adaptive reasoning modes, live grounded HTTPS citations, 5-file multimodal auditing, React/GLSL code generation, procedural PNG visual concepts, instrumental WAV audio synthesis, and a 10-stage project workspace in one creative studio.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use VIZRA AI Creative Studio for free?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes. The Creator Free tier ($0/month) includes Omnia 1.0 across Quick, Think, Research, Code, and Analyze modes, file uploads up to 10 MB per file, visual and audio tools, and workspace project tracking.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Is AI video generation live in VIZRA right now?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Not yet. VIZRA’s Temporal Video & Scene Synthesis engine is currently in staging. Today, teams use VIZRA for storyboarding, WebGL/GLSL shader prototyping, visual moodboards, and instrumental WAV audio tracks.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'VIZRA · AI CREATIVE STUDIO',
+      h1: 'An AI Creative Studio Built for Real Production Workflows',
+      lead: 'VIZRA unites Omnia 1.0 multimodal reasoning, verified Google Search citations, React and GLSL shader coding, procedural visual concepts, Lyria 3 instrumental audio, and 10-stage project workflows in one browser workspace.',
+      sections: [
+        {
+          heading: 'Live Capabilities Inside VIZRA Today',
+          body: 'Run creative ideation, multimodal file audits, code synthesis, and instrumental audio without local GPU installation.',
+          bullets: [
+            'Omnia 1.0 across Quick, Think, Research, Code, and Analyze modes (English, Hindi, Hinglish).',
+            'Multimodal auditing for up to 5 PDFs, CSVs, images, or code files per turn.',
+            'React, TypeScript, and WebGL/GLSL shader code generation plus procedural PNG concept canvases.',
+            'AI Music Studio generating 5–120s downloadable instrumental WAV soundtracks.',
+            '10-stage persistent project workflows synced via Firebase when signed in.',
+          ],
+        },
+        {
+          heading: 'Transparent Live vs. Staging Boundaries',
+          body: 'Creator Free ($0/mo) is active today. Temporal Video & Scene Synthesis and third-party external OAuth connectors remain in staging.',
+        },
+      ],
+    },
+  },
+  '/ai-workspace-for-creators': {
+    canonicalPath: '/ai-workspace-for-creators',
+    title: 'AI Workspace for Creators & Multi-Stage Projects — VIZRA',
+    description:
+      'Replace scattered AI chats with VIZRA’s unified AI workspace for creators: 10-stage project pipelines, 5-file brief audits, 25 MB local RAG, and verified search citations.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'AI Workspace for Creators',
+    jsonLd: [
+      buildWebPageSchema(
+        'AI Workspace for Creators & Multi-Stage Projects — VIZRA',
+        'Unified AI workspace for creators featuring 10-stage persistent project pipelines, multimodal brief analysis, grounded search citations, and account-isolated Firebase sync.',
+        '/ai-workspace-for-creators'
+      ),
+      buildBreadcrumbSchema('AI Workspace for Creators', '/ai-workspace-for-creators'),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Are my private workspace projects indexed by search engines?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. All authenticated and application routes (/ai, /workspace, /history, /settings) emit X-Robots-Tag: noindex, nofollow headers, are disallowed in robots.txt, and are excluded from XML sitemaps.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What file types can creators upload for analysis?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Omnia 1.0 accepts PDFs, CSVs, plain text, code files, and standard image formats (PNG, JPG, WebP) up to 10 MB per file on Free and 15 MB on Pro/Studio tiers. Binary video file uploads are not currently supported.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'VIZRA · AI WORKSPACE FOR CREATORS',
+      h1: 'A Unified AI Workspace for Creators Who Ship Multi-Stage Projects',
+      lead: 'Organize briefs, 5-file audits, grounded research, creative code, and 10-stage project pipelines inside one private browser workspace.',
+      sections: [
+        {
+          heading: 'Workspace Architecture Built for Continuity',
+          body: 'Stop losing context across disconnected tabs.',
+          bullets: [
+            '10-stage persistent project lifecycle inside /workspace with searchable /history.',
+            'Attach up to 5 PDFs, CSVs, images, or code files per Omnia 1.0 turn.',
+            'Local 25 MB browser RAG explorer for style guides and reference documents.',
+            'Firebase Auth + UID-isolated Firestore security rules keep private drafts off search engines.',
+          ],
+        },
+      ],
+    },
+  },
+  '/ai-tools-for-motion-designers': {
+    canonicalPath: '/ai-tools-for-motion-designers',
+    title: 'AI Tools for Motion Designers & Creative Coders — VIZRA',
+    description:
+      'Prototype WebGL/GLSL shaders, write beat-synced storyboards, and generate 5–120s WAV scratch soundtracks in VIZRA. Honest staging disclosure on generative video.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'AI Tools for Motion Designers',
+    jsonLd: [
+      buildWebPageSchema(
+        'AI Tools for Motion Designers & Creative Coders — VIZRA',
+        'AI tools for motion designers and creative coders covering GLSL/WebGL shader prototyping, kinetic concepts, storyboards, and Lyria 3 instrumental WAV audio.',
+        '/ai-tools-for-motion-designers'
+      ),
+      buildBreadcrumbSchema('AI Tools for Motion Designers', '/ai-tools-for-motion-designers'),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Can VIZRA generate production AI video clips today?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. VIZRA’s Temporal Video Engine is currently in staging. Today VIZRA helps motion designers with GLSL/WebGL shader code, React/CSS motion prototypes, shot-list storyboards, procedural PNG concept frames, and downloadable WAV scratch soundtracks.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Does the AI Music Studio export usable audio files?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes. The Music Studio generates downloadable instrumental WAV audio from 5 to 120 seconds, suitable for timing motion edits and pitch prototypes.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'VIZRA · AI TOOLS FOR MOTION DESIGNERS',
+      h1: 'AI Tools for Motion Designers, Creative Coders & Visual Directors',
+      lead: 'Prototype WebGL and GLSL shaders, plan kinetic typography systems, draft paced storyboards, and synthesize instrumental WAV audio beds inside VIZRA.',
+      sections: [
+        {
+          heading: 'Motion Pre-Production & Creative Code Live Today',
+          body: 'Speed up concept development alongside After Effects, Blender, or Three.js.',
+          bullets: [
+            'Omnia 1.0 Code mode for GLSL fragment shaders, WebGL uniforms, and React/CSS choreography.',
+            '4 interactive 60fps studio showcase engines in /studio and 3D creative tunnel in /explore.',
+            'Lyria 3 & procedural WAV instrumental scratch tracks (5–120s) for rhythmic edits.',
+            'Transparent status: Temporal Video & Scene Synthesis is currently in staging.',
+          ],
+        },
+      ],
+    },
+  },
+  '/ai-assistant-for-creative-work': {
+    canonicalPath: '/ai-assistant-for-creative-work',
+    title: 'AI Assistant for Creative Work — Omnia 1.0 by VIZRA',
+    description:
+      'Meet Omnia 1.0, an AI assistant for creative and technical work with Quick, Think, Research, Code, and Analyze modes, verified HTTPS citations, and EN/HI/Hinglish fluency.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'AI Assistant for Creative Work',
+    jsonLd: [
+      buildWebPageSchema(
+        'AI Assistant for Creative Work — Omnia 1.0 by VIZRA',
+        'Omnia 1.0 AI assistant offering Quick, Think, Research, Code, and Analyze modes with verified Google Search citations, 5-file audits, and multilingual English, Hindi, and Hinglish support.',
+        '/ai-assistant-for-creative-work'
+      ),
+      buildBreadcrumbSchema('AI Assistant for Creative Work', '/ai-assistant-for-creative-work'),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How does Omnia 1.0 prevent fabricated links?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'When using Research mode, Omnia 1.0 invokes live Google Search grounding and extracts verified HTTPS citations into structured source cards rather than guessing URLs from memory.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I write prompts in Hindi or Hinglish?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes. Omnia 1.0 natively understands and responds in English, Hindi, and Hinglish while keeping code snippets, design terms, and technical specifications intact.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'VIZRA · OMNIA 1.0 ASSISTANT',
+      h1: 'Omnia 1.0: An AI Assistant Engineered for Creative and Technical Work',
+      lead: 'Switch intentionally between Quick, Think, Research, Code, and Analyze modes with live verified HTTPS citations, 5-file multimodal auditing, and multilingual fluency.',
+      sections: [
+        {
+          heading: 'Five Dedicated Cognitive Modes',
+          body: 'Response depth scales proportionally to your prompt complexity.',
+          bullets: [
+            'Quick & Think modes for fast turnaround or deep multi-step creative reasoning.',
+            'Research mode powered by live Google Search grounding with clickable HTTPS citations.',
+            'Code & Analyze modes for React/TS/GLSL drafting and 5-file PDF/CSV/image audits.',
+            'DeepMind Science Hub (AlphaFold DB, PubChem, PubMed) and English/Hindi/Hinglish fluency.',
+          ],
+        },
+      ],
+    },
+  },
+  '/alternatives': {
+    canonicalPath: '/alternatives',
+    title: 'VIZRA Alternatives & Creative AI Comparisons (2026)',
+    description:
+      'Honest, verified 2026 comparisons of VIZRA vs Canva, Runway, Krea AI, and Adobe Express. See pricing, live capabilities, tradeoffs, and which platform fits your workflow.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'Alternatives & Comparisons',
+    jsonLd: [
+      buildWebPageSchema(
+        'VIZRA Alternatives & Creative AI Comparisons (2026)',
+        'Side-by-side verified comparisons of VIZRA against Canva, Runway, Krea AI, and Adobe Express.',
+        '/alternatives'
+      ),
+      buildBreadcrumbSchema('Alternatives & Comparisons', '/alternatives'),
+    ],
+    prehydration: {
+      eyebrow: 'HONEST PLATFORM COMPARISONS · VERIFIED NOV 2026',
+      h1: 'How VIZRA Compares to Leading Creative AI Platforms',
+      lead: 'Verified pricing and workflow comparisons between VIZRA, Canva, Runway, Krea AI, and Adobe Express — including where each competitor is stronger today.',
+      sections: [
+        {
+          heading: 'Side-by-Side Platform Overview',
+          body: 'Choose the right tool for your actual creative deliverable.',
+          bullets: [
+            'VIZRA vs Canva: Multimodal AI studio, grounded research & GLSL/React code vs 1.6M+ graphic templates & Brand Kits.',
+            'VIZRA vs Runway: Pre-production intelligence, shaders & WAV audio vs live Gen-4.5 generative video (VIZRA Temporal Video is in staging).',
+            'VIZRA vs Krea AI: Conversational workspace, 5-file audits & 10-stage projects vs real-time diffusion canvas & custom LoRA training.',
+            'Adobe Express ($9.99/mo Premium): Quick branded templates & 200M+ Adobe Stock assets.',
+          ],
+        },
+      ],
+    },
+  },
+  '/vizra-vs-canva': {
+    canonicalPath: '/vizra-vs-canva',
+    title: 'VIZRA vs Canva (2026): AI Creative Studio vs Templates',
+    description:
+      'Honest VIZRA vs Canva comparison with verified 2026 pricing ($0 Free, $18/mo Canva Pro), features, tradeoffs, and guidance on when to pick each platform.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'VIZRA vs Canva',
+    jsonLd: [
+      buildWebPageSchema(
+        'VIZRA vs Canva (2026): AI Creative Studio vs Templates',
+        'Verified 2026 comparison of VIZRA and Canva covering features, pricing, strengths, limitations, and ideal creative use cases.',
+        '/vizra-vs-canva'
+      ),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: 'Alternatives', item: `${SITE_ORIGIN}/alternatives` },
+          { '@type': 'ListItem', position: 3, name: 'VIZRA vs Canva', item: `${SITE_ORIGIN}/vizra-vs-canva` },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Is VIZRA a direct drop-in replacement for Canva’s template editor?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. VIZRA does not offer a drag-and-drop social template marketplace or print layout editor. VIZRA is an AI creative studio focused on Omnia 1.0 reasoning, grounded research, multimodal file audits, creative coding/shaders, procedural visuals, audio synthesis, and 10-stage workflows.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I connect my Canva account directly to VIZRA right now?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Not yet. External Canva OAuth integration is currently in staging. Today you can export PNGs or PDFs from Canva and upload them into Omnia 1.0 for layout critique or refinement.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'HONEST COMPARISON · VERIFIED NOV 2026',
+      h1: 'VIZRA vs Canva: Creative AI Studio vs Template Design Suite',
+      lead: 'Pick Canva for drag-and-drop templates, Brand Kits, and print/social collateral; pick VIZRA for Omnia 1.0 multimodal reasoning, verified research, React/GLSL code, WAV audio, and 10-stage projects.',
+      sections: [
+        {
+          heading: 'Verified Pricing & Feature Comparison',
+          body: 'Canva offers Free ($0), Pro ($18/mo or $180/yr), Business ($25/seat/mo), and Enterprise. VIZRA offers live Creator Free ($0) plus early-access Omnia Pro ($19/mo annual) and VIZRA Studio ($64/mo annual).',
+        },
+      ],
+    },
+  },
+  '/vizra-vs-runway': {
+    canonicalPath: '/vizra-vs-runway',
+    title: 'VIZRA vs Runway (2026): Creative Studio vs AI Video',
+    description:
+      'Transparent VIZRA vs Runway comparison (verified Nov 2026): Runway leads in live Gen-4.5 AI video ($15–$95/mo), while VIZRA leads in unified reasoning, shaders, research & audio.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'VIZRA vs Runway',
+    jsonLd: [
+      buildWebPageSchema(
+        'VIZRA vs Runway (2026): Creative Studio vs AI Video',
+        'Honest 2026 comparison of VIZRA and Runway covering generative video status, pricing tiers, creative coding, research, and audio workflows.',
+        '/vizra-vs-runway'
+      ),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: 'Alternatives', item: `${SITE_ORIGIN}/alternatives` },
+          { '@type': 'ListItem', position: 3, name: 'VIZRA vs Runway', item: `${SITE_ORIGIN}/vizra-vs-runway` },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Does VIZRA generate AI video like Runway Gen-4.5 right now?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. VIZRA’s Temporal Video & Scene Synthesis engine is currently in staging and not active in production. Runway is the right choice if you need generative video clips today.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can motion and film teams use VIZRA alongside Runway?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes. Teams use VIZRA for research, shot lists, structured prompt engineering, styleframe critique, GLSL shaders, and instrumental WAV scratch tracks before rendering video shots.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'HONEST COMPARISON · VERIFIED NOV 2026',
+      h1: 'VIZRA vs Runway: Multimodal Creative Studio vs Generative Video Suite',
+      lead: 'Choose Runway today for production AI video (Gen-4.5, 4K upscaling, ProRes/HDR); choose VIZRA for pre-production intelligence, grounded research, WebGL/GLSL shaders, WAV audio, and 10-stage workspaces.',
+      sections: [
+        {
+          heading: 'Transparent Video Status & Pricing',
+          body: 'Runway offers Free (125 one-time credits), Standard ($15/mo), Pro ($35/mo), Max ($95/mo), and Team ($69/seat/mo). VIZRA’s Temporal Video Engine is currently in staging while Omnia 1.0, shaders, research, and audio are live on Creator Free ($0).',
+        },
+      ],
+    },
+  },
+  '/vizra-vs-krea-ai': {
+    canonicalPath: '/vizra-vs-krea-ai',
+    title: 'VIZRA vs Krea AI (2026): Workspace vs Real-Time Canvas',
+    description:
+      'Compare VIZRA vs Krea AI with verified 2026 pricing (~$9–$105/mo Krea compute units) and honest tradeoffs between real-time LoRA painting and VIZRA’s multimodal creative studio.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'VIZRA vs Krea AI',
+    jsonLd: [
+      buildWebPageSchema(
+        'VIZRA vs Krea AI (2026): Workspace vs Real-Time Canvas',
+        'Verified 2026 comparison of VIZRA and Krea AI across real-time image generation, LoRA training, conversational AI, research citations, code/shaders, and pricing.',
+        '/vizra-vs-krea-ai'
+      ),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: 'Alternatives', item: `${SITE_ORIGIN}/alternatives` },
+          { '@type': 'ListItem', position: 3, name: 'VIZRA vs Krea AI', item: `${SITE_ORIGIN}/vizra-vs-krea-ai` },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Does VIZRA support custom LoRA model training like Krea AI?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. VIZRA does not offer custom diffusion LoRA fine-tuning. Instead, VIZRA focuses on Omnia 1.0 multimodal reasoning, procedural concept canvases, React/GLSL shader coding, local 25 MB RAG style guides, and instrumental audio.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Are my VIZRA Creator Free projects published to a public gallery?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. Signed-in VIZRA conversations and workspace projects are private to your Firebase user account and are not published to a public feed.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'HONEST COMPARISON · VERIFIED NOV 2026',
+      h1: 'VIZRA vs Krea AI: Unified Creative Workspace vs Real-Time Visual Canvas',
+      lead: 'Pick Krea AI for real-time diffusion painting, upscaling, and custom LoRA training; pick VIZRA for Omnia 1.0 reasoning, grounded citations, 5-file audits, GLSL/React code, audio, and 10-stage pipelines.',
+      sections: [
+        {
+          heading: 'Verified Pricing & Tradeoffs',
+          body: 'Krea AI offers Free (100 daily units, non-commercial/public), Basic (~$9/mo), Pro (~$35/mo), Max (~$105/mo), and Business (~$200/mo). VIZRA Creator Free ($0) keeps signed-in projects private with live reasoning, code, research, and audio.',
+        },
+      ],
+    },
+  },
+  '/free-ai-prompt-optimizer': {
+    canonicalPath: '/free-ai-prompt-optimizer',
+    title: 'Free AI Prompt Optimizer for Creators (No Sign-Up) — VIZRA',
+    description:
+      'Optimize creative AI prompts free with zero sign-up. Structure motion design, art direction, GLSL shader, storyboard, research, and Lyria 3 music prompts with instant copy.',
+    isIndexable: true,
+    robots: 'index, follow',
+    ogType: 'website',
+    breadcrumbLabel: 'Free AI Prompt Optimizer',
+    jsonLd: [
+      buildWebPageSchema(
+        'Free AI Prompt Optimizer for Creators (No Sign-Up) — VIZRA',
+        'Standalone zero-registration AI prompt optimizer for motion design, visual art direction, WebGL/GLSL coding, storyboarding, brand systems, grounded research, and AI music.',
+        '/free-ai-prompt-optimizer'
+      ),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'VIZRA Free AI Prompt Optimizer',
+        url: `${SITE_ORIGIN}/free-ai-prompt-optimizer`,
+        applicationCategory: 'DesignApplication',
+        operatingSystem: 'Web Browser',
+        isAccessibleForFree: true,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        description:
+          'Browser-based creative AI prompt optimizer with 7 studio presets, deterministic 6-point structural rubric audit, instant copy, and one-click Omnia 1.0 handoff.',
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: 'Tools', item: `${SITE_ORIGIN}/tools` },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: 'Free AI Prompt Optimizer',
+            item: `${SITE_ORIGIN}/free-ai-prompt-optimizer`,
+          },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'Do I need to sign up or enter an API key to use the AI Prompt Optimizer?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. The VIZRA AI Prompt Optimizer runs entirely in your browser with zero registration, zero credit card, and zero external API keys required.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Does this tool store or publish the prompts I type?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. Your draft prompt is processed deterministically inside your local browser session and is not published or stored on external servers.',
+            },
+          },
+        ],
+      },
+    ],
+    prehydration: {
+      eyebrow: 'FREE CREATIVE UTILITY · NO REGISTRATION REQUIRED',
+      h1: 'Free AI Prompt Optimizer for Creative Workflows',
+      lead: 'Turn rough creative ideas into structured, production-ready prompts for motion design, art direction, WebGL/GLSL shaders, storyboards, brand systems, grounded research, and AI music — directly in your browser.',
+      sections: [
+        {
+          heading: '7 Specialized Creative Presets & 6-Point Rubric Audit',
+          body: 'Audit raw drafts across Subject, Audience/Context, Visual/Technical Specs, Deliverable Format, Negative Constraints, and Quality Criteria.',
+          bullets: [
+            'Motion Design & Kinetic Concept',
+            'Visual & Art Direction',
+            'WebGL / GLSL Shader & Creative Code',
+            'Scriptwriting & Storyboard',
+            'Brand Identity & Design System',
+            'Grounded Research & Technical Brief',
+            'AI Music & Audio Direction (Lyria 3)',
+          ],
+        },
+      ],
+    },
+  },
 };
 
 const NOT_FOUND_DEFINITION: Omit<RouteSeoDefinition, 'canonicalPath'> = {
@@ -1467,10 +2020,12 @@ export function buildPrehydrationRootHtml(payload: RouteSeoPayload): string {
 
   const navLinks = [
     { href: '/', label: 'Home' },
+    { href: '/ai-creative-studio', label: 'AI Studio' },
     { href: '/features', label: 'Features' },
     { href: '/tools', label: 'AI Tools' },
+    { href: '/free-ai-prompt-optimizer', label: 'Prompt Optimizer' },
     { href: '/studio', label: 'Creative Studio' },
-    { href: '/explore', label: 'Explore 3D' },
+    { href: '/alternatives', label: 'Compare' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/docs', label: 'Docs' },
     { href: '/blog', label: 'Blog' },

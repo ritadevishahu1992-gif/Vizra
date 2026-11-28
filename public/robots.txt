@@ -28,6 +28,15 @@ Allow: /about
 Allow: /contact
 Allow: /docs
 Allow: /blog
+Allow: /ai-creative-studio
+Allow: /ai-workspace-for-creators
+Allow: /ai-tools-for-motion-designers
+Allow: /ai-assistant-for-creative-work
+Allow: /alternatives
+Allow: /vizra-vs-canva
+Allow: /vizra-vs-runway
+Allow: /vizra-vs-krea-ai
+Allow: /free-ai-prompt-optimizer
 Allow: /terms-and-conditions
 Allow: /privacy-policy
 Allow: /cookie-policy

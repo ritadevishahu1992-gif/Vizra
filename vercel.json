@@ -37,6 +37,16 @@
       "source": "/crawler-audit",
       "destination": "/seo-diagnostics",
       "permanent": true
+    },
+    {
+      "source": "/canva-alternative",
+      "destination": "/vizra-vs-canva",
+      "permanent": true
+    },
+    {
+      "source": "/runway-alternative",
+      "destination": "/vizra-vs-runway",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -125,8 +135,12 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/(features|tools|studio|explore|pricing|docs|blog|about|contact|terms-and-conditions|privacy-policy|cookie-policy|ai|workspace|history|settings|seo-diagnostics)",
+      "source": "/(features|tools|studio|explore|pricing|docs|blog|about|contact|terms-and-conditions|privacy-policy|cookie-policy|ai-creative-studio|ai-workspace-for-creators|ai-tools-for-motion-designers|ai-assistant-for-creative-work|alternatives|vizra-vs-canva|vizra-vs-runway|vizra-vs-krea-ai|free-ai-prompt-optimizer|ai|workspace|history|settings|seo-diagnostics)",
       "destination": "/$1/index.html"
+    },
+    {
+      "source": "/blog/([a-z0-9-]+)",
+      "destination": "/blog/$1/index.html"
     },
     {
       "source": "/((?!ads\\.txt|sitemap\\.xml|sitemaps/.*|robots\\.txt|llms\\.txt|llms-full\\.txt|googlef66bb3a90d865a89\\.html|googlee265bfc7c69fa8d5\\.html|BingSiteAuth\\.xml|5ca94201a0d04f8ea805259202bffce5\\.txt|og-image\\.png|favicon\\.ico|favicon\\.svg|favicon-32x32\\.png|favicon-48x48\\.png|favicon-96x96\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|manifest\\.json).*)",
@@ -144,7 +158,7 @@
         { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), microphone=(self)" },
         { "key": "X-Permitted-Cross-Domain-Policies", "value": "none" },
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com https://*.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' ws: wss: https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://alphafold.ebi.ac.uk https://pubchem.ncbi.nlm.nih.gov https://eutils.ncbi.nlm.nih.gov https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://www.google.com https://csi.gstatic.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://www.google.com; frame-ancestors 'self' https://*.run.app https://*.google.com https://aistudio.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com https://*.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' ws: wss: https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://alphafold.ebi.ac.uk https://pubchem.ncbi.nlm.nih.gov https://eutils.ncbi.nlm.nih.gov https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://www.google.com https://csi.gstatic.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://www.google.com; frame-ancestors 'self' https://*.run.app https://*.google.com https://aistudio.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" }
       ]
     },
     {
@@ -249,13 +263,6 @@
     },
     {
       "source": "/(ai|history|settings|workspace|dashboard|seo-diagnostics|crawler-audit|live)(/.*)?",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" }
