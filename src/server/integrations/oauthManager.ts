@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { verifyFirebaseIdToken } from '../authVerification';
-import { generalApiRateLimiter, feedbackRateLimiter } from '../security';
+import { generalApiRateLimiter, feedbackRateLimiter, isTrustedOrigin } from '../security';
 import { enforceFeatureAccessForRequest } from '../compliance/ageAssurance';
 import {
   getIntegrationVaultSecret,
@@ -429,8 +429,18 @@ export function isProviderConfigured(spec: WorkspaceProviderSpec): boolean {
 }
 
 function resolveCallbackUrl(providerId: string, req: express.Request): string {
-  const baseUrl = getAppUrl(req.protocol, req.get('host') || 'localhost:3000');
-  return `${baseUrl}/api/integrations/${providerId}/callback`;
+  const configuredUrl = getAppUrl(req.protocol, '');
+  const rawHost = (req.get('host') || '').trim();
+  const candidateOrigin = rawHost ? `${req.protocol}://${rawHost}` : '';
+  const safeBaseUrl =
+    process.env.APP_URL || process.env.VERCEL_URL
+      ? configuredUrl
+      : candidateOrigin && isTrustedOrigin(candidateOrigin)
+        ? candidateOrigin.replace(/\/+$/, '')
+        : isProductionEnv()
+          ? 'https://vizra.vercel.app'
+          : 'http://localhost:3000';
+  return `${safeBaseUrl}/api/integrations/${providerId}/callback`;
 }
 
 async function resolveOptionalUid(req: express.Request): Promise<string | null> {

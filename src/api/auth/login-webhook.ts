@@ -9,6 +9,7 @@
 
 import type { Request, Response } from 'express';
 import { verifyFirebaseIdToken, parseDeviceSummary } from '../../server/authVerification';
+import { getTrustedClientIp, sanitizeServerError } from '../../server/security';
 import { processLoginNotifications } from '../../server/email/loginNotificationService';
 import { sendEmail, getDefaultSenderEmail, getAdminNotificationEmail } from '../../lib/email';
 
@@ -57,11 +58,7 @@ export async function handleLoginWebhook(req: Request, res: Response): Promise<v
   }
 
   try {
-    const forwarded = req.headers['x-forwarded-for'];
-    const ipAddress =
-      typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket?.remoteAddress || '127.0.0.1';
+    const ipAddress = getTrustedClientIp(req);
     const userAgent = (req.headers['user-agent'] as string) || '';
     const deviceSummary = parseDeviceSummary(userAgent);
 
@@ -91,7 +88,7 @@ export async function handleLoginWebhook(req: Request, res: Response): Promise<v
     console.error('[Login Webhook] Error dispatching login notifications:', err);
     res.status(200).json({
       success: false,
-      error: err?.message || 'Login notification processing encountered an error',
+      error: sanitizeServerError(err, 'Login notification processing encountered an error'),
       fallback: true,
     });
   }

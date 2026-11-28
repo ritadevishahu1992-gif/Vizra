@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import { getTrustedClientIp, maskIpAddress } from './security';
 
 // ============================================================================
 // 1. OBSERVABILITY TYPES & INTERFACES
@@ -451,11 +452,24 @@ export function observabilityMiddleware(req: Request, res: Response, next: NextF
   (req as any).id = requestId;
   res.setHeader('X-Request-Id', requestId);
 
-  // Sanitized client IP
-  const forwarded = req.headers['x-forwarded-for'];
-  const clientIp = typeof forwarded === 'string'
-    ? forwarded.split(',')[0].trim()
-    : req.socket.remoteAddress || '127.0.0.1';
+  // Privacy-preserving masked client IP derived from trusted reverse-proxy hop
+  const maskedClientIp = maskIpAddress(getTrustedClientIp(req));
+
+  // Sensitive internal/admin/account endpoints excluded from the shared Workspace System Logs panel
+  const isSensitiveInternalPath = (p: string): boolean =>
+    p === '/api/system-logs' ||
+    p.startsWith('/api/metrics') ||
+    p.startsWith('/api/config/') ||
+    p.startsWith('/api/seo-diagnostics') ||
+    p.startsWith('/api/engage/admin') ||
+    p.startsWith('/api/safety/reports') ||
+    p.startsWith('/api/omnia/train') ||
+    p.startsWith('/api/omnia/feedback') ||
+    p.startsWith('/api/auth/') ||
+    p.startsWith('/api/account/') ||
+    p.startsWith('/api/billing/') ||
+    p.startsWith('/api/workspace/tokens') ||
+    p.startsWith('/api/integrations/');
 
   // Record metrics on response finish
   res.on('finish', () => {
@@ -487,8 +501,8 @@ export function observabilityMiddleware(req: Request, res: Response, next: NextF
       const timestamp = new Date().toISOString();
       const sanitizedPath = sanitizeLogPath(path);
 
-      // Record into bounded in-memory System Logs buffer (skip self-polling endpoint to prevent feedback noise)
-      if (sanitizedPath !== '/api/system-logs') {
+      // Record into bounded in-memory System Logs buffer (skip self-polling & privileged/admin/auth endpoints)
+      if (!isSensitiveInternalPath(sanitizedPath)) {
         recentApiLogs.push({
           id: requestId,
           timestamp,
@@ -512,7 +526,7 @@ export function observabilityMiddleware(req: Request, res: Response, next: NextF
         path: sanitizedPath,
         status,
         durationMs,
-        clientIp: clientIp.replace(/:\d+$/, ''), // Strip port if present
+        clientIp: maskedClientIp,
       });
     }
   });

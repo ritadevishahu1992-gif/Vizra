@@ -51,6 +51,7 @@ import {
   sanitizeServerError,
   safeCompare,
   isTrustedOrigin,
+  getTrustedClientIp,
   adminAuthMiddleware,
   authLockoutTracker,
 } from './src/server/security';
@@ -180,8 +181,15 @@ export async function createExpressApp(options?: {
   // Trust first-hop reverse proxy (Vercel / Cloud Run) for accurate client IP rate limiting
   app.set('trust proxy', 1);
 
-  // Body parser with 15MB limit for multimodal attachments + clean JSON parse error handler
-  app.use(express.json({ limit: '15mb' }));
+  // Body parser with 15MB limit for multimodal attachments + rawBody capture for webhook HMAC verification
+  app.use(
+    express.json({
+      limit: '15mb',
+      verify: (req, _res, buf) => {
+        (req as any).rawBody = buf.toString('utf8');
+      },
+    })
+  );
   app.use(
     (
       err: any,
@@ -1357,10 +1365,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       );
 
       // Determine caller identity key for fair per-user concurrency & duplicate protection
-      const forwardedIp =
-        typeof req.headers['x-forwarded-for'] === 'string'
-          ? req.headers['x-forwarded-for'].split(',')[0].trim()
-          : req.socket.remoteAddress || '127.0.0.1';
+      const forwardedIp = getTrustedClientIp(req);
       const clientIdHeader =
         typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
       const userKey = derivePrivacySessionHash(
@@ -2515,10 +2520,7 @@ Revise only where necessary. Do not expose this checklist or describe internal r
       }
 
       // Acquire bounded fair concurrency slot with duplicate-submission protection and queue backpressure
-      const agentForwardedIp =
-        typeof req.headers['x-forwarded-for'] === 'string'
-          ? req.headers['x-forwarded-for'].split(',')[0].trim()
-          : req.socket.remoteAddress || '127.0.0.1';
+      const agentForwardedIp = getTrustedClientIp(req);
       const agentClientId =
         typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
       const agentUserKey = derivePrivacySessionHash(
@@ -3064,10 +3066,7 @@ Core Responsibilities:
       }
 
       const cleanResearchQuery = queryCheck.cleanText || '';
-      const resForwardedIp =
-        typeof req.headers['x-forwarded-for'] === 'string'
-          ? req.headers['x-forwarded-for'].split(',')[0].trim()
-          : req.socket.remoteAddress || '127.0.0.1';
+      const resForwardedIp = getTrustedClientIp(req);
       const resClientId =
         typeof req.headers['x-vizra-client-id'] === 'string' ? req.headers['x-vizra-client-id'].trim() : '';
       const resUserKey = derivePrivacySessionHash(
@@ -3481,7 +3480,13 @@ Core Responsibilities:
       if (domain === 'protein') {
         // AlphaFold DB lookup (EMBL-EBI requires browser/application User-Agent)
         const clean = query.trim().toUpperCase();
+        if (!/^[A-Z0-9_-]{3,20}$/.test(clean)) {
+          res.status(400).json({ error: 'Invalid UniProt protein accession format.' });
+          return;
+        }
         const afRes = await fetch(`https://alphafold.ebi.ac.uk/api/prediction/${encodeURIComponent(clean)}`, {
+          redirect: 'error',
+          signal: AbortSignal.timeout(8000),
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'application/json',
@@ -3499,16 +3504,27 @@ Core Responsibilities:
       if (domain === 'compound') {
         // PubChem lookup
         const clean = query.trim();
-        let cid = /^\d+$/.test(clean) ? clean : null;
+        if (clean.length === 0 || clean.length > 120 || /[\/\\]|\.\./.test(clean)) {
+          res.status(400).json({ error: 'Invalid compound name or CID.' });
+          return;
+        }
+        let cid = /^\d{1,12}$/.test(clean) ? clean : null;
         if (!cid) {
-          const cidRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(clean)}/cids/JSON`);
+          const cidRes = await fetch(
+            `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(clean)}/cids/JSON`,
+            { redirect: 'error', signal: AbortSignal.timeout(8000) }
+          );
           if (cidRes.ok) {
             const cidData = await cidRes.json();
-            cid = cidData?.IdentifierList?.CID?.[0] || null;
+            const resolvedCid = cidData?.IdentifierList?.CID?.[0];
+            cid = resolvedCid && /^\d{1,12}$/.test(String(resolvedCid)) ? String(resolvedCid) : null;
           }
         }
         if (cid) {
-          const propRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IUPACName,XLogP,TPSA,HBondDonorCount,HBondAcceptorCount,RotatableBondCount/JSON`);
+          const propRes = await fetch(
+            `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${encodeURIComponent(cid)}/property/MolecularFormula,MolecularWeight,CanonicalSMILES,IUPACName,XLogP,TPSA,HBondDonorCount,HBondAcceptorCount,RotatableBondCount/JSON`,
+            { redirect: 'error', signal: AbortSignal.timeout(8000) }
+          );
           if (propRes.ok) {
             const propData = await propRes.json();
             res.json({ success: true, domain: 'compound', cid, data: propData?.PropertyTable?.Properties?.[0] });
@@ -3521,12 +3537,21 @@ Core Responsibilities:
 
       if (domain === 'literature') {
         // PubMed E-utilities search
-        const esearch = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&sort=pub_date&retmode=json&retmax=6`);
+        const cleanTerm = query.trim().slice(0, 200);
+        const esearch = await fetch(
+          `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(cleanTerm)}&sort=pub_date&retmode=json&retmax=6`,
+          { redirect: 'error', signal: AbortSignal.timeout(8000) }
+        );
         if (esearch.ok) {
           const sData = await esearch.json();
-          const idlist = sData?.esearchresult?.idlist || [];
+          const idlist: string[] = Array.isArray(sData?.esearchresult?.idlist)
+            ? sData.esearchresult.idlist.filter((id: unknown) => /^\d{1,16}$/.test(String(id))).slice(0, 6)
+            : [];
           if (idlist.length > 0) {
-            const esummary = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${idlist.join(',')}&retmode=json`);
+            const esummary = await fetch(
+              `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${idlist.join(',')}&retmode=json`,
+              { redirect: 'error', signal: AbortSignal.timeout(8000) }
+            );
             if (esummary.ok) {
               const sumData = await esummary.json();
               res.json({ success: true, domain: 'literature', count: idlist.length, results: sumData?.result || {} });
@@ -3541,7 +3566,7 @@ Core Responsibilities:
       res.status(400).json({ error: 'Invalid science domain. Must be protein, compound, or literature.' });
     } catch (err: any) {
       console.error('Science query error:', err);
-      res.status(500).json({ error: err.message || 'Error processing science query' });
+      res.status(500).json({ error: sanitizeServerError(err, 'Error processing science query') });
     }
   });
 
@@ -3701,12 +3726,12 @@ Core Responsibilities:
           fallback: true,
           isAiGenerated: true,
           provenance: provenanceMetadata,
-          error: lyriaErr.message,
+          error: sanitizeServerError(lyriaErr, 'Live music generation temporarily unavailable'),
         });
       }
     } catch (err: any) {
       console.error('Server music generation error:', err);
-      res.status(500).json({ error: err.message || 'Error generating music', fallback: true });
+      res.status(500).json({ error: sanitizeServerError(err, 'Error generating music'), fallback: true });
     }
   });
 
@@ -3940,10 +3965,7 @@ Core Responsibilities:
     }
 
     try {
-      const forwarded = req.headers['x-forwarded-for'];
-      const ipAddress = typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket.remoteAddress || '127.0.0.1';
+      const ipAddress = getTrustedClientIp(req);
       const userAgent = (req.headers['user-agent'] as string) || '';
       const deviceSummary = parseDeviceSummary(userAgent);
 
@@ -3975,7 +3997,7 @@ Core Responsibilities:
       // Login notification failure must never block or roll back the user's login session
       res.status(200).json({
         success: false,
-        error: err.message || 'Notification processing encountered an error',
+        error: sanitizeServerError(err, 'Notification processing encountered an error'),
         fallback: true,
       });
     }
@@ -4474,11 +4496,7 @@ Core Responsibilities:
     if (typeof clientTenantHeader === 'string' && /^[a-zA-Z0-9_-]{16,64}$/.test(clientTenantHeader.trim())) {
       return `client:${derivePrivacySessionHash(clientTenantHeader.trim())}`;
     }
-    const forwarded = req.headers['x-forwarded-for'];
-    const ip =
-      typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket.remoteAddress || 'local';
+    const ip = getTrustedClientIp(req);
     const ua = (req.headers['user-agent'] || 'default').slice(0, 64);
     return `anon:${derivePrivacySessionHash(`${ip}:${ua}`)}`;
   }
@@ -4703,9 +4721,13 @@ Core Responsibilities:
     }
 
     const providedSig = String(req.headers['x-vizra-billing-signature'] || '').trim();
+    const rawPayload =
+      typeof (req as any).rawBody === 'string' && (req as any).rawBody.length > 0
+        ? (req as any).rawBody
+        : JSON.stringify(req.body || {});
     const expectedSig = crypto
       .createHmac('sha256', webhookSecret)
-      .update(JSON.stringify(req.body || {}))
+      .update(rawPayload)
       .digest('hex');
 
     if (!providedSig || !safeCompare(providedSig, expectedSig)) {
@@ -4757,6 +4779,10 @@ Core Responsibilities:
       return;
     }
 
+    if (processedBillingEventIds.size >= 5000) {
+      const oldestEventId = processedBillingEventIds.values().next().value;
+      if (oldestEventId) processedBillingEventIds.delete(oldestEventId);
+    }
     processedBillingEventIds.add(eventId);
     const ledger = getOrCreateTenantLedger(`uid:${uid}`);
     ledger.planId = planId;
@@ -5451,7 +5477,7 @@ Core Responsibilities:
     }
     const cleanPath = normalizePathname(req.path);
     const redirectTarget = REDIRECT_ALIASES[cleanPath];
-    if (redirectTarget) {
+    if (redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')) {
       const qIndex = req.originalUrl.indexOf('?');
       const querySuffix = qIndex !== -1 ? req.originalUrl.slice(qIndex) : '';
       return res.redirect(301, `${redirectTarget}${querySuffix}`);
@@ -5611,11 +5637,7 @@ Core Responsibilities:
       }
     }
 
-    const forwarded = req.headers['x-forwarded-for'];
-    const rawIp =
-      typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket.remoteAddress || '127.0.0.1';
+    const rawIp = getTrustedClientIp(req);
 
     const ticket = crypto.randomBytes(24).toString('hex');
     const expiresInSeconds = 60;
@@ -5653,12 +5675,7 @@ Core Responsibilities:
       return;
     }
 
-    const forwarded = request.headers['x-forwarded-for'];
-    const clientIp = normalizeClientIp(
-      typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : request.socket.remoteAddress || '127.0.0.1'
-    );
+    const clientIp = normalizeClientIp(getTrustedClientIp(request));
 
     if (!wsConnectionLimiter.check(clientIp).allowed) {
       socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n');

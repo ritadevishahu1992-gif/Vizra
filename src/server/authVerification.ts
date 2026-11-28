@@ -7,7 +7,7 @@
  */
 
 import crypto from 'crypto';
-import { getFirebaseProjectId, isProductionEnv } from './config/envConfig';
+import { getFirebaseProjectId } from './config/envConfig';
 
 interface GooglePublicKeys {
   [kid: string]: string;
@@ -73,7 +73,7 @@ export interface VerifiedAuthEvent {
  * 2. Checks token expiration (exp) and issued time (iat).
  * 3. Checks audience matches Firebase Project ID.
  * 4. Checks issuer matches https://securetoken.google.com/<projectId>.
- * 5. Verifies cryptographic signature against Google's public certs.
+ * 5. Verifies cryptographic signature against Google's public certs (strictly fail-closed).
  */
 export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuthEvent> {
   if (!token || typeof token !== 'string') {
@@ -127,32 +127,27 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       return { valid: false, error: 'Token missing or invalid subject (UID) claim' };
     }
 
-    // 5. Cryptographic signature verification against Google public keys
+    // 5. Cryptographic signature verification against Google public keys (ALWAYS fail closed)
     const googleKeys = await getGooglePublicKeys();
-    const cert = header.kid ? googleKeys[header.kid] : null;
+    const cert = typeof header.kid === 'string' && header.kid ? googleKeys[header.kid] : null;
 
-    if (cert) {
-      const verifier = crypto.createVerify('RSA-SHA256');
-      verifier.update(`${parts[0]}.${parts[1]}`);
-      const signatureBuf = Buffer.from(parts[2], 'base64url');
-      const isSignatureValid = verifier.verify(cert, signatureBuf);
+    if (!cert) {
+      return {
+        valid: false,
+        error:
+          Object.keys(googleKeys).length === 0
+            ? 'Unable to verify token signature: Google certificate authority unavailable'
+            : `Public key kid '${header.kid || 'none'}' not recognized by Google certificate authority`,
+      };
+    }
 
-      if (!isSignatureValid) {
-        return { valid: false, error: 'Cryptographic signature verification failed' };
-      }
-    } else {
-      // If Google public certificates are loaded, any unknown or missing kid is a forged token and must be rejected in ALL environments.
-      if (Object.keys(googleKeys).length > 0 || isProductionEnv()) {
-        return {
-          valid: false,
-          error: `Public key kid '${header.kid || 'none'}' not recognized by Google certificate authority`,
-        };
-      }
-      // Offline sandbox fallback only when Google cert endpoint is unreachable in air-gapped test runners
-      const signatureBuf = Buffer.from(parts[2], 'base64url');
-      if (signatureBuf.length < 32) {
-        return { valid: false, error: 'Cryptographic signature verification failed (malformed signature)' };
-      }
+    const verifier = crypto.createVerify('RSA-SHA256');
+    verifier.update(`${parts[0]}.${parts[1]}`);
+    const signatureBuf = Buffer.from(parts[2], 'base64url');
+    const isSignatureValid = verifier.verify(cert, signatureBuf);
+
+    if (!isSignatureValid) {
+      return { valid: false, error: 'Cryptographic signature verification failed' };
     }
 
     const provider = payload.firebase?.sign_in_provider || 'google.com';
@@ -161,14 +156,14 @@ export async function verifyFirebaseIdToken(token: string): Promise<VerifiedAuth
       valid: true,
       uid: payload.sub,
       email: typeof payload.email === 'string' ? payload.email : undefined,
-      emailVerified: payload.email_verified !== false,
+      emailVerified: payload.email_verified === true,
       authTime: payload.auth_time || payload.iat || nowSec,
       tokenIssuedAt: payload.iat,
       tokenExpiresAt: payload.exp,
       provider,
     };
-  } catch (err: any) {
-    return { valid: false, error: `Token parsing failed: ${err.message}` };
+  } catch {
+    return { valid: false, error: 'Token parsing failed' };
   }
 }
 

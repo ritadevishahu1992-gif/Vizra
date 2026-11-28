@@ -1,50 +1,46 @@
-# VIZRA — Application Security Audit & Hardening Walkthrough
+# VIZRA AI Creative Studio — Security, Infrastructure & Production Reliability Walkthrough
 
 # Security Summary
 
-A full 14-point application-security audit was performed across the VIZRA frontend, Express backend (`server.ts`), Engage routes/store, OAuth integration manager, Vite build/dev config, and Firestore security rules under the threat model of an attacker with complete control over browser requests and client state.
+A full-stack application security, Firebase architecture, cryptography, observability, and production reliability audit was executed across the VIZRA frontend, Express backend (`server.ts` and `src/server/*`), OAuth integration vault, Firestore & Realtime Database security rules, Vercel deployment configuration, and npm/bun dependencies.
 
-## Executive Severity Matrix
+## Key Hardening Changes Implemented
 
-| # | Audit Area | Initial Status | Severity | Fix Applied |
-| --- | --- | --- | --- | --- |
-| 1 | Admin routes | FAIL | **High** | Closed the non-production auto-admin bypass in `engageAdminAuthMiddleware`, enforced verified email claims on admin tokens, and filtered `GET /api/omnia/knowledge` to approved public entries only. |
-| 2 | IDOR | FAIL | **High** | Raised anonymous `X-Vizra-Client-Id` minimum length to 16+ high-entropy characters, HMAC-bound anonymous tenant keys server-side, and strictly pinned authenticated `DELETE /api/account/data` to `uid:<verifiedUid>` (ignoring arbitrary client headers). |
-| 3 | Secrets in the client | PASS | **Low** | Verified zero server secrets (`GEMINI_API_KEY`, `ADMIN_API_KEY`, `OAUTH_*_SECRET`, DB credentials) are bundled or prefixed with `VITE_`. |
-| 4 | Price tampering | FAIL | **Critical** | Added authoritative server-side `PLAN_CREDIT_CATALOG` pricing (`monthlyPriceUsd`, `yearlyPriceUsd`, credit limits) and stopped honoring client-supplied `?plan=` or `planId` mutations. |
-| 5 | Quantity tampering | FAIL | **Medium** | Replaced silent clamping with strict integer validation (`1..50` on `/api/credits/usage`, `1..20` on Engage `/select`), returning `400 INVALID_QUANTITY` for `0`, negative, decimal, or oversized values. |
-| 6 | Fake payment | FAIL | **Critical** | Removed client-triggered credit refills and self-service plan upgrades (`403 PAYMENT_VERIFICATION_REQUIRED` unless verified admin) and added HMAC-SHA256 signature-verified, replay-protected `POST /api/billing/webhook`. |
-| 7 | Coupon abuse | NOT APPLICABLE | **Low** | No coupon or promo redemption endpoint exists (only a static annual billing toggle). Provided a server-side atomic single-use transaction pattern for future adoption. |
-| 8 | Mass assignment | FAIL | **Critical** | Blocked client `planId`/credit tampering, replaced `{ ...article }` spread in `/api/blog/knowledge/sync` with explicit field allowlisting, and replaced `...patch`/`...item` spreads in `engageStore.ts` with strict mutable-field whitelists. |
-| 9 | OTP / login brute force | FAIL | **Medium** | Added `AuthLockoutTracker` (5 consecutive failed admin auth attempts trigger a 15-minute IP lockout), extended `authBruteForceRateLimiter` across all admin/metrics/training routes, and surfaced Firebase `auth/too-many-requests` lockout guidance in `AuthContext`. |
-| 10 | Prompt injection | FAIL | **High** | Moved user-supplied `cleanSessionInstructions` out of privileged `systemInstruction` into a nonce-isolated `<untrusted_data>` user block, blocked HTTP redirects (`redirect: 'error'`) on remote image fetches to prevent redirect-based metadata access, and banned `image/svg+xml`. |
-| 11 | XSS | FAIL | **High** | Fixed reflected XSS in OAuth callback error handling (`text/plain` + character stripping), enforced explicit `trust: false` on KaTeX rendering call sites, and added `toSafeExternalHref()` (`http:`/`https:` allowlist) to dynamic external links. |
-| 12 | File upload | FAIL | **Medium** | Replaced extension denylists with strict MIME/extension allowlists, a 10 MB aggregate decoded payload cap, and binary magic-byte header verification across chat attachments and `/api/music/generate` cover images (processed in memory, outside web root, never executed). |
-| 13 | Exposed files | FAIL | **High** | Added Express middleware returning `404` for dotfiles (`.env`, `.git`, `.backups`), `/data/`, `/server.ts`, `/src/server/`, `/scripts/`, and `.map`/`.bak`/`.sql`/`.key` paths; enforced `dotfiles: 'deny'` on static serving, `build.sourcemap: false` and `server.fs.deny` in Vite; gated `/api/config/status` behind admin auth and stripped internal memory/env fields from `/api/health`. |
-| 14 | Injection | PASS | **Low** | Confirmed typed Firestore SDK access with zero raw SQL or string-built queries and default-deny owner-isolated Firestore rules (`isOwner(userId)`). |
-
-## Dependency Security Advisory Summary
-
-- Ran a read-only dependency check (`bun audit`): reported **47 advisories (20 high, 21 moderate, 6 low)** across direct and transitive dependencies (`vite`, `body-parser`/`qs`, `re2js`, `source-map-js`, `devalue`, `nanoid`, `undici`, `zod`, `minimatch`).
-- To preserve build stability during this security hardening pass, major-version dependency upgrades were not forced automatically; schedule a dedicated dependency upgrade window with full regression testing and rollback protection.
+| Finding | Area | Severity | Resolution |
+| --- | --- | --- | --- |
+| **VIZ-001** | Firebase ID Token Verification | **Critical** | Removed the non-production signature verification fallback in `src/server/authVerification.ts` so token validation always fails closed when Google signing certificates are unavailable or `kid` is unknown. Tightened `emailVerified` from `!== false` to strict `=== true` across `authVerification.ts`, `security.ts`, and `engageRoutes.ts`. |
+| **VIZ-002** | CORS Origin Allowlist | **High** | Replaced wildcard `*.vercel.app`, `*.run.app`, and `*.google.com` trust rules in `src/server/security.ts` with exact HTTPS allowlisting (`https://vizra.vercel.app`, strictly scoped `vizra-*.vercel.app` previews, configured `APP_URL`, and exact preview hosts; loopback permitted only outside production). |
+| **VIZ-003** | Rate Limiter & Lockout IP Spoofing | **High** | Introduced `getTrustedClientIp(req)` honoring Express `trust proxy` (`req.ip`) and replaced all manual leftmost `X-Forwarded-For` parsing across `security.ts`, `server.ts`, `observability.ts`, and `login-webhook.ts` so spoofed headers cannot bypass rate limits or lockouts. |
+| **VIZ-004** | System Logs Cross-Tenant Disclosure | **High** | Excluded privileged admin, authentication, billing, account, token, and integration endpoints from the shared workspace `recentApiLogs` buffer in `src/server/observability.ts` so `/api/system-logs` never exposes administrative activity. |
+| **VIZ-005** | Vulnerable Dependencies | **High** | Upgraded 5 vulnerable packages within semver ranges (`vite` 8.3.3, `body-parser` 1.20.9, `qs` 6.16.1, `re2js` 2.8.7, `source-map-js` 1.2.2), reducing advisories from 12 down to 2 transitive `@grpc/grpc-js` advisories pinned upstream by `@firebase/firestore`. |
+| **VIZ-006** | Unsanitized Error Leakage | **High** | Wrapped raw `err.message` responses with `sanitizeServerError(...)` across `/api/science/query`, `/api/music/generate`, `/api/auth/login-notification`, `login-webhook.ts`, `engageRoutes.ts`, and `serverOmniaLearning.ts`. |
+| **VIZ-007** | Webhook Raw-Body HMAC & Replay Bound | **High** | Captured raw request bytes (`req.rawBody`) in Express JSON parsing and switched `/api/billing/webhook` and `/api/compliance/age-assurance/parental-consent/callback` HMAC verification to authenticate raw wire bytes; bounded `processedBillingEventIds` to 5,000 entries. |
+| **VIZ-008** | Structured Log IP Privacy | **Medium** | Applied `maskIpAddress(getTrustedClientIp(req))` in `src/server/observability.ts` so raw client IP addresses are never emitted in structured server logs. |
+| **VIZ-009** | Cross-Site CSRF & API Resource Isolation | **Medium** | Added `Sec-Fetch-Site: cross-site` and untrusted `Referer` checks on state-changing `/api/*` routes (exempting signed webhooks/OAuth callbacks), plus `Cross-Origin-Resource-Policy: same-origin` on `/api/*` in both `security.ts` and `vercel.json`. |
+| **VIZ-010** | Public Status Log Email Exposure | **Medium** | Redacted email addresses from public `recentLogs` in `/api/omnia/status` and stopped recording raw admin emails inside public moderation log messages. |
+| **VIZ-011** | SSRF, Upstream Timeouts & Host Header Injection | **Medium** | Added `validateExternalUrlForSSRF()` + `redirect: 'error'` to `consentService.ts` webhooks, strict accession/path-traversal validation + 8s `AbortSignal.timeout` on `/api/science/query`, open-redirect guard on legacy aliases, and trusted-origin validation in `oauthManager.ts` `resolveCallbackUrl()`. |
+| **VIZ-012** | Hardened Firestore Rules & Ops Runbooks (Pending Approval) | **High** | Drafted `DRAFT_firestore.rules` (enforcing `affectedKeys().hasOnly(...)`, ID binding on create, `https://` `photoURL` enforcement, token email binding, timestamp validation) and `security_spec.md`, plus `docs/OPERATIONS_BACKUP_DR_SCALABILITY.md` covering backups, monitoring, 9 disaster recovery playbooks, and Vercel Hobby limits. Production rules were intentionally not deployed without explicit approval. |
 
 ---
 
 ## PoC Verification
 
-All remediated controls were verified through static type checking (`tsc --noEmit`), production bundle compilation (`vite build` + static prerendering), and review of request-handling boundaries:
+All security controls and local staging runtime characteristics were verified via automated scripts against the local server (`http://127.0.0.1:3000`) — zero tests targeted production (`https://vizra.vercel.app/`):
 
-1. **Billing, Credits & Quantity Enforcement**:
-   - Requests attempting to supply `planId` or `action: "refill"` without verified admin credentials receive `403 PAYMENT_VERIFICATION_REQUIRED`.
-   - Requests supplying `amount: 0`, `-5`, `1.5`, or `999999` on `/api/credits/usage` (or invalid `limit` on Engage selection) are rejected with `400 INVALID_QUANTITY`.
-   - Plan upgrades and credit grants are processed solely via `POST /api/billing/webhook` after timing-safe HMAC-SHA256 verification against `PAYMENT_WEBHOOK_SECRET`, replay-ID deduplication, and server-side price lookup from `PLAN_CREDIT_CATALOG`.
-2. **Admin & IDOR Isolation**:
-   - `engageAdminAuthMiddleware` fails closed with `401` across all environments when no verified admin credential is presented, and locks out IPs via `authLockoutTracker` after 5 consecutive failures.
-   - `GET /api/omnia/knowledge` returns only entries where `accessLevel === 'public'` and `status === 'APPROVED'`.
-   - Anonymous tenant keys require 16+ character IDs bound via server-side HMAC; authenticated `DELETE /api/account/data` strictly scopes erasure to the verified Firebase UID and ignores untrusted client ID headers.
-3. **File Exposure, Upload Validation & XSS / Prompt Isolation**:
-   - Direct requests for `/.env`, `/.git/config`, `/.backups/*`, `/data/*`, `/server.ts`, or `*.map` are intercepted early and returned as `404 Not Found`; `vite.config.ts` enforces `build.sourcemap: false` and `server.fs.deny`.
-   - Binary uploads and cover images are checked against an explicit MIME/extension allowlist and magic-byte signatures, rejecting disguised HTML/SVG/script files.
-   - OAuth error callbacks return `text/plain; charset=utf-8` with control/tag characters stripped, dynamic external links pass through `toSafeExternalHref()`, and `cleanSessionInstructions` are isolated in a nonce-delimited untrusted data block rather than `systemInstruction`.
-4. **Build & Type Verification**:
-   - Verified with `compile_applet` (Vite build + static prerender) and `lint_applet` (`tsc --noEmit`), followed by dev server restart to activate all backend hardening rules.
+1. **Automated Security Verification (`scripts/securityAuditTests.ts`) — 12/12 PASSED**:
+   - **SEC-01 & SEC-02 (Auth/JWT)**: Rejected `alg=none`, forged RS256 `kid`, expired, and wrong-audience tokens; verified strict fail-closed verification and `payload.email_verified === true`.
+   - **SEC-03 (Access Control)**: Verified all 13 admin/private endpoints fail closed (`401`/`429`), confirming `AuthLockoutTracker` triggers `429` after repeated failed admin attempts.
+   - **SEC-04 (CORS/CSRF)**: Verified `https://evil-attacker.vercel.app` and cross-site `Sec-Fetch-Site: cross-site` POSTs return `403`, while `https://vizra.vercel.app` succeeds (`200`).
+   - **SEC-05 (IP Spoof Resistance & Masking)**: Verified spoofed leftmost `X-Forwarded-For` values resolve to the trusted proxy IP and still trip rate limits; verified IPv4 masking (`203.0.113.xxx`).
+   - **SEC-06 (Billing & Quantity Integrity)**: Verified client plan upgrades and refills return `403`, invalid quantities (`0`, `-10`, `1.5`, `999999`) return `400`, and unconfigured/unsigned billing webhooks fail closed (`503`/`401`).
+   - **SEC-07 (Tenant Isolation & Log Hygiene)**: Verified cross-tenant workspace token deletion returns `404`, `/api/system-logs` leaks zero admin/auth paths, and `/api/omnia/status` exposes zero email addresses.
+   - **SEC-08 (SSRF & Path Injection)**: Blocked 6/6 metadata/loopback/`file://` SSRF targets and rejected `../../etc/passwd` in `/api/science/query` (`400`).
+   - **SEC-09 (XSS, Prompt Injection & File Uploads)**: Blocked `javascript:`/`data:`/`vbscript:` URLs, flagged prompt-injection attempts, rejected disguised SVG/EXE uploads as PNG, and accepted valid PNG magic bytes.
+   - **SEC-10 (Sensitive Files & Security Headers)**: Verified `/.env`, `/.git/config`, `/server.ts`, `/data/credit_ledger_store.json`, `/*.map`, and `/backup.sql` all return `404`; verified CSP, HSTS, `nosniff`, CORP `same-origin`, `X-Robots-Tag`, and absence of `X-Powered-By`.
+   - **SEC-11 (AES-256-GCM OAuth Vault)**: Verified encryption round-trip succeeds and tampered ciphertext fails GCM authentication (`null`).
+   - **SEC-12 (Draft Firestore Rules Invariants)**: Verified default-deny, disabled user listing, immutable messages, `affectedKeys` update guards, `https://` `photoURL` constraint, token email binding, and create-time ID binding.
+2. **Controlled Local Staging Benchmark (`scripts/stagingLoadBenchmark.ts`)**:
+   - Executed gradual ramp (`10 -> 25 -> 50` concurrent workers) against local non-AI endpoints only (`/api/health`, `/api/omnia/status`) with zero production or external AI quota impact.
+   - Achieved **419.9–673.2 RPS** with **0 server errors (`0` 5xx)**, **p50 12.3–70.6 ms**, and **p95 60.8–127.1 ms**; confirmed `publicApiRateLimiter` cleanly enforced `429` beyond per-IP budget without instability.
+3. **Build & Static Type Verification**:
+   - Verified with `tsc --noEmit` (`lint_applet`), full production build + static route prerender (`compile_applet`), and post-fix `bun audit` (reduced from 12 advisories to 2 upstream-pinned transitive advisories).

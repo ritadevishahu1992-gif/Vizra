@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { Express, Request, Response } from 'express';
-import { SlidingWindowRateLimiter } from '../security';
+import { SlidingWindowRateLimiter, validateExternalUrlForSSRF } from '../security';
 import { getGoogleSheetsConsentConfig } from '../config/envConfig';
 
 export const CURRENT_CONSENT_VERSION = '1.0';
@@ -239,6 +239,10 @@ export async function exportConsentEventToGoogleSheets(
   try {
     if (config.mode === 'webhook' && config.webhookUrl) {
       const webhookUrl = config.webhookUrl;
+      const ssrfCheck = await validateExternalUrlForSSRF(webhookUrl);
+      if (!ssrfCheck.safe) {
+        return 'failed_gracefully';
+      }
       const secret = config.webhookSecret || '';
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4500);
@@ -246,6 +250,7 @@ export async function exportConsentEventToGoogleSheets(
       try {
         const res = await fetchImpl(webhookUrl, {
           method: 'POST',
+          redirect: 'error',
           headers: {
             'Content-Type': 'application/json',
             ...(secret ? { 'X-Consent-Webhook-Secret': secret } : {}),

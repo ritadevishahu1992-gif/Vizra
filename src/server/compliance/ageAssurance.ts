@@ -1229,9 +1229,13 @@ export function setupAgeAssuranceRoutes(app: express.Application): void {
       }
 
       const providedSig = String(req.headers['x-parental-signature'] || '').trim();
+      const rawPayload =
+        typeof (req as any).rawBody === 'string' && (req as any).rawBody.length > 0
+          ? (req as any).rawBody
+          : JSON.stringify(req.body || {});
       const expectedSig = crypto
         .createHmac('sha256', webhookSecret)
-        .update(JSON.stringify(req.body || {}))
+        .update(rawPayload)
         .digest('hex');
 
       if (!providedSig || !safeCompare(providedSig, expectedSig)) {

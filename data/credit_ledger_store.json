@@ -3342,5 +3342,213 @@
         "description": "High-DPI procedural obsidian frame synthesis"
       }
     ]
+  },
+  "client:2a0ff91739325802937f5047": {
+    "planId": "starter",
+    "used": 14,
+    "categories": {
+      "reasoning": 7,
+      "grounding": 4,
+      "visuals": 2,
+      "audio": 1
+    },
+    "monthlyHistory": [
+      {
+        "id": "2026-06",
+        "month": "Jun",
+        "label": "Jun 2026",
+        "reasoning": 16,
+        "grounding": 9,
+        "visuals": 7,
+        "audio": 3,
+        "totalUsed": 35,
+        "limit": 60
+      },
+      {
+        "id": "2026-07",
+        "month": "Jul",
+        "label": "Jul 2026",
+        "reasoning": 21,
+        "grounding": 12,
+        "visuals": 9,
+        "audio": 4,
+        "totalUsed": 46,
+        "limit": 60
+      },
+      {
+        "id": "2026-08",
+        "month": "Aug",
+        "label": "Aug 2026",
+        "reasoning": 19,
+        "grounding": 11,
+        "visuals": 8,
+        "audio": 3,
+        "totalUsed": 41,
+        "limit": 60
+      },
+      {
+        "id": "2026-09",
+        "month": "Sep",
+        "label": "Sep 2026",
+        "reasoning": 24,
+        "grounding": 14,
+        "visuals": 11,
+        "audio": 5,
+        "totalUsed": 54,
+        "limit": 60
+      },
+      {
+        "id": "2026-10",
+        "month": "Oct",
+        "label": "Oct 2026",
+        "reasoning": 22,
+        "grounding": 13,
+        "visuals": 10,
+        "audio": 4,
+        "totalUsed": 49,
+        "limit": 60
+      },
+      {
+        "id": "2026-11",
+        "month": "Nov",
+        "label": "Nov 2026",
+        "reasoning": 7,
+        "grounding": 4,
+        "visuals": 2,
+        "audio": 1,
+        "totalUsed": 14,
+        "limit": 60
+      }
+    ],
+    "recentEvents": [
+      {
+        "id": "evt-init-1",
+        "timestamp": 1795859316938,
+        "category": "reasoning",
+        "delta": -1,
+        "balanceAfter": 48,
+        "description": "Omnia 1.0 multi-step reasoning synthesis"
+      },
+      {
+        "id": "evt-init-2",
+        "timestamp": 1795860756938,
+        "category": "grounding",
+        "delta": -1,
+        "balanceAfter": 47,
+        "description": "Verified primary web citation retrieval"
+      },
+      {
+        "id": "evt-init-3",
+        "timestamp": 1795861536938,
+        "category": "visuals",
+        "delta": -1,
+        "balanceAfter": 46,
+        "description": "High-DPI procedural obsidian frame synthesis"
+      }
+    ]
+  },
+  "client:67c3951e72669d32faf8c473": {
+    "planId": "starter",
+    "used": 14,
+    "categories": {
+      "reasoning": 7,
+      "grounding": 4,
+      "visuals": 2,
+      "audio": 1
+    },
+    "monthlyHistory": [
+      {
+        "id": "2026-06",
+        "month": "Jun",
+        "label": "Jun 2026",
+        "reasoning": 16,
+        "grounding": 9,
+        "visuals": 7,
+        "audio": 3,
+        "totalUsed": 35,
+        "limit": 60
+      },
+      {
+        "id": "2026-07",
+        "month": "Jul",
+        "label": "Jul 2026",
+        "reasoning": 21,
+        "grounding": 12,
+        "visuals": 9,
+        "audio": 4,
+        "totalUsed": 46,
+        "limit": 60
+      },
+      {
+        "id": "2026-08",
+        "month": "Aug",
+        "label": "Aug 2026",
+        "reasoning": 19,
+        "grounding": 11,
+        "visuals": 8,
+        "audio": 3,
+        "totalUsed": 41,
+        "limit": 60
+      },
+      {
+        "id": "2026-09",
+        "month": "Sep",
+        "label": "Sep 2026",
+        "reasoning": 24,
+        "grounding": 14,
+        "visuals": 11,
+        "audio": 5,
+        "totalUsed": 54,
+        "limit": 60
+      },
+      {
+        "id": "2026-10",
+        "month": "Oct",
+        "label": "Oct 2026",
+        "reasoning": 22,
+        "grounding": 13,
+        "visuals": 10,
+        "audio": 4,
+        "totalUsed": 49,
+        "limit": 60
+      },
+      {
+        "id": "2026-11",
+        "month": "Nov",
+        "label": "Nov 2026",
+        "reasoning": 7,
+        "grounding": 4,
+        "visuals": 2,
+        "audio": 1,
+        "totalUsed": 14,
+        "limit": 60
+      }
+    ],
+    "recentEvents": [
+      {
+        "id": "evt-init-1",
+        "timestamp": 1795859369099,
+        "category": "reasoning",
+        "delta": -1,
+        "balanceAfter": 48,
+        "description": "Omnia 1.0 multi-step reasoning synthesis"
+      },
+      {
+        "id": "evt-init-2",
+        "timestamp": 1795860809100,
+        "category": "grounding",
+        "delta": -1,
+        "balanceAfter": 47,
+        "description": "Verified primary web citation retrieval"
+      },
+      {
+        "id": "evt-init-3",
+        "timestamp": 1795861589100,
+        "category": "visuals",
+        "delta": -1,
+        "balanceAfter": 46,
+        "description": "High-DPI procedural obsidian frame synthesis"
+      }
+    ]
   }
 }

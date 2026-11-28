@@ -27,6 +27,7 @@ import {
   detectPromptInjection,
   derivePrivacySessionHash,
   safeCompare,
+  sanitizeServerError,
 } from '../server/security';
 import { verifyFirebaseIdToken } from '../server/authVerification';
 import { getCronSecret } from '../server/config/envConfig';
@@ -576,11 +577,19 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       lastSyncTime: new Date().toISOString(),
     };
 
+    const sanitizedRecentLogs = logsList.slice(0, 20).map((entry) => ({
+      ...entry,
+      message:
+        typeof entry.message === 'string'
+          ? entry.message.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted]')
+          : '',
+    }));
+
     res.json({
       status: 'ok',
       activeStatus: metricsData.activeStatus,
       metrics: metricsData,
-      recentLogs: logsList.slice(0, 20),
+      recentLogs: sanitizedRecentLogs,
       totalSources: sources.length,
       totalConcepts: concepts.length,
       totalRules: rules.length,
@@ -753,7 +762,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       console.error('Omnia Training pipeline failed:', err);
       res.status(500).json({
         success: false,
-        error: err?.message || 'Workflow execution error',
+        error: sanitizeServerError(err, 'Workflow execution error'),
       });
     }
   });
@@ -874,7 +883,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       });
     } catch (err: any) {
       console.error('Error adding knowledge source:', err);
-      res.status(500).json({ error: err.message || 'Error creating source' });
+      res.status(500).json({ error: sanitizeServerError(err, 'Error creating source') });
     }
   });
 
@@ -1082,7 +1091,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       timestamp: target.reviewedAt,
       level: 'info',
       stage: 'VALIDATING',
-      message: `Admin (${target.reviewedBy}) marked feedback ${target.id} as ${status}.`,
+      message: `Administrator marked feedback ${target.id} as ${status}.`,
       sourceId: target.sourceCreatedId,
     });
 
@@ -1152,7 +1161,7 @@ export function setupOmniaLearningRoutes(app: express.Application, ai?: GoogleGe
       });
     } catch (err: any) {
       console.error('Omnia cron sync error:', err);
-      res.status(500).json({ error: err.message || 'Cron execution failed' });
+      res.status(500).json({ error: sanitizeServerError(err, 'Cron execution failed') });
     }
   };
 

@@ -195,11 +195,8 @@ export class SlidingWindowRateLimiter {
 
   public getMiddleware() {
     return (req: Request, res: Response, next: NextFunction): void => {
-      // Determine client IP using x-forwarded-for or connection remoteAddress
-      const forwarded = req.headers['x-forwarded-for'];
-      const rawIp = typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket.remoteAddress || 'unknown';
+      // Determine trusted client IP honoring Express trust proxy (never blindly trusting spoofable leftmost X-Forwarded-For)
+      const rawIp = getTrustedClientIp(req);
 
       const clientKey = `${this.name}:${rawIp}`;
       const result = this.check(clientKey);
@@ -362,12 +359,7 @@ export class AuthLockoutTracker {
   }
 
   public resolveIp(req: Request): string {
-    const forwarded = req.headers['x-forwarded-for'];
-    const raw =
-      typeof forwarded === 'string'
-        ? forwarded.split(',')[0].trim()
-        : req.socket.remoteAddress || 'unknown';
-    return raw || 'unknown';
+    return getTrustedClientIp(req);
   }
 
   public checkLocked(key: string): { locked: boolean; retryAfterSeconds: number } {
@@ -532,7 +524,7 @@ export async function adminAuthMiddleware(req: Request, res: Response, next: Nex
       !userEmail ||
       allowedEmails.length === 0 ||
       !allowedEmails.includes(userEmail) ||
-      authResult.emailVerified === false
+      authResult.emailVerified !== true
     ) {
       authLockoutTracker.recordFailure(lockKey);
       res.status(403).json({
@@ -618,24 +610,108 @@ const CONTENT_SECURITY_POLICY = [
   "form-action 'self'",
 ].join('; ');
 
+const EXACT_TRUSTED_HTTPS_HOSTS = new Set<string>([
+  'vizra.vercel.app',
+  'ais-dev-7z3s5yefvrkweoqfe2a3dd-152962723123.asia-southeast1.run.app',
+  'ais-pre-7z3s5yefvrkweoqfe2a3dd-152962723123.asia-southeast1.run.app',
+]);
+
 /**
- * Checks whether an Origin header belongs to a trusted VIZRA origin.
+ * Resolves the trustworthy client IP address from an Express Request or raw IncomingMessage.
+ * Uses Express's `req.ip` (which respects `app.set('trust proxy', 1)` and selects the
+ * proxy-appended hop rather than an attacker-spoofed leftmost `X-Forwarded-For` value).
+ */
+export function getTrustedClientIp(req: {
+  ip?: string;
+  socket?: { remoteAddress?: string | undefined };
+  headers?: Record<string, string | string[] | undefined>;
+}): string {
+  if (typeof req.ip === 'string' && req.ip.trim()) {
+    return req.ip.trim().replace(/^::ffff:/i, '');
+  }
+  const remote = (req.socket?.remoteAddress || '').trim().replace(/^::ffff:/i, '');
+  // For raw Node IncomingMessage (e.g., WebSocket upgrade) behind a single trusted reverse proxy,
+  // only read the rightmost proxy-appended X-Forwarded-For entry if remoteAddress is loopback/private.
+  const forwarded = req.headers?.['x-forwarded-for'];
+  const isPrivatePeer =
+    remote === '127.0.0.1' ||
+    remote === '::1' ||
+    remote.startsWith('10.') ||
+    remote.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(remote);
+  if (isPrivatePeer && typeof forwarded === 'string' && forwarded.trim()) {
+    const hops = forwarded
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (hops.length > 0) {
+      return hops[hops.length - 1].replace(/^::ffff:/i, '');
+    }
+  }
+  return remote || 'unknown';
+}
+
+function getConfiguredAppHostname(): string | null {
+  const candidates = [process.env.APP_URL, process.env.VERCEL_URL];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'string') continue;
+    const trimmed = candidate.trim();
+    if (!trimmed) continue;
+    try {
+      const normalized = trimmed.startsWith('http://') || trimmed.startsWith('https://')
+        ? trimmed
+        : `https://${trimmed}`;
+      const parsed = new URL(normalized);
+      if (parsed.hostname) return parsed.hostname.toLowerCase();
+    } catch {
+      // Ignore malformed env var
+    }
+  }
+  return null;
+}
+
+/**
+ * Checks whether an Origin header belongs to a strictly allowlisted VIZRA origin.
+ * Never trusts wildcard `*.vercel.app`, `*.run.app`, or `*.google.com` origins,
+ * and requires HTTPS for all non-local production origins.
  */
 export function isTrustedOrigin(origin: string | undefined): boolean {
   if (!origin) return true; // Same-origin or non-browser request without Origin
   try {
     const parsed = new URL(origin);
+    const protocol = parsed.protocol.toLowerCase();
     const host = parsed.hostname.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === 'vizra.vercel.app' ||
-      host.endsWith('.vercel.app') ||
-      host.endsWith('.run.app') ||
-      host.endsWith('.google.com')
-    ) {
+
+    if (protocol !== 'https:' && protocol !== 'http:') {
+      return false;
+    }
+
+    // Local development loopback hosts (only permitted outside production)
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return !isProductionEnv();
+    }
+
+    // All non-local origins MUST use HTTPS
+    if (protocol !== 'https:') {
+      return false;
+    }
+
+    // Exact allowlisted production & VIZRA preview hosts
+    if (EXACT_TRUSTED_HTTPS_HOSTS.has(host)) {
       return true;
     }
+
+    // Strictly scoped VIZRA Vercel preview deployments (vizra-<hash>.vercel.app)
+    if (/^vizra-[a-z0-9-]+\.vercel\.app$/.test(host)) {
+      return true;
+    }
+
+    // Configured deployment origin (APP_URL / VERCEL_URL)
+    const configuredHost = getConfiguredAppHostname();
+    if (configuredHost && host === configuredHost) {
+      return true;
+    }
+
     return false;
   } catch {
     return false;
@@ -656,8 +732,9 @@ export function securityHeadersMiddleware(req: Request, res: Response, next: Nex
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Content-Security-Policy', CONTENT_SECURITY_POLICY);
 
-  // Apply X-Robots-Tag: noindex, nofollow and no-store cache policy strictly to API and private routes
+  // Apply X-Robots-Tag: noindex, nofollow, CORP, and no-store cache policy strictly to API and private routes
   if (req.path.startsWith('/api/') || req.path.startsWith('/live')) {
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -665,12 +742,19 @@ export function securityHeadersMiddleware(req: Request, res: Response, next: Nex
   next();
 }
 
+const CSRF_EXEMPT_WEBHOOK_PATHS = [
+  '/api/billing/webhook',
+  '/api/compliance/age-assurance/parental-consent/callback',
+  '/api/cron/omnia-sync',
+];
+
 /**
- * Enforces HTTP method whitelist and strict CORS origin checks for /api/* routes.
+ * Enforces HTTP method whitelist, strict CORS origin checks, and cross-site CSRF guards for /api/* routes.
  */
 export function corsSecurityMiddleware(req: Request, res: Response, next: NextFunction): void {
   const allowedMethods = ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'];
-  if (!allowedMethods.includes(req.method.toUpperCase())) {
+  const method = req.method.toUpperCase();
+  if (!allowedMethods.includes(method)) {
     res.status(405).json({
       error: {
         code: 'METHOD_NOT_ALLOWED',
@@ -698,7 +782,42 @@ export function corsSecurityMiddleware(req: Request, res: Response, next: NextFu
     }
   }
 
-  if (req.method.toUpperCase() === 'OPTIONS') {
+  // Defense-in-depth CSRF guard on state-changing browser API requests
+  const isStateChanging = method === 'POST' || method === 'PATCH' || method === 'DELETE';
+  const isWebhookExempt =
+    CSRF_EXEMPT_WEBHOOK_PATHS.includes(req.path) ||
+    /^\/api\/integrations\/[a-z0-9_-]+\/callback$/i.test(req.path);
+
+  if (isStateChanging && req.path.startsWith('/api/') && !isWebhookExempt) {
+    const secFetchSite = String(req.headers['sec-fetch-site'] || '').trim().toLowerCase();
+    if (secFetchSite === 'cross-site' && (!origin || !isTrustedOrigin(origin))) {
+      res.status(403).json({
+        error: {
+          code: 'CSRF_CROSS_SITE_BLOCKED',
+          message: 'Cross-site state-changing API request was rejected.',
+        },
+      });
+      return;
+    }
+    if (!origin && typeof req.headers.referer === 'string' && req.headers.referer.trim()) {
+      try {
+        const refererOrigin = new URL(req.headers.referer).origin;
+        if (!isTrustedOrigin(refererOrigin)) {
+          res.status(403).json({
+            error: {
+              code: 'CSRF_UNTRUSTED_REFERER',
+              message: 'State-changing API request from untrusted referer was rejected.',
+            },
+          });
+          return;
+        }
+      } catch {
+        // Ignore malformed non-URL referer
+      }
+    }
+  }
+
+  if (method === 'OPTIONS') {
     res.status(204).end();
     return;
   }

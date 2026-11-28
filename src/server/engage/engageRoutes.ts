@@ -4,6 +4,7 @@ import {
   SlidingWindowRateLimiter,
   validateExternalUrlForSSRF,
   authLockoutTracker,
+  sanitizeServerError,
 } from '../security';
 import { verifyFirebaseIdToken } from '../authVerification';
 import { resolveRequestAgePolicyContext } from '../compliance/ageAssurance';
@@ -173,7 +174,7 @@ export async function engageAdminAuthMiddleware(
     }
 
     if (
-      verified.emailVerified === false ||
+      verified.emailVerified !== true ||
       allowedAdminEmails.length === 0 ||
       !allowedAdminEmails.includes(verified.email.toLowerCase())
     ) {
@@ -262,7 +263,7 @@ export function setupVizraEngageRoutes(app: Express): void {
         enabled: false,
         items: [],
         fallback: true,
-        error: err.message || 'Engage selection unavailable',
+        error: sanitizeServerError(err, 'Engage selection unavailable'),
       });
     }
   };
@@ -348,7 +349,7 @@ export function setupVizraEngageRoutes(app: Express): void {
         res.status(200).json({
           success: false,
           recorded: false,
-          error: err.message,
+          error: sanitizeServerError(err, 'Unable to record event'),
         });
       }
     }
@@ -455,7 +456,7 @@ export function setupVizraEngageRoutes(app: Express): void {
         res.status(500).json({
           error: {
             code: 'ENGAGE_CONTENT_SAVE_ERROR',
-            message: err.message || 'Failed to save content item.',
+            message: sanitizeServerError(err, 'Failed to save content item.'),
           },
         });
       }
@@ -567,7 +568,7 @@ export function setupVizraEngageRoutes(app: Express): void {
         res.status(500).json({
           error: {
             code: 'CAMPAIGN_SAVE_ERROR',
-            message: err.message || 'Failed to save campaign.',
+            message: sanitizeServerError(err, 'Failed to save campaign.'),
           },
         });
       }
@@ -621,7 +622,7 @@ export function setupVizraEngageRoutes(app: Express): void {
         res.status(500).json({
           error: {
             code: 'PARTNER_SAVE_ERROR',
-            message: err.message || 'Failed to save partner.',
+            message: sanitizeServerError(err, 'Failed to save partner.'),
           },
         });
       }
