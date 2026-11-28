@@ -20,6 +20,7 @@ import { ScienceHubModal } from '../components/ai/ScienceHubModal';
 import { CommandPaletteModal } from '../components/ai/CommandPaletteModal';
 import { ShortcutsModal } from '../components/ai/ShortcutsModal';
 import { EngageAdminModal } from '../components/ai/engage/EngageAdminModal';
+import { StudioQuickActionsMenu } from '../components/studio/StudioQuickActionsMenu';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { CitationItem } from '../types/rag';
 import { ArrowDown, ExternalLink, EyeOff, Trash2 } from 'lucide-react';
@@ -477,6 +478,11 @@ export const AIPage: React.FC = () => {
     ? activeConversation.messages
     : [];
   const activeProject = projects.find((p) => p.id === activeProjectId);
+  const latestActiveUserPrompt =
+    [...messages]
+      .reverse()
+      .find((m) => m.role === 'user' && typeof m.content === 'string' && m.content.trim().length > 0)
+      ?.content.trim() || null;
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -1395,6 +1401,27 @@ export const AIPage: React.FC = () => {
       <EngageAdminModal
         isOpen={isEngageAdminOpen}
         onClose={() => setIsEngageAdminOpen(false)}
+      />
+
+      {/* Floating Studio Quick Actions Menu */}
+      <StudioQuickActionsMenu
+        context="ai"
+        conversationsOverride={conversations}
+        lastPromptOverride={latestActiveUserPrompt}
+        onNewDraft={() => {
+          handleNewChat();
+          setInitialComposerPrompt(undefined);
+          window.setTimeout(() => handleFocusComposer(), 60);
+        }}
+        onOptimizePrompt={(optimizedPrompt) => {
+          setActiveProjectId(null);
+          setInitialComposerPrompt(optimizedPrompt);
+          window.setTimeout(() => handleFocusComposer(), 60);
+        }}
+        onSelectConversation={(conversationId) => {
+          handleSelectConversation(conversationId);
+        }}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
     </div>
   );

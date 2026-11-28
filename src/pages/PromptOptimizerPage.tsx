@@ -27,6 +27,7 @@ import {
   optimizeCreativePrompt,
 } from '../utils/promptOptimizerEngine';
 import { trackConversionEvent } from '../services/conversionTracking';
+import { OPTIMIZER_DRAFT_STORAGE_KEY } from '../components/studio/StudioQuickActionsMenu';
 
 const TOOL_FAQS = [
   {
@@ -85,6 +86,29 @@ export const PromptOptimizerPage: React.FC = () => {
       page: '/free-ai-prompt-optimizer',
       category: 'Free Utility Tool',
     });
+
+    try {
+      const queuedDraft = sessionStorage.getItem(OPTIMIZER_DRAFT_STORAGE_KEY);
+      if (queuedDraft && queuedDraft.trim().length > 0) {
+        sessionStorage.removeItem(OPTIMIZER_DRAFT_STORAGE_KEY);
+        const trimmedDraft = queuedDraft.trim().slice(0, MAX_PROMPT_IDEA_LENGTH);
+        setRawIdea(trimmedDraft);
+        setError(null);
+        setResult(
+          optimizeCreativePrompt({
+            rawIdea: trimmedDraft,
+            presetId: 'motion-design',
+            targetFormat: PROMPT_PRESETS[0].defaultFormat,
+            tone: PROMPT_PRESETS[0].defaultTone,
+            detailLevel: 'production',
+            audience: '',
+            exclusions: PROMPT_PRESETS[0].sampleExclusions,
+          })
+        );
+      }
+    } catch {
+      // Ignore storage access restrictions
+    }
   }, []);
 
   const runOptimization = (overrides?: Partial<OptimizePromptInput>) => {

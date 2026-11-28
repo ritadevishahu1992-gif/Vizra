@@ -52,6 +52,7 @@ import {
   resolveRouteSeoPayload,
   applySeoToDocument,
 } from '../seo/routeMetadata';
+import { StudioQuickActionsMenu } from '../components/studio/StudioQuickActionsMenu';
 
 interface WorkspaceApiToken {
   id: string;
@@ -1202,6 +1203,12 @@ export const WorkspaceDashboardPage: React.FC = () => {
         }
         confirmLabel="Download JSON"
         variant="export"
+      />
+
+      {/* Floating Studio Quick Actions Menu */}
+      <StudioQuickActionsMenu
+        context="workspace"
+        onNewDraft={() => setIsNewProjectModalOpen(true)}
       />
     </DashboardShell>
   );
